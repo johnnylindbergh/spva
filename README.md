@@ -1,5 +1,5 @@
-# fsc-track
-A simple time tracking web application.
+# spva-track
+A simple project tracking web application.
 
 ## Installation
 1. Clone the repository: `git clone https://github.com/johnylindbergh/fsc-track.git`
