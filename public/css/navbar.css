@@ -1,0 +1,57 @@
+
+/*
+  navbar.css: navbar-specific style
+*/
+
+/* containing navbar div */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  font-size: 14px;
+  background-color: rgba(90, 72, 130, 0.54);
+  z-index: 3;
+}
+
+/* make all navbar content non-highlightable */
+.navbar * {
+  user-select: none;
+}
+
+/* list containing all links */
+.navbar ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* navbar list elements */
+.navbar li {
+  float:left;
+}
+
+/* navbar link style */
+.navbar li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 16px 16px;
+  text-decoration: none;
+}
+
+/* highlight and change cursor when navbar links hovered */
+.navbar li a:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+/* push text titles for each link away from their icons */
+.navbar li a i {
+  margin-left: 3px;
+}
+
+/* container for page content on all pages with navbar */
+.container {
+  margin-top: 60px;
+}

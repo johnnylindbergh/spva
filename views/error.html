@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>An Error Occurred! | {{defaults.sysName}}</title>
+  <link rel="stylesheet" type="text/css" href="css/reset.css">
+  <link rel="stylesheet" type="text/css" href="css/defaults.css">
+  <link rel="stylesheet" type="text/css" href="css/navbar.css">
+</head>
+<body>
+  <div class="navbar">
+    <ul>
+      <li><a href="/">{{defaults.sysName}}</a></li>
+      <li><a href="/">FSCTrack</a></li>
+      <div style="float:right">
+        <li><a href="/auth/google">Log In</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </div>
+    </ul>
+  </div>
+  <div class="container">
+  	{{#defaults.devMode}}
+      <pre>{{raw}}</pre>
+    {{/defaults.devMode}}
+
+  	<p>{{friendly}}</p>
+
+    {{#link}}
+      <a href="{{link}}">{{linkTitle}}</a>
+    {{/link}}
+  </div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title> Main | {{defaults.sysName}}</title>
+  <link rel="stylesheet" type="text/css" href="css/reset.css">
+  <link rel="stylesheet" type="text/css" href="css/defaults.css">
+  <link rel="stylesheet" type="text/css" href="css/navbar.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+<script src="
+https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js
+"></script>  
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+  </script>
+</head>
+<body>
+  <div class="navbar">
+    <ul> 
+      <li><a href="/">{{defaults.sysName}}</a></li>
+      {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
+      <li><a href="/dashboard">dashboard</a></li>
+      <div style="float:right">
+        <li><a href="/auth/google">Log In</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </div>
+    </ul>
+  </div>
+  {{#auth}} 
+  <div class="container">
+    <h2>
+      {{#message}}
+        <p>{{message}}</p>
+      {{/message}}
+    </h2> </br>
+  {{/auth}}
+
+  <div class="container">
+    <form action="/addTakeoff">
+    <input type="submit" value="addTakeoff" />
+</form>
+
+  <form action="/alButton">
+    <input type="submit" value="AL Button" />
+</form>
+  </div>
+
+<!-- <div>
+	<table>
+		<tr>
+			<th>Material</th>
+			<th>Measure</th>
+		</tr>
+		{{#subjects}}
+			<tr>
+				<td>{{Material}}</td>
+				<td>{{Area}}</td>
+				<td>{{Length}}</td>
+			</tr>
+		{{/subjects}}
+</div> -->
+</body>
+</html>
+

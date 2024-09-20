@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{title}} | {{defaults.sysName}}</title>
+  <link rel="stylesheet" type="text/css" href="css/reset.css">
+  <link rel="stylesheet" type="text/css" href="css/defaults.css">
+  <link rel="stylesheet" type="text/css" href="css/navbar.css">
+</head>
+<body>
+  <div class="navbar">
+    <ul>
+      <li><a href="/">{{defaults.sysName}}</a></li>
+      <div style="float:right">
+        <li><a href="/auth/google">Log In</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </div>
+    </ul>
+  </div>
+  <div class="container">
+    {{#header}}
+      <h1>{{header}}</h1>
+    {{/header}}
+
+    {{#message}}
+      <p>{{message}}</p>
+    {{/message}}
+
+    {{#link}}
+      <a href="{{link}}">{{linkTitle}}</a>
+    {{/link}}
+  </div>
+</body>
+</html>

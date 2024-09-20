@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Main | {{defaults.sysName}}</title>
+  <link rel="stylesheet" type="text/css" href="../css/reset.css">
+  <link rel="stylesheet" type="text/css" href="../css/defaults.css">
+  <link rel="stylesheet" type="text/css" href="../css/navbar.css">
+</head>
+<body>
+  <div class="navbar">
+    <ul>
+      <li><a href="/">{{defaults.sysName}}</a></li>
+      <div style="float:right">
+        <li><a href="/auth/google">Log In</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </div>
+    </ul>
+  </div>
+  {{#auth}}
+  <div class="container">
+    <h2>
+      {{#message}}
+        <!-- <p>{{message}}</p> -->
+      {{/message}}
+    </h2> </br>
+  {{/auth}}
+  {{^auth}}
+    Please Log in to continue.
+  {{/auth}}
+  
+  <div class="container">
+   {{#user}}
+	<form action="/updateUser/" method="post">
+    <input name="id" type="text" value="{{id}}" hidden>
+    <table>
+      <tr>
+
+      <td> Name: </td> <td><input name= "name" type="text" value=" {{name}}"></td>
+
+      </tr>
+
+      <tr>
+
+      <td>User Type: </td> <td><input name= "user_type" type="text" value = "{{user_type}}"></td>
+
+      </tr>
+
+      <tr>
+
+      <td>Email: </td> <td><input name= "email" type="text" value="{{email}}"></td>
+
+      </tr>
+
+
+    <tr><td><input type="submit"></br> <input type="button" value="delete user"></input></td></tr>
+  </table>
+  </form>
+   {{/user}}
+  </div>
+
+
+
+
+
+</body>
+</html>

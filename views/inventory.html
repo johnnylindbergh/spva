@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Page | {{defaults.sysName}}</title>
+  <link rel="stylesheet" type="text/css" href="css/reset.css">
+  <link rel="stylesheet" type="text/css" href="css/defaults.css">
+  <link rel="stylesheet" type="text/css" href="css/navbar.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+</head>
+
+<body>
+  <div class="navbar">
+    <ul>
+      <li><a href="/">{{defaults.sysName}}</a></li>
+      <div style="float:right">
+        <li><a href="/auth/google">Log In</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </div>
+    </ul>
+  </div>
+  {{#auth}}
+  <div class="container">
+    <h2>
+      {{#message}}
+        <p>{{message}}</p>
+      {{/message}}
+    </h2> 
+  </div>
+  {{/auth}}
+ <div class="container">
+    <!-- Job Content Here -->
+     <form action="/deleteJob" method = "POST">
+      <table>
+        <tr>
+        <th>Jobs</th>
+      </tr>
+
+          {{#jobs}}
+            <tr>
+              <td>
+                <input type="radio" id="jobName" name="jobName" value="{{id}}">
+              </td>
+
+              <td>
+		<p>{{name}}</p>
+              </td>
+            </tr>
+          {{/jobs}}
+      </table>
+        <input type="submit" value="Delete Job">
+    </form>
+  </div>
+
+  <div class="container">
+    <!-- add job Content Here -->
+      <form action="/addJob" method ="POST">
+        <b>Add a Job</b>
+          <input name="jobName" type="text" autocomplete="off" placeholder="Enter new Job...">
+          <input type="submit" value="Create New Job">
+      </form>
+  </div>
+
+
+
+
+  <div class="container">
+    <!-- task Content Here -->
+     <form action="/deleteTask" method = "POST">
+      <table>
+        <tr>
+        <th>Tasks</th>
+      </tr>
+
+          {{#tasks}}
+            <tr>
+              <td>
+                <input type="radio" id="taskName" name="taskName" value="{{id}}">
+              </td>
+
+              <td>
+                <p>{{name}}</p>
+              </td>
+            </tr>
+          {{/tasks}}
+      </table>
+        <input type="submit" value="Delete task">
+    </form>
+  </div>
+
+  <div class="container">
+    <!-- add task Content Here -->
+      <form action="/addTask" method ="POST">
+        <b>Add a Task</b>
+          <input name="taskName" type="text" autocomplete="off" placeholder="Enter new task...">
+          <input type="submit" value="Create New Task">
+      </form>
+  </div>
+
+<div class="container">
+  <!-- qr code generation content here -->
+ <a href="/qrGen/1">Generate Job-Task QR Code</a> </br>
+</div>
+</br>
+
+<div class="searchBar">
+<b> Filter Results</b></br>&nbsp;
+    <form  id="searchForm" action="/searchTimesheet" method="POST">
+	  <input type="submit" formaction="default_url_when_press_enter" style="visibility: hidden; display: none;">
+          
+          <select name="userId" onchange="this.form.submit();">
+            <option value="-1">All Users</option>
+            {{#users}}
+            <option value="{{id}}"{{#selected}}selected{{/selected}}>{{name}}</option>
+            {{/users}}
+          </select>  
+
+          <select name="jobId" onchange="this.form.submit();">
+            <option value="-1">All Jobs</option>
+            {{#jobs}}
+            <option value="{{id}}"{{#selected}}selected{{/selected}}>{{name}}</option>
+            {{/jobs}}
+          </select>  
+
+
+          <select  name="taskId" onchange="this.form.submit();">
+            <option value="-1">All Tasks</option>
+            {{#tasks}}
+            <option value="{{id}}"{{#selected}}selected{{/selected}}>{{name}}</option>
+            {{/tasks}}
+          </select>
+
+          
+            <b>From:</b> <input type="date" name="startDate" value="{{startDate}}"><b>To:</b>&nbsp;
+          
+            <input type="date" name="endDate" value="{{endDate}}">
+
+          <button type="submit" name="search" formaction="/searchTimesheet"><i class="fas fa-search"> </i></button>
+          <button type="submit" name="download" formaction="/searchTimesheetToCSV"><i class="fas fa-download"> </i></button>
+        </form>
+</div>
+
+<div class = "container">
+  <table>
+    <th>
+      <tr>
+       <td>
+        Start Time
+      </td>
+         <td>
+        End Time
+      </td>
+       <td>
+        Job - task
+      </td>
+        <td>
+        Name
+      </td>
+       <td>
+        Duration
+      </td>
+    </tr>
+    </th>
+    {{#results}}
+          <tr>
+            <td>{{clock_in}}</td>
+            <td>{{clock_out}}</td>
+            <td>{{name}} - {{taskname}}</td>
+            <td>{{username}}</td>
+             <td>{{formattedDuration}}</td>
+          </tr>
+    {{/results}}
+  </table>
+
+</div>
+
+
+</body>
+</html>

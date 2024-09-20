@@ -1,0 +1,130 @@
+
+/*
+  defaults.css: Default style to apply to all pages 
+*/
+
+@import 'https://fonts.googleapis.com/css?family=open-sans';
+
+* {
+  font-family: 'open-sans', sans-serif;
+}
+
+.container {
+     display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+  background-color: #f5f5f5;
+  padding:8px 21px;
+
+}
+#clock{
+  width:80%;
+       display: block;
+
+    margin-left: auto;
+  margin-right: auto;
+  color:#ffffff;
+  background-color: #01aaff;
+  padding:10px;
+}
+
+.qrcontainer {
+  padding:50px;
+  width:90%;
+  column-width: 500px;
+
+
+}
+
+.zoom-in-out-box:hover {
+  margin: 24px;
+  width: 50px;
+  height: 50px;
+  background: #f50057;
+  animation: zoom-in-zoom-out ;
+}
+
+@keyframes zoom-in-zoom-out {
+  0% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.5, 1.5);
+  }
+ 
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  padding:1px;
+}
+
+td {
+  padding:8px;
+}
+
+th {
+  padding:12px;
+
+}
+
+.hiddenDiv {
+  display: none;
+}
+
+.hoverMe:hover + .hiddenDiv {
+  display: block;
+  color: red;
+}
+
+tr:nth-child(even) {
+  background-color: #ffffff
+}
+
+.searchBar {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+  background-color: #f5f5f5;
+  padding:10px;
+
+}
+
+#barcode {
+  display: inline;
+  margin-left: 10px;
+  margin-right: auto;
+  background-color: #f5f5f5;
+  padding:10px;
+}
+
+button, input[type=button], input[type=submit], input[type=reset] {
+  background-color: rgba(90, 72, 130, 1);
+  border: none;
+  border-radius: 5px;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  margin: 6px 4px;
+  cursor: pointer;
+}
+/*
+.timesheet {
+    margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+}
+.timesheet th {
+  background-color: #04AA6D;
+  color: gray;
+}
+
+.timesheet td {
+  padding:5px;
+}
+.timesheet tr:hover {background-color: coral;}*/
+
+
