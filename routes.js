@@ -23,7 +23,8 @@ const path = require("path");
 const multer = require("multer");
 
 const fs = require("fs");
-const { parse } = require("csv-parse");
+const csv = require("csv-parser");
+
 var fileCounter = Math.floor(1000 + Math.random() * 9000);
 
 // file upload stuff 
@@ -63,26 +64,36 @@ function readTakeoff(req, res, filename, cb) {
 
 
   console.log("parsing ", filename);
+  var results = [];
+  var headers = [];
 
   db.createNewTakeoff(req, res, function (err, takeoff_id) {
     console.log("takeoff id is ", takeoff_id);
     fs.createReadStream(filename)
       
-      .pipe(parse({ delimiter: ",", from_line: 2 }))
+      .pipe(csv())
+      .on("headers", (headersInOrder)=> {
+        console.log(`First header: ${headersInOrder}`);
+        headers = headersInOrder;
+
+      })
       
       .on("data", function (row) {
-        db.loadRevuData(row, takeoff_id, function (err) {
-          if (err) {
-            //console.log(err);
-          } 
-        });
+        results.push(row);
       })
       .on("end", function () {
         console.log("csv parsed");
-        cb(null);
+        db.loadTakeoffData(takeoff_id, results, headers, function (err) {
+          if (err) {
+            cb(err);
+          } else {
+            console.log("takeoff data loaded");
+            cb(null);
+          }
+        });
       })
       .on("error", function (error) {
-      console.log(error.message);
+        console.log(error.message);
       cb(error)
     });
   });
@@ -94,8 +105,15 @@ module.exports = function (app) {
   // GET requests
   app.get('/', mid.isAuth, (req, res) => {
     var render = defaultRender(req);
-    res.render("main.html", render);
-
+    db.summaryAllTakeoffs(function (err, takeoffs) {
+      if (err) {
+        console.log(err);
+      } else {
+        render.takeoffs = takeoffs;
+        res.render("main.html", render);
+      }
+    
+    });
 
   });
 
@@ -110,7 +128,7 @@ module.exports = function (app) {
 
 
     // Route for handling file uploads
-  app.post("/uploadTakeoff", mid.isAuth, function (req, res, next) {
+  app.post("/uploadTakeoff", mid.isAuth, function (req, res) {
     console.log("uploading ");
     // Use Multer middleware to handle file upload
     upload(req, res, function (err) {
@@ -130,7 +148,7 @@ module.exports = function (app) {
                   console.log(err);
                 } else {
                   console.log("takeoff read. time to generate estimate for creator id :", req.body.takeoff_id);
-                  res.redirect("/editTakeoff/"+req.body.takeoff_id);
+                  res.redirect("/");
                 }
               });
 
@@ -143,15 +161,18 @@ module.exports = function (app) {
     });
   });
 
-  app.get("/editTakeoff/:id-takeoff", mid.isAuth, function (req, res) {
-    res.send("works");
-    // db.getTakeoff(req.params.id, function (err, results) {
-    //   if (err) {
-    //     console.log(err);
-    //   } else {
-    //     res.render("editTakeoff.html", { takeoff: results[0] });
-    //   }
-    // });
+  app.post("/editTakeoff", mid.isAuth, function (req, res) {
+    console.log("editing", req.body.takeoff_id);
+
+    db.getTakeoff(req.body.takeoff_id, function (err, takeoff_info, subjects, measureSum) {
+      if (err) {
+        console.log(err);
+      } else {
+        //console.log(takeoff_info);
+        //console.log(subjects);
+        res.render("editTakeoff.html", {takeoff: takeoff_info , materials:measureSum });
+      }
+    });
   });
 
   // Get all users

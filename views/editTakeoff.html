@@ -6,15 +6,26 @@
   <link rel="stylesheet" type="text/css" href="css/defaults.css">
   <link rel="stylesheet" type="text/css" href="css/navbar.css">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
-<script src="
-https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js
-"></script>  
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
+  
+  <script>
+    function toggleMaterial(materialId, checkbox) {
+      alert("changed");
+      var isChecked = checkbox.checked ? 1 : 0;
+      
+      $.post("/toggle-material", { material_id: materialId, toggled: isChecked })
+        .done(function() {
+          console.log("Material toggled: " + materialId);
+        })
+        .fail(function() {
+          console.log("Failed to toggle material: " + materialId);
+        });
+    }
   </script>
+
 </head>
 <body>
   <div class="navbar">
@@ -28,32 +39,49 @@ https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js
       </div>
     </ul>
   </div>
-  <!-- {{#auth}} 
-  <div class="container">
-    <h2>
-      {{#message}}
-        <p>{{message}}</p>
-      {{/message}}
-    </h2> </br>
-  {{/auth}} -->
 
-  <h1> Upload takeoff</h1>
-<div>
-	<table>
-		<tr>
-			<th></th>
-			<th></th>
-		</tr>
+  <div class="container">
+    {{#takeoff}}
+      {{name}}
+      {{creator_id}}
+      {{owner}}
+      {{owner_billing_address}}
+      {{created_at}}
+      </br>
+    {{/takeoff}}
+
+    <table>
       <tr>
-        
-        <td>
-          Subjects 
-        </td>
-        <td>on/off button</td>
+        <th>Name</th>
+        <th>Area</th> 
+        <th>Length</th> 
+        <th>Count</th> 
+        <th>Measurement</th> 
+        <th>Option</th> 
       </tr>
-  </table>
-        
-</div>
+      {{#materials}}
+      <tr>
+        <td>{{material}}</td> 
+        <td>{{area}} sqft □</td>
+        <td>{{length}} ft –</td>
+        <td>{{count}} ∴</td>
+        <td>{{measurement}}</td>
+        <td>{{measurement_unit}}</td>
+        <td>
+          <label class="switch">
+            <input type="checkbox" 
+                   onchange="toggleMaterial('{{id}}', this)" 
+                   {{#is_toggled}}checked{{/is_toggled}}>
+            <span class="slider round"></span>
+          </label>
+        </td>
+      </tr>
+      {{/materials}}
+      {{^materials}}
+      No subjects found
+      {{/materials}}
+    </table>
+  </div>
+
 </body>
 </html>
-

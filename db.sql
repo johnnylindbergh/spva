@@ -38,6 +38,7 @@ CREATE TABLE takeoffs (
   owner VARCHAR(64),
   owner_billing_address VARCHAR(64),
   file_path_of_plans VARCHAR(255),
+  status TINYINT(1) DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 

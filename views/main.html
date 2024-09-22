@@ -39,13 +39,51 @@ https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js
 
   <div class="container">
     <form action="/addTakeoff">
-    <input type="submit" value="addTakeoff" />
+    <input type="submit" value="Add Takeoff" />
 </form>
 
   <form action="/alButton">
     <input type="submit" value="AL Button" />
 </form>
   </div>
+  <div class="container">
+    Takeoffs: 
+    <table>
+      <tr>
+        <th>Takeoff Name</th>
+        <th></th>
+         <th></th>
+
+      </tr>
+
+      {{#takeoffs}}
+      <tr>
+
+      
+        <td>{{name}}</td>
+
+        <form action="/editTakeoff" method = "POST">
+          <input type="hidden" name="takeoff_id" value="{{id}}">
+            <td>
+          <input type="submit" value="edit" />
+          </td>
+        </form>
+
+        <form action="/view" method = "POST">
+          <input type="hidden" name="takeoff_id" value="{{id}}">
+            <td>
+          <input style="background-color: white; color:black;" type="submit" value="view" />
+          </td>
+        </form>
+
+
+
+       </tr>
+      {{/takeoffs}}
+   </table>
+   
+  </div>
+
 
 <!-- <div>
 	<table>
