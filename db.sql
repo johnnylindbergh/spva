@@ -108,26 +108,13 @@ CREATE TABLE subjects (
   materials_cost DECIMAL(10,2),
   duration_hours INT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-  -- associated revu data 
   subject VARCHAR(64),
-  date DATETIME,
+  date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   page_label VARCHAR(64),
   layer VARCHAR(64),
   color VARCHAR(64),
-  length DECIMAL(10,2),
-  length_unit VARCHAR(64),
-  area DECIMAL(10,2),
-  area_unit VARCHAR(64),
-  wall_area DECIMAL(10,2),
-  wall_area_unit VARCHAR(64),
-  depth DECIMAL(10,2),
-  depth_unit VARCHAR(64),
-  count INT,
   measurement DECIMAL(10,2),
-  measurement_unit VARCHAR(64),
-  
-
+  measurement_unit VARCHAR(64), 
 
 
   PRIMARY KEY (id),
