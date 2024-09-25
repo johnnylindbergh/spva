@@ -23,7 +23,7 @@ const path = require("path");
 const multer = require("multer");
 
 const fs = require("fs");
-const csv = require("csv-parser");
+const {parse} = require("csv-parse");
 
 var fileCounter = Math.floor(1000 + Math.random() * 9000);
 
@@ -71,26 +71,63 @@ function readTakeoff(req, res, filename, cb) {
     console.log("takeoff id is ", takeoff_id);
     fs.createReadStream(filename)
       
-      .pipe(csv())
+      .pipe(parse({delimiter: ','}))
       .on("headers", (headersInOrder)=> {
         console.log(`First header: ${headersInOrder}`);
         headers = headersInOrder;
+        //convert to snake case
+        headers = headers.map(function (header) {
+          return header.replace(/\s+/g, '_').toLowerCase();
+
+        });
+
+        // replace second space if it exists
+        headers = headers.map(function (header) {
+          return header.replace(/\s+/g, '_');
+        });
+
+      
+
+        // header should not start with an underscore 
+        headers = headers.map(function (header) {
+          if (header.startsWith("_")) {
+            return header.substring(1);
+          }
+          return header;
+        });
+
+
+       
+            //print the headers
+        //console.log("headers are ", headers);
 
       })
       
       .on("data", function (row) {
-        results.push(row);
+        //console.log(row);
+       results.push(row);
       })
       .on("end", function () {
-        console.log("csv parsed");
-        db.loadTakeoffData(takeoff_id, results, headers, function (err) {
+        
+         db.loadTakeoffData(takeoff_id, results, headers, function(err){
+           if (err) {
+             cb(err);
+           } else {
+             console.log("takeoff loaded");
+            
+           }
+         });
+
+        db.generateTakeoffMaterials(takeoff_id, function (err) {
           if (err) {
-            cb(err);
+            console.log(err);
           } else {
-            console.log("takeoff data loaded");
-            cb(null);
+            console.log("materials generated");
+            
           }
         });
+        res.redirect("/");
+        
       })
       .on("error", function (error) {
         console.log(error.message);
@@ -164,13 +201,23 @@ module.exports = function (app) {
   app.post("/editTakeoff", mid.isAuth, function (req, res) {
     console.log("editing", req.body.takeoff_id);
 
-    db.getTakeoff(req.body.takeoff_id, function (err, takeoff_info, subjects, measureSum) {
+    db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
       if (err) {
         console.log(err);
       } else {
-        //console.log(takeoff_info);
-        //console.log(subjects);
-        res.render("editTakeoff.html", {takeoff: takeoff_info , materials:measureSum });
+     
+        res.render("editTakeoff.html", {takeoff: takeoff, material:materials});
+      }
+    });
+  });
+
+  app.post("/toggle-material", mid.isAuth, function (req, res) {
+    console.log("toggling ", req.body);
+    db.toggleMaterial(req.body.takeoff_id, req.body.material_id, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.redirect("/");
       }
     });
   });

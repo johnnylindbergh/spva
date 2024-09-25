@@ -14,9 +14,6 @@ const con = mysql.createPool({
   multipleStatements: true
 });
 
-function generalizedMultiple(){
-
-}
 
 
 
@@ -61,36 +58,70 @@ module.exports = {
   // loads results with is an array with the headers into the table subjects in the database
 
   loadTakeoffData: function (takeoff_id, results, headers, cb){
-    headersMapped = [];
-    // convert to snake case
-    for (var i = 0; i < headers.length; i++) {
-      headersMapped.push(headers[i].replace(/ /g, '_').toLowerCase());
-    }
-    
-    console.log(headersMapped);
 
-    var expectedHeaders = [
-      'subject',        'page_label',
-      'date',           'layer',
-      'color',          'length',
-      'length_unit',    'area',
-      'area_unit',      'wall_area',
-      'wall_area_unit', 'depth',
-      'depth_unit',     'count',
-      'measurement',    'measurement_unit'
-    ];
+      
+ [
+  'Take out of walls',
+  'A-201 - EXTERIOR ELEVATIONS',
+  '9/13/2024 8:37',
+  '',
+  '#80FFFF',
+  '59.76',
+  `ft' in"`,
+  '223.2',
+  'sf',
+  '507.96',
+  'sf',
+  '8.5',
+  `ft' in"`,
+  '0',
+  '223.2',
+  'sf'
+]
 
-
-    for (var i = 0; i < expectedHeaders.length; i++){
-      var index = headersMapped.indexOf(expectedHeaders[i]);
-
-      if (index == -1){
-        return cb("Missing header: " + expectedHeaders[i]);
-      } else {
-        headersMapped.splice(index, 1);
+    for (var i = 1; i < results.length; i++) {
+ 
+      // format all values in the row and set blank values to zero
+      for (var j = 0; j < results[i].length; j++) {
+        if (results[i][j] === undefined || results[i][j] === null || results[i][j] === '') {
+          results[i][j] = 0;
+        } else {
+          results[i][j] = results[i][j].trim();
+        }
       }
-    }
-    console.log(headersMapped);
+
+      results[i][2] = moment(results[i][2]).format('YYYY-MM-DD HH:mm:ss');
+
+
+      //console.log(results[i]);
+      console.log("subject: ", results[i][0]);
+      console.log("page_label: ", results[i][1]);
+      console.log("date: " ,results[i][2]);
+      console.log("layer: ", results[i][3]);
+      console.log("color: " ,results[i][4]);
+      console.log("length: " ,results[i][5]);
+      console.log("length_unit: ", results[i][6]);
+      console.log("area: ",  results[i][7]);
+      console.log("area_unit: " ,results[i][8]);
+      console.log("wall_area: " ,parseFloat(results[i][9]));
+      console.log("wall_area_unit: " ,results[i][10]);
+      console.log("depth: " ,results[i][11]);
+      console.log("depth_unit: " ,results[i][12]);
+      console.log("count: " ,results[i][13]);
+      console.log("measurement: " ,results[i][14]);
+      console.log("measurement_unit: " ,results[i][15]);
+
+
+      con.query('INSERT INTO subjects (takeoff_id, subject, page_label, layer, color, length, length_unit, area, area_unit, wall_area, wall_area_unit, depth, depth_unit, count, measurement, measurement_unit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);', 
+        [takeoff_id, results[i][0], results[i][1],  results[i][3], results[i][4], 0.0 , results[i][6], results[i][7].trim(2), results[i][8], results[i][9], results[i][10], results[i][11], results[i][12], results[i][13], results[i][14], results[i][15]], function (err) {
+        if (err) {
+          console.log(err);
+          //return cb(err);
+        }
+      });
+      
+      }
+      //console.log("values", values);
 
 
   },
@@ -111,35 +142,25 @@ module.exports = {
   getTakeoff: function (takeoff_id, callback) {
     con.query('SELECT * FROM takeoffs WHERE id = ?;', [takeoff_id], function (err, takeoff_info) {
       if (err) return callback(err);
-      con.query('SELECT DISTINCT name from subjects where takeoff_id = ?;', [takeoff_id], function (err, subjects) {
-        var measureSum = [];
-        
-          con.query('SELECT name as material, SUM(area) as area, SUM(length) as length, SUM(count) as count, SUM(measurement) as measurement FROM subjects WHERE takeoff_id = ? GROUP BY name', [takeoff_id], function (err, measure) {
+          con.query('SELECT * FROM applied_materials WHERE takeoff_id = ?;', [takeoff_id], function (err, measure) {
             if (err){
 
-            } else {
-                        
-                          callback(null, takeoff_info, subjects, measure);
+            } else {        
+              callback(null, takeoff_info, measure);
             }
-
-
           });
-        
-
-        
-      });
     });
   },
 
-  getMaterials: function (takeoff_id, callback) {
-    con.query('SELECT DISTINCT name from subjects where takeoff_id = ?;', [takeoff_id], function (err, results) {
+  generateTakeoffMaterials: function (takeoff_id, callback) {
+    con.query('SELECT DISTINCT subject from subjects where takeoff_id = ?;', [takeoff_id], function (err, results) {
       if (err) return callback(err);
       callback(null, results);
     });
   },
 
   sumSFMaterial: function (material_id, takeoff_id, callback) {
-    con.query('SELECT name as material, SUM(area) as area, SUM(length) as length  FROM subjects WHERE takeoff_id = ? AND name = ?;', [material, takeoff_id], function (err, results) {
+    con.query('SELECT subject as material, SUM(measurement) as measurement, measurement_unit  FROM subjects WHERE takeoff_id = ? AND name = ?;', [material, takeoff_id], function (err, results) {
       if (err) return callback(err);
       callback(null, results);
     });

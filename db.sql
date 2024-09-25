@@ -53,6 +53,12 @@ CREATE TABLE labor (
   PRIMARY KEY (id)
 );
 
+insert into labor (rate_name, rate) values ('Rate USD/sqft', 1.56);
+insert into labor (rate_name, rate) values ('hourly rate USD/hr', 22.00);
+insert into labor (rate_name, rate) values ('Rate USD/ft', 1.04);
+
+
+
 -- Material archetypes table
 CREATE TABLE material_archetypes (
   id INT NOT NULL AUTO_INCREMENT,
@@ -60,6 +66,7 @@ CREATE TABLE material_archetypes (
   PRIMARY KEY (id)
 );
 
+INSERT INTO material_archetypes (name) VALUES ('Wood'), ('Metal'), ('Plastic'), ('Masonry'), ('Drywall'), ('Paint'), ('Tile'), ('Carpet'), ('Roofing'), ('Insulation'), ('Electrical'), ('Plumbing'), ('HVAC'), ('Other');
 
 
 
@@ -69,12 +76,26 @@ CREATE TABLE materials (
   name VARCHAR(255),
   description VARCHAR(255),
   cost DECIMAL(10,2),
-  takeoff_id INT,
+  labor_cost DECIMAL(10,2),
+  coverage DECIMAL(10,2),
   material_type INT,
   PRIMARY KEY (id),
-  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id),
   FOREIGN KEY (material_type) REFERENCES material_archetypes(id)
 );
+
+-- insert random paint names with id 6
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Paint 1', 'Paint 1 Description', 10.00, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Paint 2', 'Paint 2 Description', 15.00, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Paint 3', 'Paint 3 Description', 20.00, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Paint 4', 'Paint 4 Description', 25.00, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Paint 5', 'Paint 5 Description', 30.00, 1.00, 6); 
+
+-- insert random 'Other names'
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Other 1', 'Other 1 Description', 10.00, 1.00, 14); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Other 2', 'Other 2 Description', 15.00, 1.00, 14); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Other 3', 'Other 3 Description', 20.00, 1.00, 14);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Other 4', 'Other 4 Description', 25.00, 1.00, 14);
+
 
 
 -- Estimates table (job estimation data)
@@ -89,29 +110,50 @@ CREATE TABLE subjects (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   -- associated revu data 
-  name VARCHAR(255),
-  labels VARCHAR(255),
-  page_label VARCHAR(255),
-  `date` DATETIME,
-  layer VARCHAR(255),
-  color VARCHAR(7),
-  `length` DECIMAL(10, 4),
-  length_unit VARCHAR(50),
-  area DECIMAL(10, 2),
-  area_unit VARCHAR(50),
-  wall_area DECIMAL(10, 2),
-  wall_area_unit VARCHAR(50),
-  depth DECIMAL(10, 2),
-  depth_unit VARCHAR(50),
+  subject VARCHAR(64),
+  date DATETIME,
+  page_label VARCHAR(64),
+  layer VARCHAR(64),
+  color VARCHAR(64),
+  length DECIMAL(10,2),
+  length_unit VARCHAR(64),
+  area DECIMAL(10,2),
+  area_unit VARCHAR(64),
+  wall_area DECIMAL(10,2),
+  wall_area_unit VARCHAR(64),
+  depth DECIMAL(10,2),
+  depth_unit VARCHAR(64),
   count INT,
-  measurement DECIMAL(10, 2),
-  measurement_unit VARCHAR(50),
-  cost_delta DECIMAL(10, 2),
+  measurement DECIMAL(10,2),
+  measurement_unit VARCHAR(64),
+  
+
+
 
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
   FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE SET NULL
 );
+
+CREATE TABLE applied_materials (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(64),
+  measurement DECIMAL(10,2),
+  measurement_unit VARCHAR(64),
+  takeoff_id INT,
+  material_id INT,
+  secondary_material_id INT,
+  tertiary_material_id INT,
+  labor_id INT,
+  applied TINYINT(1) DEFAULT 1,
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
+  FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE,
+  FOREIGN KEY (secondary_material_id) REFERENCES materials(id) ON DELETE CASCADE,
+  FOREIGN KEY (tertiary_material_id) REFERENCES materials(id) ON DELETE CASCADE,
+  FOREIGN KEY (labor_id) REFERENCES labor(id) ON DELETE CASCADE
+);
+
 
 CREATE TABLE estimate (
   id INT NOT NULL AUTO_INCREMENT,

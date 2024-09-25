@@ -14,9 +14,11 @@
   <script>
     function toggleMaterial(materialId, checkbox) {
       alert("changed");
+      console.log("Material toggled: " + materialId.material);
+
       var isChecked = checkbox.checked ? 1 : 0;
       
-      $.post("/toggle-material", { material_id: materialId, toggled: isChecked })
+      $.post("/toggle-material", { material_id: materialId.material, takeoff_id:materialId.takeoff toggled: isChecked })
         .done(function() {
           console.log("Material toggled: " + materialId);
         })
@@ -42,44 +44,38 @@
 
   <div class="container">
     {{#takeoff}}
-      {{name}}
-      {{creator_id}}
-      {{owner}}
-      {{owner_billing_address}}
-      {{created_at}}
+      <h1>{{name}}</h1> </br>
+      
+      {{owner}}</br>
+      {{owner_billing_address}}</br>
+      {{created_at}}</br>
       </br>
     {{/takeoff}}
 
     <table>
       <tr>
         <th>Name</th>
-        <th>Area</th> 
-        <th>Length</th> 
-        <th>Count</th> 
         <th>Measurement</th> 
         <th>Option</th> 
       </tr>
-      {{#materials}}
+      {{#material}}
       <tr>
-        <td>{{material}}</td> 
-        <td>{{area}} sqft □</td>
-        <td>{{length}} ft –</td>
-        <td>{{count}} ∴</td>
+        <td>{{name}}</td> 
         <td>{{measurement}}</td>
         <td>{{measurement_unit}}</td>
         <td>
           <label class="switch">
             <input type="checkbox" 
-                   onchange="toggleMaterial('{{id}}', this)" 
-                   {{#is_toggled}}checked{{/is_toggled}}>
+                   onchange="toggleMaterial({'{{material}}','{{takeoff.id}}' this)" 
+                   {{#applied}}checked{{/applied}}>
             <span class="slider round"></span>
           </label>
         </td>
       </tr>
-      {{/materials}}
-      {{^materials}}
+      {{/material}}
+      {{^material}}
       No subjects found
-      {{/materials}}
+      {{/material}}
     </table>
   </div>
 
