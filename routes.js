@@ -206,98 +206,19 @@ module.exports = function (app) {
         console.log(err);
       } else {
      
-        res.render("editTakeoff.html", {takeoff: takeoff, material:materials});
+        res.render("editTakeoff.html", {takeoff: takeoff, material:materials, takeoff_id: req.body.takeoff_id});
       }
     });
   });
 
   app.post("/toggle-material", mid.isAuth, function (req, res) {
     console.log("toggling ", req.body);
-    db.toggleMaterial(req.body.takeoff_id, req.body.material_id, function (err) {
+    db.toggleMaterial(req.body.material_id, req.body.applied, function (err) {
       if (err) {
         console.log(err);
       } else {
         res.redirect("/");
       }
-    });
-  });
-
-  // Get all users
-  app.get('/demo', mid.isAuth, (req, res) => {
-    
-  });
-
-  // Get user by ID
-  app.get('/users/:id', mid.isAuth, (req, res) => {
-    const userId = req.params.id;
-    db.query('SELECT * FROM users WHERE id = ?', [userId], (err, results) => {
-      if (err) return res.status(500).send(err);
-      res.json(results[0]);
-    });
-  });
-
-  // Get all take-offs
-  app.get('/takeoffs', mid.isAuth, (req, res) => {
-    db.query('SELECT * FROM take_off', (err, results) => {
-      if (err) return res.status(500).send(err);
-      res.json(results);
-    });
-  });
-
-  // Get take-off by ID
-  app.get('/takeoffs/:id', mid.isAuth, (req, res) => {
-    const takeoffId = req.params.id;
-    db.query('SELECT * FROM take_off WHERE id = ?', [takeoffId], (err, results) => {
-      if (err) return res.status(500).send(err);
-      res.json(results[0]);
-    });
-  });
-
-  // Get all estimates
-  app.get('/estimates', mid.isAuth, (req, res) => {
-    db.query('SELECT * FROM estimates', (err, results) => {
-      if (err) return res.status(500).send(err);
-      res.json(results);
-    });
-  });
-
-  // Get estimate by ID
-  app.get('/estimates/:id', mid.isAuth, (req, res) => {
-    const estimateId = req.params.id;
-    db.query('SELECT * FROM estimates WHERE id = ?', [estimateId], (err, results) => {
-      if (err) return res.status(500).send(err);
-      res.json(results[0]);
-    });
-  });
-
-  // POST requests
-  // Create a new user
-  app.post('/users', mid.isAuth, (req, res) => {
-    const { user_type, name, email, phone_number, public_key, authentication_token } = req.body;
-    const query = 'INSERT INTO users (user_type, name, email, phone_number, public_key, authentication_token) VALUES (?, ?, ?, ?, ?, ?)';
-    db.query(query, [user_type, name, email, phone_number, public_key, authentication_token], (err, results) => {
-      if (err) return res.status(500).send(err);
-      res.status(201).json({ id: results.insertId });
-    });
-  });
-
-  // Create a new take-off
-  app.post('/takeoffs', mid.isAuth, (req, res) => {
-    const { name, owner, owner_billing_address, file_path_of_plans } = req.body;
-    const query = 'INSERT INTO take_off (name, owner, owner_billing_address, file_path_of_plans) VALUES (?, ?, ?, ?)';
-    db.query(query, [name, owner, owner_billing_address, file_path_of_plans], (err, results) => {
-      if (err) return res.status(500).send(err);
-      res.status(201).json({ id: results.insertId });
-    });
-  });
-
-  // Create a new estimate
-  app.post('/estimates', mid.isAuth, (req, res) => {
-    const { takeoff_id, total_cost, labor_cost, materials_cost, duration_days } = req.body;
-    const query = 'INSERT INTO estimates (takeoff_id, total_cost, labor_cost, materials_cost, duration_days) VALUES (?, ?, ?, ?, ?)';
-    db.query(query, [takeoff_id, total_cost, labor_cost, materials_cost, duration_days], (err, results) => {
-      if (err) return res.status(500).send(err);
-      res.status(201).json({ id: results.insertId });
     });
   });
 }

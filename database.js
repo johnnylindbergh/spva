@@ -97,23 +97,23 @@ module.exports = {
       results[i][2] = moment(results[i][2]).format('YYYY-MM-DD HH:mm:ss');
 
 
-      //console.log(results[i]);
-      // console.log("subject: ", results[i][0]);
-      // console.log("page_label: ", results[i][1]);
-      // console.log("date: " ,results[i][2]);
-      // console.log("layer: ", results[i][3]);
-      // console.log("color: " ,results[i][4]);
-      // console.log("length: " ,results[i][5]);
-      // console.log("length_unit: ", results[i][6]);
-      // console.log("area: ",  results[i][7]);
-      // console.log("area_unit: " ,results[i][8]);
-      // console.log("wall_area: " ,parseFloat(results[i][9]));
-      // console.log("wall_area_unit: " ,results[i][10]);
-      // console.log("depth: " ,results[i][11]);
-      // console.log("depth_unit: " ,results[i][12]);
-      // console.log("count: " ,results[i][13]);
-      // console.log("measurement: " ,results[i][14]);
-      // console.log("measurement_unit: " ,results[i][15]);
+      console.log(results[i]);
+      console.log("subject: ", results[i][0]);
+      console.log("page_label: ", results[i][1]);
+      console.log("date: " ,results[i][2]);
+      console.log("layer: ", results[i][3]);
+      console.log("color: " ,results[i][4]);
+      console.log("length: " ,results[i][5]);
+      console.log("length_unit: ", results[i][6]);
+      console.log("area: ",  results[i][7]);
+      console.log("area_unit: " ,results[i][8]);
+      console.log("wall_area: " ,parseFloat(results[i][9]));
+      console.log("wall_area_unit: " ,results[i][10]);
+      console.log("depth: " ,results[i][11]);
+      console.log("depth_unit: " ,results[i][12]);
+      console.log("count: " ,results[i][13]);
+      console.log("measurement: " ,results[i][14]);
+      console.log("measurement_unit: " ,results[i][15]);
 
       var measurement = results[i][14];
 
@@ -177,27 +177,34 @@ module.exports = {
 
   generateTakeoffMaterials: function (takeoff_id, callback) {
       // kill me
-      con.query('SELECT DISTINCT subject FROM subjects WHERE takeoff_id = ?;', [takeoff_id], function (err, results) {
-        if (err) return callback(err);
-        for (var i = 0; i < results.length; i++) {
-          con.query('SELECT * from subjects where takeoff_id = ? AND subject = ?;', [takeoff_id], function (err, materials) {
-            // you have one subject here
-            // now you have to sum the measurements
-            
-            if (err) return callback(err);
-            callback(null, materials);
-          });
+    con.query('SELECT subject, SUM(measurement), MAX(measurement_unit) FROM subjects WHERE takeoff_id = ? GROUP BY subject;', [takeoff_id], function (err, subjects) { 
+      if (err) return callback(err);
+      console.log(subjects);
+      for (var i = 0; i < subjects.length; i++) {
+        // insert into applied_materials
+        con.query('INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit) VALUES (?,?,?,?);', [takeoff_id, subjects[i].subject, subjects[i]['SUM(measurement)'],subjects[i]['MAX(measurement_unit)']], function (err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      }
 
-        }
-      });
-
+    });
   },
 
 
-  sumSFMaterial: function (material_id, takeoff_id, callback) {
-    con.query('SELECT subject as material, SUM(measurement) as measurement, measurement_unit  FROM subjects WHERE takeoff_id = ? AND name = ?;', [material, takeoff_id], function (err, results) {
+  toggleMaterial: function (applied_material_id, applied, callback) {
+    con.query('UPDATE applied_materials set applied = ? WHERE id = ?;', [parseInt(applied), parseInt(applied_material_id)], function (err) {
       if (err) return callback(err);
-      callback(null, results);
+      callback(null);
+
+    });
+  },
+  sumSFMaterial: function (material_id, takeoff_id, callback) {
+    con.query('SELECT subject, SUM(measurement) FROM subjects WHERE takeoff_id = ? GROUP BY subject;', [takeoff_id], function (err, subjects) {
+      if (err) return callback(err);
+      console.log(subjects)
+      callback(null, subjects);
     });
   },
 

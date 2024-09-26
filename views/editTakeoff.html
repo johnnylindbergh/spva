@@ -8,17 +8,17 @@
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <script>
     function toggleMaterial(materialId, checkbox) {
-      alert("changed");
       console.log("Material toggled: " + materialId.material);
 
       var isChecked = checkbox.checked ? 1 : 0;
       
-      $.post("/toggle-material", { material_id: materialId.material, takeoff_id:materialId.takeoff toggled: isChecked })
+      $.post("/toggle-material", { material_id: materialId, applied: isChecked })
         .done(function() {
           console.log("Material toggled: " + materialId);
         })
@@ -26,6 +26,14 @@
           console.log("Failed to toggle material: " + materialId);
         });
     }
+  </script>
+
+  <script>
+    function add_material(materialId) {
+     
+      console.log("Add material");
+    }
+
   </script>
 
 </head>
@@ -61,15 +69,17 @@
       {{#material}}
       <tr>
         <td>{{name}}</td> 
-        <td>{{measurement}}</td>
-        <td>{{measurement_unit}}</td>
+        <td>{{measurement}} {{measurement_unit}}</td>
         <td>
           <label class="switch">
             <input type="checkbox" 
-                   onchange="toggleMaterial({'{{material}}','{{takeoff.id}}' this)" 
+                   onchange="toggleMaterial({{id}}, this)" 
                    {{#applied}}checked{{/applied}}>
             <span class="slider round"></span>
           </label>
+        </td>
+        <td>
+          <span style = "background-color: inherit;" onclick = "add_material({{id}})" class="fa fa-plus" aria-hidden="true"></span> 
         </td>
       </tr>
       {{/material}}

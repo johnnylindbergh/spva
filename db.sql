@@ -29,6 +29,11 @@ CREATE TABLE users (
   PRIMARY KEY (id)
 );
 
+CREATE TABLE system_settings (
+  levens_threshold INT,
+  
+);
+
 -- Take-off table (populates when a user uploads a take-off)
 CREATE TABLE takeoffs (
   id INT NOT NULL AUTO_INCREMENT,
@@ -39,6 +44,9 @@ CREATE TABLE takeoffs (
   owner_billing_address VARCHAR(64),
   file_path_of_plans VARCHAR(255),
   status TINYINT(1) DEFAULT 0,
+  duration_hours INT,
+  start_data DATETIME,
+  end_data DATETIME,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -131,6 +139,7 @@ CREATE TABLE applied_materials (
   material_id INT,
   secondary_material_id INT,
   tertiary_material_id INT,
+  quartary_material_id INT,
   labor_id INT,
   applied TINYINT(1) DEFAULT 1,
   PRIMARY KEY (id),
