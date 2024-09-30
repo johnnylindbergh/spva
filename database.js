@@ -165,12 +165,76 @@ module.exports = {
   getTakeoff: function (takeoff_id, callback) {
     con.query('SELECT * FROM takeoffs WHERE id = ?;', [takeoff_id], function (err, takeoff_info) {
       if (err) return callback(err);
-          con.query('SELECT applied_materials.id as id, applied_materials.material_id as material_id, applied_materials.applied as applied, applied_materials.name AS material_name, measurement as measurement, measurement_unit as measurement_unit FROM applied_materials LEFT JOIN materials ON applied_materials.material_id = materials.id WHERE applied_materials.takeoff_id = ?;', [takeoff_id], function (err, materials) {
+          con.query('SELECT applied_materials.id as id, applied_materials.material_id as material_id, applied_materials.applied as applied, applied_materials.name AS material_name, applied_materials.secondary_material_id as secondary_material_id, applied_materials.tertiary_material_id as tertiary_material_id, applied_materials.quartary_material_id as quartary_material_id, applied_materials.primary_cost_delta AS primary_cost_delta, applied_materials.secondary_cost_delta as secondary_cost_delta, applied_materials.tertiary_cost_delta as tertiary_cost_delta, applied_materials.quartary_cost_delta as quartary_cost_delta,  measurement as measurement, measurement_unit as measurement_unit FROM applied_materials LEFT JOIN materials ON applied_materials.material_id = materials.id WHERE applied_materials.takeoff_id = ?;', [takeoff_id], function (err, rows) {
             if (err){
+              callback(err);
+              } else {
+              for (var i = 0; i < rows.length; i++) {
+                if (rows[i] != undefined && rows[i].length > 0) {
+           
+                // check the primary material_id
+                if (rows[i].material_id){
+                  // get the name and set field material_name in row
+                  con.query('SELECT * FROM materials WHERE id = ?;', [rows[i].material_id], function (err, material) {
+                    if (err) {
+                      console.log(err);
+                    } else {
+                      console.log(material[0].name);
+                      rows[i].primary_material = material[0].name;
+                      rows[i].primary_material_cost = material[0].cost;
+                    }
+                  });
+                }
+
+                // check secondary material
+                if (rows[i].secondary_material_id){
+                  // get the name and set field secondary_material_name in row
+                  con.query('SELECT * FROM materials WHERE id = ?;', [rows[i].secondary_material_id], function (err, secondary_material) {
+                    if (err) {
+                      console.log(err);
+                    } else {
+                      rows[i].secondary_material_name = secondary_material[0].name;
+                      rows[i].secondary_material_cost = secondary_material[0].cost;
+                    }
+                  });
+                } 
+
+                // check tertiary material
+
+                if (rows[i].tertiary_material_id){
+                  // get the name and set field tertiary_material_name in row
+                  con.query('SELECT * FROM materials WHERE id = ?;', [rows[i].tertiary_material_id], function (err, tertiary_material) {
+                    if (err) {
+                      console.log(err);
+                    } else {
+                      rows[i].tertiary_material_name = tertiary_material[0].name;
+                      rows[i].tertiary_material_cost = tertiary_material[0].cost;
+                    }
+                  });
+                }
+
+                // check quartary material
+
+                if (rows[i].quartary_material_id){
+                  // get the name and set field quartary_material_name in row
+                  con.query('SELECT * FROM materials WHERE id = ?;', [rows.quartary_material_id], function (err, quartary_material) {
+                    if (err) {
+                      console.log(err);
+                    } else {
+                      rows[i].quartary_material_name = quartary_material[0].name;
+                      rows[i].quartary_material_cost = quartary_material[0].cost;
+                    }
+                  });
+                }
+                  //update the rows
+                }
+                
+              }
+              
+              callback(null, takeoff_info, rows);
+
               console.log(err);
-            } else {        
-              callback(null, takeoff_info, materials);
-            }
+            } 
           });
     });
   },
@@ -198,6 +262,48 @@ module.exports = {
       if (err) return callback(err);
       callback(null);
 
+    });
+  },
+
+  addMaterialSubject: function (material_id, subject_id, callback){
+    // first select from applied_materials and check if the primary or secondary id is null;
+
+    con.query("SELECT * from applied_materials WHERE id = ?;", [subject_id], function (err, material) {
+      if (err) {
+        console.log(err);
+      } else {
+        if (material[0].material_id == null) {
+
+          console.log("updating primary material");
+          con.query("UPDATE applied_materials SET material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
+            if (err) {
+              console.log(err);
+            }
+            callback(err);
+
+           
+          });
+        } else if (material[0].secondary_id == null) {
+          console.log("updating secondary material");
+          con.query("UPDATE applied_materials SET secondary_material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
+            if (err) {
+              console.log(err);
+            }
+            callback(err);
+          });
+        } else if (material[0].tertiary_material_id ==  null){
+          console.log("updating tertiary material");
+          con.query("UPDATE applied_materials SET tertiary_material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
+            if (err) {
+              console.log(err);
+            }                        
+            callback(err);
+
+          });
+        } else {
+          console.log("all material slots are filled");
+        }
+      }
     });
   },
 

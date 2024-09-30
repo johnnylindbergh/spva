@@ -107,11 +107,13 @@ INSERT INTO materials (name, description, cost, coverage, material_type) VALUES 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME MT EXTRA', 'Paint 5 Description', 49.64, 1.00, 6); 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME SA EXTRA', 'Paint 5 Description', 48.99, 1.00, 6); 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME SG EXTRA', 'Paint 5 Description', 51.99, 1.00, 6); 
--- insert random 'Other names'
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Other 1', 'Other 1 Description', 10.00, 1.00, 14); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Other 2', 'Other 2 Description', 15.00, 1.00, 14); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Other 3', 'Other 3 Description', 20.00, 1.00, 14);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Other 4', 'Other 4 Description', 25.00, 1.00, 14);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMERALD IN FL EXTR ', 'Other 4 Description', 53.51 , 1.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMERALD IN SA EXTR', 'Other 4 Description', 54.51 , 1.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMERALD IN SG EXTR', 'Other 4 Description', 55.51 , 1.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PROCL LTX SA EXTRA', 'Other 4 Description', 54.85, 1.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PROCL LTX SG EXTRA', 'Other 4 Description', 56.55, 1.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMRLD UTE SA HHW', 'Other 4 Description', 62.05, 1.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('FIRETEX FX5090', 'Other 1 Description', 98.39, 1.00, 6); 
 
 
 
@@ -146,9 +148,13 @@ CREATE TABLE applied_materials (
   measurement_unit VARCHAR(64),
   takeoff_id INT,
   material_id INT,
+  primary_cost_delta DECIMAL(10,2),
   secondary_material_id INT,
+  secondary_cost_delta DECIMAL(10,2),
   tertiary_material_id INT,
+  tertiary_cost_delta DECIMAL(10,2),
   quartary_material_id INT,
+  quartary_cost_delta DECIMAL(10,2),
   labor_id INT,
   applied TINYINT(1) DEFAULT 1,
   PRIMARY KEY (id),

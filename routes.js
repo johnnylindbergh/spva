@@ -224,6 +224,19 @@ module.exports = function (app) {
       }
     });
   });
+
+
+//add-material-subject POST
+
+app.post("/add-material-subject", mid.isAuth, function (req, res) {
+  console.log("adding material subject ", req.body);
+  db.addMaterialSubject(req.body.material_id, req.body.subject_id, function (err) {
+    if (err) {
+      console.log(err);
+    }
+  });
+});
+
 }
 
 function arrayToCSV(objArray) {
