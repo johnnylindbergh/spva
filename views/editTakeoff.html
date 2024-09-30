@@ -5,6 +5,9 @@
   <link rel="stylesheet" type="text/css" href="css/reset.css">
   <link rel="stylesheet" type="text/css" href="css/defaults.css">
   <link rel="stylesheet" type="text/css" href="css/navbar.css">
+  <link rel="stylesheet" type="text/css" href="css/dropdown.css">
+
+
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
@@ -28,13 +31,64 @@
     }
   </script>
 
-  <script>
-    function add_material(materialId) {
-     
-      console.log("Add material");
-    }
 
-  </script>
+  <script>
+
+    var subject_id = 0;
+    var material_id = 0;
+    /* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+function filterFunction() {
+  var input, filter, ul, li, a, i;
+  input = document.getElementById("myInput");
+  filter = input.value.toUpperCase();
+  div = document.getElementById("myDropdown");
+  a = div.getElementsByTagName("a");
+  for (i = 0; i < a.length; i++) {
+    txtValue = a[i].textContent || a[i].innerText;
+    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+      a[i].style.display = "";
+    } else {
+      a[i].style.display = "none";
+    }
+  }
+}
+
+function add_subject(id) {
+  subject_id = id;
+  console.log("Adding material for: " + subject_id);
+  // use jquery to set the text of element selected_material to the name of the material
+  $("#selected_subject").text("Selected subject: " + id);
+
+}
+
+function add_material(id){
+  console.log("added material_id " + id + " for subject " + subject_id);
+  material_id = id;
+  //alert("added material_id " + id + " for subject " + subject_id);
+  $("#selected_material").text("Selected material: " + id);
+}
+
+function add_material_subject(){
+  // post subject_id and material_id
+  console.log("adding material " + material_id + " to subject " + subject_id);
+  $.post("/add-material-subject", {material_id: material_id, subject_id: subject_id})
+    .done(function() {
+      console.log("Material added to subject: " + material_id + " " + subject_id);
+    })
+    .fail(function() {
+      console.log("Failed to add material to subject: " + material_id + " " + subject_id);
+    });
+      
+}
+
+
+</script>
+
 
 </head>
 <body>
@@ -50,7 +104,13 @@
     </ul>
   </div>
 
+ 
+
+
+
   <div class="container">
+
+
     {{#takeoff}}
       <h1>{{name}}</h1> </br>
       
@@ -60,15 +120,53 @@
       </br>
     {{/takeoff}}
 
+    <div >
+    <p id = "selected_material">No material selected </p>
+    <p id = "selected_subject">No subject selected </p>
+    <!-- button that when you click it runs a js function -->
+    <button onclick="add_material_subject()">Add Material to Subject</button>
+
+  </div>
+
+          <div class="dropdown" style = "block">
+          <div class="dropdown">
+        <button onclick="myFunction()" class="dropbtn">Material Library</button>
+        <div id="myDropdown" class="dropdown-content">
+          <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+            
+
+          {{#materials}}
+            <!-- a link that when you click it it runs a js function -->
+            <a href="#" onclick="add_material({{id}})">{{name}}</a>
+
+          {{/materials}}
+        </div>
+        </div>
+        </div>
+
+
+<br>
+<br>
+
+<br>
+<br>
+  
+
     <table>
       <tr>
         <th>Name</th>
         <th>Measurement</th> 
         <th>Option</th> 
+        <th>Primary Material</th> 
+
+        <th>
+
+      </th>
+
       </tr>
-      {{#material}}
+      {{#subjects}}
       <tr>
-        <td>{{name}}</td> 
+        <td>{{material_name}}</td> 
         <td>{{measurement}} {{measurement_unit}}</td>
         <td>
           <label class="switch">
@@ -78,16 +176,30 @@
             <span class="slider round"></span>
           </label>
         </td>
+        
         <td>
-          <span style = "background-color: inherit;" onclick = "add_material({{id}})" class="fa fa-plus" aria-hidden="true"></span> 
+          {{material_id}}
+          {{secondary_material}}
+          {{tertiary_material}}
         </td>
+        <td>
+          <!-- add material button runs js function called addMaterial and passes in the subject_id -->
+          <button onclick="add_subject({{id}})">Add Material</button> 
+        </td>
+
       </tr>
-      {{/material}}
-      {{^material}}
+      {{/subjects}}
+      {{^subjects}}
       No subjects found
-      {{/material}}
+      {{/subjects}}
     </table>
+
+
   </div>
+
+
+
+ 
 
 </body>
 </html>

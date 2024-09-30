@@ -10,10 +10,11 @@
 }
 
 .container {
-     display: block;
+  text-align: left;
+     display: inline-block;
   margin-left: auto;
   margin-right: auto;
-  width: 80%;
+  width: 85%;
   background-color: #f5f5f5;
   padding:8px 21px;
 
@@ -102,7 +103,7 @@ tr:nth-child(even) {
 }
 
 button, input[type=button], input[type=submit], input[type=reset] {
-  background-color: rgba(90, 72, 130, 1);
+  background-color: rgba(90, 72, 130);
   border: none;
   border-radius: 5px;
   color: white;
@@ -152,7 +153,7 @@ button, input[type=button], input[type=submit], input[type=reset] {
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: rgb(90, 72, 130);
 }
 
 input:focus + .slider {

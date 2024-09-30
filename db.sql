@@ -92,12 +92,21 @@ CREATE TABLE materials (
 );
 
 -- insert random paint names with id 6
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Paint 1', 'Paint 1 Description', 10.00, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Paint 2', 'Paint 2 Description', 15.00, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Paint 3', 'Paint 3 Description', 20.00, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Paint 4', 'Paint 4 Description', 25.00, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Paint 5', 'Paint 5 Description', 30.00, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 FL EXTRA', 'Paint 1 Description', 23.98, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 0 EG EXTRA', 'Paint 2 Description', 24.98, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 0 SG EXTRA', 'Paint 3 Description', 25.98, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('SPR INT FL EXTRA', 'Paint 4 Description', 33.66, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('SPR INT SA EXTRA', 'Paint 5 Description', 33.06, 1.00, 6); 
 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('SPR INT SG EXTRA', 'Paint 2 Description', 36.26, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('CASHMERE FL EXTRA', 'Paint 3 Description', 36.99, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('CASHMERE LL EXTRA', 'Paint 4 Description', 36.99, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('CASHMERE ML EXTRA', 'Paint 5 Description', 43.99, 1.00, 6); 
+
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME FL EXTRA', 'Paint 5 Description', 49.64, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME MT EXTRA', 'Paint 5 Description', 49.64, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME SA EXTRA', 'Paint 5 Description', 48.99, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME SG EXTRA', 'Paint 5 Description', 51.99, 1.00, 6); 
 -- insert random 'Other names'
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Other 1', 'Other 1 Description', 10.00, 1.00, 14); 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Other 2', 'Other 2 Description', 15.00, 1.00, 14); 

@@ -184,7 +184,7 @@ module.exports = function (app) {
                 if (err) {
                   console.log(err);
                 } else {
-                  console.log("takeoff read. time to generate estimate for creator id :", req.body.takeoff_id);
+                  console.log("takeoff read. time to generate estimate for takeoff_id :", req.body.takeoff_id);
                   res.redirect("/");
                 }
               });
@@ -202,12 +202,15 @@ module.exports = function (app) {
     console.log("editing", req.body.takeoff_id);
 
     db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
-      if (err) {
-        console.log(err);
-      } else {
-     
-        res.render("editTakeoff.html", {takeoff: takeoff, material:materials, takeoff_id: req.body.takeoff_id});
-      }
+      db.getAllMaterials(function (err, allMaterials) {
+
+        if (err) {
+          console.log(err);
+        } else {
+          res.render("editTakeoff.html", {takeoff: takeoff, subjects:materials, materials:allMaterials, takeoff_id: req.body.takeoff_id});
+        }
+
+      });
     });
   });
 

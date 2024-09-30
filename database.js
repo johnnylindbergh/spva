@@ -165,9 +165,9 @@ module.exports = {
   getTakeoff: function (takeoff_id, callback) {
     con.query('SELECT * FROM takeoffs WHERE id = ?;', [takeoff_id], function (err, takeoff_info) {
       if (err) return callback(err);
-          con.query('SELECT * FROM applied_materials WHERE takeoff_id = ?;', [takeoff_id], function (err, materials) {
+          con.query('SELECT applied_materials.id as id, applied_materials.material_id as material_id, applied_materials.applied as applied, applied_materials.name AS material_name, measurement as measurement, measurement_unit as measurement_unit FROM applied_materials LEFT JOIN materials ON applied_materials.material_id = materials.id WHERE applied_materials.takeoff_id = ?;', [takeoff_id], function (err, materials) {
             if (err){
-
+              console.log(err);
             } else {        
               callback(null, takeoff_info, materials);
             }
@@ -177,7 +177,7 @@ module.exports = {
 
   generateTakeoffMaterials: function (takeoff_id, callback) {
       // kill me
-    con.query('SELECT subject, SUM(measurement), MAX(measurement_unit) FROM subjects WHERE takeoff_id = ? GROUP BY subject;', [takeoff_id], function (err, subjects) { 
+    con.query('SELECT subject, SUM(measurement), MAX(measurement_unit), MAX(color) FROM subjects WHERE takeoff_id = ? GROUP BY subject;', [takeoff_id], function (err, subjects) { 
       if (err) return callback(err);
       console.log(subjects);
       for (var i = 0; i < subjects.length; i++) {
@@ -198,6 +198,13 @@ module.exports = {
       if (err) return callback(err);
       callback(null);
 
+    });
+  },
+
+  getAllMaterials: function (callback) {
+    con.query('SELECT * FROM materials;', function (err, materials) {
+      if (err) return callback(err);
+      callback(null, materials);
     });
   },
   sumSFMaterial: function (material_id, takeoff_id, callback) {
