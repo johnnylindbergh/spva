@@ -20,6 +20,7 @@
   "homepage": "https://github.com/thomascastleman/node-template#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "chatgpt": "^5.2.5",
     "cookie-parser": "^1.4.4",
     "cookie-session": "^1.3.3",
     "csv-parse": "^5.5.6",
@@ -27,6 +28,7 @@
     "date-and-time": "^3.3.0",
     "dayjs": "^1.11.11",
     "express": "^4.17.1",
+    "fast-levenshtein": "^3.0.0",
     "greenlock": "^2.8.8",
     "greenlock-express": "^4.0.3",
     "greenlock-store-fs": "^3.2.2",
@@ -35,6 +37,7 @@
     "multer": "^1.4.5-lts.1",
     "mustache-express": "^1.2.8",
     "mysql": "^2.17.1",
+    "mysql2": "^3.11.3",
     "node-schedule": "^2.1.1",
     "nodemailer": "^6.9.6",
     "passport": "^0.5.3",

@@ -14,85 +14,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <script>
-    function toggleMaterial(materialId, checkbox) {
-      console.log("Material toggled: " + materialId.material);
-
-      var isChecked = checkbox.checked ? 1 : 0;
-      
-      $.post("/toggle-material", { material_id: materialId, applied: isChecked })
-        .done(function() {
-          console.log("Material toggled: " + materialId);
-        })
-        .fail(function() {
-          console.log("Failed to toggle material: " + materialId);
-        });
-    }
-  </script>
-
-
-  <script>
-
-    var subject_id = 0;
-    var material_id = 0;
-    /* When the user clicks on the button,
-toggle between hiding and showing the dropdown content */
-function myFunction() {
-  document.getElementById("myDropdown").classList.toggle("show");
-}
-
-function filterFunction() {
-  var input, filter, ul, li, a, i;
-  input = document.getElementById("myInput");
-  filter = input.value.toUpperCase();
-  div = document.getElementById("myDropdown");
-  a = div.getElementsByTagName("a");
-  for (i = 0; i < a.length; i++) {
-    txtValue = a[i].textContent || a[i].innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      a[i].style.display = "";
-    } else {
-      a[i].style.display = "none";
-    }
-  }
-}
-
-function add_subject(id) {
-  subject_id = id;
-  console.log("Adding material for: " + subject_id);
-  // use jquery to set the text of element selected_material to the name of the material
-  $("#selected_subject").text("Selected subject: " + id);
-
-}
-
-function add_material(id){
-  console.log("added material_id " + id + " for subject " + subject_id);
-  material_id = id;
-  //alert("added material_id " + id + " for subject " + subject_id);
-  $("#selected_material").text("Selected material: " + id);
-}
-
-function add_material_subject(){
-  // post subject_id and material_id
-  console.log("adding material " + material_id + " to subject " + subject_id);
-
-  if (material_id != 0 && subject_id != 0){
-    $.post("/add-material-subject", {material_id: material_id, subject_id: subject_id})
-      .done(function() {
-        console.log("Material added to subject: " + material_id + " " + subject_id);
-      })
-      .fail(function() {
-        console.log("Failed to add material to subject: " + material_id + " " + subject_id);
-      });
-  } else {
-    console.log("Material or subject not selected");
-  }
-
-}
-
-
-</script>
+  <script src="/js/editTakeoff.js" type="text/javascript"></script>
+  ?<script> loadTakeoffMaterials({{takeoff_id}}); </script>
 
 
 </head>
@@ -117,6 +40,8 @@ function add_material_subject(){
 
 
     {{#takeoff}}
+
+
       <h1>{{name}}</h1> </br>
       
       {{owner}}</br>
@@ -184,13 +109,21 @@ function add_material_subject(){
         </td>
         
         <td>
-         {{#primary_material}} <a onclick="remove_material({{id}})"> {{primary_material}} <input style="width=50%;" type="text" value="{{primary_material_cost}}"> </a>{{/primary_material}} </br>
+          
+          {{#selected_materials}}
+            {{name}} <input style="width=50px;" type="text" value="{{cost}}"></br>
+          
+
+          {{/selected_materials}}
+            </td>
+
+        <!--  {{#primary_material}} <a onclick="remove_material({{id}})"> {{primary_material}} <input style="width=50%;" type="text" value="{{primary_material_cost}}"> </a>{{/primary_material}} </br>
         
           {{#secondary_material_name}} <a onclick="remove_material({{id}})"> {{secondary_material_name}} <input style="width=50%;" type="text" value="{{secondary_material_cost}}"> </a>{{/secondary_material_name}} </br>
 
          
              {{#tertiary_material_name}} <a onclick="remove_material({{id}})"> {{tertiary_material_name}} <input style="width=50%;" type="text" value="{{tertiary_material_cost}}"> </a>{{/tertiary_material_name}} </br>
-
+ -->
                 
         </td>
         <td>
@@ -203,6 +136,9 @@ function add_material_subject(){
       {{^subjects}}
       No subjects found
       {{/subjects}}
+    </table>
+
+    <table id ="takeoff_materials_table"> 
     </table>
 
 

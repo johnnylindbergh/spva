@@ -116,6 +116,37 @@ INSERT INTO materials (name, description, cost, coverage, material_type) VALUES 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('FIRETEX FX5090', 'Other 1 Description', 98.39, 1.00, 6); 
 
 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -WHITE (GAL)', 'Other 1 Description', 29.26, 300.0, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -WHITE (GAL)', 'Interior flat paint', 29.26, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -WHITE (5GAL)', 'Interior flat paint', 126.50, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -BASE1 (GAL)', 'Interior flat paint base 1', 35.04, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -BASE1 (5GAL)', 'Interior flat paint base 1', 151.39, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 LS -WHITE (GAL)', 'Interior low-sheen paint', 35.04, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 LS -WHITE (5GAL)', 'Interior low-sheen paint', 151.39, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 LS -BASE1 (GAL)', 'Interior low-sheen paint base 1', 35.04, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 LS -BASE1 (5GAL)', 'Interior low-sheen paint base 1', 151.39, 1500.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 EGG -WHITE (GAL)', 'Interior eggshell paint', 35.87, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 EGG -WHITE (5GAL)', 'Interior eggshell paint', 157.32, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 EGG -BASE1 (GAL)', 'Interior eggshell paint base 1', 35.87, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 EGG -BASE1 (5GAL)', 'Interior eggshell paint base 1', 157.32, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC STN/PERL- WHITE (GAL)', 'Interior satin/perl finish', 39.82, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC STN/PERL- WHITE (5GAL)', 'Interior satin/perl finish', 157.32, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC STN/PERL -BASE 1 (GAL)', 'Interior satin/perl finish base 1', 41.11, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC STN/PERL -BASE 1 (5GAL)', 'Interior satin/perl finish base 1', 157.32, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Ben Int Latex Matte - White (GAL)', 'Interior latex matte paint', 50.14, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Ben Int LTX Eggshell - White (GAL)', 'Interior latex eggshell paint', 55.47, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Ben Int LTX Eggshell - White (GAL)', 'Interior latex eggshell paint', 55.47, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Regal Select Flat White (GAL)', 'Interior flat paint', 55.47, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Regal Select Matte White (GAL)', 'Interior matte paint', 55.47, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Regal Select Eggshell White (GAL)', 'Interior eggshell paint', 55.47, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Regal Select Pearl White (GAL)', 'Interior pearl finish paint', 55.47, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Regal Select Semi-Gloss White (GAL)', 'Interior semi-gloss finish paint', 55.47, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Aura Interior Matte Base 1 (GAL)', 'Interior matte paint', 78.99, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Aura Exterior Satin White (GAL)', 'Exterior satin paint', 78.99, 300.0, 7);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Ultra Spec Exterior Flat White (GAL)', 'Exterior flat paint', 60.54, 300.0, 7);
+
+
+
 
 -- Estimates table (job estimation data)
 CREATE TABLE subjects (

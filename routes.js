@@ -202,6 +202,7 @@ module.exports = function (app) {
     console.log("editing", req.body.takeoff_id);
 
     db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
+      if (err) {console.log(err)}
       db.getAllMaterials(function (err, allMaterials) {
 
         if (err) {
@@ -213,6 +214,23 @@ module.exports = function (app) {
       });
     });
   });
+
+  app.post("/loadTakeoffMaterials", mid.isAuth, function (req, res) {
+  console.log("editing", req.body.takeoff_id);
+
+  db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
+    if (err) {console.log(err)}
+    db.getAllMaterials(function (err, allMaterials) {
+
+      if (err) {
+        console.log(err);
+      } else {
+        res.send({takeoff: takeoff, subjects:materials, materials:allMaterials, takeoff_id: req.body.takeoff_id});
+      }
+
+    });
+  });
+});
 
   app.post("/toggle-material", mid.isAuth, function (req, res) {
     console.log("toggling ", req.body);
@@ -233,6 +251,8 @@ app.post("/add-material-subject", mid.isAuth, function (req, res) {
   db.addMaterialSubject(req.body.material_id, req.body.subject_id, function (err) {
     if (err) {
       console.log(err);
+    } else {
+      console.log("updated");
     }
   });
 });

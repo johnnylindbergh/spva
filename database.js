@@ -1,9 +1,11 @@
 const creds   = require('./credentials.js');
 const sys     = require('./settings.js');
-const mysql   = require('mysql');
+const mysql   = require('mysql2');
 const moment = require('moment');
 const date = require('date-and-time') 
 moment().format();
+
+const queries = require('./queries.js');
 
 // Levenshtein distance
 const levenshtein = require('fast-levenshtein');
@@ -162,82 +164,45 @@ module.exports = {
     });
   },
 
-  getTakeoff: function (takeoff_id, callback) {
-    con.query('SELECT * FROM takeoffs WHERE id = ?;', [takeoff_id], function (err, takeoff_info) {
+getTakeoff: function (takeoff_id, callback) {
+  con.query('SELECT * FROM takeoffs WHERE id = ?;', [takeoff_id], function (err, takeoff_info) {
+    if (err) return callback(err);
+
+    con.query(queries.getTakeoff, [takeoff_id], async function (err, rows) {
       if (err) return callback(err);
-          con.query('SELECT applied_materials.id as id, applied_materials.material_id as material_id, applied_materials.applied as applied, applied_materials.name AS material_name, applied_materials.secondary_material_id as secondary_material_id, applied_materials.tertiary_material_id as tertiary_material_id, applied_materials.quartary_material_id as quartary_material_id, applied_materials.primary_cost_delta AS primary_cost_delta, applied_materials.secondary_cost_delta as secondary_cost_delta, applied_materials.tertiary_cost_delta as tertiary_cost_delta, applied_materials.quartary_cost_delta as quartary_cost_delta,  measurement as measurement, measurement_unit as measurement_unit FROM applied_materials LEFT JOIN materials ON applied_materials.material_id = materials.id WHERE applied_materials.takeoff_id = ?;', [takeoff_id], function (err, rows) {
-            if (err){
-              callback(err);
-              } else {
-              for (var i = 0; i < rows.length; i++) {
-                if (rows[i] != undefined && rows[i].length > 0) {
-           
-                // check the primary material_id
-                if (rows[i].material_id){
-                  // get the name and set field material_name in row
-                  con.query('SELECT * FROM materials WHERE id = ?;', [rows[i].material_id], function (err, material) {
-                    if (err) {
-                      console.log(err);
-                    } else {
-                      console.log(material[0].name);
-                      rows[i].primary_material = material[0].name;
-                      rows[i].primary_material_cost = material[0].cost;
-                    }
-                  });
-                }
 
-                // check secondary material
-                if (rows[i].secondary_material_id){
-                  // get the name and set field secondary_material_name in row
-                  con.query('SELECT * FROM materials WHERE id = ?;', [rows[i].secondary_material_id], function (err, secondary_material) {
-                    if (err) {
-                      console.log(err);
-                    } else {
-                      rows[i].secondary_material_name = secondary_material[0].name;
-                      rows[i].secondary_material_cost = secondary_material[0].cost;
-                    }
-                  });
-                } 
+      // Create an array of promises to fetch material names
+      const promises = rows.map(row => {
+        if (row && row.material_id) {
+          return new Promise((resolve, reject) => {
+            con.query(
+              'SELECT * FROM materials WHERE id IN (?, ?, ?);',
+              [row.material_id, row.secondary_material_id, row.tertiary_material_id],
+              function (err, materials) {
+                if (err) return reject(err);
 
-                // check tertiary material
-
-                if (rows[i].tertiary_material_id){
-                  // get the name and set field tertiary_material_name in row
-                  con.query('SELECT * FROM materials WHERE id = ?;', [rows[i].tertiary_material_id], function (err, tertiary_material) {
-                    if (err) {
-                      console.log(err);
-                    } else {
-                      rows[i].tertiary_material_name = tertiary_material[0].name;
-                      rows[i].tertiary_material_cost = tertiary_material[0].cost;
-                    }
-                  });
-                }
-
-                // check quartary material
-
-                if (rows[i].quartary_material_id){
-                  // get the name and set field quartary_material_name in row
-                  con.query('SELECT * FROM materials WHERE id = ?;', [rows.quartary_material_id], function (err, quartary_material) {
-                    if (err) {
-                      console.log(err);
-                    } else {
-                      rows[i].quartary_material_name = quartary_material[0].name;
-                      rows[i].quartary_material_cost = quartary_material[0].cost;
-                    }
-                  });
-                }
-                  //update the rows
-                }
-                
+                // Add material names to the row
+                row.selected_materials = materials; // You can customize how you want to store the materials info
+                resolve(row);
               }
-              
-              callback(null, takeoff_info, rows);
-
-              console.log(err);
-            } 
+            );
           });
+        } else {
+          return Promise.resolve(row); // If no material_id, just resolve the row as is
+        }
+      });
+
+      try {
+        const updatedRows = await Promise.all(promises);
+        // Once all material info has been fetched, pass the updated rows to the callback
+        console.log(updatedRows);
+        callback(null, takeoff_info, updatedRows);
+      } catch (queryErr) {
+        callback(queryErr);
+      }
     });
-  },
+  });
+},
 
   generateTakeoffMaterials: function (takeoff_id, callback) {
       // kill me
@@ -278,8 +243,10 @@ module.exports = {
           con.query("UPDATE applied_materials SET material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
             if (err) {
               console.log(err);
+            } else {
+              callback(err);
             }
-            callback(err);
+            //callback(err);
 
            
           });
@@ -288,16 +255,19 @@ module.exports = {
           con.query("UPDATE applied_materials SET secondary_material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
             if (err) {
               console.log(err);
+            } else {
+              callback(err);
             }
-            callback(err);
           });
         } else if (material[0].tertiary_material_id ==  null){
           console.log("updating tertiary material");
           con.query("UPDATE applied_materials SET tertiary_material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
             if (err) {
               console.log(err);
+            } else {
+              callback(err);
             }                        
-            callback(err);
+            
 
           });
         } else {
@@ -306,7 +276,7 @@ module.exports = {
       }
     });
   },
-
+  // used by the material library
   getAllMaterials: function (callback) {
     con.query('SELECT * FROM materials;', function (err, materials) {
       if (err) return callback(err);
