@@ -3,11 +3,10 @@
   defaults.css: Default style to apply to all pages 
 */
 
-@import 'https://fonts.googleapis.com/css?family=open-sans';
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
 
 * {
-  font-family: 'open-sans', sans-serif;
-}
+   font-family: "Quicksand", sans-serif;
 
 .container {
   text-align: left;
@@ -63,7 +62,7 @@ table {
 }
 
 td {
-  padding:8px;
+  padding:5px;
 }
 
 th {
@@ -104,6 +103,18 @@ tr:nth-child(even) {
 
 button, input[type=button], input[type=submit], input[type=reset] {
   background-color: rgba(90, 72, 130);
+  border: none;
+  border-radius: 5px;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  margin: 6px 4px;
+  cursor: pointer;
+}
+
+
+.estimate_button {
+  background-color: rgba(20, 107, 85);
   border: none;
   border-radius: 5px;
   color: white;

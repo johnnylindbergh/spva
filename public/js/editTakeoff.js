@@ -1,30 +1,28 @@
+let subject_id = 0;
+let material_id = 0;
+let takeoff_id = 0;
 
-    function toggleMaterial(materialId, checkbox) {
-      console.log("Material toggled: " + materialId.material);
+function toggleMaterial(materialId, checkbox) {
+  console.log("Material toggled: " + materialId);
 
-      var isChecked = checkbox.checked ? 1 : 0;
-      
-      $.post("/toggle-material", { material_id: materialId, applied: isChecked })
-        .done(function() {
-          console.log("Material toggled: " + materialId);
-        })
-        .fail(function() {
-          console.log("Failed to toggle material: " + materialId);
-        });
-    }
+  let isChecked = checkbox.checked ? 1 : 0;
+  
+  $.post("/toggle-material", { material_id: materialId})
+    .done(function() {
+      console.log("Material toggled successfully: " + materialId);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function() {
+      console.log("Failed to toggle material: " + materialId);
+    });
+}
 
-
-    var subject_id = 0;
-    var material_id = 0;
-    var takeoff_id = 0;
-    /* When the user clicks on the button,
-toggle between hiding and showing the dropdown content */
 function myFunction() {
   document.getElementById("myDropdown").classList.toggle("show");
 }
 
 function filterFunction() {
-  var input, filter, ul, li, a, i;
+  let input, filter, div, a, i, txtValue;
   input = document.getElementById("myInput");
   filter = input.value.toUpperCase();
   div = document.getElementById("myDropdown");
@@ -39,121 +37,220 @@ function filterFunction() {
   }
 }
 
-function add_subject(id) {
+function add_subject(id, material_name) {
   subject_id = id;
-  console.log("Adding material for: " + subject_id);
-  // use jquery to set the text of element selected_material to the name of the material
-  $("#selected_subject").text("Selected subject: " + id);
-
+  console.log("Adding material for subject: " + material_name);
+  $("#selected_subject").text("Selected subject: " + material_name);
+  document.getElementById("myDropdown").classList.toggle("show");
 }
 
-function add_material(id){
-  console.log("added material_id " + id + " for subject " + subject_id);
+function add_material(id) {
+  console.log("Added material_id " + id + " for subject " + subject_id);
   material_id = id;
-  //alert("added material_id " + id + " for subject " + subject_id);
-  $("#selected_material").text("Selected material: " + id);
+  document.getElementById("myDropdown").classList.toggle("show");
+
+  if (material_id != null && subject_id != null) {
+    add_material_subject();
+  }
 }
 
-function add_material_subject(){
-  // post subject_id and material_id
-  console.log("adding material " + material_id + " to subject " + subject_id);
+function removeMaterial(subject_id, id) {
+  material_id = id;
 
-  if (material_id != 0 && subject_id != 0){
-    $.post("/add-material-subject", {material_id: material_id, subject_id: subject_id})
+  $.post("/remove-material-subject", { material_id: material_id, subject_id: subject_id })
+    .done(function() {
+      console.log("Material removed: " + material_id + " from subject: " + subject_id);
+      loadTakeoffMaterials(takeoff_id); // Only reload the takeoff materials table
+    })
+    .fail(function() {
+      console.log("Failed to remove material from subject: " + material_id);
+    });
+}
+
+function add_material_subject() {
+  console.log("Adding material " + material_id + " to subject " + subject_id);
+
+  if (material_id !== 0 && subject_id !== 0) {
+    $.post("/add-material-subject", { material_id: material_id, subject_id: subject_id })
       .done(function() {
         console.log("Material added to subject: " + material_id + " " + subject_id);
-        material_id = 0;
-        subject_id = 0;
-        //call the loadTakeoffMaterials
-        loadTakeoffMaterials(takeoff_id);
+        loadTakeoffMaterials(takeoff_id); // Only reload the takeoff materials table
       })
       .fail(function() {
-        console.log("Failed to add material to subject: " + material_id + " " + subject_id);
+        console.log("Failed to add material to subject: " + material_id);
       });
   } else {
     console.log("Material or subject not selected");
+    alert("Please select both a material and a subject before adding.");
   }
-
 }
 
-
-
 function loadTakeoffMaterials(id) {
-  takeoff_id = id
-  // this function posts {{takeoff_id}} to /loadTakeoffMaterials
-  // and then loads the materials for the takeoff
-  console.log("loading takeoff materials");
-  $.post("/loadTakeoffMaterials", {takeoff_id: takeoff_id})
+  takeoff_id = id;
+  console.log("Loading takeoff materials");
+  
+  $.post("/loadTakeoffMaterials", { takeoff_id: takeoff_id })
     .done(function(data) {
       console.log("Takeoff materials loaded");
-      console.log(data);
-      // load the data into the takeoff materials table
-      // first, clear the table
       $("#takeoff_materials_table").empty();
-      // data is of the form: {takeoff: takeoff, subjects:materials, materials:allMaterials, takeoff_id: req.body.takeoff_id}
-      //print the materials and cost found in the subjects table
+      let sum = 0;
 
-      var sum = 0;
-      // rows in data.subjects are of the form:
-
-      // applied: 1
-      // id: 1
-      // material_id: null
-      // material_name: "Doors"
-      // measurement: "31.00"
-      // measurement_unit: "Count"
-      // primary_cost_delta: null
-      // primary_material: null
-      // quartary_cost_delta: null
-      // quaternary_material_id: null
-      // secondary_cost_delta: null
-      // secondary_material_id: null
-      // tertiary_cost_delta: null
-      // tertiary_material_id: null
-
-      // for each row in data.subjects, add a row to the table
-      for (var i = 0; i < data.subjects.length; i++){
-        var row = data.subjects[i];
-        // create a new row in the table
-        var newRow = $("<tr></tr>");
-        // add the material name to the row
+      data.subjects.forEach((row) => {
+        console.log(row)
+        let newRow = $("<tr></tr>");
         newRow.append("<td>" + row.material_name + "</td>");
-        // add the measurement to the row
-        newRow.append("<td>" + row.measurement + " " + row.measurement_unit + "</td>");
-        // add the primary material to the row
-        newRow.append("<td>" + row.primary_material + "</td>");
-        // add the cost to the row
+
+        let measurementInput = $("<input>")
+          .attr("type", "number")
+          .attr("value", row.measurement)
+          .attr("min", "0")
+          .attr("step", "any")
+          .data("row-id", row.id)
+          .addClass("measurement-input");
+
+        let measurementUnits = ["Count", "sf", "ft' in\""];
+        let measurementUnitInput = $("<select>")
+          .data("row-id", row.id)
+          .addClass("measurement-unit-input");
+
+        measurementUnits.forEach(function(unit) {
+          let option = $("<option>").attr("value", unit).text(unit);
+          if (unit === row.measurement_unit) {
+            option.attr("selected", "selected");
+          }
+          measurementUnitInput.append(option);
+        });
+
+        let measurementCell = $("<td></td>")
+          .append(measurementInput)
+          .append(" ")
+          .append(measurementUnitInput);
+
+        newRow.append(measurementCell);
+
+        measurementInput.on("change", function() {
+          let newMeasurement = $(this).val();
+          let rowId = $(this).data("row-id");
+          updateMeasurement(rowId, newMeasurement);
+        });
+
+        measurementUnitInput.on("change", function() {
+          let newMeasurementUnit = $(this).val();
+          let rowId = $(this).data("row-id");
+          updateMeasurementUnit(rowId, newMeasurementUnit);
+        });
+
         newRow.append("<td>" + row.primary_cost_delta + "</td>");
-        // add the checkbox to the row
-        var checkbox = $("<input type='checkbox' onclick='toggleMaterial(" + row.material_id + ", this)'>");
-        if (row.applied == 1){
+
+        let checkbox = $("<input type='checkbox' onclick='toggleMaterial(" + row.id + ", this)'>");
+        if (row.applied == 1) {
           checkbox.attr("checked", "checked");
         }
         newRow.append($("<td></td>").append(checkbox));
-        // add the row to the table
+
+
+         let materialsCell = $("<td></td>");
+        let subsum = 0;
+        if (row.applied != 0) {
+          if (row.selected_materials && row.selected_materials.length > 0) {
+           
+            row.selected_materials.forEach((material) => {
+
+              // remove material button
+                              materialsCell.append("<br><i>" + material.name + " </i> ");
+
+              let materialCell = $("<i class='fa fa-trash' onclick='removeMaterial(" + row.id + ", "+material.id+ ")'>");
+
+                //material name
+               // materialsCell.append("<br>");
+
+              subsum += material.price * row.measurement;
+
+              materialsCell.append(materialCell);
+
+            });
+
+
+          }
+
+          newRow.append(materialsCell);
+
+
+        let addSubject = $("<input type='button' onclick='add_subject(" + row.id + ")'>");
+        addSubject.attr("value", "Add Material");
+        newRow.append(addSubject);
+
+          sum += subsum;
+        } else {
+          newRow.append("<td>No Materials Applied</td>");
+        }
+
         $("#takeoff_materials_table").append(newRow);
 
-        // add the cost to the sum
-        var number_of gallons = ....row.measurement/row.selected_materials[0].coverage * (row.selected_materials[0].cost  + row.primary_cost_delta);
-        sum += row.measurement * (row.selected_materials[0] + row.primary_cost_delta);
-        sum += row.measurement * (row.selected_materials[0] + row.primary_cost_delta);
-      }
 
-
-      // print the sum to the console :
-      console.log("sum of all materials: " + sum);
-
-
-
-      // add the takeoff name
+      });
+      // for row end
     })
     .fail(function() {
       console.log("Failed to load takeoff materials");
     });
-
-
 }
 
+function updateMeasurement(rowId, newMeasurement) {
+  $.post("/update-measurement", { id: rowId, measurement: newMeasurement })
+    .done(function() {
+      console.log("Measurement updated for subject: " + rowId);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function() {
+      console.log("Failed to update measurement for subject: " + rowId);
+    });
+}
 
+function updateMeasurementUnit(rowId, newUnit) {
+  console.log("Updating measurement unit for subject: " + rowId + " to: " + newUnit);
+  
+  $.post("/update-measurement-unit", { id: rowId, unit: newUnit })
+    .done(function() {
+      console.log("Measurement unit updated successfully for subject: " + rowId);
+      loadTakeoffMaterials(takeoff_id); // Reload the materials to reflect changes
+    })
+    .fail(function() {
+      console.log("Failed to update measurement unit for subject: " + rowId);
+     // alert("Failed to update the measurement unit. Please try again.");
+    });
+}
+
+function priceChange(id) {
+  console.log("Price change for material " + id);
+  
+  let newPrice = parseFloat($("#material_price_" + id).val());
+  if (isNaN(newPrice) || newPrice < 0) {
+    alert("Please enter a valid positive number for the price.");
+    return;
+  }
+
+  $.post("/change-material-price", { material_id: id, new_price: newPrice })
+    .done(function() {
+      console.log("Material price changed: " + id);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function() {
+      console.log("Failed to change material price: " + id);
+    });
+}
+
+function generateEstimate() {
+  console.log("Generating estimate");
+
+  $.post("/generate-estimate", { takeoff_id: takeoff_id })
+    .done(function() {
+      console.log("Estimate generated");
+      window.location.href = "/estimates";
+    })
+    .fail(function() {
+      console.log("Failed to generate estimate");
+    });
+}
 
 

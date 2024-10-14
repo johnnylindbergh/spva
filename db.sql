@@ -53,6 +53,7 @@ CREATE TABLE takeoffs (
   FOREIGN KEY (creator_id) REFERENCES users(id),
   PRIMARY KEY (id)
 );
+
 -- Labor table
 CREATE TABLE labor (
   id INT NOT NULL AUTO_INCREMENT,
@@ -145,6 +146,7 @@ INSERT INTO materials (name, description, cost, coverage, material_type) VALUES 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Aura Exterior Satin White (GAL)', 'Exterior satin paint', 78.99, 300.0, 7);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Ultra Spec Exterior Flat White (GAL)', 'Exterior flat paint', 60.54, 300.0, 7);
 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Wood Panel Interior Door', '', 60.54, 0.20666708, 7);
 
 
 
@@ -166,10 +168,10 @@ CREATE TABLE subjects (
   measurement DECIMAL(10,2),
   measurement_unit VARCHAR(64), 
 
-
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
   FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE SET NULL
+
 );
 
 CREATE TABLE applied_materials (
@@ -179,12 +181,13 @@ CREATE TABLE applied_materials (
   measurement_unit VARCHAR(64),
   takeoff_id INT,
   material_id INT,
-  primary_cost_delta DECIMAL(10,2),
-  secondary_material_id INT,
-  secondary_cost_delta DECIMAL(10,2),
   tertiary_material_id INT,
-  tertiary_cost_delta DECIMAL(10,2),
   quartary_material_id INT,
+
+  secondary_material_id INT,
+  primary_cost_delta DECIMAL(10,2),
+  secondary_cost_delta DECIMAL(10,2),
+  tertiary_cost_delta DECIMAL(10,2),
   quartary_cost_delta DECIMAL(10,2),
   labor_id INT,
   applied TINYINT(1) DEFAULT 1,

@@ -99,23 +99,23 @@ module.exports = {
       results[i][2] = moment(results[i][2]).format('YYYY-MM-DD HH:mm:ss');
 
 
-      console.log(results[i]);
-      console.log("subject: ", results[i][0]);
-      console.log("page_label: ", results[i][1]);
-      console.log("date: " ,results[i][2]);
-      console.log("layer: ", results[i][3]);
-      console.log("color: " ,results[i][4]);
-      console.log("length: " ,results[i][5]);
-      console.log("length_unit: ", results[i][6]);
-      console.log("area: ",  results[i][7]);
-      console.log("area_unit: " ,results[i][8]);
-      console.log("wall_area: " ,parseFloat(results[i][9]));
-      console.log("wall_area_unit: " ,results[i][10]);
-      console.log("depth: " ,results[i][11]);
-      console.log("depth_unit: " ,results[i][12]);
-      console.log("count: " ,results[i][13]);
-      console.log("measurement: " ,results[i][14]);
-      console.log("measurement_unit: " ,results[i][15]);
+      // console.log(results[i]);
+      // console.log("subject: ", results[i][0]);
+      // console.log("page_label: ", results[i][1]);
+      // console.log("date: " ,results[i][2]);
+      // console.log("layer: ", results[i][3]);
+      // console.log("color: " ,results[i][4]);
+      // console.log("length: " ,results[i][5]);
+      // console.log("length_unit: ", results[i][6]);
+      // console.log("area: ",  results[i][7]);
+      // console.log("area_unit: " ,results[i][8]);
+      // console.log("wall_area: " ,parseFloat(results[i][9]));
+      // console.log("wall_area_unit: " ,results[i][10]);
+      // console.log("depth: " ,results[i][11]);
+      // console.log("depth_unit: " ,results[i][12]);
+      // console.log("count: " ,results[i][13]);
+      // console.log("measurement: " ,results[i][14]);
+      // console.log("measurement_unit: " ,results[i][15]);
 
       var measurement = results[i][14];
 
@@ -195,7 +195,7 @@ getTakeoff: function (takeoff_id, callback) {
       try {
         const updatedRows = await Promise.all(promises);
         // Once all material info has been fetched, pass the updated rows to the callback
-        console.log(updatedRows);
+        //console.log(updatedRows);
         callback(null, takeoff_info, updatedRows);
       } catch (queryErr) {
         callback(queryErr);
@@ -208,25 +208,90 @@ getTakeoff: function (takeoff_id, callback) {
       // kill me
     con.query('SELECT subject, SUM(measurement), MAX(measurement_unit), MAX(color) FROM subjects WHERE takeoff_id = ? GROUP BY subject;', [takeoff_id], function (err, subjects) { 
       if (err) return callback(err);
-      console.log(subjects);
+      //console.log(subjects);
       for (var i = 0; i < subjects.length; i++) {
         // insert into applied_materials
         con.query('INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit) VALUES (?,?,?,?);', [takeoff_id, subjects[i].subject, subjects[i]['SUM(measurement)'],subjects[i]['MAX(measurement_unit)']], function (err) {
           if (err) {
             console.log(err);
+          } else {
+            console.log("matching subject strings.");
+            // find the closest match in the materials table useing l
           }
         });
       }
 
     });
+  }, 
+
+removeMaterialSubject: function (material_id, subject_id, callback) {
+
+  // First, get the subject and the applied materials
+  con.query("SELECT * FROM applied_materials WHERE id = ?;", [subject_id], function (err, material) {
+    if (err) {
+      console.log(err);
+      return callback(err); // Ensure the callback is called on error
+    }
+
+    if (!material || material.length === 0) {
+      console.log("Subject ID not found");
+      return callback("Subject ID not found");
+    }
+
+    const materialRow = material[0];
+    const fields = ['material_id', 'secondary_material_id', 'tertiary_material_id'];
+    let fieldToUpdate = null;
+
+    // Check which material slot matches the material_id
+    for (let field of fields) {
+      if (materialRow[field] == material_id) {
+        fieldToUpdate = field;
+        break;
+      }
+    }
+
+    if (fieldToUpdate) {
+      // Construct the SQL query dynamically
+      const sql = `UPDATE applied_materials SET ${fieldToUpdate} = NULL WHERE id = ?;`;
+      con.query(sql, [subject_id], function (err) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
+        console.log(`${fieldToUpdate} updated to NULL for subject ID ${subject_id}`);
+        callback(null); // Indicate success
+      });
+    } else {
+      console.log("No material slots match the material ID");
+      callback("No material slots match the material ID");
+    }
+  });
+},
+
+
+
+  toggleMaterial: function (applied_material_id, callback) {
+
+    // a call to this function should not accept a toggle state, it should select the current state of the applied_material_id and then toggle it
+
+    con.query('SELECT applied FROM applied_materials WHERE id = ?;', [applied_material_id], function (err, material) {
+        if (err){console.log(err)}
+          let applied = !material[0].applied;
+          console.log("new state", !material.applied);
+        con.query('UPDATE applied_materials SET applied = ? WHERE id = ?;', [applied, applied_material_id], function (err) {
+          if (err) {
+            console.log(err);
+            return callback(err);
+          }
+          callback(null);
+        });
+    });
   },
 
-
-  toggleMaterial: function (applied_material_id, applied, callback) {
-    con.query('UPDATE applied_materials set applied = ? WHERE id = ?;', [parseInt(applied), parseInt(applied_material_id)], function (err) {
+  changeMaterialPrice: function (material_id, price, callback) {
+    con.query('UPDATE materials set cost = ? WHERE id = ?;', [parseFloat(price), parseInt(material_id)], function (err) {
       if (err) return callback(err);
       callback(null);
-
     });
   },
 
@@ -250,7 +315,7 @@ getTakeoff: function (takeoff_id, callback) {
 
            
           });
-        } else if (material[0].secondary_id == null) {
+        } else if (material[0].secondary_material_id == null) {
           console.log("updating secondary material");
           con.query("UPDATE applied_materials SET secondary_material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
             if (err) {
@@ -270,23 +335,73 @@ getTakeoff: function (takeoff_id, callback) {
             
 
           });
+        } else  if (material[0].tertiary_material_id ==  null){
+             con.query("UPDATE applied_materials SET tertiary_material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
+            if (err) {
+              console.log(err);
+            } else {
+              callback(err);
+            }                        
+            
+
+          });
+          
         } else {
           console.log("all material slots are filled");
+
         }
+      }
+
+    });
+  },
+
+  getTakeoffs: function (callback) {
+    con.query('SELECT * FROM takeoffs;', function (err, takeoffs) {
+      if (err) return callback(err);
+      callback(null, takeoffs);
+    });
+  },
+
+  takeoffSetStatus: function (takeoff_id, status, cb) {
+    con.query("UPDATE takeoffs SET status = ? WHERE id = ?;", [status, takeoff_id], function (err) {
+      if (err) {
+        console.log(err);
+        cb(err);
+      } else {
+        cb(null); 
       }
     });
   },
+
   // used by the material library
-  getAllMaterials: function (callback) {
+  getAllMaterialsAndLabor: function (callback) {
     con.query('SELECT * FROM materials;', function (err, materials) {
       if (err) return callback(err);
-      callback(null, materials);
+      con.query('SELECT * FROM labor;', function (err, labor) {
+        if (err) return callback(err);
+        callback(null, materials, labor);
+      });
     });
   },
+
+  updateMeasurement: function (subject_id, measurement, callback) {
+    con.query('UPDATE applied_materials SET measurement = ? WHERE id = ?;', [parseInt(measurement), subject_id], function (err) {
+      if (err) return callback(err);
+      callback(null);
+    });
+  },
+
+  updateMeasurementUnit: function (subject_id, unit, callback) {
+    con.query('UPDATE applied_materials SET measurement_unit = ? WHERE id = ?;', [unit, subject_id], function (err) {
+      if (err) return callback(err);
+      callback(null);
+    });
+  },
+
   sumSFMaterial: function (material_id, takeoff_id, callback) {
     con.query('SELECT subject, SUM(measurement) FROM subjects WHERE takeoff_id = ? GROUP BY subject;', [takeoff_id], function (err, subjects) {
       if (err) return callback(err);
-      console.log(subjects)
+      //console.log(subjects)
       callback(null, subjects);
     });
   },

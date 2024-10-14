@@ -73,7 +73,7 @@ function readTakeoff(req, res, filename, cb) {
       
       .pipe(parse({delimiter: ','}))
       .on("headers", (headersInOrder)=> {
-        console.log(`First header: ${headersInOrder}`);
+       // console.log(`First header: ${headersInOrder}`);
         headers = headersInOrder;
         //convert to snake case
         headers = headers.map(function (header) {
@@ -114,7 +114,9 @@ function readTakeoff(req, res, filename, cb) {
              cb(err);
            } else {
              console.log("takeoff loaded");
-            
+             db.takeoffSetStatus(takeoff_id, status, function (err) {
+              
+            });
            }
          });
 
@@ -137,7 +139,7 @@ function readTakeoff(req, res, filename, cb) {
 }
 
 
-// GET requests
+// main page stuff
 module.exports = function (app) {
   // GET requests
   app.get('/', mid.isAuth, (req, res) => {
@@ -147,6 +149,7 @@ module.exports = function (app) {
         console.log(err);
       } else {
         render.takeoffs = takeoffs;
+        console.log("User: "+ req.user.local.name);
         res.render("main.html", render);
       }
     
@@ -162,6 +165,32 @@ module.exports = function (app) {
 
   });
 
+
+  app.get('/getTakeoffs', mid.isAuth, (req, res) => {
+    db.getTakeoffs(function (err, takeoffs) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(takeoffs);
+      }
+    });
+  });
+
+  // post request to https://estimate.sunpaintingva.com/viewTakeoff with body param takeoff_id
+
+
+  app.post("/viewTakeoff", mid.isAuth, function (req, res) {
+    console.log("viewing", req.body.takeoff_id);
+
+    db.generateEstimate(req.body.takeoff_id, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.render("estimateView.html", defaultRender(req));
+      }
+    });
+
+  });
 
 
     // Route for handling file uploads
@@ -199,16 +228,16 @@ module.exports = function (app) {
   });
 
   app.post("/editTakeoff", mid.isAuth, function (req, res) {
-    console.log("editing", req.body.takeoff_id);
+   // console.log("editing", req.body.takeoff_id);
 
     db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
       if (err) {console.log(err)}
-      db.getAllMaterials(function (err, allMaterials) {
+      db.getAllMaterialsAndLabor(function (err, allMaterials, allLabor) {
 
         if (err) {
           console.log(err);
         } else {
-          res.render("editTakeoff.html", {takeoff: takeoff, subjects:materials, materials:allMaterials, takeoff_id: req.body.takeoff_id});
+          res.render("editTakeoff.html", {takeoff: takeoff, subjects:materials, materials:allMaterials, takeoff_id: req.body.takeoff_id, labor: allLabor});
         }
 
       });
@@ -216,25 +245,28 @@ module.exports = function (app) {
   });
 
   app.post("/loadTakeoffMaterials", mid.isAuth, function (req, res) {
-  console.log("editing", req.body.takeoff_id);
+  //console.log("editing", req.body.takeoff_id);
 
   db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
     if (err) {console.log(err)}
-    db.getAllMaterials(function (err, allMaterials) {
+      //console.log(materials);
+    db.getAllMaterialsAndLabor(function (err, allMaterials, allLabor) {
 
       if (err) {
         console.log(err);
       } else {
-        res.send({takeoff: takeoff, subjects:materials, materials:allMaterials, takeoff_id: req.body.takeoff_id});
+        res.send({takeoff: takeoff, subjects:materials, materials:allMaterials, takeoff_id: req.body.takeoff_id, labor: allLabor});
       }
 
     });
   });
 });
 
+
+
   app.post("/toggle-material", mid.isAuth, function (req, res) {
-    console.log("toggling ", req.body);
-    db.toggleMaterial(req.body.material_id, req.body.applied, function (err) {
+    console.log("toggling ", req.body.material_id);
+    db.toggleMaterial(req.body.material_id, function (err) {
       if (err) {
         console.log(err);
       } else {
@@ -257,7 +289,65 @@ app.post("/add-material-subject", mid.isAuth, function (req, res) {
   });
 });
 
-}
+app.post("/remove-material-subject", mid.isAuth, function (req, res) {
+  console.log("remove-material-subject ", req.body.material_id);
+  if (req.body.subject_id && req.body.material_id) {
+    db.removeMaterialSubject(req.body.material_id, req.body.subject_id, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.redirect("/");
+      }
+    });
+  }
+});
+
+
+
+// material settings page
+
+app.get("/materialSettings", mid.isAuth, function (req, res) {
+  res.render("materialSettings.html", defaultRender(req));
+
+});
+
+app.post("/change-material-price", mid.isAuth, function (req, res) {
+  console.log("changing material price ", req.body);
+  db.changeMaterialPrice(req.body.material_id, req.body.new_price, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("updated");
+    }
+  });
+});
+
+
+app.post("/update-measurement", mid.isAuth, function (req, res) {
+  console.log("updating measurement ", req.body);
+  db.updateMeasurement(req.body.id, req.body.measurement, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("updated");
+    }
+  });
+});
+
+app.post("/update-measurement-unit", mid.isAuth, function (req, res) {
+  console.log("updating measurement unit ", req.body);
+  db.updateMeasurementUnit(req.body.id, req.body.unit, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("updated");
+    }
+  });
+});
+
+
+// ending perentheses do not delete
+};
 
 function arrayToCSV(objArray) {
   const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
@@ -279,7 +369,7 @@ function defaultRender(req) {
       auth: {
         isAuthenticated: true,
         userIsAdmin: req.user.local.isAdmin,
-        message: "Welcome,  " + req.user.name.givenName + "!"
+        message: "Hello,  " + req.user.name.givenName + "!"
       },
       defaults: {
         sysName: sys.SYSTEM_NAME
