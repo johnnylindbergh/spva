@@ -48,7 +48,7 @@
     <input type="submit" value="AL Button" />
 </form>
 
-
+  {{#takeoffs}}
     <table id="takeoffs_table">
       <thead>
         <tr>
@@ -63,6 +63,12 @@
         <!-- Rows will be appended here -->
       </tbody>
     </table>
+
+    {{/takeoffs}}
+
+    {{^takeoffs}}
+      <p>No takeoffs found.</p>
+    {{/takeoffs}}
 
     <!-- Takeoffs: 
     <table id = "takeoffs_table">

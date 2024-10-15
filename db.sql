@@ -44,6 +44,7 @@ CREATE TABLE takeoffs (
   owner_billing_address VARCHAR(64),
   file_path_of_plans VARCHAR(255),
   status TINYINT(1) DEFAULT 0,
+  passcode VARCHAR(64),
   duration_hours INT,
   start_data DATETIME,
   end_data DATETIME,
@@ -54,17 +55,8 @@ CREATE TABLE takeoffs (
   PRIMARY KEY (id)
 );
 
--- Labor table
-CREATE TABLE labor (
-  id INT NOT NULL AUTO_INCREMENT,
-  rate_name VARCHAR(64),
-  rate DECIMAL(10,2),
-  PRIMARY KEY (id)
-);
 
-insert into labor (rate_name, rate) values ('Rate USD/sqft', 1.56);
-insert into labor (rate_name, rate) values ('hourly rate USD/hr', 22.00);
-insert into labor (rate_name, rate) values ('Rate USD/ft', 1.04);
+
 
 
 
@@ -189,14 +181,24 @@ CREATE TABLE applied_materials (
   secondary_cost_delta DECIMAL(10,2),
   tertiary_cost_delta DECIMAL(10,2),
   quartary_cost_delta DECIMAL(10,2),
-  labor_id INT,
+  labor_cost DECIMAL(10,2) default 0,
   applied TINYINT(1) DEFAULT 1,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
   FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE,
   FOREIGN KEY (secondary_material_id) REFERENCES materials(id) ON DELETE CASCADE,
-  FOREIGN KEY (tertiary_material_id) REFERENCES materials(id) ON DELETE CASCADE,
-  FOREIGN KEY (labor_id) REFERENCES labor(id) ON DELETE CASCADE
+  FOREIGN KEY (tertiary_material_id) REFERENCES materials(id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE string_match_subject (
+  id INT NOT NULL AUTO_INCREMENT,
+  material_id INT,
+  labor_cost DECIMAL(10,2),
+  unit_cost DECIMAL(10,2),
+  string_match VARCHAR(64),
+  PRIMARY KEY (id),
+  FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
 );
 
 

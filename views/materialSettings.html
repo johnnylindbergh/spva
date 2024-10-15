@@ -20,7 +20,7 @@
 
 </head>
 <body>
-  <div class="navbar">
+    <div class="navbar">
     <ul> 
       <li><a href="/">{{defaults.sysName}}</a></li>
       {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
@@ -29,6 +29,36 @@
         <li><a href="/auth/google">Log In</a></li>
         <li><a href="/logout">Log Out</a></li>
       </div>
+
+        <div>
+        <li><!-- material library -->
+          <div class="dropdown" >
+            <p id="selected_subject"></p>
+
+          <div class="dropdown">
+        <a onclick="myFunction()" class="dropbtn">Material Library</a>
+        <div id="myDropdown" class="dropdown-content">
+          <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+            
+
+          {{#materials}}
+            <!-- a link that when you click it it runs a js function -->
+            <a href="#" onclick="add_material({{id}})">{{name}} <i style= "font-size: 6;">${{cost}} </i></a>
+
+          {{/materials}}
+        </div>
+        </div>
+        </div></li>
+      </div>
+
+      <div>
+        <li><a href="/materialSettings">Material Settings</a></li>
+      </div>
+    
+      <div>
+        <li><a href="/generateEstimate/{{takeoff_id}}">Generate Estimate</a></li>
+      </div>
+   
     </ul>
   </div>
 

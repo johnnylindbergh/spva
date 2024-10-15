@@ -28,49 +28,13 @@
         <li><a href="/auth/google">Log In</a></li>
         <li><a href="/logout">Log Out</a></li>
       </div>
-    </ul>
-  </div>
 
- 
-
-
-
-  <div class="container">
-
-
-    {{#takeoff}}
-
-
-      <h1>{{name}}</h1> </br>
-      
-      {{owner}}</br>
-      {{owner_billing_address}}</br>
-      {{created_at}}</br>
-      {{status}}
-      </br>
-    {{/takeoff}}
-
-    <h1>Takeoff Materials</h1>
-     <h1 style=" font-size: 20px;" id = "sum"> </h1> </br>
-
-  </div>
-
-  
-</br>
-<div>
-    <button class = "estimate_button"onclick="generateEstimate()">Generate Estimate</button> <a/>
-  </div>
-
-<button href = "/materialSettings" class = "add_material_button">Add Material</button>  
-
- <a href= "/materialSettings"> <i class="fa fa-cog" aria-hidden="true"></i> </a>
-
-<!-- material library -->
-          <div class="dropdown" style = "block">
-            <p id="selected_subject"></p>
+        <div>
+        <li><!-- material library -->
+          <div class="dropdown" >
 
           <div class="dropdown">
-        <button onclick="myFunction()" class="dropbtn">Material Library</button>
+        <a onclick="myFunction()" class="dropbtn">Material Library</a>
         <div id="myDropdown" class="dropdown-content">
           <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
             
@@ -82,14 +46,57 @@
           {{/materials}}
         </div>
         </div>
-        </div>
+        </div></li>
+                    <p id="selected_subject"></p>
+
+      </div>
+
+      <div>
+        <li><a href="/materialSettings">Material Settings</a></li>
+      </div>
+    
+      <div>
+        <form action='/generateEstimate' method='POST' > 
+          <li>
+            <input type="submit" value="Generate Estimate">
+          </li>
+            <input type='hidden' name='takeoff_id' value='{{takeoff_id}}'>
+       
+        </form>
+        
+      </div>
+   
+    </ul>
+  </div>
+
+ 
 
 
-<br>
-<br>
 
-<br>
-<br>
+  <div class="container">
+
+<form action="/updateTakeoff" method="POST">
+    {{#takeoff}}
+
+
+      <h1  contenteditable="true">{{name}}</h1> </br>
+      
+      {{owner}}</br>
+      {{owner_billing_address}}</br>
+      {{created_at}}</br>
+      {{status}}
+      {{passcode}}
+
+      </br>
+    {{/takeoff}}
+
+
+     <h1 style=" font-size: 20px;" id = "sum"> </h1> </br>
+
+  </div>
+
+
+
 
 <table id = "takeoff_materials_table">
     <tr>

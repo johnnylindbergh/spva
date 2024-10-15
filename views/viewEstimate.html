@@ -1,35 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title> Main | {{defaults.sysName}}</title>
-  <link rel="stylesheet" type="text/css" href="css/reset.css">
-  <link rel="stylesheet" type="text/css" href="css/defaults.css">
-  <link rel="stylesheet" type="text/css" href="css/navbar.css">
-  <link rel="stylesheet" type="text/css" href="css/dropdown.css">
-  <link rel="stylesheet" type="text/css" href="css/number.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sun Painting Estimate</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border: 1px solid #dddddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+        .address, .estimate-info, .total {
+            margin-top: 20px;
+            color: #555;
+        }
+        .estimate-info strong, .address strong, .total strong {
+            color: #000;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td {
+            background-color: #fcfcfc;
+        }
+        .total {
+            text-align: right;
+        }
+        .image-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .image-container img {
+            float:right;
+            max-width: 200px;
+            height: auto;
+        }
+        /* Signature section */
+        .signature {
+            margin-top: 40px;
+            text-align: center;
+        }
+        .signature p {
+            font-size: 0.9em;
+            color: #888;
+        }
 
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="/js/editTakeoff.js" type="text/javascript"></script>
-  <script> loadTakeoffMaterials({{takeoff_id}}); </script>
-
-
+        /* Print styles */
+        @media print {
+            body, .container {
+                margin: 0;
+                padding: 0;
+                width: 95%;
+            }
+            .container {
+                border: none;
+                box-shadow: none;
+                padding: 10px;
+            }
+            .image-container img {
+                float:right;
+                margin-top: 0px;
+                max-width: 110px;
+                height: auto;
+            }
+            h2, h3 {
+                font-size: 1.2em;
+            }
+            table, th, td {
+                border: 1px solid #000;
+                margin-top: 0px;
+                padding: 8px;
+                font-size: 0.8em;
+            }
+            .address, .estimate-info, .total {
+                font-size: 0.9em;
+            }
+            .total strong {
+                font-size: 1em;
+            }
+            .signature p {
+                font-size: 0.8em;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="navbar">
-    <ul> 
-      <li><a href="/">{{defaults.sysName}}</a></li>
-      {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
-      <li><a href="/dashboard">dashboard</a></li>
-      <div style="float:right">
-        <li><a href="/auth/google">Log In</a></li>
-        <li><a href="/logout">Log Out</a></li>
-      </div>
-    </ul>
-  </div>
+    <div class="container">
 
- 
+        <!-- Image Section (replaces Sun Painting, LLC text) -->
+        <div class="image-container">
+            <img src="sunpainting_logo_blue.png" alt="Sun Painting Logo">
+        </div>
+
+        <p>1819 Broadway St, Charlottesville, VA 22902 US</p>
+        <p>Phone: +1 434-207-2025 | Email: <a href="mailto:sales@sunpaintingva.com" style="color:#0066cc;">sales@sunpaintingva.com</a></p>
+        <p>Website: <a href="http://www.sunpaintingva.com" style="color:#0066cc;">www.sunpaintingva.com</a></p>
+        
+        <div class="address">
+            <strong>Address:</strong> Andrew Kowalski<br>
+            L.F. Jennings
+        </div>
+        
+        <div class="estimate-info">
+            <strong>Estimate #:</strong> 1881<br>
+            <strong>Date:</strong> 10/15/2024<br>
+            <strong>Job Name:</strong> 300. E. Franklin
+        </div>
+        
+        <h3>Description</h3>
+        <table>
+            <tr>
+                <th>Code</th>
+                <th>Description</th>
+                <th>Amount</th>
+            </tr>
+            <tr>
+                <td>0010</td>
+                <td>Interior painting of renovated space.</td>
+                <td>$0.00</td>
+            </tr>
+            <tr>
+                <td>0020</td>
+                <td>
+                    Proposal Includes:
+                    <ul>
+                        <li>New gypsum board and patch areas will receive one coat of Sherwin-Williams PVA primer.</li>
+                        <li>Joints to be caulked w/ top quality SW Pristine brand.</li>
+                        <li>Walls will receive two coats of Sherwin-Williams ProMar 200 in the client's preferred sheen and color.</li>
+                        <li>Gypsum ceiling will receive two coats of ProMar Ceiling Paint Flat.</li>
+                        <li>Doors and frames will receive two coats of Sherwin-Williams Solo.</li>
+                        <li>Application and supplying of wall covering.</li>
+                        <li>Painting of the inside of vents and returns.</li>
+                    </ul>
+                </td>
+                <td>$0.00</td>
+            </tr>
+            <tr>
+                <td>0030</td>
+                <td>
+                    Exclusions & Assumptions:
+                    <ul>
+                        <li>All labor & materials are included in these estimates.</li>
+                        <li>Proposal based on plans dated 10/4/24.</li>
+                        <li>Excluding all drywall finishing, patching, and sanding.</li>
+                        <li>Assuming all trim and baseboard are not to be painted.</li>
+                        <li>Assume no Davis Bacon wages or prevailing wages are required for this proposal.</li>
+                        <li>Assume there is no bid bond or other bonding for this proposal.</li>
+                        <li>Assumed two guys for 3 days for touch-ups/punch list items in this proposal.</li>
+                        <li>Assuming we are not painting or caulking any windows.</li>
+                        <li>Assuming no painting or staining of built-ins, casework, or cabinets.</li>
+                        <li>Assumed no painting of window sills, trim, head, jambs, or Mullins around windows since they are not provided in the drawing.</li>
+                    </ul>
+                </td>
+                <td>$0.00</td>
+            </tr>
+            <tr>
+                <td>0040</td>
+                <td>Interior Estimate</td>
+                <td>$162,500.00</td>
+            </tr>
+        </table>
+
+        <div class="total">
+            <strong>Subtotal:</strong> $162,500.00<br>
+            <strong>Tax:</strong> $0.00<br>
+            <strong>Total:</strong> $162,500.00
+        </div>
+
+        <p>Thank you for allowing us to work with you!</p>
+        <p>This Proposal must be signed and dated by the contracting authority for the project and must be received by Sun Painting within 30 days following the listed Proposal Date to be considered formally approved. Proposals received by Sun Painting after 30 Days may require re-pricing.</p>
+
+        <!-- Signature Section -->
+        <div class="signature">
+            <p><em>This budget estimate is not a contract until signed and returned to Sun Painting.</em></p>
+        </div>
+    </div>
+</body>
+</html>

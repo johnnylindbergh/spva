@@ -57,14 +57,17 @@ function add_material(id) {
 function removeMaterial(subject_id, id) {
   material_id = id;
 
-  $.post("/remove-material-subject", { material_id: material_id, subject_id: subject_id })
-    .done(function() {
-      console.log("Material removed: " + material_id + " from subject: " + subject_id);
-      loadTakeoffMaterials(takeoff_id); // Only reload the takeoff materials table
-    })
-    .fail(function() {
-      console.log("Failed to remove material from subject: " + material_id);
-    });
+  if (subject_id && id){
+      $.post("/remove-material-subject", { material_id: material_id, subject_id: subject_id })
+        .done(function() {
+        console.log("Material removed: " + material_id + " from subject: " + subject_id);
+        loadTakeoffMaterials(takeoff_id); // Only reload the takeoff materials table
+      })
+      .fail(function() {
+        console.log("Failed to remove material from subject: " + material_id);
+      });
+  }
+
 }
 
 function add_material_subject() {
@@ -74,7 +77,11 @@ function add_material_subject() {
     $.post("/add-material-subject", { material_id: material_id, subject_id: subject_id })
       .done(function() {
         console.log("Material added to subject: " + material_id + " " + subject_id);
-        loadTakeoffMaterials(takeoff_id); // Only reload the takeoff materials table
+        // wait 0.5 seconds and then call loadTakeoffMaterials
+        setTimeout(function() {
+          loadTakeoffMaterials(takeoff_id);
+        }, 500);
+
       })
       .fail(function() {
         console.log("Failed to add material to subject: " + material_id);
@@ -98,12 +105,20 @@ function loadTakeoffMaterials(id) {
       data.subjects.forEach((row) => {
         console.log(row)
         let newRow = $("<tr></tr>");
-        newRow.append("<td>" + row.material_name + "</td>");
+
+           let checkbox = $("<input type='checkbox' onclick='toggleMaterial(" + row.id + ", this)'>");
+        if (row.applied == 1) {
+          checkbox.attr("checked", "checked");
+        }
+        newRow.append($("<td></td>").append(checkbox));
+
+        newRow.append("<td style='width:15px;'>" + row.material_name + "</td>");
 
         let measurementInput = $("<input>")
           .attr("type", "number")
           .attr("value", row.measurement)
           .attr("min", "0")
+          .attr("style", "width: 100px;")
           .attr("step", "any")
           .data("row-id", row.id)
           .addClass("measurement-input");
@@ -121,6 +136,8 @@ function loadTakeoffMaterials(id) {
           measurementUnitInput.append(option);
         });
 
+
+
         let measurementCell = $("<td></td>")
           .append(measurementInput)
           .append(" ")
@@ -134,30 +151,31 @@ function loadTakeoffMaterials(id) {
           updateMeasurement(rowId, newMeasurement);
         });
 
+
+        let laborPrice = $("<input type='number' id='labor_price' value='" + row.labor_cost + "' step='any' min='0' onchange='laborPriceChange(" + row.id + ")'> </br>");
+
+        let laborCell = $("<td style='width:200px; float:left; '>Labor Cost $</td>").append(laborPrice);
+        newRow.append(laborCell);
+
         measurementUnitInput.on("change", function() {
           let newMeasurementUnit = $(this).val();
           let rowId = $(this).data("row-id");
           updateMeasurementUnit(rowId, newMeasurementUnit);
         });
 
-        newRow.append("<td>" + row.primary_cost_delta + "</td>");
 
-        let checkbox = $("<input type='checkbox' onclick='toggleMaterial(" + row.id + ", this)'>");
-        if (row.applied == 1) {
-          checkbox.attr("checked", "checked");
-        }
-        newRow.append($("<td></td>").append(checkbox));
+     
 
-
-         let materialsCell = $("<td></td>");
+        let materialsCell = $("<td></td>");
         let subsum = 0;
+        
         if (row.applied != 0) {
           if (row.selected_materials && row.selected_materials.length > 0) {
            
             row.selected_materials.forEach((material) => {
 
               // remove material button
-                              materialsCell.append("<br><i>" + material.name + " </i> ");
+                     materialsCell.append("<i style = 'display:inline-block; padding:5px;'>" + material.name + " </i> ");
 
               let materialCell = $("<i class='fa fa-trash' onclick='removeMaterial(" + row.id + ", "+material.id+ ")'>");
 
@@ -168,6 +186,9 @@ function loadTakeoffMaterials(id) {
 
               materialsCell.append(materialCell);
 
+             let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + material.cost + "' step='any' min='0' onchange='priceChange(" + material.id + ")'> </br>");
+             materialPrice.addClass("material-price-input");
+              materialsCell.append(materialPrice);
             });
 
 
@@ -183,6 +204,7 @@ function loadTakeoffMaterials(id) {
           sum += subsum;
         } else {
           newRow.append("<td>No Materials Applied</td>");
+          newRow.attr("style", "background-color: #f2f2f2; opacity: 0.5;");
         }
 
         $("#takeoff_materials_table").append(newRow);
@@ -240,17 +262,22 @@ function priceChange(id) {
     });
 }
 
-function generateEstimate() {
-  console.log("Generating estimate");
+// function generateEstimate() {
+//   console.log("Generating estimate");
+//   if (takeoff_id) {
+//       $.post("/generateEstimate", { takeoff_id: takeoff_id })
+//     .done(function() {
+//       console.log("Estimate generated");
+//       // window.location.href = "/generateEstimate";
+//     })
+//     .fail(function() {
+//       console.log("Failed to generate estimate");
+//     });
 
-  $.post("/generate-estimate", { takeoff_id: takeoff_id })
-    .done(function() {
-      console.log("Estimate generated");
-      window.location.href = "/estimates";
-    })
-    .fail(function() {
-      console.log("Failed to generate estimate");
-    });
-}
+//   } else {
+//     console.log("takeoff_id not defined")
+//   }
+
+// }
 
 

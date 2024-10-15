@@ -232,12 +232,12 @@ module.exports = function (app) {
 
     db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
       if (err) {console.log(err)}
-      db.getAllMaterialsAndLabor(function (err, allMaterials, allLabor) {
+      db.getAllMaterials(function (err, allMaterials) {
 
         if (err) {
           console.log(err);
         } else {
-          res.render("editTakeoff.html", {takeoff: takeoff, subjects:materials, materials:allMaterials, takeoff_id: req.body.takeoff_id, labor: allLabor});
+          res.render("editTakeoff.html", {takeoff: takeoff, subjects:materials, materials:allMaterials, takeoff_id: req.body.takeoff_id});
         }
 
       });
@@ -250,17 +250,53 @@ module.exports = function (app) {
   db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
     if (err) {console.log(err)}
       //console.log(materials);
-    db.getAllMaterialsAndLabor(function (err, allMaterials, allLabor) {
+    db.getAllMaterials(function (err, allMaterials) {
 
       if (err) {
         console.log(err);
       } else {
-        res.send({takeoff: takeoff, subjects:materials, materials:allMaterials, takeoff_id: req.body.takeoff_id, labor: allLabor});
+        res.send({takeoff: takeoff, subjects:materials, materials:allMaterials, takeoff_id: req.body.takeoff_id});
       }
 
     });
   });
 });
+
+  app.post("/generateEstimate", function (req, res) {
+    var takeoff_id = req.body.takeoff_id;
+    console.log("generating estimate for ", takeoff_id);
+    // do some computation and redirect to /viewEstimate/:id
+    // must do user validation here because outside users must access this page
+    // ie if not authed, direct to enter passcode page
+    // must add passcode to takeoffs table
+    // the enter pascode page will be a simple form with a hidden field for takeoff_id
+    // when the user enter the correct passcode, the page will render the estimate with the abiliy to sign the document, 
+    // all accesses by client must be tracked
+
+    db.generateEstimate(takeoff_id, function (err, estimate) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('comput estimate here');
+        console.log(estimate);
+        //res.redirect("/viewEstimate/"+estimate.id);
+        res.render("viewEstimate.html", {estimate: estimate});
+      }
+    });
+  });
+
+
+  app.get("/viewEstimate/:id"), mid.isAuth, function (req, res) {
+    console.log("estimate view")
+    db.getEstimate(req.params.id, function (err, estimate) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(estimate);
+        res.render("viewEstimate.html", {estimate: estimate});
+      }
+    });
+  }
 
 
 
@@ -270,7 +306,7 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
       } else {
-        res.redirect("/");
+       res.end();
       }
     });
   });
@@ -284,7 +320,7 @@ app.post("/add-material-subject", mid.isAuth, function (req, res) {
     if (err) {
       console.log(err);
     } else {
-      console.log("updated");
+      res.end();
     }
   });
 });
@@ -296,7 +332,7 @@ app.post("/remove-material-subject", mid.isAuth, function (req, res) {
       if (err) {
         console.log(err);
       } else {
-        res.redirect("/");
+        res.end();
       }
     });
   }

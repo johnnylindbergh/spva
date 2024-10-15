@@ -21,6 +21,11 @@ const con = mysql.createPool({
 });
 
 
+function generatePasscode() {
+  return Math.floor(1000 + Math.random() * 9000); // just a 4-digit number for now
+}
+
+
 
 
 module.exports = {
@@ -155,7 +160,7 @@ module.exports = {
 
 
   createNewTakeoff: function (req, res, cb) {
-    con.query('INSERT INTO takeoffs (creator_id, name) VALUES (?, ?); SELECT LAST_INSERT_ID() as last;', [req.user.local.id, req.body.takeoffName], function (err, result) {
+    con.query('INSERT INTO takeoffs (creator_id, name, passcode) VALUES (?, ?, ?); SELECT LAST_INSERT_ID() as last;', [req.user.local.id, req.body.takeoffName, generatePasscode().toString()], function (err, result) {
       if (err) {
         return cb(err);
       }
@@ -202,6 +207,25 @@ getTakeoff: function (takeoff_id, callback) {
       }
     });
   });
+},
+
+generateEstimate: function (takeoff_id, callback) {
+    con.query(queries.getTakeoff, [takeoff_id], async function (err, rows) { 
+      for (var i = 0; i < rows.length; i++) {
+       // console.log(rows[i])
+        if (rows[i].applied && rows[i].selected_materials != null) {
+          for(var j = 0; j < rows[i].selected_materials.length; j++) {
+            //console.log(rows[i].selected_materials[j].cost);
+            rows[i].selected_materials[j].cost = parseFloat(rows[i].selected_materials[j].cost);
+            rows[i].selected_materials[j].price = rows[i].selected_materials[j].cost * rows[i].measurement + rows[i].selected_materials[j].labor_cost;
+            //console.log(rows[i].selected_materials[j].price);
+          }   
+        }
+      }
+
+      callback(null, rows);
+    });
+
 },
 
   generateTakeoffMaterials: function (takeoff_id, callback) {
@@ -308,6 +332,7 @@ removeMaterialSubject: function (material_id, subject_id, callback) {
           con.query("UPDATE applied_materials SET material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
             if (err) {
               console.log(err);
+                callback(err);
             } else {
               callback(err);
             }
@@ -320,6 +345,7 @@ removeMaterialSubject: function (material_id, subject_id, callback) {
           con.query("UPDATE applied_materials SET secondary_material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
             if (err) {
               console.log(err);
+                callback(err);
             } else {
               callback(err);
             }
@@ -329,6 +355,7 @@ removeMaterialSubject: function (material_id, subject_id, callback) {
           con.query("UPDATE applied_materials SET tertiary_material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
             if (err) {
               console.log(err);
+                callback(err);
             } else {
               callback(err);
             }                        
@@ -339,6 +366,7 @@ removeMaterialSubject: function (material_id, subject_id, callback) {
              con.query("UPDATE applied_materials SET tertiary_material_id = ? WHERE id = ?;", [material_id, subject_id], function (err) {
             if (err) {
               console.log(err);
+                callback(err);
             } else {
               callback(err);
             }                        
@@ -348,6 +376,7 @@ removeMaterialSubject: function (material_id, subject_id, callback) {
           
         } else {
           console.log("all material slots are filled");
+            callback(err);
 
         }
       }
@@ -374,13 +403,10 @@ removeMaterialSubject: function (material_id, subject_id, callback) {
   },
 
   // used by the material library
-  getAllMaterialsAndLabor: function (callback) {
+  getAllMaterials: function (callback) {
     con.query('SELECT * FROM materials;', function (err, materials) {
       if (err) return callback(err);
-      con.query('SELECT * FROM labor;', function (err, labor) {
-        if (err) return callback(err);
-        callback(null, materials, labor);
-      });
+      callback(null, materials);
     });
   },
 
