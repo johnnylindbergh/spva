@@ -37,10 +37,10 @@ CREATE TABLE system_settings (
 -- Take-off table (populates when a user uploads a take-off)
 CREATE TABLE takeoffs (
   id INT NOT NULL AUTO_INCREMENT,
-  name VARCHAR(64),
+  name VARCHAR(64) default 'Untitled',
   isArchived TINYINT(1) DEFAULT 0,
   creator_id INT,
-  owner VARCHAR(64),
+  owner VARCHAR(64) default 'Owner Name',
   owner_billing_address VARCHAR(64),
   file_path_of_plans VARCHAR(255),
   status TINYINT(1) DEFAULT 0,
@@ -207,6 +207,7 @@ CREATE TABLE estimate (
   date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   header TEXT,
   materials TEXT,
+  options TEXT,
   labor TEXT,
   exclusions TEXT,
   footer TEXT,

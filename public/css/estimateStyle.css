@@ -1,0 +1,154 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+#includes-total #excludes-total {
+
+    width; 50px
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    background-color: #ffffff;
+    padding: 20px;
+    border: 1px solid #dddddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2, h3, h4 {
+    text-align: center;
+    color: #333;
+}
+
+.address, .estimate-info, .total {
+    margin-top: 20px;
+    color: #555;
+}
+
+.estimate-info strong, .address strong, .total strong {
+    color: #000;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+td {
+    background-color: #fcfcfc;
+}
+
+.total {
+    text-align: right;
+    position: relative;
+}
+
+.image-container {
+    float:right;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.image-container img {
+    max-width: 300px;
+    height: auto;
+}
+
+/* Editable Description Area */
+.editable {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+    min-height: 50px;
+}
+
+.editable:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+/* Hover item (tooltip) for totals */
+.total:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: -10px;
+    right: 100%;
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+
+.tooltip ul {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+
+.tooltip ul li {
+    margin-bottom: 5px;
+}
+
+/* Signature Section */
+.signature {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.signature p {
+    font-size: 0.9em;
+    color: black;
+}
+
+/* Terms and Conditions section */
+.terms-section {
+    font-size: 0.9em;
+    margin-top: 40px;
+}
+
+.terms-section h4 {
+    margin-bottom: 20px;
+}
+
+.terms-section p {
+    margin-bottom: 15px;
+    color: #444;
+}
+
+.terms-section ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    color: #444;
+}
+
+/* Input Styles for Signature */
+input[type="text"], input[type="date"] {
+    border: 1px solid #ddd;
+    padding: 5px;
+    font-size: 

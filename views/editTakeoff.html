@@ -61,7 +61,7 @@
             <input type="submit" value="Generate Estimate">
           </li>
             <input type='hidden' name='takeoff_id' value='{{takeoff_id}}'>
-       
+
         </form>
         
       </div>
@@ -75,14 +75,13 @@
 
   <div class="container">
 
-<form action="/updateTakeoff" method="POST">
     {{#takeoff}}
+       <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
 
-
-      <h1  contenteditable="true">{{name}}</h1> </br>
-      
-      {{owner}}</br>
-      {{owner_billing_address}}</br>
+      <input type= 'text' class="titleInput" id= 'takeoff_name' onchange='updateTakeoffName()' value='{{name}}'></br>
+   
+      Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{owner}}'></br>
+      Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{owner_billing_address}}'></br>
       {{created_at}}</br>
       {{status}}
       {{passcode}}
@@ -110,7 +109,26 @@
     {{^subjects}}
     No subjects found
     {{/subjects}}
-  </table>
+</table>
+
+
+<table id = "options">
+    <tr>
+      <th>Name</th>
+      <th>Cost</th> 
+      <th></th>
+    </tr>
+
+    {{#options}}
+    <tr id = "option_{{id}}">
+      <td>{{name}}</td>
+      <td>${{cost}}</td>
+      <td><button onclick="removeOption({{id}})">Remove</button></td>
+    </tr>
+    {{/options}}
+
+
+</table>
 
   
 

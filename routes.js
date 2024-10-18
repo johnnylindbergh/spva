@@ -165,6 +165,57 @@ module.exports = function (app) {
 
   });
 
+  //updateTakeoff POST
+  app.post('/update-takeoff-name', mid.isAuth, (req, res) => {
+    console.log("updating takeoff name");
+    let takeoff_name = req.body.name;
+    let takeoff_id = req.body.takeoff_id;
+    console.log(takeoff_name);
+    console.log(takeoff_id)
+    db.updateTakeoffName(req.body.takeoff_id, takeoff_name, function (err) {
+      if (err) {
+        console.log(err);
+        res.end();
+      } else {
+        res.redirect("/");
+      }
+    });
+
+  });
+
+
+  app.post('/update-takeoff-owner-name', mid.isAuth, (req, res) => {
+    console.log("updating takeoff name");
+    let owner_name = req.body.owner;
+    let takeoff_id = req.body.takeoff_id;
+    console.log(req.body)
+    db.updateTakeoffOwnerName(req.body.takeoff_id, owner_name, function (err) {
+      if (err) {
+        console.log(err);
+        res.end();
+      } else {
+        res.redirect("/");
+      }
+    });
+
+  });
+
+  app.post('/update-takeoff-owner-billing', mid.isAuth, (req, res) => {
+    console.log("updating takeoff name");
+    let address = req.body.owner_billing_address;
+    let takeoff_id = req.body.takeoff_id;
+    console.log(req.body)
+    db.updateTakeoffOwnerBilling(req.body.takeoff_id, address, function (err) {
+      if (err) {
+        console.log(err);
+        res.end();
+      } else {
+        res.redirect("/");
+      }
+    });
+
+  });
+
 
   app.get('/getTakeoffs', mid.isAuth, (req, res) => {
     db.getTakeoffs(function (err, takeoffs) {
@@ -180,12 +231,15 @@ module.exports = function (app) {
 
 
   app.post("/viewTakeoff", mid.isAuth, function (req, res) {
+    let render = defaultRender(req);
     console.log("viewing", req.body.takeoff_id);
 
-    db.generateEstimate(req.body.takeoff_id, function (err) {
+    db.generateEstimate(req.body.takeoff_id, function (err, estimate) {
       if (err) {
         console.log(err);
       } else {
+        console.log(estimate)
+        render.append(estimate);
         res.render("estimateView.html", defaultRender(req));
       }
     });
@@ -274,14 +328,19 @@ module.exports = function (app) {
     // all accesses by client must be tracked
 
     db.generateEstimate(takeoff_id, function (err, estimate) {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log('comput estimate here');
-        console.log(estimate);
-        //res.redirect("/viewEstimate/"+estimate.id);
-        res.render("viewEstimate.html", {estimate: estimate});
-      }
+      db.getTakeoff(takeoff_id, function (err, takeoff) {
+        if (err) {
+          console.log(err);
+        } else {
+          //console.log('comput estimate here');
+          let date_updated = moment(takeoff.updated_at).format("MMMM Do YYYY");
+          //res.redirect("/viewEstimate/"+estimate.id);
+          takeoff[0].date_updated = date_updated;
+                    //console.log(takeoff);
+
+          res.render("viewEstimate.html", {estimate: estimate, takeoff:takeoff});
+        }
+      });
     });
   });
 
@@ -302,13 +361,16 @@ module.exports = function (app) {
 
   app.post("/toggle-material", mid.isAuth, function (req, res) {
     console.log("toggling ", req.body.material_id);
-    db.toggleMaterial(req.body.material_id, function (err) {
-      if (err) {
-        console.log(err);
-      } else {
-       res.end();
-      }
-    });
+    let material_id = req.body.material_id;
+    if (material_id) {
+      db.toggleMaterial(req.body.material_id, function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+         res.end();
+        }
+      });
+    }
   });
 
 
@@ -349,7 +411,7 @@ app.get("/materialSettings", mid.isAuth, function (req, res) {
 
 app.post("/change-material-price", mid.isAuth, function (req, res) {
   console.log("changing material price ", req.body);
-  db.changeMaterialPrice(req.body.material_id, req.body.new_price, function (err) {
+  db.changeMaterialPrice(req.body.material_id, req.body.takeoff_id, req.body.new_price, function (err) {
     if (err) {
       console.log(err);
     } else {

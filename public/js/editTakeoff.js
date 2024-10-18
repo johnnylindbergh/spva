@@ -17,6 +17,8 @@ function toggleMaterial(materialId, checkbox) {
     });
 }
 
+
+
 function myFunction() {
   document.getElementById("myDropdown").classList.toggle("show");
 }
@@ -36,6 +38,47 @@ function filterFunction() {
     }
   }
 }
+
+function updateTakeoffName() {
+  // get the newname from the input field
+  let name = $("#takeoff_name").val();
+  console.log("Updating takeoff name: " + name);
+  $.post("/update-takeoff-name", { takeoff_id: takeoff_id, name: name })
+    .done(function() {
+      console.log("Takeoff name updated: " + name);
+    })
+    .fail(function() {
+      console.log("Failed to update takeoff name: " + name);
+    });
+}
+
+
+function updateTakeoffOwnerName() {
+  // get the newname from the input field
+  let name = $("#takeoff_owner_name").val();
+  console.log("Updating takeoff owner name: " + name);
+  $.post("/update-takeoff-owner-name", { takeoff_id: takeoff_id, owner: name })
+    .done(function() {
+      console.log("Takeoff owner name updated: " + name);
+    })
+    .fail(function() {
+      console.log("Failed to update takeoff owner name: " + name);
+    });
+}
+
+function updateTakeoffBillingAddress() {
+  // get the newname from the input field
+  let address = $("#owner_billing_address").val();
+  console.log("Updating takeoff owner name: " + name);
+  $.post("/update-takeoff-owner-billing", { takeoff_id: takeoff_id, owner_billing_address: address })
+    .done(function() {
+      console.log("Takeoff owner name updated: " + name);
+    })
+    .fail(function() {
+      console.log("Failed to update takeoff owner name: " + name);
+    });
+}
+
 
 function add_subject(id, material_name) {
   subject_id = id;
@@ -185,10 +228,20 @@ function loadTakeoffMaterials(id) {
               subsum += material.price * row.measurement;
 
               materialsCell.append(materialCell);
+              if ( material.id == row.material_id) {
+                let newCost = parseFloat(material.cost) + parseFloat(row.primary_cost_delta);
+                  console.log(newCost);
 
-             let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + material.cost + "' step='any' min='0' onchange='priceChange(" + material.id + ")'> </br>");
-             materialPrice.addClass("material-price-input");
-              materialsCell.append(materialPrice);
+                 let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toString()+ "' step='any' min='0' onchange='priceChange(" + material.id + ")'> </br>");
+                 materialPrice.addClass("material-price-input");
+
+                 materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
+                 materialsCell.append(materialPrice);
+
+              }
+              
+
+
             });
 
 
@@ -246,13 +299,19 @@ function updateMeasurementUnit(rowId, newUnit) {
 function priceChange(id) {
   console.log("Price change for material " + id);
   
-  let newPrice = parseFloat($("#material_price_" + id).val());
+  let newPrice = parseFloat($("#raw_material_price_" + id).val());
   if (isNaN(newPrice) || newPrice < 0) {
     alert("Please enter a valid positive number for the price.");
     return;
   }
 
-  $.post("/change-material-price", { material_id: id, new_price: newPrice })
+  // get original price
+  let originalPrice = parseFloat($("#material_price_" + id).attr("value"));
+// subtract the old price from the newPrice
+  if (originalPrice == null) { console.log("could not get raw material price")}
+    console.log(originalPrice);
+  newPrice = newPrice - originalPrice;
+  $.post("/change-material-price", { material_id: id, new_price: newPrice, takeoff_id: takeoff_id })
     .done(function() {
       console.log("Material price changed: " + id);
       loadTakeoffMaterials(takeoff_id);
@@ -262,22 +321,5 @@ function priceChange(id) {
     });
 }
 
-// function generateEstimate() {
-//   console.log("Generating estimate");
-//   if (takeoff_id) {
-//       $.post("/generateEstimate", { takeoff_id: takeoff_id })
-//     .done(function() {
-//       console.log("Estimate generated");
-//       // window.location.href = "/generateEstimate";
-//     })
-//     .fail(function() {
-//       console.log("Failed to generate estimate");
-//     });
-
-//   } else {
-//     console.log("takeoff_id not defined")
-//   }
-
-// }
 
 

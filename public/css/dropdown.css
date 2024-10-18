@@ -26,6 +26,8 @@
   border-bottom: 1px solid #ddd;
 }
 
+
+
 /* The search field when it gets focus/clicked on */
 #myInput:focus {outline: 3px solid #ddd;}
 

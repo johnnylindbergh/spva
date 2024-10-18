@@ -168,6 +168,39 @@ module.exports = {
       cb(null, result[1][0].last);
     });
   },
+updateTakeoffName: function (takeoff_id, name, callback) {
+  if (!takeoff_id || !name) {
+    return callback("Missing required parameters");
+  } else {
+    con.query('UPDATE takeoffs SET name = ? WHERE id = ?;', [name, takeoff_id], function (err) {
+      if (err) return callback(err);
+      callback(null);
+    });
+  }
+},
+
+updateTakeoffOwnerName: function (takeoff_id, owner_name, callback) {
+  if (!takeoff_id || !owner_name) {
+    return callback("Missing required parameters");
+  } else {
+    con.query('UPDATE takeoffs SET owner = ? WHERE id = ?;', [owner_name, takeoff_id], function (err) {
+      if (err) return callback(err);
+      callback(null);
+    });
+  }
+},
+
+updateTakeoffOwnerBilling: function (takeoff_id, owner_billing_address, callback){
+  if (!takeoff_id || !owner_billing_address) {
+    return callback("Missing required parameters");
+  } else {
+    con.query('UPDATE takeoffs SET owner_billing_address = ? WHERE id = ?;', [owner_billing_address, takeoff_id], function (err) {
+      if (err) return callback(err);
+      callback(null);
+    });
+  }
+},
+
 
 getTakeoff: function (takeoff_id, callback) {
   con.query('SELECT * FROM takeoffs WHERE id = ?;', [takeoff_id], function (err, takeoff_info) {
@@ -219,6 +252,7 @@ generateEstimate: function (takeoff_id, callback) {
             rows[i].selected_materials[j].cost = parseFloat(rows[i].selected_materials[j].cost);
             rows[i].selected_materials[j].price = rows[i].selected_materials[j].cost * rows[i].measurement + rows[i].selected_materials[j].labor_cost;
             //console.log(rows[i].selected_materials[j].price);
+
           }   
         }
       }
@@ -299,7 +333,7 @@ removeMaterialSubject: function (material_id, subject_id, callback) {
     // a call to this function should not accept a toggle state, it should select the current state of the applied_material_id and then toggle it
 
     con.query('SELECT applied FROM applied_materials WHERE id = ?;', [applied_material_id], function (err, material) {
-        if (err){console.log(err)}
+        if (err || material.length == 0){console.log(err)}
           let applied = !material[0].applied;
           console.log("new state", !material.applied);
         con.query('UPDATE applied_materials SET applied = ? WHERE id = ?;', [applied, applied_material_id], function (err) {
@@ -313,8 +347,37 @@ removeMaterialSubject: function (material_id, subject_id, callback) {
   },
 
   changeMaterialPrice: function (material_id, price, callback) {
-    con.query('UPDATE materials set cost = ? WHERE id = ?;', [parseFloat(price), parseInt(material_id)], function (err) {
-      if (err) return callback(err);
+    // deterine whether the primary material or the secondary material or the teritary material price is being updated
+    con.query('SELECT * FROM applied_materials WHERE material_id = ? OR secondary_material_id = ? OR tertiary_material_id = ?;', [material_id, material_id, material_id], function (err, materials) {
+      if (err) {
+        console.log(err);
+        return callback(err);
+      }
+      //console.log(materials);
+      for (var i = 0; i < materials.length; i++) {
+        if (materials[i].material_id == material_id) {
+          con.query('UPDATE applied_materials SET primary_cost_delta = ? WHERE material_id = ?;', [price, material_id], function (err) {
+            if (err) {
+              console.log(err);
+              return callback(err);
+            }
+          });
+        } else if (materials[i].secondary_material_id == material_id) {
+          con.query('UPDATE applied_materials SET secondary_cost_delta = ? WHERE secondary_material_id = ?;', [price, material_id], function (err) {
+            if (err) {
+              console.log(err);
+              return callback(err);
+            }
+          });
+        } else if (materials[i].tertiary_material_id == material_id) {
+          con.query('UPDATE applied_materials SET tertiary_cost_delta = ? WHERE tertiary_material_id = ?;', [price, material_id], function (err) {
+            if (err) {
+              console.log(err);
+              return callback(err);
+            }
+          });
+        }
+      }
       callback(null);
     });
   },
