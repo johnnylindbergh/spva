@@ -411,11 +411,25 @@ app.get("/materialSettings", mid.isAuth, function (req, res) {
 
 app.post("/change-material-price", mid.isAuth, function (req, res) {
   console.log("changing material price ", req.body);
-  db.changeMaterialPrice(req.body.material_id, req.body.takeoff_id, req.body.new_price, function (err) {
+  db.changeMaterialPrice(req.body.material_id, req.body.delta, function (err) {
     if (err) {
       console.log(err);
     } else {
       console.log("updated");
+      res.end();
+    }
+  });
+});
+
+
+app.post("/change-labor-price", mid.isAuth, function (req, res) {
+  console.log("changing labor price ", req.body);
+  db.changeLaborPrice(req.body.subject, req.body.price, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("updated");
+      res.end();
     }
   });
 });

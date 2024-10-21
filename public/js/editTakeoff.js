@@ -229,10 +229,15 @@ function loadTakeoffMaterials(id) {
 
               materialsCell.append(materialCell);
               if ( material.id == row.material_id) {
+
+                if (row.primary_cost_delta==null) {
+                  row.primary_cost_delta = 0;
+                }
+
                 let newCost = parseFloat(material.cost) + parseFloat(row.primary_cost_delta);
                   console.log(newCost);
 
-                 let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toString()+ "' step='any' min='0' onchange='priceChange(" + material.id + ")'> </br>");
+                 let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toString()+ "' step='any' min='0' onchange='priceChange(" + material.id + ")'> <br>");
                  materialPrice.addClass("material-price-input");
 
                  materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
@@ -240,6 +245,40 @@ function loadTakeoffMaterials(id) {
 
               }
               
+
+              if ( material.id == row.secondary_material_id) {
+                if (row.secondary_cost_delta==null) {
+                  row.secondary_cost_delta = 0;
+                }
+                let newCost = parseFloat(material.cost) + parseFloat(row.secondary_cost_delta);
+                console.log(material)
+                  console.log(newCost);
+
+                 let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toString()+ "' step='any' min='0' onchange='priceChange(" + material.id + ")'> <br>");
+                 materialPrice.addClass("material-price-input");
+
+                 materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
+                 materialsCell.append(materialPrice);
+
+              }
+
+              if ( material.id == row.tertiary_material_id) {
+
+                if (row.tertiary_cost_delta==null) {
+                  row.tertiary_cost_delta = 0;
+                }
+
+                let newCost = parseFloat(material.cost) + parseFloat(row.tertiary_cost_delta);
+                console.log(newCost);
+
+                 let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toString()+ "' step='any' min='0' onchange='priceChange(" + material.id + ")'> <br>");
+                 materialPrice.addClass("material-price-input");
+
+                 materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
+                 materialsCell.append(materialPrice);
+
+              }
+
 
 
             });
@@ -296,29 +335,45 @@ function updateMeasurementUnit(rowId, newUnit) {
     });
 }
 
-function priceChange(id) {
-  console.log("Price change for material " + id);
+function laborPriceChange(id) {
+  newPrice = $("#labor_price").val();
   
-  let newPrice = parseFloat($("#raw_material_price_" + id).val());
-  if (isNaN(newPrice) || newPrice < 0) {
-    alert("Please enter a valid positive number for the price.");
-    return;
-  }
 
-  // get original price
-  let originalPrice = parseFloat($("#material_price_" + id).attr("value"));
-// subtract the old price from the newPrice
-  if (originalPrice == null) { console.log("could not get raw material price")}
-    console.log(originalPrice);
-  newPrice = newPrice - originalPrice;
-  $.post("/change-material-price", { material_id: id, new_price: newPrice, takeoff_id: takeoff_id })
+  $.post("/change-labor-price", { subject: id, price: newPrice })
     .done(function() {
-      console.log("Material price changed: " + id);
+      console.log("Price updated for material: " + id);
       loadTakeoffMaterials(takeoff_id);
     })
     .fail(function() {
-      console.log("Failed to change material price: " + id);
+      console.log("Failed to update price for material: " + id);
     });
+  
+
+}
+
+function priceChange(id) {
+  //this function doesent actually change the price of the material, it changes the price delta
+  //so just get the newPrice and subtract it from the original price
+
+  console.log("Price change for material " + id);
+
+  let newPrice = $("#material_price_" + id).val();
+  let rawPrice = $("#raw_material_price_" + id).val();
+
+  let delta = newPrice - rawPrice;
+
+  console.log("New price: " + newPrice);
+
+  $.post("/change-material-price", { material_id: id, delta: delta })
+    .done(function() {
+      console.log("Price updated for material: " + id);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function() {
+      console.log("Failed to update price for material: " + id);
+    });
+  
+
 }
 
 

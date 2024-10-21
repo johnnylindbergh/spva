@@ -346,12 +346,22 @@ removeMaterialSubject: function (material_id, subject_id, callback) {
     });
   },
 
+  changeLaborPrice: function (subject, price, callback) {
+    con.query('UPDATE applied_materials SET labor_cost = ? WHERE id = ?;', [price, subject], function (err) {
+      if (err) {
+        console.log(err);
+        return callback(err);
+      }
+      callback(null);
+    });
+  },
+
   changeMaterialPrice: function (material_id, price, callback) {
     // deterine whether the primary material or the secondary material or the teritary material price is being updated
     con.query('SELECT * FROM applied_materials WHERE material_id = ? OR secondary_material_id = ? OR tertiary_material_id = ?;', [material_id, material_id, material_id], function (err, materials) {
       if (err) {
         console.log(err);
-        return callback(err);
+        callback(err);
       }
       //console.log(materials);
       for (var i = 0; i < materials.length; i++) {
@@ -359,26 +369,25 @@ removeMaterialSubject: function (material_id, subject_id, callback) {
           con.query('UPDATE applied_materials SET primary_cost_delta = ? WHERE material_id = ?;', [price, material_id], function (err) {
             if (err) {
               console.log(err);
-              return callback(err);
+              callback(err);
             }
           });
         } else if (materials[i].secondary_material_id == material_id) {
           con.query('UPDATE applied_materials SET secondary_cost_delta = ? WHERE secondary_material_id = ?;', [price, material_id], function (err) {
             if (err) {
               console.log(err);
-              return callback(err);
+              callback(err);
             }
           });
         } else if (materials[i].tertiary_material_id == material_id) {
           con.query('UPDATE applied_materials SET tertiary_cost_delta = ? WHERE tertiary_material_id = ?;', [price, material_id], function (err) {
             if (err) {
               console.log(err);
-              return callback(err);
+              callback(err);
             }
           });
         }
       }
-      callback(null);
     });
   },
 
