@@ -138,25 +138,28 @@ function add_material_subject() {
 function loadTakeoffMaterials(id) {
   takeoff_id = id;
   console.log("Loading takeoff materials");
-  
+
   $.post("/loadTakeoffMaterials", { takeoff_id: takeoff_id })
-    .done(function(data) {
+    .done(function (data) {
       console.log("Takeoff materials loaded");
       $("#takeoff_materials_table").empty();
       let sum = 0;
 
       data.subjects.forEach((row) => {
-        console.log(row)
+        console.log(row);
         let newRow = $("<tr></tr>");
 
-           let checkbox = $("<input type='checkbox' onclick='toggleMaterial(" + row.id + ", this)'>");
+        // Checkbox for toggling material
+        let checkbox = $("<input type='checkbox' onclick='toggleMaterial(" + row.id + ", this)'>");
         if (row.applied == 1) {
           checkbox.attr("checked", "checked");
         }
         newRow.append($("<td></td>").append(checkbox));
 
+        // Material name
         newRow.append("<td style='width:15px;'>" + row.material_name + "</td>");
 
+        // Measurement input
         let measurementInput = $("<input>")
           .attr("type", "number")
           .attr("value", row.measurement)
@@ -166,20 +169,19 @@ function loadTakeoffMaterials(id) {
           .data("row-id", row.id)
           .addClass("measurement-input");
 
+        // Measurement unit selector
         let measurementUnits = ["Count", "sf", "ft' in\""];
         let measurementUnitInput = $("<select>")
           .data("row-id", row.id)
           .addClass("measurement-unit-input");
 
-        measurementUnits.forEach(function(unit) {
+        measurementUnits.forEach(function (unit) {
           let option = $("<option>").attr("value", unit).text(unit);
           if (unit === row.measurement_unit) {
             option.attr("selected", "selected");
           }
           measurementUnitInput.append(option);
         });
-
-
 
         let measurementCell = $("<td></td>")
           .append(measurementInput)
@@ -188,127 +190,120 @@ function loadTakeoffMaterials(id) {
 
         newRow.append(measurementCell);
 
-        measurementInput.on("change", function() {
+        // Event handlers for measurement changes
+        measurementInput.on("change", function () {
           let newMeasurement = $(this).val();
           let rowId = $(this).data("row-id");
           updateMeasurement(rowId, newMeasurement);
+          // Reload the table to reflect changes
+          loadTakeoffMaterials(takeoff_id);
         });
 
-
-        let laborPrice = $("<input type='number' id='labor_price' value='" + row.labor_cost + "' step='any' min='0' onchange='laborPriceChange(" + row.id + ")'> </br>");
-
-        let laborCell = $("<td style='width:200px; float:left; '>Labor Cost $</td>").append(laborPrice);
-        newRow.append(laborCell);
-
-        measurementUnitInput.on("change", function() {
+        measurementUnitInput.on("change", function () {
           let newMeasurementUnit = $(this).val();
           let rowId = $(this).data("row-id");
           updateMeasurementUnit(rowId, newMeasurementUnit);
+          // Reload the table to reflect changes
+          loadTakeoffMaterials(takeoff_id);
         });
 
+        // Labor price input
+        let laborPrice = $("<input type='number' id='labor_price_" + row.id + "' value='" + row.labor_cost + "' step='any' min='0' onchange='laborPriceChange(" + row.id + ")'>");
+        let laborCell = $("<td style='width:200px; float:left;'>Labor Cost $</td>").append(laborPrice);
+        newRow.append(laborCell);
 
-     
-
+        // Materials and cost calculation
         let materialsCell = $("<td></td>");
         let subsum = 0;
-        
+
         if (row.applied != 0) {
           if (row.selected_materials && row.selected_materials.length > 0) {
-           
             row.selected_materials.forEach((material) => {
-
-              // remove material button
-                     materialsCell.append("<i style = 'display:inline-block; padding:5px;'>" + material.name + " </i> ");
-
-              let materialCell = $("<i class='fa fa-trash' onclick='removeMaterial(" + row.id + ", "+material.id+ ")'>");
-
-                //material name
-               // materialsCell.append("<br>");
-
-              subsum += material.price * row.measurement;
-
+              materialsCell.append("<i style='display:inline-block; padding:5px;'>" + material.name + " </i> ");
+              let materialCell = $("<i class='fa fa-trash' onclick='removeMaterial(" + row.id + ", " + material.id + ")'>");
               materialsCell.append(materialCell);
-              if ( material.id == row.material_id) {
 
-                if (row.primary_cost_delta==null) {
-                  row.primary_cost_delta = 0;
-                }
+              // Parse values and handle NaN
+              let materialCost = parseFloat(material.cost) || 0;
+              let measurement = parseFloat(row.measurement) || 0;
+              let coverage = parseFloat(row.coverage) || 1; // Default to 1 to avoid division by zero
+              let newCost = materialCost;
 
-                let newCost = parseFloat(material.cost) + parseFloat(row.primary_cost_delta);
-                  console.log(newCost);
+              // Adjust cost for primary, secondary, and tertiary materials
+              if (material.id == row.material_id) {
+                let primaryCostDelta = parseFloat(row.primary_cost_delta) || 0;
+                newCost += primaryCostDelta;
 
-                 let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toString()+ "' step='any' min='0' onchange='priceChange(" + material.id + ")'> <br>");
-                 materialPrice.addClass("material-price-input");
+                // Material price input
+                let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toFixed(2) + "' step='any' min='0' onchange='priceChange(" + material.id + ")'><br>");
+                materialPrice.addClass("material-price-input");
+                materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
+                materialsCell.append(materialPrice);
+              } else if (material.id == row.secondary_material_id) {
+                let secondaryCostDelta = parseFloat(row.secondary_cost_delta) || 0;
+                newCost += secondaryCostDelta;
 
-                 materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
-                 materialsCell.append(materialPrice);
+                let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toFixed(2) + "' step='any' min='0' onchange='priceChange(" + material.id + ")'><br>");
+                materialPrice.addClass("material-price-input");
+                materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
+                materialsCell.append(materialPrice);
+              } else if (material.id == row.tertiary_material_id) {
+                let tertiaryCostDelta = parseFloat(row.tertiary_cost_delta) || 0;
+                newCost += tertiaryCostDelta;
 
-              }
-              
-
-              if ( material.id == row.secondary_material_id) {
-                if (row.secondary_cost_delta==null) {
-                  row.secondary_cost_delta = 0;
-                }
-                let newCost = parseFloat(material.cost) + parseFloat(row.secondary_cost_delta);
-                console.log(material)
-                  console.log(newCost);
-
-                 let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toString()+ "' step='any' min='0' onchange='priceChange(" + material.id + ")'> <br>");
-                 materialPrice.addClass("material-price-input");
-
-                 materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
-                 materialsCell.append(materialPrice);
-
-              }
-
-              if ( material.id == row.tertiary_material_id) {
-
-                if (row.tertiary_cost_delta==null) {
-                  row.tertiary_cost_delta = 0;
-                }
-
-                let newCost = parseFloat(material.cost) + parseFloat(row.tertiary_cost_delta);
-                console.log(newCost);
-
-                 let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toString()+ "' step='any' min='0' onchange='priceChange(" + material.id + ")'> <br>");
-                 materialPrice.addClass("material-price-input");
-
-                 materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
-                 materialsCell.append(materialPrice);
-
+                let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toFixed(2) + "' step='any' min='0' onchange='priceChange(" + material.id + ")'><br>");
+                materialPrice.addClass("material-price-input");
+                materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
+                materialsCell.append(materialPrice);
               }
 
+              // Divide measurement by coverage and add to subsum
+              let adjustedMeasurement = measurement / coverage;
+              if (isNaN(adjustedMeasurement) || !isFinite(adjustedMeasurement)) {
+                adjustedMeasurement = 0;
+              }
 
+              subsum += newCost * adjustedMeasurement;
 
+              if (row.labor_cost > 0) {
+                subsum += parseFloat(row.labor_cost) * adjustedMeasurement;
+              }
             });
-
-
           }
 
           newRow.append(materialsCell);
 
+          // "Add Material" button
+          let addSubject = $("<input type='button' onclick='add_subject(" + row.id + ")'>");
+          addSubject.attr("value", "Add Material");
+          newRow.append(addSubject);
 
-        let addSubject = $("<input type='button' onclick='add_subject(" + row.id + ")'>");
-        addSubject.attr("value", "Add Material");
-        newRow.append(addSubject);
-
+          // Check for NaN in subsum before adding to sum
+          if (isNaN(subsum) || !isFinite(subsum)) {
+            console.log("subsum is NaN or Infinite");
+            subsum = 0; // Reset subsum to 0 if invalid
+          }
           sum += subsum;
         } else {
           newRow.append("<td>No Materials Applied</td>");
           newRow.attr("style", "background-color: #f2f2f2; opacity: 0.5;");
         }
 
+        // Append subsum to the row
+        newRow.append("<td>$" + subsum.toFixed(2) + "</td>");
+
         $("#takeoff_materials_table").append(newRow);
-
-
       });
-      // for row end
+
+      // Update total sum
+      $("#sum").text("Total Cost: $" + sum.toFixed(2));
     })
-    .fail(function() {
+    .fail(function () {
       console.log("Failed to load takeoff materials");
     });
 }
+
+
 
 function updateMeasurement(rowId, newMeasurement) {
   $.post("/update-measurement", { id: rowId, measurement: newMeasurement })
@@ -336,7 +331,7 @@ function updateMeasurementUnit(rowId, newUnit) {
 }
 
 function laborPriceChange(id) {
-  newPrice = $("#labor_price").val();
+  newPrice = $("#labor_price_"+id).val();
   
 
   $.post("/change-labor-price", { subject: id, price: newPrice })

@@ -172,22 +172,35 @@ CREATE TABLE applied_materials (
   measurement DECIMAL(10,2),
   measurement_unit VARCHAR(64),
   takeoff_id INT,
+
   material_id INT,
+  secondary_material_id INT,
   tertiary_material_id INT,
   quartary_material_id INT,
-
-  secondary_material_id INT,
-  primary_cost_delta DECIMAL(10,2),
-  secondary_cost_delta DECIMAL(10,2),
-  tertiary_cost_delta DECIMAL(10,2),
-  quartary_cost_delta DECIMAL(10,2),
-  labor_cost DECIMAL(10,2) default 0,
+  
+  primary_cost_delta DECIMAL(10,2)  NOT NULL DEFAULT 0,
+  secondary_cost_delta DECIMAL(10,2) NOT NULL DEFAULT 0,
+  tertiary_cost_delta DECIMAL(10,2) NOT NULL DEFAULT 0,
+  quartary_cost_delta DECIMAL(10,2) NOT NULL DEFAULT 0,
+  
+  labor_cost DECIMAL(10,2) NOT NULL default 0,
   applied TINYINT(1) DEFAULT 1,
+
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
   FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE,
   FOREIGN KEY (secondary_material_id) REFERENCES materials(id) ON DELETE CASCADE,
   FOREIGN KEY (tertiary_material_id) REFERENCES materials(id) ON DELETE CASCADE
+);
+
+CREATE TABLE applied_options (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(64),
+  takeoff_id INT,
+  cost DECIMAL(10,2) default 0,
+  applied TINYINT(1) DEFAULT 1,
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
 );
 
 
