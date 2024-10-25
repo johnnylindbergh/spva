@@ -243,23 +243,81 @@ getTakeoff: function (takeoff_id, callback) {
 },
 
 generateEstimate: function (takeoff_id, callback) {
-    con.query(queries.getTakeoff, [takeoff_id], async function (err, rows) { 
-      for (var i = 0; i < rows.length; i++) {
-       // console.log(rows[i])
-        if (rows[i].applied && rows[i].selected_materials != null) {
-          for(var j = 0; j < rows[i].selected_materials.length; j++) {
-            //console.log(rows[i].selected_materials[j].cost);
-            rows[i].selected_materials[j].cost = parseFloat(rows[i].selected_materials[j].cost);
-            rows[i].selected_materials[j].price = rows[i].selected_materials[j].cost * rows[i].measurement + rows[i].selected_materials[j].labor_cost;
-            //console.log(rows[i].selected_materials[j].price);
+  // query takeoffs table for estimate_id 
+  // if the estimate_id is null, create a new estimate insert it into the db, and update the takeoff's estimate_id in the takeoffs table
+  // if the estimate_id is not null, update the existing estimate with the new data
+  con.query('SELECT estimate_id FROM takeoffs WHERE id = ?;', [takeoff_id], function (err, estimate_id) {
+    if (err) return callback(err);
+    console.log(estimate_id);
 
-          }   
+    if (estimate_id[0].estimate_id == null) {
+      con.query('INSERT INTO estimate (takeoff_id) VALUES (?); SELECT LAST_INSERT_ID() as last;', [takeoff_id], function (err, result) {
+        if (err) {
         }
-      }
+        con.query('UPDATE takeoffs SET estimate_id = ? WHERE id = ?;', [result[1][0].last, takeoff_id], function (err) {
+          if (err) return callback(err);
+        });
+      });
+    } else {
 
-      callback(null, rows);
+
+    }
+  });
+
+
+
+
+    con.query('SELECT * FROM takeoffs WHERE id = ?;', [takeoff_id], function (err, takeoff_info) {
+      if (err) return callback(err);
+
+      con.query(queries.getTakeoff, [takeoff_id], async function (err, rows) {
+        if (err) return callback(err);
+
+        // Create an array of promises to fetch material names
+        const promises = rows.map(row => {
+          if (row && row.material_id) {
+            return new Promise((resolve, reject) => {
+              con.query(
+                'SELECT * FROM materials WHERE id IN (?, ?, ?);',
+                [row.material_id, row.secondary_material_id, row.tertiary_material_id],
+                function (err, materials) {
+                  if (err) return reject(err);
+
+                  // Add material names to the row
+                  row.selected_materials = materials; // You can customize how you want to store the materials info
+                  resolve(row);
+                }
+              );
+            });
+          } else {
+            return Promise.resolve(row); // If no material_id, just resolve the row as is
+          }
+        });
+
+        try {
+          const updatedRows = await Promise.all(promises);
+          // Once all material info has been fetched, pass the updated rows to the callback
+          //console.log(updatedRows);
+          callback(null, takeoff_info, updatedRows);
+        } catch (queryErr) {
+          callback(queryErr);
+        }
+      });
     });
+},
 
+saveEstimate: function (takeoff_id, inclusions, exclusions, callback) { 
+  con.query('UPDATE estimate SET inclusions = ?, exclusions = ? WHERE id = ?;', [inclusions, exclusions, takeoff_id], function (err) {
+    if (err) return callback(err);
+    callback(null);
+  });
+},
+
+getEstimateData: function (takeoff_id, callback) {
+  con.query('SELECT * FROM estimate WHERE takeoff_id = ?;', [takeoff_id], function (err, estimate) {
+    if (err) return callback(err);
+    callback(null, estimate);
+  });
 },
 
   generateTakeoffMaterials: function (takeoff_id, callback) {

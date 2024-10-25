@@ -28,6 +28,8 @@ module.exports = {
   // name of this system
   SYSTEM_NAME: 'SPVATrack',
 
+  PROMPT:"Consider the following json object. The output must be two description sections titled 'Proposal Includes' and 'Exclusions and assumptions' separated by a </br> tag. If an object has no selected materials, its name is listed in the 'Exclusions and assumptions' section; otherwise, a one-sentence description in the 'Proposal Includes' section that includes the name, coverage, and description. \n. Do not include extra symbols like (* or -)",
+
   
   // admin
   // inventory add/delete/ reorder options

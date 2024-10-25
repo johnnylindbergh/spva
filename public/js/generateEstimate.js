@@ -3,13 +3,10 @@ function populateProposalIncludes(items) {
     const includesList = $('#includes-list');
     includesList.empty(); // Clear any existing content
 
-    items.forEach(item => {
-        const li = $('<li>').text(item);
-        includesList.append(li);
-    });
-
-    // Set the total value dynamically
-    $('#includes-total').text(calculateTotal(items.length, 100)); // Example calculation
+    // set the content of the includesList to the items
+    // items is a string 
+    includesList.text(items);
+    $('#includes-total').text(calculateTotal(items.length, 50)); // Example calculation
 }
 
 // Function to populate the "Exclusions & Assumptions" section
@@ -17,10 +14,7 @@ function populateExclusions(exclusions) {
     const exclusionsList = $('#exclusions-list');
     exclusionsList.empty(); // Clear any existing content
 
-    exclusions.forEach(exclusion => {
-        const li = $('<li>').text(exclusion);
-        exclusionsList.append(li);
-    });
+    exclusionsList.text(exclusions);
 
     // Set the total value dynamically
     $('#excludes-total').text(calculateTotal(exclusions.length, 50)); // Example calculation
@@ -60,7 +54,7 @@ function addOption() {
     
     // Create a new row with editable cells
     const newRow = $('<tr>');
-    const descriptionCell = $('<td contenteditable="true" class="editable">').text('Enter description here...');
+    const descriptionCell = $('<td contenteditable="true" class="editable">').text('');
     const amountCell = $('<td contenteditable="true" class="editable">').text('0.00');
 
     newRow.append(descriptionCell);
@@ -130,11 +124,19 @@ function addEditableListeners() {
 $(document).ready(function() {
     // Populate the "Proposal Includes" section with dynamic data
     const includesItems = ['Preparation of surfaces', 'Primer application', 'Final paint coat'];
-    populateProposalIncludes(includesItems);
+    // post takeoff_id to getEstimateData to set includesItems and exclusionsItems
+    
+    $.post('/getEstimateData', {takeoff_id: 1}, function(data) {
+        console.log(data)
 
-    // Populate the "Exclusions & Assumptions" section with dynamic data
-    const exclusionsItems = ['Lead paint abatement', 'Mold remediation'];
-    populateExclusions(exclusionsItems);
+        populateProposalIncludes(data[0].inclusions);
+        populateExclusions(data[0].exclusions);
+ 
+    });
+
+
+
+    
 
     // Add event listeners for editable fields
     addEditableListeners();

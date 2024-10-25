@@ -21,6 +21,8 @@ const mid = require('./middleware.js');
 const moment = require('moment');
 const path = require("path");
 const multer = require("multer");
+// require chatgpt.js
+const chatgpt = require('./chatgpt.js');
 
 const fs = require("fs");
 const {parse} = require("csv-parse");
@@ -317,32 +319,99 @@ module.exports = function (app) {
 });
 
   app.post("/generateEstimate", function (req, res) {
-    var takeoff_id = req.body.takeoff_id;
-    console.log("generating estimate for ", takeoff_id);
-    // do some computation and redirect to /viewEstimate/:id
-    // must do user validation here because outside users must access this page
-    // ie if not authed, direct to enter passcode page
-    // must add passcode to takeoffs table
-    // the enter pascode page will be a simple form with a hidden field for takeoff_id
-    // when the user enter the correct passcode, the page will render the estimate with the abiliy to sign the document, 
-    // all accesses by client must be tracked
+  var takeoff_id = req.body.takeoff_id;
+  console.log("Generating estimate for takeoff", takeoff_id);
 
-    db.generateEstimate(takeoff_id, function (err, estimate) {
-      db.getTakeoff(takeoff_id, function (err, takeoff) {
-        if (err) {
-          console.log(err);
-        } else {
-          //console.log('comput estimate here');
-          let date_updated = moment(takeoff.updated_at).format("MMMM Do YYYY");
-          //res.redirect("/viewEstimate/"+estimate.id);
-          takeoff[0].date_updated = date_updated;
-                    //console.log(takeoff);
+  var prompt = sys.PROMPT;
 
-          res.render("viewEstimate.html", {estimate: estimate, takeoff:takeoff});
+  db.takeoffSetStatus(takeoff_id, 2, function (err) {
+    if (err) {
+      console.log(err);
+      // Handle the error if necessary
+    }
+
+    // Proceed to generate the estimate regardless of the error in setting status
+    db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error generating estimate");
+      } else {
+        // Build the prompt
+        for (var i = 0; i < estimate.length; i++) {
+          prompt += " subject={ " + estimate[i].material_name;
+          prompt +=
+            " measurement: " +
+            estimate[i].measurement + estimate[i].measurement_unit
+            " " +
+            estimate[i].measurement_unit;
+          if (estimate[i].selected_materials != null) {
+            for (
+              var j = 0;
+              j < estimate[i].selected_materials.length;
+              j++
+            ) {
+              console.log(estimate[i].selected_materials[j]);
+              prompt +=
+                " name: " +
+                estimate[i].selected_materials[j].name +
+                "'";
+              prompt +=
+                " desc: " +
+                estimate[i].selected_materials[j].description;
+            }
+          }
+          prompt += "}"
         }
-      });
+        //console.log(prompt);
+
+       // call to  async function callChatGPT with the response as the return value and saves the it to the database
+
+       let response = "";
+        chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
+          response = subres;
+          console.log("Response:", response);
+         
+           
+
+          // process response for render
+          // split into two vars called includes, and exclusions
+          let inclusions = response.split("</br>")[0];
+          let exclusions = response.split("</br>")[1];
+
+           db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
+             res.render('viewEstimate.html', {estimate: estimate});
+
+           });
+         
+            
+       
+        });
+
+
+
+        // chatgpt.callChatGPT(prompt, function (err, descriptionResponse) {
+        //   if (err) {
+        //     console.log(err);
+        //     res.status(500).send("Error generating estimate");
+        //   } else {
+
+        //                     console.log("Response:", descriptionResponse)
+
+        //     db.saveEstimate(takeoff_id, descriptionResponse, function (err) {
+        //       if (err) {
+        //         console.log(err);
+        //         res.status(500).send("Error generating estimate");
+        //       } else {
+        //         res.send("Estimate generated successfully");
+        //       }
+        //     });
+        //   }
+        // }); 
+      }
     });
   });
+});
+
 
 
   app.get("/viewEstimate/:id"), mid.isAuth, function (req, res) {
@@ -453,6 +522,17 @@ app.post("/update-measurement-unit", mid.isAuth, function (req, res) {
       console.log(err);
     } else {
       console.log("updated");
+    }
+  });
+});
+
+app.post("/getEstimateData", mid.isAuth, function (req, res) {
+  console.log("just viewing takeoff id: ", req.body.takeoff_id);
+  db.getEstimateData(req.body.takeoff_id, function (err, data) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(data);
     }
   });
 });

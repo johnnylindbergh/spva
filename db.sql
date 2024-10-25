@@ -30,8 +30,21 @@ CREATE TABLE users (
 );
 
 CREATE TABLE system_settings (
-  levens_threshold INT,
+  levens_threshold INT
   
+);
+
+CREATE TABLE estimate (
+  id INT NOT NULL AUTO_INCREMENT,
+  takeoff_id INT,
+  isArchived TINYINT(1) DEFAULT 0,
+  date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  inclusions TEXT,
+  options TEXT,
+  labor TEXT,
+  exclusions TEXT,
+  footer TEXT,
+  PRIMARY KEY (id)
 );
 
 -- Take-off table (populates when a user uploads a take-off)
@@ -43,15 +56,17 @@ CREATE TABLE takeoffs (
   owner VARCHAR(64) default 'Owner Name',
   owner_billing_address VARCHAR(64),
   file_path_of_plans VARCHAR(255),
+  estimate_id INT,
   status TINYINT(1) DEFAULT 0,
   passcode VARCHAR(64),
   duration_hours INT,
-  start_data DATETIME,
-  end_data DATETIME,
+  start_date DATETIME,
+  end_date DATETIME,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   FOREIGN KEY (creator_id) REFERENCES users(id),
+  FOREIGN KEY (estimate_id) REFERENCES estimate(id),
   PRIMARY KEY (id)
 );
 
@@ -215,17 +230,7 @@ CREATE TABLE string_match_subject (
 );
 
 
-CREATE TABLE estimate (
-  id INT NOT NULL AUTO_INCREMENT,
-  date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  header TEXT,
-  materials TEXT,
-  options TEXT,
-  labor TEXT,
-  exclusions TEXT,
-  footer TEXT,
-  PRIMARY KEY (id)
-);
+
 
 -- Emails table
 CREATE TABLE emails (

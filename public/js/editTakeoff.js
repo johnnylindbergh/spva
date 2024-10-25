@@ -85,6 +85,16 @@ function add_subject(id, material_name) {
   console.log("Adding material for subject: " + material_name);
   $("#selected_subject").text("Selected subject: " + material_name);
   document.getElementById("myDropdown").classList.toggle("show");
+  // move div to mouse x,y
+  // var x = event.clientX;
+  // var y = event.clientY;
+  // var div = document.getElementById("myDropdown");
+  // div.style.top = y + 'px';
+  // div.style.left = x + 'px';
+  // console.log("x: " + x + " y: " + y);
+  // console.log("div x: " + div.style.left + " div y: " + div.style.top);
+
+
 }
 
 function add_material(id) {
@@ -209,7 +219,7 @@ function loadTakeoffMaterials(id) {
 
         // Labor price input
         let laborPrice = $("<input type='number' id='labor_price_" + row.id + "' value='" + row.labor_cost + "' step='any' min='0' onchange='laborPriceChange(" + row.id + ")'>");
-        let laborCell = $("<td style='width:200px; float:left;'>Labor Cost $</td>").append(laborPrice);
+        let laborCell = $("<td style=' '>Labor Cost $</td>").append(laborPrice);
         newRow.append(laborCell);
 
         // Materials and cost calculation
@@ -226,7 +236,8 @@ function loadTakeoffMaterials(id) {
               // Parse values and handle NaN
               let materialCost = parseFloat(material.cost) || 0;
               let measurement = parseFloat(row.measurement) || 0;
-              let coverage = parseFloat(row.coverage) || 1; // Default to 1 to avoid division by zero
+              let coverage = parseFloat(material.coverage) || 1; // Default to 1 to avoid division by zero
+              console.log("Material cost: " + materialCost + " Measurement: " + measurement + " Coverage: " + coverage);
               let newCost = materialCost;
 
               // Adjust cost for primary, secondary, and tertiary materials
@@ -258,7 +269,7 @@ function loadTakeoffMaterials(id) {
               }
 
               // Divide measurement by coverage and add to subsum
-              let adjustedMeasurement = measurement / coverage;
+              let adjustedMeasurement = measurement;
               if (isNaN(adjustedMeasurement) || !isFinite(adjustedMeasurement)) {
                 adjustedMeasurement = 0;
               }
@@ -266,7 +277,17 @@ function loadTakeoffMaterials(id) {
               subsum += newCost * adjustedMeasurement;
 
               if (row.labor_cost > 0) {
-                subsum += parseFloat(row.labor_cost) * adjustedMeasurement;
+                if (row.measurement_unit === "sf") {
+                  subsum += parseFloat(row.labor_cost/ material.coverage) * adjustedMeasurement;
+                }
+
+                if (row.measurement_unit === "ft' in\"") {
+                  subsum += parseFloat(row.labor_cost / material.coverage) * adjustedMeasurement;
+                }
+
+                if (row.measurement_unit === "Count") {
+                  subsum += parseFloat(row.labor_cost) * adjustedMeasurement;
+                }
               }
             });
           }

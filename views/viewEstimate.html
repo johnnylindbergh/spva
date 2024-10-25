@@ -6,15 +6,40 @@
     <title>Sun Painting Estimate</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <link rel="stylesheet" href="css/estimateStyle.css">
-    <script src="/js/viewEstimate.js"></script>
+    <script src="/js/generateEstimate.js"></script>
 </head>
 <body>
 <body>
     <div class="container">
-        <!-- Existing HTML structure with a few key IDs for JavaScript -->
+
+         <div class="image-container">
+            <img src="sunpainting_logo_blue.png" alt="Sun Painting Logo">
+        </div>
+        <p>1819 Broadway St, Charlottesville, VA 22902 US</p>
+        <p>Phone: +1 434-207-2025 | Email: <a href="mailto:sales@sunpaintingva.com" style="color:#0066cc;">sales@sunpaintingva.com</a></p>
+        <p>Website: <a href="http://www.sunpaintingva.com" style="color:#0066cc;">www.sunpaintingva.com</a></p>
+
+        
+         {{#takeoff}}
+       <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
+
+      <input type= 'text' class="titleInput" id= 'takeoff_name' onchange='updateTakeoffName()' value='{{name}}'></br>
+   
+      Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{owner}}'></br>
+      Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{owner_billing_address}}'></br>
+      {{created_at}}</br>
+      {{status}}
+      {{passcode}}
+
+      </br>
+    {{/takeoff}}
+
+    <p> {{response}}</p>
         <table id="estimate-table">
             <tr>
                 <th>Description</th>
+
+
                 <th>Amount</th>
             </tr>
             <tr>
@@ -30,10 +55,6 @@
                     <ul id="exclusions-list"></ul>
                 </td>
                 <td id="excludes-total">${{exclude_total}}</td>
-            </tr>
-            <tr>
-                <td><input type="text" class="hiddenInput"></td>
-                <td id="subtotal">${{estimate_subtotal}}</td>
             </tr>
         </table>
 
