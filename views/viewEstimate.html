@@ -5,10 +5,20 @@
     <title>Sun Painting Estimate</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <link rel="stylesheet" href="css/estimateStyle.css">
+        <link rel="stylesheet" href="css/bottomNavbar.css">
     <script src="/js/generateEstimate.js"></script>
 </head>
 <body>
 <body>
+
+    <nav class="bottom-navbar">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
     <div class="container">
 
          <div class="image-container">
@@ -21,6 +31,8 @@
         
          {{#takeoff}}
        <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
+
+       <input type='hidden' id='takeoff_total' value='{{takeoff_info.total}}'>
 
       <input type= 'text' class="titleInput" id= 'takeoff_name' onchange='updateTakeoffName()' value='{{name}}'></br>
    

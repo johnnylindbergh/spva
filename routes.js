@@ -327,6 +327,19 @@ app.post("/alButton", mid.isAuth, function (req, res) {
   });
 });
 
+  app.post("/updateTakeoffTotal", mid.isAuth, function (req, res) {
+    console.log("updating takeoff total ", req.body);
+    db.updateTakeoffTotal(req.body.takeoff_id, req.body.total, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("updated");
+        res.end();
+      }
+    });
+  });
+
+
   app.post("/generateEstimate", function (req, res) {
   var takeoff_id = req.body.takeoff_id;
   console.log("Generating estimate for takeoff", takeoff_id);
@@ -388,7 +401,7 @@ app.post("/alButton", mid.isAuth, function (req, res) {
           let exclusions = response.split("</br>")[1];
 
            db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
-             res.render('viewEstimate.html', {estimate: estimate});
+             res.render('viewEstimate.html', {estimate: estimate, takeoff_info: takeoff_info});
 
            });
          
@@ -547,13 +560,22 @@ app.post('/update-content', mid.isAuth, function (req, res) {
   });
 });
 
+//https://estimate.sunpaintingva.com/add-row 
+app.post('/add-row', mid.isAuth, function (req, res){
+  console.log("Getting option:", req.body.option);
+  console.log("Cost Delta:", req.body.cost_delta);
+
+  // db.addOption would need takeoff_id
+  
+})
+
 app.post("/getEstimateData", mid.isAuth, function (req, res) {
   console.log("just viewing takeoff id: ", req.body.takeoff_id);
-  db.getEstimateData(req.body.takeoff_id, function (err, data) {
+  db.getEstimateData(req.body.takeoff_id, function (err, estimate, takeoff) {
     if (err) {
       console.log(err);
     } else {
-      res.send(data);
+      res.send({estimate: estimate, takeoff: takeoff});
     }
   });
 });

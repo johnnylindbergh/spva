@@ -242,6 +242,13 @@ getTakeoff: function (takeoff_id, callback) {
   });
 },
 
+updateTakeoffTotal: function (takeoff_id, total, callback) {
+  con.query('UPDATE takeoffs SET total = ? WHERE id = ?;', [total, takeoff_id], function (err) {
+    if (err) return callback(err);
+    callback(null);
+  });
+},
+
 generateEstimate: function (takeoff_id, callback) {
   // query takeoffs table for estimate_id 
   // if the estimate_id is null, create a new estimate insert it into the db, and update the takeoff's estimate_id in the takeoffs table
@@ -259,7 +266,7 @@ generateEstimate: function (takeoff_id, callback) {
         });
       });
     } else {
-        
+
 
     }
   });
@@ -322,8 +329,10 @@ saveEstimate: function (takeoff_id, inclusions, exclusions, callback) {
 
 getEstimateData: function (takeoff_id, callback) {
   con.query('SELECT * FROM estimate WHERE takeoff_id = ?;', [takeoff_id], function (err, estimate) {
-    if (err) return callback(err);
-    callback(null, estimate);
+    con.query('SELECT * FROM takeoffs WHERE id = ?;', [takeoff_id], function (err, takeoff) {
+      if (err) return callback(err);
+      callback(null, estimate, takeoff);
+    });
   });
 },
 

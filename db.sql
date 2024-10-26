@@ -59,6 +59,7 @@ CREATE TABLE takeoffs (
   estimate_id INT,
   status TINYINT(1) DEFAULT 0,
   passcode VARCHAR(64),
+  total DECIMAL(10,2),
   duration_hours INT,
   start_date DATETIME,
   end_date DATETIME,
@@ -153,8 +154,8 @@ INSERT INTO materials (name, description, cost, coverage, material_type) VALUES 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Aura Exterior Satin White (GAL)', 'Exterior satin paint', 78.99, 300.0, 7);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Ultra Spec Exterior Flat White (GAL)', 'Exterior flat paint', 60.54, 300.0, 7);
 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Wood Panel Interior Door', '', 60.54, 0.20666708, 7);
-
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Wood Panel Interior Door', '', 60.54, 1, 1);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Steel Door frame', '', 80.00, 1, 1);
 
 
 -- Estimates table (job estimation data)

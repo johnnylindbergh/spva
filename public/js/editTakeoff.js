@@ -318,6 +318,16 @@ function loadTakeoffMaterials(id) {
 
       // Update total sum
       $("#sum").text("Total Cost: $" + sum.toFixed(2));
+
+      //now post the new sum to /updateTakeoffTotal
+      $.post("/updateTakeoffTotal", { takeoff_id: takeoff_id, total: sum.toFixed(2) })
+        .done(function () {
+          console.log("Total updated for takeoff: " + takeoff_id);
+        })
+        .fail(function () {
+          console.log("Failed to update total for takeoff: " + takeoff_id);
+        });
+        
     })
     .fail(function () {
       console.log("Failed to load takeoff materials");

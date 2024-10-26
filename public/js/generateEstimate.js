@@ -6,7 +6,7 @@ function populateProposalIncludes(items) {
     // set the content of the includesList to the items
     // items is a string 
     includesList.text(items);
-    $('#includes-total').text(calculateTotal(items.length, 50)); // Example calculation
+   // $('#includes-total').text(calculateTotal(items.length, 50)); // Example calculation
 }
 
 // Function to populate the "Exclusions & Assumptions" section
@@ -16,8 +16,8 @@ function populateExclusions(exclusions) {
 
     exclusionsList.text(exclusions);
 
-    // Set the total value dynamically
-    $('#excludes-total').text(calculateTotal(exclusions.length, 50)); // Example calculation
+
+   // $('#excludes-total').text(calculateTotal(exclusions.length, 50)); // Example calculation
 }
 
 // Simple function to calculate totals (for demonstration purposes)
@@ -76,8 +76,8 @@ function addOption() {
 // Example function to handle new row data and POST it to the server
 function postToAddOption(description, amount) {
     const data = {
-        description: description,
-        amount: amount
+        option: description,
+        cost_delta: amount
     };
 
     // Send the data to the server via a POST request using jQuery
@@ -131,8 +131,10 @@ $(document).ready(function() {
     $.post('/getEstimateData', {takeoff_id: 1}, function(data) {
         console.log(data)
 
-        populateProposalIncludes(data[0].inclusions);
-        populateExclusions(data[0].exclusions);
+        populateProposalIncludes(data.estimate[0].inclusions);
+        populateExclusions(data.estimate[0].exclusions);
+        console.log(data.takeoff[0].total);
+        $('#includes-total').text(data.takeoff[0].total);
  
     });
 

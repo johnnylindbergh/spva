@@ -1,0 +1,65 @@
+
+/*
+  navbar.css: navbar-specific style
+*/
+
+/* containing navbar div */
+.bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 14px;
+    background-color: rgba(20, 30, 160, 0.74);
+    z-index: 3;
+  }
+  
+  /* make all navbar content non-highlightable */
+  .botton-navbar * {
+    user-select: none;
+  }
+  
+  /* list containing all links */
+  .bottom-navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  /* navbar list elements */
+  .bottom-navbar li {
+    float:left;
+  }
+  
+  /* navbar link style */
+  .bottom-navbar li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 16px 16px;
+    text-decoration: none;
+  }
+  
+  .bottom-navbar .dropdown {
+    display: block;
+    color: black;
+    text-align: center;
+    padding: 10 px 16px;
+    text-decoration: none;
+  }
+  
+  /* highlight and change cursor when navbar links hovered */
+  .bottom-navbar li a:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+  
+  /* push text titles for each link away from their icons */
+  .bottom-navbar li a i {
+    margin-left: 3px;
+  }
+  
+  /* container for page content on all pages with navbar */
+  .container {
+    margin-top: 60px;
+  }
