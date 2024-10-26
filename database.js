@@ -259,7 +259,7 @@ generateEstimate: function (takeoff_id, callback) {
         });
       });
     } else {
-
+        
 
     }
   });
@@ -304,6 +304,13 @@ generateEstimate: function (takeoff_id, callback) {
         }
       });
     });
+},
+
+updateContent: function (id, content, callback) {
+  con.query('UPDATE estimate SET inclusions = ? WHERE id = ?;', [content[0], id], function (err) {
+    if (err) return callback(err);
+    callback(null);
+  });
 },
 
 saveEstimate: function (takeoff_id, inclusions, exclusions, callback) { 

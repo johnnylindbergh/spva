@@ -232,19 +232,28 @@ module.exports = function (app) {
   // post request to https://estimate.sunpaintingva.com/viewTakeoff with body param takeoff_id
 
 
+app.post("/alButton", mid.isAuth, function (req, res) {
+  console.log("alButton");
+  // if the user name is al, res.send "Hello AL!" otherwise, say you are not al
+  if (req.user.local.name == "AL" || req.user.local.name == "Johnny") {
+    res.send("Hello AL!");
+  } else {
+    res.send("You are not AL");
+  }
+});
+
   app.post("/viewTakeoff", mid.isAuth, function (req, res) {
     let render = defaultRender(req);
     console.log("viewing", req.body.takeoff_id);
-
-    db.generateEstimate(req.body.takeoff_id, function (err, estimate) {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log(estimate)
-        render.append(estimate);
-        res.render("estimateView.html", defaultRender(req));
-      }
-    });
+    res.send("viewing takeoff")
+    // db.generateEstimate(req.body.takeoff_id, function (err, estimate) {
+    //   if (err) {
+    //     console.log(err);
+    //   } else {
+    //     console.log(estimate)
+    //     res.render("viewEstimate.html", {estimate: estimate});
+    //   }
+    // });
 
   });
 
@@ -414,9 +423,9 @@ module.exports = function (app) {
 
 
 
-  app.get("/viewEstimate/:id"), mid.isAuth, function (req, res) {
+  app.post("/viewEstimate", mid.isAuth, function (req, res) {
     console.log("estimate view")
-    db.getEstimate(req.params.id, function (err, estimate) {
+    db.getEstimateData(req.body.id, function (err, estimate) {
       if (err) {
         console.log(err);
       } else {
@@ -424,7 +433,7 @@ module.exports = function (app) {
         res.render("viewEstimate.html", {estimate: estimate});
       }
     });
-  }
+  });
 
 
 
@@ -518,6 +527,18 @@ app.post("/update-measurement", mid.isAuth, function (req, res) {
 app.post("/update-measurement-unit", mid.isAuth, function (req, res) {
   console.log("updating measurement unit ", req.body);
   db.updateMeasurementUnit(req.body.id, req.body.unit, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("updated");
+    }
+  });
+});
+
+app.post('/update-content', mid.isAuth, function (req, res) {
+  console.log("updating content ", req.body);
+  if (req.body.id == null){ req.body.id = req.user.local.takeoff_id;}
+  db.updateContent(req.body.id, req.body.content, function (err) {
     if (err) {
       console.log(err);
     } else {

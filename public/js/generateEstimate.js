@@ -109,7 +109,9 @@ function addEditableListeners() {
             console.log('Content changed:', content);
 
             // Send POST request with the new content
-            $.post('/update-content', { id: elementId, content: content })
+            var takeoff_id = $('#takeoff_id').val(); // not super safe, but just for example
+            console.log(takeoff_id);
+            $.post('/update-content', { id: takeoff_id, content: content })
                 .done(function(response) {
                     console.log('Content updated successfully:', response);
                 })
