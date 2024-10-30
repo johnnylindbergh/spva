@@ -1,14 +1,14 @@
-$(document).ready(function() {
+$(document).ready(function () {
   function createProgressBar(statusCode) {
     const statuses = [
       { code: 1, label: "Takeoff Uploaded" },
       { code: 2, label: "Estimate Generated" },
       { code: 3, label: "Estimate Published" },
-      { code: 4, label: "Estimate Signed" }
+      { code: 4, label: "Estimate Signed" },
     ];
 
     // Find the index of the current status
-    let currentIndex = statuses.findIndex(s => s.code === statusCode);
+    let currentIndex = statuses.findIndex((s) => s.code === statusCode);
     if (currentIndex === -1) {
       currentIndex = 0; // Default to the first status if not found
     }
@@ -31,16 +31,21 @@ $(document).ready(function() {
     return progressBar;
   }
 
-  function viewTakeoff(id){
-    // make a post to viewTakeoff with takeoff_id: id
-    $.post("/viewTakeoff", { takeoff_id: id }, function(data) {
-    
-      window.location.href = "/viewTakeoff";
-      alert("view takeoff " + id+"?");
+  function viewTakeoff(id) {
+    // make a post to viewEstimate with takeoff_id: id
+    $.post("/viewEstimate", { takeoff_id: id }, function (data) {
+      // Display the HTML content in a specific element
+      var page_containter = $("#estimate_view");
+      if (page_containter.html() == "") {
+        page_containter.html(data);
+      } else {
+        page_containter.empty();
+        page_containter.html;
+      }
 
-            console.log(data);
-
-    }).fail(function(jqXHR, textStatus, errorThrown) {
+      // Redirect to the /viewEstimate page
+      //window.location.href = "/viewEstimate";
+    }).fail(function (jqXHR, textStatus, errorThrown) {
       console.error("Error viewing takeoff:", textStatus, errorThrown);
     });
   }
@@ -49,27 +54,27 @@ $(document).ready(function() {
     console.log("retrieving takeoffs");
     // empty the table
     $("#takeoffs_table").empty();
-    $.get("/getTakeoffs", function(data) {
+    $.get("/getTakeoffs", function (data) {
       console.log(data);
-      data.forEach(function(takeoff) {
+      data.forEach(function (takeoff) {
         let row = $("<tr>");
         row.append(`<td>${takeoff.name}</td>`);
 
         // Create the form for editing
         let form = $("<form>", {
           action: "/editTakeoff",
-          method: "POST"
+          method: "POST",
         });
 
         let input = $("<input>", {
           type: "hidden",
           name: "takeoff_id",
-          value: takeoff.id
+          value: takeoff.id,
         });
 
         let submit = $("<input>", {
           type: "submit",
-          value: "Edit"
+          value: "Edit",
         });
 
         form.append(input, submit);
@@ -78,19 +83,21 @@ $(document).ready(function() {
         row.append(tdForm);
 
         // Format dates using Intl.DateTimeFormat
-        let createdAt = new Date(takeoff.created_at).toLocaleString('en-US', {
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric',
-          hour: 'numeric',
-          minute: 'numeric',
-          second: 'numeric',
+        let createdAt = new Date(takeoff.created_at).toLocaleString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          second: "numeric",
         });
 
         row.append(`<td>${createdAt}</td>`);
 
         // Add the 'View' column with proper event handling
-        row.append(`<td><button class="view-button" data-id="${takeoff.id}">View</button></td>`);
+        row.append(
+          `<td><button class="view-button" data-id="${takeoff.id}">View</button></td>`
+        );
 
         // Create the progress bar cell AFTER the 'View' column
         let tdProgress = $("<td>");
@@ -100,14 +107,14 @@ $(document).ready(function() {
 
         $("#takeoffs_table").append(row);
       });
-    }).fail(function(jqXHR, textStatus, errorThrown) {
+    }).fail(function (jqXHR, textStatus, errorThrown) {
       console.error("Error retrieving takeoffs:", textStatus, errorThrown);
     });
   }
 
   // Bind event handler for dynamically added 'View' buttons
-  $(document).on('click', '.view-button', function() {
-    const id = $(this).data('id');
+  $(document).on("click", ".view-button", function () {
+    const id = $(this).data("id");
     viewTakeoff(id);
   });
 

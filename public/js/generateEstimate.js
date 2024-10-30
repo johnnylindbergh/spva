@@ -1,3 +1,4 @@
+
 // Function to populate the "Proposal Includes" section
 function populateProposalIncludes(items) {
     const includesList = $('#includes-list');
@@ -17,15 +18,35 @@ function populateExclusions(exclusions) {
     exclusionsList.text(exclusions);
 
 
-   // $('#excludes-total').text(calculateTotal(exclusions.length, 50)); // Example calculation
+    $('#excludes-total').text("$0.00"); 
 }
 
-// Simple function to calculate totals (for demonstration purposes)
-function calculateTotal(quantity, pricePerItem) {
-    return '$' + (quantity * pricePerItem).toFixed(2);
+function populateOptions(takeoff_id) {   
+    $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
+        console.log(data);
+        const table = $('#estimate-table');
+        for (let i = 0; i < data.length; i++) {
+            // Create a new row and set row_id as a data attribute
+            const newRow = $('<tr>').attr('data-row-id', data[i].id);
+            const descriptionCell = $('<td contenteditable="true" class="editable">').text(data[i].description);
+            const amountCell = $('<td contenteditable="true" class="editable">').text(data[i].cost);
+            newRow.append(descriptionCell);
+            newRow.append(amountCell);
+            table.append(newRow);
+
+            // Trigger post to server when editing is finished (focusout)
+            descriptionCell.on('focusout', function() {
+                postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
+            });
+            amountCell.on('focusout', function() {
+                postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
+            });
+        }
+    });
 }
 
-// Function to handle the signature input change and POST data to the server
+
+
 function handleSignatureChange() {
     const signatureInput = $('#signature').val();
     const dateInput = $('input[type="date"]').val();
@@ -48,47 +69,79 @@ function handleSignatureChange() {
         });
 }
 
-// Function to add a new editable row to the estimate table and POST data to the server
-function addOption() {
+function populateOptions(takeoff_id) {   
+    $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
+        console.log(data);
+        const table = $('#estimate-table');
+        for (let i = 0; i < data.length; i++) {
+            const newRow = $('<tr>').data('row_id', data[i].id); // Store row_id as data attribute
+            const descriptionCell = $('<td contenteditable="true" class="editable">').text(data[i].description);
+            const amountCell = $('<td contenteditable="true" class="editable">').text(data[i].cost);
+            newRow.append(descriptionCell);
+            newRow.append(amountCell);
+            table.append(newRow);
+
+            // Trigger post to server when editing is finished (focusout)
+            descriptionCell.on('focusout', function() {
+                postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.data('row_id'));
+            });
+            amountCell.on('focusout', function() {
+                postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.data('row_id'));
+            });
+        }
+    });
+}
+
+function addOption(takeoff_id) {
+    if (takeoff_id == null) {
+        takeoff_id = parseInt($('#takeoff_id').val());
+    }
+
+    console.log("Adding option to takeoff ", takeoff_id);
+
     const table = $('#estimate-table');
-    
-    // Create a new row with editable cells
-    const newRow = $('<tr>');
+    const newRow = $('<tr>').attr('data-row-id', null); // New rows initially have no row_id
     const descriptionCell = $('<td contenteditable="true" class="editable">').text('');
     const amountCell = $('<td contenteditable="true" class="editable">').text('0.00');
-
     newRow.append(descriptionCell);
     newRow.append(amountCell);
     table.append(newRow);
 
-    // Trigger post to server when content is changed
-    descriptionCell.on('input', function() {
-        postToAddOption(descriptionCell.text(), amountCell.text());
+    // Trigger post to server when editing is finished (focusout)
+    descriptionCell.on('focusout', function() {
+        postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
     });
-    amountCell.on('input', function() {
-        postToAddOption(descriptionCell.text(), amountCell.text());
+    amountCell.on('focusout', function() {
+        postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
     });
 
     // Initial post when row is added
-    postToAddOption(descriptionCell.text(), amountCell.text());
+    postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
 }
 
-// Example function to handle new row data and POST it to the server
-function postToAddOption(description, amount) {
+function postToAddOption(description, amount, takeoff_id, row_id) {
     const data = {
         option: description,
-        cost_delta: amount
+        cost_delta: amount,
+        takeoff_id: takeoff_id,
+        row_id: row_id // Include row_id in the data
     };
 
     // Send the data to the server via a POST request using jQuery
     $.post('/add-row', data)
         .done(function(response) {
-            console.log('Row added successfully:', response);
+            console.log('Row added/updated successfully:', response);
+
+            // Update the row_id if it was a new row and server provided an ID
+            if (!row_id && response.new_row_id) {
+                $('[data-row-id="null"]').attr('data-row-id', response.new_row_id);
+            }
         })
         .fail(function(error) {
-            console.error('Error adding row:', error);
+            console.error('Error adding/updating row:', error);
         });
 }
+
 
 // Function to add onclick and oninput listeners to all editable elements
 function addEditableListeners() {
@@ -133,8 +186,9 @@ $(document).ready(function() {
 
         populateProposalIncludes(data.estimate[0].inclusions);
         populateExclusions(data.estimate[0].exclusions);
+        populateOptions(parseInt($('#takeoff_id').val()));
         console.log(data.takeoff[0].total);
-        $('#includes-total').text(data.takeoff[0].total);
+        $('#includes-total').text("$"+data.takeoff[0].total);
  
     });
 

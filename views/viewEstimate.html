@@ -13,10 +13,41 @@
 
     <nav class="bottom-navbar">
         <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="services.html">Services</a></li>
-            <li><a href="about.html">About Us</a></li>
-            <li><a href="contact.html">Contact</a></li>
+            <li><input type="button" value="Share With Sun Painting" onclick="shareRequest()" class="img-button-client"</li> /<br>
+            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danger Button</title>
+    <style>
+        .danger-button {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 0, 0.269),
+                rgba(255, 255, 0, 0.321) 10px,
+                rgba(0, 0, 0, 0.267) 10px,
+                rgba(0, 0, 0, 0.232) 20px
+            );
+            border: 2px solid black;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-shadow: 1px 1px 2px black;
+        }
+        .danger-button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <button class="danger-button">Share With Client</button>
+</body>
+</html>
+
+        
         </ul>
     </nav>
     <div class="container">
@@ -25,22 +56,21 @@
             <img src="sunpainting_logo_blue.png" alt="Sun Painting Logo">
         </div>
         <p>1819 Broadway St, Charlottesville, VA 22902 US</p>
-        <p>Phone: +1 434-207-2025 | Email: <a href="mailto:sales@sunpaintingva.com" style="color:#0066cc;">sales@sunpaintingva.com</a></p>
-        <p>Website: <a href="http://www.sunpaintingva.com" style="color:#0066cc;">www.sunpaintingva.com</a></p>
+        <p>Phone: +1 434-207-2025 | Email: <a href="mailto:sales@sunpaintingva.com" style="color:#000000;">sales@sunpaintingva.com</a></p>
+        <p>Website: <a href="http://www.sunpaintingva.com" style="color:#000000;">www.sunpaintingva.com</a></p>
 
         
          {{#takeoff}}
-       <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
+       <input type='hidden' id='takeoff_id' value='{{id}}'>
 
        <input type='hidden' id='takeoff_total' value='{{takeoff_info.total}}'>
 
-      <input type= 'text' class="titleInput" id= 'takeoff_name' onchange='updateTakeoffName()' value='{{name}}'></br>
+      <h2>{{name}}</h2>
+    </br>
    
-      Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{owner}}'></br>
-      Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{owner_billing_address}}'></br>
+      Owner:  {{owner}}</br>
+      Billing Address: {{owner_billing_address}}</br>
       {{created_at}}</br>
-      {{status}}
-      {{passcode}}
 
       </br>
     {{/takeoff}}
@@ -70,7 +100,7 @@
         </table>
 
         <!-- Button to add a new row -->
-        <button id="add-row-btn" onclick="addOption()">Add Row</button>
+        <button id="add-row-btn" onclick="addOption({{estimate.takeoff_id}})">Add Row</button>
 
         <!-- Signature section with IDs for signature input -->
         <div class="signature">
@@ -122,6 +152,7 @@
 
     
     </div>
+    <br>
 
     <script src="scripts.js"></script>
 </body>

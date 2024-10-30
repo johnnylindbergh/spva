@@ -47,6 +47,15 @@ CREATE TABLE estimate (
   PRIMARY KEY (id)
 );
 
+CREATE TABLE options (
+  id INT NOT NULL AUTO_INCREMENT,
+  takeoff_id INT,
+  description TEXT,
+  cost DECIMAL(10,2),
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+);
+
 -- Take-off table (populates when a user uploads a take-off)
 CREATE TABLE takeoffs (
   id INT NOT NULL AUTO_INCREMENT,
@@ -101,35 +110,35 @@ CREATE TABLE materials (
 );
 
 -- insert random paint names with id 6
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 FL EXTRA', 'Paint 1 Description', 23.98, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 0 EG EXTRA', 'Paint 2 Description', 24.98, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 0 SG EXTRA', 'Paint 3 Description', 25.98, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('SPR INT FL EXTRA', 'Paint 4 Description', 33.66, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('SPR INT SA EXTRA', 'Paint 5 Description', 33.06, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 FL EXTRA', 'Paint 1 Description', 23.98, 200.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 0 EG EXTRA', 'Paint 2 Description', 24.98, 200.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 0 SG EXTRA', 'Paint 3 Description', 25.98, 200.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('SPR INT FL EXTRA', 'Paint 4 Description', 33.66, 200.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('SPR INT SA EXTRA', 'Paint 5 Description', 33.06, 200.00, 6); 
 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('SPR INT SG EXTRA', 'Paint 2 Description', 36.26, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('CASHMERE FL EXTRA', 'Paint 3 Description', 36.99, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('CASHMERE LL EXTRA', 'Paint 4 Description', 36.99, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('CASHMERE ML EXTRA', 'Paint 5 Description', 43.99, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('SPR INT SG EXTRA', 'Paint 2 Description', 36.26, 200.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('CASHMERE FL EXTRA', 'Paint 3 Description', 36.99, 200.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('CASHMERE LL EXTRA', 'Paint 4 Description', 36.99, 200.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('CASHMERE ML EXTRA', 'Paint 5 Description', 43.99, 200.00, 6); 
 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME FL EXTRA', 'Paint 5 Description', 49.64, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME MT EXTRA', 'Paint 5 Description', 49.64, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME SA EXTRA', 'Paint 5 Description', 48.99, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME SG EXTRA', 'Paint 5 Description', 51.99, 1.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMERALD IN FL EXTR ', 'Other 4 Description', 53.51 , 1.00, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMERALD IN SA EXTR', 'Other 4 Description', 54.51 , 1.00, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMERALD IN SG EXTR', 'Other 4 Description', 55.51 , 1.00, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PROCL LTX SA EXTRA', 'Other 4 Description', 54.85, 1.00, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PROCL LTX SG EXTRA', 'Other 4 Description', 56.55, 1.00, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMRLD UTE SA HHW', 'Other 4 Description', 62.05, 1.00, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('FIRETEX FX5090', 'Other 1 Description', 98.39, 1.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME FL EXTRA', 'Paint 5 Description', 49.64, 200.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME MT EXTRA', 'Paint 5 Description', 49.64, 200.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME SA EXTRA', 'Paint 5 Description', 48.99, 200.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('DUR HOME SG EXTRA', 'Paint 5 Description', 51.99, 200.00, 6); 
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMERALD IN FL EXTR ', 'Other 4 Description', 53.51 , 200.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMERALD IN SA EXTR', 'Other 4 Description', 54.51 , 200.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMERALD IN SG EXTR', 'Other 4 Description', 55.51 , 200.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PROCL LTX SA EXTRA', 'Other 4 Description', 54.85, 200.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PROCL LTX SG EXTRA', 'Other 4 Description', 56.55, 200.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMRLD UTE SA HHW', 'Other 4 Description', 62.05, 200.00, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('FIRETEX FX5090', 'Other 1 Description', 98.39, 200.00, 6); 
 
 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -WHITE (GAL)', 'Other 1 Description', 29.26, 300.0, 6); 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -WHITE (GAL)', 'Interior flat paint', 29.26, 300.0, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -WHITE (5GAL)', 'Interior flat paint', 126.50, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -WHITE (5GAL)', 'Interior flat paint', 126.50, 1500.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -BASE1 (GAL)', 'Interior flat paint base 1', 35.04, 300.0, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -BASE1 (5GAL)', 'Interior flat paint base 1', 151.39, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -BASE1 (5GAL)', 'Interior flat paint base 1', 151.39, 1500.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 LS -WHITE (GAL)', 'Interior low-sheen paint', 35.04, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 LS -WHITE (5GAL)', 'Interior low-sheen paint', 151.39, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 LS -BASE1 (GAL)', 'Interior low-sheen paint base 1', 35.04, 300.0, 6);
@@ -151,8 +160,10 @@ INSERT INTO materials (name, description, cost, coverage, material_type) VALUES 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Regal Select Pearl White (GAL)', 'Interior pearl finish paint', 55.47, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Regal Select Semi-Gloss White (GAL)', 'Interior semi-gloss finish paint', 55.47, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Aura Interior Matte Base 1 (GAL)', 'Interior matte paint', 78.99, 300.0, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Aura Exterior Satin White (GAL)', 'Exterior satin paint', 78.99, 300.0, 7);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Ultra Spec Exterior Flat White (GAL)', 'Exterior flat paint', 60.54, 300.0, 7);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Aura Exterior Satin White (GAL)', 'Exterior satin paint', 78.99, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Ultra Spec Exterior Flat White (GAL)', 'Exterior flat paint', 60.54, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Lux (GAL)', 'SW3078', 978.54, 300.0, 6);
+
 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Wood Panel Interior Door', '', 60.54, 1, 1);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Steel Door frame', '', 80.00, 1, 1);

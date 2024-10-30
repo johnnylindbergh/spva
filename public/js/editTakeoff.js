@@ -83,7 +83,7 @@ function updateTakeoffBillingAddress() {
 function add_subject(id, material_name) {
   subject_id = id;
   console.log("Adding material for subject: " + material_name);
-  $("#selected_subject").text("Selected subject: " + material_name);
+ // $("#selected_subject").text("Selected subject: " + material_name);
   document.getElementById("myDropdown").classList.toggle("show");
   // move div to mouse x,y
   // var x = event.clientX;
@@ -274,21 +274,30 @@ function loadTakeoffMaterials(id) {
                 adjustedMeasurement = 0;
               }
 
-              subsum += newCost * adjustedMeasurement;
+              subsum += newCost * (adjustedMeasurement/material.coverage);
 
               if (row.labor_cost > 0) {
-                if (row.measurement_unit === "sf") {
-                  subsum += parseFloat(row.labor_cost/ material.coverage) * adjustedMeasurement;
+                  subsum += parseFloat(row.labor_cost) * adjustedMeasurement;
+              }
+
+              if (row.measurement_unit === "sf") {
+                if(material.coverage <200){
+                  material.coverage = 200;
                 }
+                subsum += (parseFloat(row.labor_cost) / parseFloat(material.coverage) * adjustedMeasurement);
+              }
 
                 if (row.measurement_unit === "ft' in\"") {
-                  subsum += parseFloat(row.labor_cost / material.coverage) * adjustedMeasurement;
+                  if(material.coverage <200){
+                    material.coverage = 200;
+                  }
+                  subsum += (parseFloat(row.labor_cost) / parseFloat(material.coverage) * adjustedMeasurement);
                 }
 
                 if (row.measurement_unit === "Count") {
                   subsum += parseFloat(row.labor_cost) * adjustedMeasurement;
                 }
-              }
+              
             });
           }
 

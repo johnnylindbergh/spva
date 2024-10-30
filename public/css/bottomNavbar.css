@@ -3,13 +3,26 @@
   navbar.css: navbar-specific style
 */
 
+.img-button-client {
+    background: url('/sun_painting_logo.png') no-repeat;
+    border: 2px solid black;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-shadow: 1px 1px 2px black;
+}
+
 /* containing navbar div */
 .bottom-navbar {
     position: fixed;
+    padding: 10px;
+    float:left;
     bottom: 0;
-    width: 100%;
+    width: 15%;
     font-size: 14px;
-    background-color: rgba(20, 30, 160, 0.74);
+    background-color: rgba(0, 0, 0, 0.74);
     z-index: 3;
   }
   

@@ -9,7 +9,7 @@
   top: 0;
   width: 100%;
   font-size: 14px;
-  background-color: rgba(90, 72, 130, 0.54);
+  background-color:#0893a1;
   z-index: 3;
 }
 
@@ -50,7 +50,7 @@
 
 /* highlight and change cursor when navbar links hovered */
 .navbar li a:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: #05666f
   cursor: pointer;
 }
 

@@ -8,6 +8,7 @@
 * {
    font-family: "Quicksand", sans-serif;
 
+}
 .container {
   text-align: left;
        display:center;
@@ -105,7 +106,7 @@ tr:nth-child(even) {
 }
 
 button, input[type=button], input[type=submit], input[type=reset] {
-  background-color: rgba(90, 72, 130);
+  background-color:#f48847;
   border: none;
   border-radius: 5px;
   color: white;
