@@ -26,7 +26,7 @@ function addMaterial() {
     const desc = document.getElementById('desc').value;
     const cost = document.getElementById('cost').value;
     const coverage = document.getElementById('coverage').value;
-    const type = $('#type');
+    const type =  $('#type :selected').text();
 
     // Implement the logic to add a new material
     // This might involve an AJAX call to your server to save the material

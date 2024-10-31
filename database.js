@@ -446,6 +446,10 @@ module.exports = {
   },
 
   addMaterial: function (name, desc, cost, coverage, type, callback) {
+    type = parseInt(type);
+    if ( type == 0 || type == null || isNaN(type)) {
+      type = 6; // the default for paint
+    }
     con.query(
       "INSERT INTO materials (name, description, cost, coverage, material_type) VALUES (?,?,?,?,?);",
       [name, desc, cost, coverage, type],
@@ -473,16 +477,60 @@ module.exports = {
     );
   },
 
-  getSharedEstimate: function (estimate_id, callback) {
+
+getSharedEstimate: function (hash, callback) {
     con.query(
-      "SELECT * FROM estimate WHERE passcode = ?;",
-      [estimate_id],
-      function (err, estimate) {
-        if (err) return callback(err);
-        callback(null, estimate);
-      }
+        "SELECT * FROM takeoffs WHERE passcode = ?;",
+        [hash],
+        function (err, takeoffResults) {
+            if (err) return callback(err);
+            if (!takeoffResults || takeoffResults.length === 0) {
+              console.log("non-existent hash: ", hash);
+                return callback(new Error("No takeoff found for the provided passcode"));
+            }
+
+            const takeoff = takeoffResults[0]; // assuming only one result
+
+            console.log("getting shared takeoff:", takeoff);
+
+            con.query(
+                "SELECT * FROM estimate WHERE id = ?;",
+                [takeoff.estimate_id],
+                function (err, estimateResults) {
+                    if (err) return callback(err);
+                    const estimate = estimateResults[0]; // assuming only one result
+
+                    // Query the options table for the estimate_id
+                    con.query(
+                        "SELECT * FROM options WHERE takeoff_id = ?;",
+                        [takeoff.estimate_id],
+                        function (err, optionsResults) {
+                            if (err) return callback(err);
+                            callback(null, estimate, takeoff, optionsResults);
+                        }
+                    );
+                }
+            );
+        }
     );
-  },
+},
+
+updateOptionSelection: function (takeoff_id, option_id, selected, callback) {
+  if (selected == 'true'){
+    selected = 1;
+  } else {
+    selected = 0;
+  }
+    con.query(
+        "UPDATE options SET applied = ? WHERE id = ? AND takeoff_id = ?;",
+        [selected, option_id, takeoff_id],
+        function (err) {
+            if (err) return callback(err);
+            callback(null);
+        }
+    );
+},
+
 
   generateTakeoffMaterials: function (takeoff_id, callback) {
     // kill me

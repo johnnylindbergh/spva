@@ -330,7 +330,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/generateEstimate", function (req, res) {
+  app.post("/generateEstimate", function (req, res) { // priority: this function should check to see if an estimate has been generated, if yes, send to client, if no, generate 
     var takeoff_id = req.body.takeoff_id;
     console.log("Generating estimate for takeoff", takeoff_id);
 
@@ -625,16 +625,34 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/share/:hash", function (req, res) {
+  app.get("/share/:hash", function (req, res) {
     console.log("sharing takeoff ", req.params.hash);
-    db.getSharedEstimate(req.params.hash, function (err) {
+    if(req.params.hash.length != 16) {
+      res.redirect("/");
+    }
+    db.getSharedEstimate(req.params.hash, function (err, estimate, takeoff, options) {
       if (err) {
         console.log(err);
+        res.redirect("/");
       } else {
         console.log("shared");
+        res.render('viewEstimateClient.html', {takeoff:takeoff, estimate:estimate, options:options});
       }
     });
   });
+
+  app.post('/share/updateOptionsSelection', function(req, res) {
+    console.log("updating options selection ", req.body);
+    db.updateOptionSelection(req.body.takeoff_id, req.body.option_id, req.body.applied, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("updated");
+        res.send({response: "updated!"});
+      }
+    });
+  });
+
 
   // ending perentheses do not delete
 };

@@ -112,13 +112,20 @@ td {
 
 /* Signature Section */
 .signature {
+    padding: 20px;
     margin-top: 40px;
     text-align: center;
 }
 
 .signature p {
     font-size: 0.9em;
+
     color: black;
+}
+#signature {
+    font-family: "Monsieur La Doulaise", cursive;
+  font-weight: 400;
+  font-style: normal;
 }
 
 /* Terms and Conditions section */
@@ -141,6 +148,39 @@ td {
     margin-left: 20px;
     color: #444;
 }
+
+.loader {
+
+    display:inline-block;
+
+  border-top: 8px solid #F8B348;
+  border-right: 8px solid #0893A1;
+  border-bottom: 8px solid #EA4C42;
+  border-left: 8px solid #f48847;
+  border-radius: 25%;
+   border-radius: 10%;
+  width: 15px;
+  height: 15px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); border-radius: 10%;}
+  
+  50% { transform: rotate(180deg); border-radius: 100%;}
+
+  100% { transform: rotate(360deg); border-radius: 10%;}
+}
+
+
+
 
 /* Input Styles for Signature */
 input[type="text"], input[type="date"] {

@@ -94,9 +94,9 @@ $(document).ready(function () {
 
         row.append(`<td>${createdAt}</td>`);
 
-        // Add the 'View' column with proper event handling
+        // Add the 'View' button with a link to /share/+takeoff.passcode with proper event handling
         row.append(
-          `<td><button class="view-button" data-id="${takeoff.id}">View</button></td>`
+          `<td><input type="button" onclick="location.href='/share/`+takeoff.passcode+`';" value="View" /></td>`
         );
 
         // Create the progress bar cell AFTER the 'View' column
