@@ -21,6 +21,7 @@ function populateExclusions(exclusions) {
     $('#excludes-total').text("$0.00"); 
 }
 
+var optionsTouched = false;
 
 function populateOptions(takeoff_id) {   
 
@@ -28,45 +29,67 @@ function populateOptions(takeoff_id) {
 
     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
         console.log(data);
-        const table = $('#estimate-table');
+        const table = $('#options-table');
+        table.empty(); // Clear any existing content
         for (let i = 0; i < data.length; i++) {
             // Create a new row and set row_id as a data attribute
             const newRow = $('<tr>').attr('data-row-id', data[i].id);
             const descriptionCell = $('<td>').text(data[i].description);
             const amountCell = $('<td id= "amount">').text(data[i].cost);
-            //data[i].applied should be used to set the state of the checkBoxCell
             
-            // Create a checkbox cell
-            const checkboxCell = $('<td>');
-            const checkbox = $('<input>').attr('type', 'checkbox').attr('data-takeoff-id', takeoff_id);
-            checkbox.prop('checked', data[i].applied);  // Set the checkbox state based on the data
-            console.log(data[i].applied )
-            if (data[i].cost && data[i].applied) {
-                console.log("adding to total", data[i].cost);
+            // Create a radio button cell
+            const radioCell = $('<td >');
+            // make the width 60px
+            radioCell.css('width', '105px');
+            const includeRadio = $('<input>').attr('type', 'radio').attr('name', 'option-' + data[i].id).attr('value', 'include');
+            const excludeRadio = $('<input>').attr('type', 'radio').attr('name', 'option-' + data[i].id).attr('value', 'exclude');
+            
+            // Set the radio button state based on the data
+            if (data[i].applied) {
+                includeRadio.prop('checked', true);
                 optionsTotal += parseFloat(data[i].cost.replace('$',''));
-                console.log(optionsTotal)
+            } else {
+                excludeRadio.prop('checked', true);
             }
             
-            // Add change event listener to the checkbox
-            checkbox.on('change', function() {
-                const isChecked = $(this).is(':checked');
-                // Post to server when checkbox state changes
-
-                $.post('updateOptionsSelection', {
-                    takeoff_id: takeoff_id,
-                    option_id: data[i].id,
-                    applied: isChecked
-                }, function(response) {
-                    console.log('Checkbox updated:', response);
-                     updateTotals();
-                     window.location.reload();
-                });
+            // Add change event listener to the radio buttons
+            includeRadio.on('change', function() {
+                if ($(this).is(':checked')) {
+                    $.post('updateOptionsSelection', {
+                        takeoff_id: takeoff_id,
+                        option_id: data[i].id,
+                        applied: true // mark as applied server side will toggle the value
+                    }, function(response) {
+                        console.log('Radio button updated:', response);
+                        updateTotals();
+                        optionsTouched = true;
+                        populateOptions(takeoff_id);
+                        //window.location.reload();
+                    });
+                }
             });
             
-            checkboxCell.append(checkbox);
+            excludeRadio.on('change', function() {
+                if ($(this).is(':checked')) {
+                    $.post('updateOptionsSelection', {
+                        takeoff_id: takeoff_id,
+                        option_id: data[i].id,
+                        applied: false
+                    }, function(response) {
+                        console.log('Radio button updated:', response);
+                       
+                        optionsTouched = true;
+                        populateOptions(takeoff_id);
+
+                        //window.location.reload();
+                    });
+                }
+            });
+            
+            radioCell.append(includeRadio).append(' Yes ').append(excludeRadio).append(' No ');
             newRow.append(descriptionCell);
             newRow.append(amountCell);
-            newRow.append(checkboxCell); // Append the checkbox cell to the row
+            newRow.append(radioCell); // Append the radio button cell to the row
             table.append(newRow);
 
             // Trigger post to server when editing is finished (focusout)
@@ -78,13 +101,10 @@ function populateOptions(takeoff_id) {
             });
         }
 
-            $('#options-total').text("$" + optionsTotal.toFixed(2));
+        $('#options-total').text("Options: $" + optionsTotal.toFixed(2));
 
         updateTotals();
     });
-
-
- 
 }
 
 function updateTotals() {
@@ -99,8 +119,8 @@ function updateTotals() {
     const total = subtotal + optionsTotal;
 
     // Update the text content of subtotal, options-total, and total
-    $('#subtotal').text("$" + subtotal.toFixed(2));
-    $('#total').text("$" + total.toFixed(2));
+    $('#subtotal').text("Subtotal: $" + subtotal.toFixed(2));
+    $('#total').text("Total: $" + total.toFixed(2));
 
     // Optional: Log to console for debugging purposes
     console.log("Subtotal:", subtotal);
@@ -114,13 +134,26 @@ function updateTotals() {
 
 
 function handleSignatureChange() {
+
+    if (!optionsTouched){
+        alert("Please select options before signing");
+        return;
+    }
+
     const signatureInput = $('#signature').val();
     const dateInput = $('input[type="date"]').val();
+
+
+    if (signatureInput === '') {
+        alert('Please provide a signature');
+        return;
+    }   
 
     console.log('Signature Updated:', signatureInput);
     
     // Prepare the data to send to the server
     const data = {
+        takeoff_id: parseInt($('#takeoff_id').val()),
         signature: signatureInput,
         date: dateInput
     };
@@ -129,6 +162,8 @@ function handleSignatureChange() {
     $.post('/update-signature', data)
         .done(function(response) {
             console.log('Success:', response);
+
+         
         })
         .fail(function(error) {
             console.error('Error:', error);
@@ -143,6 +178,7 @@ function handleSignatureChange() {
 
 // Example to dynamically populate content on page load
 $(document).ready(function() {
+     $(".loader").toggle(); // hide it initially
     // Populate the "Proposal Includes" section with dynamic data
     const includesItems = ['Preparation of surfaces', 'Primer application', 'Final paint coat'];
     // post takeoff_id to getEstimateData to set includesItems and exclusionsItems
@@ -154,9 +190,11 @@ $(document).ready(function() {
         populateExclusions(data.estimate[0].exclusions);
         populateOptions(parseInt($('#takeoff_id').val()));
         console.log(data.takeoff[0].total);
+        $('#includes-total').text("$"+data.takeoff[0].total);
         $('#subtotal').text("$"+data.takeoff[0].total);
+        //call update totals every few seconds
+        //setInterval(updateTotals, 5000);
 
-        updateEstimateTotal(parseFloat(data.takeoff[0].total));
 
         
     });

@@ -65,6 +65,7 @@ CREATE TABLE takeoffs (
   creator_id INT,
   owner VARCHAR(64) default 'Owner Name',
   owner_billing_address VARCHAR(64),
+  owner_email VARCHAR(64),
   file_path_of_plans VARCHAR(255),
   estimate_id INT,
   status TINYINT(1) DEFAULT 0,

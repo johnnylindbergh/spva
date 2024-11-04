@@ -407,11 +407,11 @@ module.exports = {
     // if it is not, update the existing row
     if (row_id == null) {
       con.query(
-        "INSERT INTO options (takeoff_id, description, cost) VALUES (?,?,?);",
+        "INSERT INTO options (takeoff_id, description, cost) VALUES (?,?,?); SELECT LAST_INSERT_ID() as last;",
         [takeoff_id, option, cost_delta],
-        function (err) {
+        function (err, results) {
           if (err) return callback(err);
-          callback(null);
+          callback(null,results[1][0].last);
         }
       );
     } else {
@@ -531,6 +531,34 @@ updateOptionSelection: function (takeoff_id, option_id, selected, callback) {
     );
 },
 
+  updateSignature: function (takeoff_id, signature, date, callback) {
+    // first get the owner_name in takeoffs
+    con.query(
+      "SELECT owner FROM takeoffs WHERE id = ?;",
+      [takeoff_id],
+      function (owner, err) {
+        if (err) return callback(err);
+        console.log("comparing  ", owner);
+         console.log("to  ", signature);
+        // if the levenshtein distance is less than 3, update the takeoff status to 4
+        if (levenshtein.get(owner, signature) < 2) {
+          con.query(
+            "UPDATE takeoffs SET status = 4, date = ? WHERE id = ?;",
+            [date, takeoff_id],
+              function (err) {
+                if (err) return callback(err);
+                callback(true, null);
+                }
+              );
+
+        } else {
+          console.log("signature does not match owner_name or owner_name is null");
+          callback(false,null);
+        }
+      
+      }
+    );
+  },
 
   generateTakeoffMaterials: function (takeoff_id, callback) {
     // kill me
@@ -791,6 +819,20 @@ updateOptionSelection: function (takeoff_id, option_id, selected, callback) {
     });
   },
 
+
+  //used by mailer
+
+  getTakeoffById: function (takeoff_id, callback) {
+    con.query(
+      "SELECT * FROM takeoffs WHERE id = ?;",
+      [takeoff_id],
+      function (err, takeoff) {
+        if (err) return callback(err);
+        callback(null, takeoff);
+      }
+    );
+  },
+  
   takeoffSetStatus: function (takeoff_id, status, cb) {
     con.query(
       "UPDATE takeoffs SET status = ? WHERE id = ?;",

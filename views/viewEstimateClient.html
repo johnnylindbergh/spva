@@ -73,6 +73,14 @@
                 <td id="excludes-total">${{exclude_total}}</td>
             </tr>
         </table>
+        <table id="options-table">
+            <tr>
+                <th>Description</th>
+
+
+                <th>Amount</th>
+            </tr>
+        </table>
 
         <div class="total" >
             <h3 class="total" id = "subtotal">$</h3>
@@ -82,6 +90,8 @@
         </div>
     </br>
 
+    <strong>  Prefered Start Date:</strong> <input type="date">
+
         <!-- no adding rows on the client -->
         <!-- <button id="add-row-btn" onclick="addOption({{estimate.takeoff_id}})">Add Row</button> -->
 
@@ -89,9 +99,10 @@
         <div class="signature">
             <p><em>This budget estimate is not a contract until signed and returned to Sun Painting.</em></p> </br>
             <p>
-                <strong>Authorized Signature:</strong><input type="text" id="signature" onchange="handleSignatureChange()" placeholder="Sign here"><strong>  Date:</strong> <input type="date"> <i style ="margin-bottom: -10px; margin-left:2px"class="loader"></i>
+                <strong>Authorized Signature:</strong><input type="text" id="signature" placeholder="Sign here"><strong>  Date:</strong> <input type="date"> <i class="loader" style ="margin-bottom: -10px; margin-left:2px"></i>
+                <!-- submit button that calls handleSig.. -->
+                <button class="sign-btn" onclick="handleSignatureChange()">Sign</button>
 
-               
             </p>
         </div>
     </div>

@@ -112,7 +112,13 @@ function addOption(takeoff_id) {
         postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
     });
     amountCell.on('focusout', function() {
-        postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
+        if (descriptionCell.text() == '') { // Don't allow empty descriptions
+            descriptionCell.text('WRITE DESCRIPTION HERE');
+        } else {
+            postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
+
+        }
+
     });
 
     // Initial post when row is added
