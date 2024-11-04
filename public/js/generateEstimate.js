@@ -47,27 +47,27 @@ function populateOptions(takeoff_id) {
 
 
 
-function handleSignatureChange() {
-    const signatureInput = $('#signature').val();
-    const dateInput = $('input[type="date"]').val();
+// function handleSignatureChange() {
+//     const signatureInput = $('#signature').val();
+//     const dateInput = $('input[type="date"]').val();
 
-    console.log('Signature Updated:', signatureInput);
+//     console.log('Signature Updated:', signatureInput);
     
-    // Prepare the data to send to the server
-    const data = {
-        signature: signatureInput,
-        date: dateInput
-    };
+//     // Prepare the data to send to the server
+//     const data = {
+//         signature: signatureInput,
+//         date: dateInput
+//     };
 
-    // Send the data to the server via a POST request using jQuery
-    $.post('/update-signature', data)
-        .done(function(response) {
-            console.log('Success:', response);
-        })
-        .fail(function(error) {
-            console.error('Error:', error);
-        });
-}
+//     // Send the data to the server via a POST request using jQuery
+//     $.post('/update-signature', data)
+//         .done(function(response) {
+//             console.log('Success:', response);
+//         })
+//         .fail(function(error) {
+//             console.error('Error:', error);
+//         });
+// }
 
 function populateOptions(takeoff_id) {   
     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
@@ -148,6 +148,43 @@ function postToAddOption(description, amount, takeoff_id, row_id) {
         });
 }
 
+function shareClient(){
+    const takeoff_id = $('#takeoff_id').val();
+    console.log(takeoff_id);
+    XSAlert({
+        title: 'Email Confirmation',
+        message: 'Are you sure you want to share this estimate with the client?',
+        icon: 'warning',
+     }).then((value) => {
+        console.log("dialogue output",value);
+        if(value == "ok"){
+
+            $.post('/shareClient', {takeoff_id: takeoff_id}, function(data) {
+                console.log(data);
+            });
+
+        }
+    });
+}
+
+function shareSelf(){
+    const takeoff_id = $('#takeoff_id').val();
+    console.log(takeoff_id);
+    XSAlert({
+        title: 'Email Confirmation',
+        message: 'Are you sure you want to share this estimate with the client?',
+        icon: 'warning',
+     }).then((value) => {
+        console.log("dialogue output",value);
+        if(value == "ok"){
+
+            $.post('/shareClient', {takeoff_id: takeoff_id}, function(data) {
+                console.log(data);
+            });
+
+        }
+    });
+}
 
 // Function to add onclick and oninput listeners to all editable elements
 function addEditableListeners() {

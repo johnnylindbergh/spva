@@ -162,8 +162,6 @@ function handleSignatureChange() {
     $.post('/update-signature', data)
         .done(function(response) {
             console.log('Success:', response);
-
-         
         })
         .fail(function(error) {
             console.error('Error:', error);
@@ -190,12 +188,12 @@ $(document).ready(function() {
         populateExclusions(data.estimate[0].exclusions);
         populateOptions(parseInt($('#takeoff_id').val()));
         console.log(data.takeoff[0].total);
+
         $('#includes-total').text("$"+data.takeoff[0].total);
         $('#subtotal').text("$"+data.takeoff[0].total);
+
         //call update totals every few seconds
         //setInterval(updateTotals, 5000);
-
-
         
     });
 });

@@ -411,7 +411,7 @@ module.exports = {
         [takeoff_id, option, cost_delta],
         function (err, results) {
           if (err) return callback(err);
-          callback(null,results[1][0].last);
+          callback(null, results[1][0].last);
         }
       );
     } else {
@@ -447,7 +447,7 @@ module.exports = {
 
   addMaterial: function (name, desc, cost, coverage, type, callback) {
     type = parseInt(type);
-    if ( type == 0 || type == null || isNaN(type)) {
+    if (type == 0 || type == null || isNaN(type)) {
       type = 6; // the default for paint
     }
     con.query(
@@ -477,59 +477,60 @@ module.exports = {
     );
   },
 
-
-getSharedEstimate: function (hash, callback) {
+  getSharedEstimate: function (hash, callback) {
     con.query(
-        "SELECT * FROM takeoffs WHERE passcode = ?;",
-        [hash],
-        function (err, takeoffResults) {
+      "SELECT * FROM takeoffs WHERE passcode = ?;",
+      [hash],
+      function (err, takeoffResults) {
+        if (err) return callback(err);
+        if (!takeoffResults || takeoffResults.length === 0) {
+          console.log("non-existent hash: ", hash);
+          return callback(
+            new Error("No takeoff found for the provided passcode")
+          );
+        }
+
+        const takeoff = takeoffResults[0]; // assuming only one result
+
+        console.log("getting shared takeoff:", takeoff);
+
+        con.query(
+          "SELECT * FROM estimate WHERE id = ?;",
+          [takeoff.estimate_id],
+          function (err, estimateResults) {
             if (err) return callback(err);
-            if (!takeoffResults || takeoffResults.length === 0) {
-              console.log("non-existent hash: ", hash);
-                return callback(new Error("No takeoff found for the provided passcode"));
-            }
+            const estimate = estimateResults[0]; // assuming only one result
 
-            const takeoff = takeoffResults[0]; // assuming only one result
-
-            console.log("getting shared takeoff:", takeoff);
-
+            // Query the options table for the estimate_id
             con.query(
-                "SELECT * FROM estimate WHERE id = ?;",
-                [takeoff.estimate_id],
-                function (err, estimateResults) {
-                    if (err) return callback(err);
-                    const estimate = estimateResults[0]; // assuming only one result
-
-                    // Query the options table for the estimate_id
-                    con.query(
-                        "SELECT * FROM options WHERE takeoff_id = ?;",
-                        [takeoff.estimate_id],
-                        function (err, optionsResults) {
-                            if (err) return callback(err);
-                            callback(null, estimate, takeoff, optionsResults);
-                        }
-                    );
-                }
+              "SELECT * FROM options WHERE takeoff_id = ?;",
+              [takeoff.estimate_id],
+              function (err, optionsResults) {
+                if (err) return callback(err);
+                callback(null, estimate, takeoff, optionsResults);
+              }
             );
-        }
+          }
+        );
+      }
     );
-},
+  },
 
-updateOptionSelection: function (takeoff_id, option_id, selected, callback) {
-  if (selected == 'true'){
-    selected = 1;
-  } else {
-    selected = 0;
-  }
+  updateOptionSelection: function (takeoff_id, option_id, selected, callback) {
+    if (selected == "true") {
+      selected = 1;
+    } else {
+      selected = 0;
+    }
     con.query(
-        "UPDATE options SET applied = ? WHERE id = ? AND takeoff_id = ?;",
-        [selected, option_id, takeoff_id],
-        function (err) {
-            if (err) return callback(err);
-            callback(null);
-        }
+      "UPDATE options SET applied = ? WHERE id = ? AND takeoff_id = ?;",
+      [selected, option_id, takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
     );
-},
+  },
 
   updateSignature: function (takeoff_id, signature, date, callback) {
     // first get the owner_name in takeoffs
@@ -539,23 +540,23 @@ updateOptionSelection: function (takeoff_id, option_id, selected, callback) {
       function (owner, err) {
         if (err) return callback(err);
         console.log("comparing  ", owner);
-         console.log("to  ", signature);
+        console.log("to  ", signature);
         // if the levenshtein distance is less than 3, update the takeoff status to 4
         if (levenshtein.get(owner, signature) < 2) {
           con.query(
             "UPDATE takeoffs SET status = 4, date = ? WHERE id = ?;",
             [date, takeoff_id],
-              function (err) {
-                if (err) return callback(err);
-                callback(true, null);
-                }
-              );
-
+            function (err) {
+              if (err) return callback(err);
+              callback(true, null);
+            }
+          );
         } else {
-          console.log("signature does not match owner_name or owner_name is null");
-          callback(false,null);
+          console.log(
+            "signature does not match owner_name or owner_name is null"
+          );
+          callback(false, null);
         }
-      
       }
     );
   },
@@ -819,7 +820,6 @@ updateOptionSelection: function (takeoff_id, option_id, selected, callback) {
     });
   },
 
-
   //used by mailer
 
   getTakeoffById: function (takeoff_id, callback) {
@@ -832,7 +832,7 @@ updateOptionSelection: function (takeoff_id, option_id, selected, callback) {
       }
     );
   },
-  
+
   takeoffSetStatus: function (takeoff_id, status, cb) {
     con.query(
       "UPDATE takeoffs SET status = ? WHERE id = ?;",

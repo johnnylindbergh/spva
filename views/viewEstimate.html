@@ -4,7 +4,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sun Painting Estimate</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <link rel="stylesheet" href="css/estimateStyle.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/themes/light-theme.css">
+
+    <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
+
+            <link rel="stylesheet" href="css/estimateStyle.css">
         <link rel="stylesheet" href="css/bottomNavbar.css">
     <script src="/js/generateEstimate.js"></script>
 </head>
@@ -13,37 +18,17 @@
 
     <nav class="bottom-navbar">
         <ul>
-            <li><input type="button" value="Share With Sun Painting" onclick="shareRequest()" class="img-button-client"</li> /<br>
+            <li><input type="button" value="Share With Sun Painting" onclick="shareClient()" class="img-button-client"</li> /<br>
             <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danger Button</title>
-    <style>
-        .danger-button {
-            background: repeating-linear-gradient(
-                45deg,
-                rgba(255, 255, 0, 0.269),
-                rgba(255, 255, 0, 0.321) 10px,
-                rgba(0, 0, 0, 0.267) 10px,
-                rgba(0, 0, 0, 0.232) 20px
-            );
-            border: 2px solid black;
-            color: white;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            text-shadow: 1px 1px 2px black;
-        }
-        .danger-button:hover {
-            opacity: 0.8;
-        }
-    </style>
+  
 </head>
 <body>
-    <button class="danger-button">Share With Client</button>
+    <!-- button of the class shareBtn,. on click, call function share -->
+    <button class="shareBtn" onclick="shareClient()">Share</button>
 </body>
 </html>
 

@@ -333,16 +333,22 @@ module.exports = function (app) {
 
   app.post("/update-signature", function (req, res) {
     console.log("updating signature ", req.body);
-    db.updateSignature(req.takeoff_id, req.body.signature, req.body.date, function (valid, err) {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(valid);
+    db.updateSignature(
+      req.takeoff_id,
+      req.body.signature,
+      req.body.date,
+      function (valid, err) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send(valid);
+        }
       }
-    });
+    );
   });
 
-  app.post("/generateEstimate", function (req, res) { // priority: this function should check to see if an estimate has been generated, if yes, send to client, if no, generate 
+  app.post("/generateEstimate", function (req, res) {
+    // priority: this function should check to see if an estimate has been generated, if yes, send to client, if no, generate
     var takeoff_id = req.body.takeoff_id;
     console.log("Generating estimate for takeoff", takeoff_id);
 
@@ -610,13 +616,13 @@ module.exports = function (app) {
           console.log(err);
         } else {
           console.log("added");
-          res.send({ new_row_id:new_row_id});
+          res.send({ new_row_id: new_row_id });
         }
       }
     );
   });
 
-  app.post("/loadOptions",  function (req, res) {
+  app.post("/loadOptions", function (req, res) {
     console.log("loading options for takeoff ", req.body.takeoff_id);
     db.getOptions(req.body.takeoff_id, function (err, options) {
       if (err) {
@@ -639,38 +645,53 @@ module.exports = function (app) {
 
   app.get("/share/:hash", function (req, res) {
     console.log("sharing takeoff ", req.params.hash);
-    if(req.params.hash.length != 16) {
+    if (req.params.hash.length != 16) {
       res.redirect("/");
     }
-    db.getSharedEstimate(req.params.hash, function (err, estimate, takeoff, options) {
-      if (err) {
-        console.log(err);
-        res.redirect("/");
-      } else {
-        console.log("shared");
-        res.render('viewEstimateClient.html', {takeoff:takeoff, estimate:estimate, options:options});
+    db.getSharedEstimate(
+      req.params.hash,
+      function (err, estimate, takeoff, options) {
+        if (err) {
+          console.log(err);
+          res.redirect("/");
+        } else {
+          console.log("shared");
+          res.render("viewEstimateClient.html", {
+            takeoff: takeoff,
+            estimate: estimate,
+            options: options,
+          });
+        }
       }
-    });
+    );
   });
 
-  app.post('/share/updateOptionsSelection', function(req, res) {
+  app.post("/share/updateOptionsSelection", function (req, res) {
     console.log("updating options selection ", req.body);
-    db.updateOptionSelection(req.body.takeoff_id, req.body.option_id, req.body.applied, function(err) {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log("updated");
-        res.send({response: "updated!"});
+    db.updateOptionSelection(
+      req.body.takeoff_id,
+      req.body.option_id,
+      req.body.applied,
+      function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("updated");
+          res.send({ response: "updated!" });
+        }
       }
-    });
+    );
   });
 
-  app.get('/sendEmail', function(req, res) {
-    console.log("sending email ");
-    emailer.sendEstimateEmail(1);
-  } );
-
-
+  app.post("/shareClient", mid.isAuth, function (req, res) {
+    console.log("sending email to client ", req.body.takeoff_id);
+    if (req.body.takeoff_id) {
+      console.log("sending email ");
+      emailer.sendEstimateEmail(req.body.takeoff_id);
+    } else {
+      console.log(""); 
+    }
+  });
 
   // ending perentheses do not delete
 };
