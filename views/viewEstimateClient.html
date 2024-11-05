@@ -99,13 +99,19 @@
         <div class="signature">
             <p><em>This budget estimate is not a contract until signed and returned to Sun Painting.</em></p> </br>
             <p>
-                <strong>Authorized Signature:</strong><input type="text" id="signature" placeholder="Sign here"><strong>  Date:</strong> <input type="date"> <i class="loader" style ="margin-bottom: -10px; margin-left:2px"></i>
+                <strong>Authorized Signature:</strong><input type="text" id="signature" value='{{takeoff.owner}}' placeholder="Sign here"><strong>  Date:</strong> <input type="date"> <i class="loader" style ="margin-bottom: -10px; margin-left:2px"></i>
                 <!-- submit button that calls handleSig.. -->
                 <button class="sign-btn" onclick="handleSignatureChange()">Sign</button>
-
+            
             </p>
         </div>
-    </div>
+
+        <div class="signature-success">
+            
+           <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"> <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/> <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                <p style="text-align:center;">Signature successfully saved!</p></svg>
+        
+       </div>
 </body>
 </html>
 

@@ -102,6 +102,18 @@ $(document).ready(function () {
         // Create the progress bar cell AFTER the 'View' column
         let tdProgress = $("<td>");
         let progressBar = createProgressBar(takeoff.status);
+        if (takeoff.status === 4) {
+          // add a hover element to the progress bar that just shows the date the estimate was signed
+          tdProgress.addClass("hoverable");
+          tdProgress.attr("title", `Estimate Signed: ${new Date(takeoff.signed_at).toLocaleString("en-US")}`);
+
+        }
+
+        if (takeoff.status > 3) {
+          // add a hover element to the progress bar that just shows the date the estimate was signed
+          progressBar.addClass("hoverable");
+          progressBar.attr("title", `View Count: ${takeoff.view_count}`);
+        }
         tdProgress.append(progressBar);
         row.append(tdProgress);
 

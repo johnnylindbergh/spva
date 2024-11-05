@@ -20,27 +20,31 @@ async function sendEstimateEmail(takeoff_id) {
       console.log(err);
     } else {
       console.log(takeoff);
-      const mailOptions = {
-        from: credentials.serverEmail,
-        to: takeoff[0].owner_email,
-        subject: "Your Estimate from Sun Painting",
-        html: `
-          <h2>Hi ${takeoff[0]?.owner_name},</h2>
-          <h3>Your estimate is ready.</h3>
-          <p>Please click the link below to view it:</p>
-          <a href="${credentials.domain}/share/${takeoff[0]?.passcode}">View Estimate</a></br>
-          <img style="margin:20px;width:140px;"src="${credentials.domain}/SWAM_LOGO.jpg" alt="Swam Logo"></br>
-          <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
-        `,
-      };
-      
-      const info = transporter.sendMail(mailOptions, (err, info) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("Email sent: " + info.response);
-        }
-      });
+      if (takeoff[0].owner_email && takeoff[0].owner && takeoff[0].passcode) { 
+        const mailOptions = {
+          from: credentials.serverEmail,
+          to: takeoff[0].owner_email,
+          subject: "Your Estimate from Sun Painting",
+          html: `
+            <h3>Hello, ${takeoff[0].owner},</h3>
+            <h3>Your estimate is ready.</h3>
+            <p>Please click the link below to view it:</p>
+            <a href="${credentials.domain}/share/${takeoff[0]?.passcode}">View Estimate</a></br>
+            <img style="margin:20px;width:140px;"src="${credentials.domain}/SWAM_LOGO.jpg" alt="Swam Logo"></br>
+            <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
+          `,
+        };
+        
+        const info = transporter.sendMail(mailOptions, (err, info) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("Email sent: " + info.response);
+          }
+        });
+      } else {
+        console.log("Some info is missing from this takeoff takeoff.owner, takeoff.owner_email, or takeoff.passcode");
+      }
     }
   });
 }

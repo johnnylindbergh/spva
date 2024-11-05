@@ -172,13 +172,13 @@ function shareSelf(){
     console.log(takeoff_id);
     XSAlert({
         title: 'Email Confirmation',
-        message: 'Are you sure you want to share this estimate with the client?',
-        icon: 'warning',
+        message: 'Are you sure you want to share this estimate with Sun Painting?',
+        icon: 'success',
      }).then((value) => {
         console.log("dialogue output",value);
         if(value == "ok"){
 
-            $.post('/shareClient', {takeoff_id: takeoff_id}, function(data) {
+            $.post('/shareSelf', {takeoff_id: takeoff_id}, function(data) {
                 console.log(data);
             });
 

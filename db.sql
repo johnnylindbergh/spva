@@ -70,6 +70,8 @@ CREATE TABLE takeoffs (
   estimate_id INT,
   status TINYINT(1) DEFAULT 0,
   passcode VARCHAR(64),
+  signed_at TIMESTAMP DEFAULT NULL,
+  view_count INT DEFAULT 0,
   total DECIMAL(10,2),
   duration_hours INT,
   start_date DATETIME,
@@ -156,6 +158,8 @@ CREATE TABLE applied_materials (
   
   labor_cost DECIMAL(10,2) NOT NULL default 0.40,
   applied TINYINT(1) DEFAULT 1,
+
+  separateLineItem TINYINT(1) DEFAULT 0,
 
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,

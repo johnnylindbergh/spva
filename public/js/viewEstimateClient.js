@@ -29,6 +29,8 @@ function populateOptions(takeoff_id) {
 
     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
         console.log(data);
+        var mutable = data.mutable;
+        data = data.options;
         const table = $('#options-table');
         table.empty(); // Clear any existing content
         for (let i = 0; i < data.length; i++) {
@@ -85,6 +87,12 @@ function populateOptions(takeoff_id) {
                     });
                 }
             });
+
+            // if the options are not mutable, disable the radio buttons
+            if (!mutable) {
+                includeRadio.prop('disabled', true);
+                excludeRadio.prop('disabled', true);
+            }
             
             radioCell.append(includeRadio).append(' Yes ').append(excludeRadio).append(' No ');
             newRow.append(descriptionCell);
@@ -134,8 +142,10 @@ function updateTotals() {
 
 
 function handleSignatureChange() {
+    // get the number of options
+    const options = $('#options-table tr').length;
 
-    if (!optionsTouched){
+    if (!optionsTouched && options > 0) {
         alert("Please select options before signing");
         return;
     }
@@ -149,7 +159,7 @@ function handleSignatureChange() {
         return;
     }   
 
-    console.log('Signature Updated:', signatureInput);
+    //console.log('Signature Updated:', signatureInput);
     
     // Prepare the data to send to the server
     const data = {
@@ -162,6 +172,16 @@ function handleSignatureChange() {
     $.post('/update-signature', data)
         .done(function(response) {
             console.log('Success:', response);
+            if (response) {
+                // show the signature success message
+                $('.signature-success').toggle();
+                // hide the signature form
+                $('.signature').toggle();
+                // make the options table read only
+                $('#options-table').find('input').prop('disabled', true);
+ 
+
+            }
         })
         .fail(function(error) {
             console.error('Error:', error);
@@ -177,6 +197,7 @@ function handleSignatureChange() {
 // Example to dynamically populate content on page load
 $(document).ready(function() {
      $(".loader").toggle(); // hide it initially
+     $(".signature-success").toggle(); // hide it initially
     // Populate the "Proposal Includes" section with dynamic data
     const includesItems = ['Preparation of surfaces', 'Primer application', 'Final paint coat'];
     // post takeoff_id to getEstimateData to set includesItems and exclusionsItems

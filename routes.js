@@ -334,16 +334,24 @@ module.exports = function (app) {
   app.post("/update-signature", function (req, res) {
     console.log("updating signature ", req.body);
     db.updateSignature(
-      req.takeoff_id,
+      req.body.takeoff_id,
       req.body.signature,
       req.body.date,
       function (valid, err) {
         if (err) {
           console.log(err);
         } else {
+          if (valid)
           res.send(valid);
         }
       }
+    );
+
+    db.takeoffSetStatus(req.body.takeoff_id, 4, function (err) {
+      if (err) {
+        console.log(err);
+      }
+    }
     );
   });
 
@@ -358,6 +366,7 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
         // Handle the error if necessary
+        
       }
 
       // Proceed to generate the estimate regardless of the error in setting status
@@ -600,6 +609,20 @@ module.exports = function (app) {
     });
   });
 
+  app.post("/update-takeoff-owner-email", mid.isAuth, function (req, res) {
+    console.log("updating takeoff owner email ", req.body);
+    db.updateTakeoffOwnerEmail(req.body.takeoff_id, req.body.owner_email_address, function (
+      err
+    ) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("updated");
+      }
+    });
+  }); 
+
+
   app.post("/add-row", mid.isAuth, function (req, res) {
     console.log("Adding row to takeoff", req.body.takeoff_id);
     console.log("Getting option:", req.body.option);
@@ -624,11 +647,11 @@ module.exports = function (app) {
 
   app.post("/loadOptions", function (req, res) {
     console.log("loading options for takeoff ", req.body.takeoff_id);
-    db.getOptions(req.body.takeoff_id, function (err, options) {
+    db.getOptions(req.body.takeoff_id, function (err, options, mutable) {
       if (err) {
         console.log(err);
       }
-      res.send(options);
+      res.send({options:options, mutable:mutable});
     });
   });
 
@@ -688,6 +711,12 @@ module.exports = function (app) {
     if (req.body.takeoff_id) {
       console.log("sending email ");
       emailer.sendEstimateEmail(req.body.takeoff_id);
+      db.takeoffSetStatus(req.body.takeoff_id, 3, function (err) {
+        if (err) {
+          console.log(err);
+        }
+      }
+      );
     } else {
       console.log(""); 
     }

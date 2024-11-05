@@ -380,6 +380,21 @@ module.exports = {
     );
   },
 
+  updateTakeoffOwnerEmail: function (takeoff_id, owner_email, callback) {
+    if (!takeoff_id || !owner_email) {
+      return callback("Missing required parameters");
+    } else {
+      con.query(
+        "UPDATE takeoffs SET owner_email = ? WHERE id = ?;",
+        [owner_email, takeoff_id],
+        function (err) {
+          if (err) return callback(err);
+          callback(null);
+        }
+      );
+    }
+  },
+
   saveEstimate: function (takeoff_id, inclusions, exclusions, callback) {
     con.query(
       "UPDATE estimate SET inclusions = ?, exclusions = ? WHERE id = ?;",
@@ -396,8 +411,20 @@ module.exports = {
       "SELECT * FROM options WHERE takeoff_id = ?;",
       [takeoff_id],
       function (err, options) {
-        if (err) return callback(err);
-        callback(null, options);
+        // also get the takeoff status
+        con.query(
+          "SELECT status FROM takeoffs WHERE id = ?;",
+          [takeoff_id],
+          function (err, status) {
+            if (err) return callback(err);
+            // if the status is 4, the takeoff is signed and the options should be locked
+            if (status[0].status == 4) {
+              return callback(null, options, false); // the third parameter is a boolean that indicates whether the options are mutable
+            } else {
+              return callback(null, options, true);
+            }
+          }
+        );
       }
     );
   },
@@ -514,6 +541,17 @@ module.exports = {
         );
       }
     );
+
+    // update the view_count for the takeoff
+    con.query(
+      "UPDATE takeoffs SET view_count = view_count + 1 WHERE passcode = ?;",
+      [hash],
+      function (err) {
+        if (err) {
+          console.log(err);
+        }
+      }
+    );
   },
 
   updateOptionSelection: function (takeoff_id, option_id, selected, callback) {
@@ -537,14 +575,28 @@ module.exports = {
     con.query(
       "SELECT owner FROM takeoffs WHERE id = ?;",
       [takeoff_id],
-      function (owner, err) {
+      function (err, owner) {
         if (err) return callback(err);
-        console.log("comparing  ", owner);
+        console.log("comparing  ", owner[0].owner); // there should only be one result
         console.log("to  ", signature);
         // if the levenshtein distance is less than 3, update the takeoff status to 4
-        if (levenshtein.get(owner, signature) < 2) {
+        if (
+          levenshtein.get(owner[0].owner, signature) < 2 ||
+          owner[0].owner == null
+        ) {
+          // if the owner name is null, allow the signature to be accepted
           con.query(
-            "UPDATE takeoffs SET status = 4, date = ? WHERE id = ?;",
+            "UPDATE takeoffs SET status = 4 WHERE id = ?;",
+            [takeoff_id],
+            function (err) {
+              if (err) return callback(err);
+              callback(true, null);
+            }
+          );
+
+          // also update the signed_at date
+          con.query(
+            "UPDATE takeoffs SET signed_at = ? WHERE id = ?;",
             [date, takeoff_id],
             function (err) {
               if (err) return callback(err);

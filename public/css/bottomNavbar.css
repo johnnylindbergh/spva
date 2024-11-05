@@ -4,14 +4,14 @@
 */
 
 .img-button-client {
-    background: url('/sun_painting_logo.png') no-repeat;
-    border: 2px solid black;
-    color: white;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
+    background-color: #FA8847;
+    border: none;
     border-radius: 5px;
-    text-shadow: 1px 1px 2px black;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    margin: 6px 4px;
+    cursor: pointer;
 }
 
 /* containing navbar div */
@@ -75,4 +75,15 @@
   /* container for page content on all pages with navbar */
   .container {
     margin-top: 60px;
+  }
+
+  .shareClientBtn {
+    background-color: #0893A1;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    margin: 6px 4px;
+    cursor: pointer;
   }

@@ -166,6 +166,14 @@ function loadTakeoffMaterials(id) {
         }
         newRow.append($("<td></td>").append(checkbox));
 
+
+         // Checkbox for makeing material a separate line item
+         let separateLineCheckbox = $("<input type='checkbox' onclick='separateLineItem(" + row.id + ", this)'>");
+         if (row.separateLineItem == 1) {
+          separateLineCheckbox.attr("checked", "checked");
+         }
+         newRow.append($("<td></td>").append(separateLineCheckbox));
+ 
         // Material name
         newRow.append("<td style='width:15px;'>" + row.material_name + "</td>");
 
@@ -367,6 +375,18 @@ function updateMeasurementUnit(rowId, newUnit) {
     .fail(function() {
       console.log("Failed to update measurement unit for subject: " + rowId);
      // alert("Failed to update the measurement unit. Please try again.");
+    });
+}
+
+function updateTakeoffOwnerEmailAddress(){
+  let email = $("#owner_email_address").val();
+  console.log("Updating takeoff owner email address: " + email);
+  $.post("/update-takeoff-owner-email", { takeoff_id: takeoff_id, owner_email_address: email })
+    .done(function() {
+      console.log("Takeoff owner email address updated: " + email);
+    })
+    .fail(function() {
+      console.log("Failed to update takeoff owner email address: " + email);
     });
 }
 
