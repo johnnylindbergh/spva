@@ -369,10 +369,17 @@ module.exports = {
     );
   },
 
-  updateContent: function (id, content, callback) {
+  updateContent: function (id, inclusions, exclusions, callback) {
+    if (inclusions == null) {
+      inclusions = "";
+    }
+    if (exclusions == null) {
+      exclusions = "";
+    }
+
     con.query(
-      "UPDATE estimate SET inclusions = ? WHERE id = ?;",
-      [content[0], id],
+      "UPDATE estimate SET inclusions = ?, exclusions = ? WHERE id = ?;",
+      [inclusions, exclusions, id],
       function (err) {
         if (err) return callback(err);
         callback(null);
@@ -396,6 +403,7 @@ module.exports = {
   },
 
   saveEstimate: function (takeoff_id, inclusions, exclusions, callback) {
+    console.log("saving estimate");
     con.query(
       "UPDATE estimate SET inclusions = ?, exclusions = ? WHERE id = ?;",
       [inclusions, exclusions, takeoff_id],

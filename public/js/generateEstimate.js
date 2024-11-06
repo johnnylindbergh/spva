@@ -199,15 +199,17 @@ function addEditableListeners() {
         });
 
         // On input, send POST request to server when content changes
-        element.on('input', function() {
-            const content = element.text();
+        element.on('focusout', function() {
+            // determine if the element is in the includes or excludes section
+            const inclusions = $('#includes-list').text();
+            const exclusions = $('#exclusions-list').text();
             const elementId = element.attr('id');
-            console.log('Content changed:', content);
+        
 
             // Send POST request with the new content
             var takeoff_id = $('#takeoff_id').val(); // not super safe, but just for example
             console.log(takeoff_id);
-            $.post('/update-content', { id: takeoff_id, content: content })
+            $.post('/update-content', { id: takeoff_id, inclusions: inclusions, exclusions: exclusions})
                 .done(function(response) {
                     console.log('Content updated successfully:', response);
                 })

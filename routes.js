@@ -375,65 +375,53 @@ module.exports = function (app) {
           console.log(err);
           res.status(500).send("Error generating estimate");
         } else {
-          // Build the prompt
-          for (var i = 0; i < estimate.length; i++) {
-            prompt += " subject={ " + estimate[i].material_name;
-            prompt +=
-              " measurement: " +
-              estimate[i].measurement +
-              estimate[i].measurement_unit;
-            " " + estimate[i].measurement_unit;
-            if (estimate[i].selected_materials != null) {
-              for (var j = 0; j < estimate[i].selected_materials.length; j++) {
-                console.log(estimate[i].selected_materials[j]);
-                prompt +=
-                  " name: " + estimate[i].selected_materials[j].name + "'";
-                prompt +=
-                  " desc: " + estimate[i].selected_materials[j].description;
+          if (takeoff_info[0].estimate_id != null) {
+            // Build the prompt
+            for (var i = 0; i < estimate.length; i++) {
+              prompt += " subject={ " + estimate[i].material_name;
+              prompt +=
+                " measurement: " +
+                estimate[i].measurement +
+                estimate[i].measurement_unit;
+              " " + estimate[i].measurement_unit;
+              if (estimate[i].selected_materials != null) {
+                for (var j = 0; j < estimate[i].selected_materials.length; j++) {
+                  console.log(estimate[i].selected_materials[j]);
+                  prompt +=
+                    " name: " + estimate[i].selected_materials[j].name + "'";
+                  prompt +=
+                    " desc: " + estimate[i].selected_materials[j].description;
+                }
               }
+              prompt += "}";
             }
-            prompt += "}";
-          }
-          //console.log(prompt);
 
-          // call to  async function callChatGPT with the response as the return value and saves the it to the database
+            // call to  async function callChatGPT with the response as the return value and saves the it to the database
+            let response = "";
+            chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
+              response = subres;
+              console.log("Response:", response);
 
-          let response = "";
-          chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
-            response = subres;
-            console.log("Response:", response);
+              // process response for render
+              // split into two vars called includes, and exclusions
+              let inclusions = response.split("</br>")[0];
+              let exclusions = response.split("</br>")[1];
 
-            // process response for render
-            // split into two vars called includes, and exclusions
-            let inclusions = response.split("</br>")[0];
-            let exclusions = response.split("</br>")[1];
-
-            db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
-              res.render("viewEstimate.html", {
-                estimate: estimate,
-                takeoff: takeoff_info,
+              db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
+                res.render("viewEstimate.html", {
+                  estimate: estimate,
+                  takeoff: takeoff_info,
+                });
               });
             });
-          });
 
-          // chatgpt.callChatGPT(prompt, function (err, descriptionResponse) {
-          //   if (err) {
-          //     console.log(err);
-          //     res.status(500).send("Error generating estimate");
-          //   } else {
+          } else {
+            res.render("viewEstimate.html", {
+              estimate: estimate,
+              takeoff: takeoff_info,
+            });
 
-          //                     console.log("Response:", descriptionResponse)
-
-          //     db.saveEstimate(takeoff_id, descriptionResponse, function (err) {
-          //       if (err) {
-          //         console.log(err);
-          //         res.status(500).send("Error generating estimate");
-          //       } else {
-          //         res.send("Estimate generated successfully");
-          //       }
-          //     });
-          //   }
-          // });
+          }
         }
       });
     });
@@ -598,9 +586,9 @@ module.exports = function (app) {
   app.post("/update-content", mid.isAuth, function (req, res) {
     console.log("updating content ", req.body);
     if (req.body.id == null) {
-      req.body.id = req.user.local.takeoff_id;
+      req.body.id = req.user.local.takeoff_id; 
     }
-    db.updateContent(req.body.id, req.body.content, function (err) {
+    db.updateContent(req.body.id, req.body.inclusions, req.body.exclusions, function (err) {
       if (err) {
         console.log(err);
       } else {
