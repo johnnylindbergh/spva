@@ -52,9 +52,8 @@ CREATE TABLE options (
   takeoff_id INT,
   description TEXT,
   cost DECIMAL(10,2),
-  applied TINYINT(0) DEFAULT,
-  PRIMARY KEY (id),
-  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+  applied TINYINT(1) DEFAULT,
+  PRIMARY KEY (id)
 );
 
 -- Take-off table (populates when a user uploads a take-off)
@@ -70,7 +69,6 @@ CREATE TABLE takeoffs (
   estimate_id INT,
   status TINYINT(1) DEFAULT 0,
   passcode VARCHAR(64),
-  signed_at TIMESTAMP DEFAULT NULL,
   view_count INT DEFAULT 0,
   total DECIMAL(10,2),
   duration_hours INT,
@@ -159,8 +157,6 @@ CREATE TABLE applied_materials (
   labor_cost DECIMAL(10,2) NOT NULL default 0.40,
   applied TINYINT(1) DEFAULT 1,
 
-  separateLineItem TINYINT(1) DEFAULT 0,
-
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
   FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE,
@@ -203,5 +199,4 @@ CREATE TABLE emails (
   PRIMARY KEY (id),
   FOREIGN KEY (customer_takeoff_id) REFERENCES takeoffs(id)
 );
-
 

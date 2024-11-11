@@ -21,29 +21,7 @@ function populateExclusions(exclusions) {
     $('#excludes-total').text("$0.00"); 
 }
 
-function populateOptions(takeoff_id) {   
-    $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
-        console.log(data);
-        const table = $('#estimate-table');
-        for (let i = 0; i < data.length; i++) {
-            // Create a new row and set row_id as a data attribute
-            const newRow = $('<tr>').attr('data-row-id', data[i].id);
-            const descriptionCell = $('<td contenteditable="true" class="editable">').text(data[i].description);
-            const amountCell = $('<td contenteditable="true" class="editable">').text(data[i].cost);
-            newRow.append(descriptionCell);
-            newRow.append(amountCell);
-            table.append(newRow);
 
-            // Trigger post to server when editing is finished (focusout)
-            descriptionCell.on('focusout', function() {
-                postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
-            });
-            amountCell.on('focusout', function() {
-                postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
-            });
-        }
-    });
-}
 
 
 
@@ -71,7 +49,7 @@ function populateOptions(takeoff_id) {
 
 function populateOptions(takeoff_id) {   
     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
-        console.log(data);
+        data = data.options;
         const table = $('#estimate-table');
         for (let i = 0; i < data.length; i++) {
             const newRow = $('<tr>').data('row_id', data[i].id); // Store row_id as data attribute
@@ -83,7 +61,7 @@ function populateOptions(takeoff_id) {
 
             // Trigger post to server when editing is finished (focusout)
             descriptionCell.on('focusout', function() {
-                postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.data('row_id'));
+               // postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.data('row_id'));
             });
             amountCell.on('focusout', function() {
                 postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.data('row_id'));
@@ -109,7 +87,7 @@ function addOption(takeoff_id) {
 
     // Trigger post to server when editing is finished (focusout)
     descriptionCell.on('focusout', function() {
-        postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
+       // postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
     });
     amountCell.on('focusout', function() {
         if (descriptionCell.text() == '') { // Don't allow empty descriptions
@@ -122,7 +100,7 @@ function addOption(takeoff_id) {
     });
 
     // Initial post when row is added
-    postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
+   // postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
 }
 
 function postToAddOption(description, amount, takeoff_id, row_id) {

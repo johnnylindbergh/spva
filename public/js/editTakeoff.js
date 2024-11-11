@@ -213,16 +213,21 @@ function loadTakeoffMaterials(id) {
           let newMeasurement = $(this).val();
           let rowId = $(this).data("row-id");
           updateMeasurement(rowId, newMeasurement);
-          // Reload the table to reflect changes
-          loadTakeoffMaterials(takeoff_id);
+          // Wait one sec and then reload the table to reflect changes
+          setTimeout(function() {
+            loadTakeoffMaterials(takeoff_id);
+          }, 1000);
+          
         });
 
         measurementUnitInput.on("change", function () {
           let newMeasurementUnit = $(this).val();
           let rowId = $(this).data("row-id");
           updateMeasurementUnit(rowId, newMeasurementUnit);
-          // Reload the table to reflect changes
-          loadTakeoffMaterials(takeoff_id);
+          // Wait one sec and then reload the table to reflect changes
+          setTimeout(function() {
+            loadTakeoffMaterials(takeoff_id);
+          }, 1000);
         });
 
         // Labor price input
@@ -252,16 +257,24 @@ function loadTakeoffMaterials(id) {
               if (material.id == row.material_id) {
                 let primaryCostDelta = parseFloat(row.primary_cost_delta) || 0;
                 newCost += primaryCostDelta;
-
-                // Material price input
+                // if the cost delta is positive color the input red and if negative color it green
                 let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toFixed(2) + "' step='any' min='0' onchange='priceChange(" + material.id + ")'><br>");
                 materialPrice.addClass("material-price-input");
                 materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
+                
+                let delta = newCost - material.cost;
+                if (delta > 0) {
+                  materialPrice.css("color", "red");
+                } else if (delta < 0) {
+                  materialPrice.css("color", "green");
+                }
+
                 materialsCell.append(materialPrice);
+               
               } else if (material.id == row.secondary_material_id) {
                 let secondaryCostDelta = parseFloat(row.secondary_cost_delta) || 0;
                 newCost += secondaryCostDelta;
-
+                 
                 let materialPrice = $("<input type='number' id='material_price_" + material.id + "' value='" + newCost.toFixed(2) + "' step='any' min='0' onchange='priceChange(" + material.id + ")'><br>");
                 materialPrice.addClass("material-price-input");
                 materialPrice.append("<input type='hidden' id='raw_material_price_" + material.id + "' value='" + material.cost + "'>");
@@ -303,6 +316,7 @@ function loadTakeoffMaterials(id) {
                 }
 
                 if (row.measurement_unit === "Count") {
+                  subsum += newCost * adjustedMeasurement;
                   subsum += parseFloat(row.labor_cost) * adjustedMeasurement;
                 }
               
@@ -416,18 +430,33 @@ function priceChange(id) {
   let rawPrice = $("#raw_material_price_" + id).val();
 
   let delta = newPrice - rawPrice;
+  // color the input red if the delta is positive and green if negative
+  if (delta > 0) {
+    $("#material_price_" + id).css("color", "red");
+  } else if (delta < 0) {
+    $("#material_price_" + id).css("color", "green");
+  } else {
+    $("#material_price_" + id).css("color", "black");
+  }
+  
 
   console.log("New price: " + newPrice);
 
   $.post("/change-material-price", { material_id: id, delta: delta })
-    .done(function() {
+    .done(function(response) {
       console.log("Price updated for material: " + id);
-      loadTakeoffMaterials(takeoff_id);
+      
+       
     })
     .fail(function() {
       console.log("Failed to update price for material: " + id);
     });
   
+
+    // wait 0.5 seconds and then call loadTakeoffMaterials
+    setTimeout(function() {
+      loadTakeoffMaterials(takeoff_id);
+    }, 500);
 
 }
 

@@ -22,6 +22,16 @@ const multer = require("multer");
 // require chatgpt.js
 const chatgpt = require("./chatgpt.js");
 const emailer = require("./email.js");
+const creds = require("./credentials.js");
+
+// require payment.js
+//const payment = require("./payment.js");
+
+const stripe = require('stripe')(creds.stripe.secret);
+
+
+const YOUR_DOMAIN = creds.domain;
+
 
 const fs = require("fs");
 const { parse } = require("csv-parse");
@@ -341,8 +351,10 @@ module.exports = function (app) {
         if (err) {
           console.log(err);
         } else {
-          if (valid)
-          res.send(valid);
+          if (valid){
+            res.send(valid);
+          }
+          
         }
       }
     );
@@ -416,6 +428,7 @@ module.exports = function (app) {
             });
 
           } else {
+            console.log("No estimate generated, just retrieved");
             res.render("viewEstimate.html", {
               estimate: estimate,
               takeoff: takeoff_info,
@@ -710,6 +723,109 @@ module.exports = function (app) {
     }
   });
 
+  app.get('/checkMeout/:id', function (req, res) {
+    const takeoff_id = req.params.id;
+    if (takeoff_id == null) {
+      console.log("takeoff_id is null");
+      res.redirect("/");
+    }
+    // get takeoff
+    db.getTakeoffTotal(takeoff_id, function (err, takeoffName, total) {
+      console.log(takeoffName + " has a total of " + total);
+      if (err) {
+        console.log(err);
+      } else {
+        // post to /v1/prices to create a price_id
+        // get the price_id
+        // render the checkout page
+        //takeoff = takeoff[0];
+      //cnvert rows into json object
+ 
+
+      // if (total == null) {
+      //   console.log('total is null');
+      //   total = 50.00;
+      // }
+
+      // create a stripe price_id
+      const price = stripe.prices.create({
+        unit_amount: Math.floor(total*100),
+        currency: 'usd',
+        product_data: {
+          name: takeoffName +' Estimate'
+        },
+
+      });
+        //console.log(price.id);
+        
+       // console.log("takeoff is ", takeoff);
+        res.render("checkout.html", {
+          takeoff_id: takeoff_id,
+          priceId: price.id
+        });
+      }
+    }
+  );
+});
+   
+
+app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
+  // create a price_id
+  // get whole takeoff
+  console.log(req.params);
+  db.getTakeoffTotal(req.params.takeoff_id, async function (err, takeoffName, total) {
+    if (err) {
+      console.log(err);
+      res.status(500).send("Error retrieving takeoff");
+    } else {
+
+   
+      if ( total == null) {
+        console.log("total is null");
+       total = 13000.00 * 100;
+      }
+      // determine the total
+      console.log("total is ", total);
+
+      // create a product
+      const product = await stripe.products.create({
+        name: takeoffName + " Estimate",
+       // unit_amount: takeoff.total,
+      });
+     
+      const price = await stripe.prices.create({
+        unit_amount: total,
+        currency: 'usd',
+        product: product.id,
+      });
+
+      const session = await stripe.checkout.sessions.create({
+        ui_mode: 'embedded',
+        line_items: [
+          {
+            // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+            price: price.id,
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        return_url: creds.domain + `/return.html?session_id={CHECKOUT_SESSION_ID}`,
+      });
+
+      res.send({ clientSecret: session.client_secret });
+    }
+  });
+});
+
+app.get('/session-status', async (req, res) => {
+  const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+
+  res.send({
+    status: session.status,
+    customer_email: session.customer_details.email
+  });
+});
+  
   // ending perentheses do not delete
 };
 

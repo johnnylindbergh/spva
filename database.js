@@ -578,6 +578,18 @@ module.exports = {
     );
   },
 
+  getTakeoffTotal: function (takeoff_id, callback) {
+    con.query(
+      "SELECT total FROM takeoffs WHERE id = ?;",
+      [takeoff_id],
+      function (err, options_total) {
+        con
+        if (err) return callback(err);
+        callback(null, total[0]["total"]);
+      }
+    );
+  },
+
   updateSignature: function (takeoff_id, signature, date, callback) {
     // first get the owner_name in takeoffs
     con.query(
@@ -598,7 +610,7 @@ module.exports = {
             [takeoff_id],
             function (err) {
               if (err) return callback(err);
-              callback(true, null);
+              //callback(true, null);
             }
           );
 
@@ -608,7 +620,7 @@ module.exports = {
             [date, takeoff_id],
             function (err) {
               if (err) return callback(err);
-              callback(true, null);
+              //callback(true, null);
             }
           );
         } else {
@@ -889,6 +901,26 @@ module.exports = {
       function (err, takeoff) {
         if (err) return callback(err);
         callback(null, takeoff);
+      }
+    );
+  },
+
+  //    db.getTakeoffTotal(takeoff_id, function (err, takeoff, total) {
+
+  getTakeoffTotal: function (takeoff_id, callback) {
+    con.query(
+      "SELECT total, name FROM takeoffs WHERE id = ?;",
+      [takeoff_id],
+      function (err, rows) {
+        if (err) return callback(err);
+        if (rows[0] != null && rows[0].total != null && rows[0].name != null) {
+          console.log(rows[0]);
+          let total = rows[0].total;
+          let takeoffName = rows[0].name;
+          callback(null, takeoffName, total);
+        } else {
+          callback(err);
+        }
       }
     );
   },

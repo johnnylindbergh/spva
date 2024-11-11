@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/themes/light-theme.css">
 
     <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
-
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="checkout.js" defer></script>
             <link rel="stylesheet" href="css/estimateStyle.css">
         <link rel="stylesheet" href="css/bottomNavbar.css">
     <script src="/js/generateEstimate.js"></script>
@@ -84,6 +85,10 @@
             </tr>
         </table>
 
+        <table id="options-table">
+            </table>
+
+
         <!-- Button to add a new row -->
         <button id="add-row-btn" onclick="addOption({{estimate.takeoff_id}})">Add Row</button>
 
@@ -98,6 +103,13 @@
             </p>
         </div>
     </div>
+
+
+    <div id="checkout">
+        <!-- Checkout will insert the payment form here -->
+    </div>
+
+
 
 </body>
 </html>

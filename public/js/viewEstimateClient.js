@@ -28,8 +28,14 @@ function populateOptions(takeoff_id) {
     var optionsTotal = 0;
 
     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
-        console.log(data);
+        
         var mutable = data.mutable;
+                // if muteable is false, disable the signature form and hide it and add a div that says it has been signed
+        if (!mutable) {
+            $('.signature').toggle();
+            $('.signature-success').toggle();
+            $('#options-table').find('input').prop('disabled', true);
+        }
         data = data.options;
         const table = $('#options-table');
         table.empty(); // Clear any existing content
@@ -65,7 +71,7 @@ function populateOptions(takeoff_id) {
                         console.log('Radio button updated:', response);
                         updateTotals();
                         optionsTouched = true;
-                        populateOptions(takeoff_id);
+                        //populateOptions(takeoff_id);
                         //window.location.reload();
                     });
                 }
@@ -190,6 +196,34 @@ function handleSignatureChange() {
 
 
 
+function createPaymentIntent() {
+    // Prepare the data to send to the server
+
+    // get takeoff_id from the hidden input field
+   
+       const takeoff_id = parseInt($('#takeoff_id').val());
+    
+    const data = {
+        takeoff_id: takeoff_id
+    };
+
+    // Send the data to the server via a POST request using jQuery
+
+    // form the post url
+    const url = '/checkout/' + takeoff_id;
+    $.post(url, data)
+        .done(function(response) {
+            console.log('Success:', response);
+            if (response) {
+                // Redirect to the checkout page
+                window.location.href = '/checkout/'+takeoff_id;
+            }
+        })
+        .fail(function(error) {
+            console.error('Error:', error);
+        });
+}   
+
 
 
 
@@ -212,6 +246,10 @@ $(document).ready(function() {
 
         $('#includes-total').text("$"+data.takeoff[0].total);
         $('#subtotal').text("$"+data.takeoff[0].total);
+
+
+      
+        
 
         //call update totals every few seconds
         //setInterval(updateTotals, 5000);
