@@ -68,29 +68,29 @@ app.use((req, res, next) => {
 });
 
 // import local modules for routes / all other functionality
-const auth = require('./auth.js')(app, passport);
+ const auth = require('./auth.js')(app, passport);
 const routes = require('./routes.js')(app);
 // unhandled routes redirect to home
 app.get('*', (req, res) => { res.redirect('/'); });
 
-if (!sys.inDevMode) {
-        var lex = require('greenlock-express')
-        lex.init({
-          packageRoot: __dirname,
-          configDir: "./greenlock.d",
+// if (!sys.inDevMode) {
+//         var lex = require('greenlock-express')
+//         lex.init({
+//           packageRoot: __dirname,
+//           configDir: "./greenlock.d",
  
-          // contact for security and critical bug notices
-          maintainerEmail: "lindberghjohnny@gmail.com",
+//           // contact for security and critical bug notices
+//           maintainerEmail: "lindberghjohnny@gmail.com",
  
-          // whether or not to run at cloudscale
-          cluster: false
-        }).serve(app);
+//           // whether or not to run at cloudscale
+//           cluster: false
+//         }).serve(app);
 
        
-}
+// }
 
 
-// start server listening
-//var server = app.listen(sys.PORT, () => {
- // console.log(sys.SYSTEM_NAME + ' server listening on port %d', server.address().port);
-//});
+// start server listening for dev mode 
+var server = app.listen(sys.PORT, () => {
+  console.log(sys.SYSTEM_NAME + ' server listening on port %d', server.address().port);
+});

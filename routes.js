@@ -41,7 +41,7 @@ var fileCounter = Math.floor(1000 + Math.random() * 9000);
 // file upload stuff
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "/var/www/spvaTrack/uploads");
+    cb(null, sys.PROJECT_PATH+"/uploads");
   },
   filename: function (req, file, cb) {
     cb(null, file.fieldname + "" + fileCounter + ".csv");
@@ -149,7 +149,7 @@ module.exports = function (app) {
         console.log(err);
       } else {
         render.takeoffs = takeoffs;
-        console.log("User: " + req.user.local.name);
+        console.log("User: " + "Testing User");
         res.render("main.html", render);
       }
     });
@@ -263,7 +263,7 @@ module.exports = function (app) {
           readTakeoff(
             req,
             res,
-            "/var/www/spvaTrack/uploads/" + req.file.filename,
+            sys.PROJECT_PATH+"/uploads/" + req.file.filename,
             function (err) {
               if (err) {
                 console.log(err);

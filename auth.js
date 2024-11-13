@@ -18,7 +18,7 @@ module.exports = (app, passport) => {
 
     // attempt to locate existing user account by email
     db.lookUpUser(email, (err, profile) => {
-      if (!err) {
+      if (!err || sys.DEV_MODE) {
         // cache profile in session
         user.local = profile;
 
@@ -28,6 +28,7 @@ module.exports = (app, passport) => {
       // if automatic account creation allowed & email pass restriction (or no restriction exists)
       } else if (sys.ALLOW_NEW_ACCOUNTS && (!sys.EMAIL_RESTRICTION || sys.EMAIL_RESTRICTION.test(email))) {
         // add new user account
+        // this function 
         db.addUserFromGoogle(user, (err, profile) => {
           // cache profile
           user.local = profile;
