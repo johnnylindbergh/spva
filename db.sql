@@ -52,7 +52,7 @@ CREATE TABLE options (
   takeoff_id INT,
   description TEXT,
   cost DECIMAL(10,2),
-  applied TINYINT(1) DEFAULT,
+  applied TINYINT(1) DEFAULT 0,
   PRIMARY KEY (id)
 );
 
@@ -162,16 +162,6 @@ CREATE TABLE applied_materials (
   FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE,
   FOREIGN KEY (secondary_material_id) REFERENCES materials(id) ON DELETE CASCADE,
   FOREIGN KEY (tertiary_material_id) REFERENCES materials(id) ON DELETE CASCADE
-);
-
-CREATE TABLE applied_options (
-  id INT NOT NULL AUTO_INCREMENT,
-  name VARCHAR(64),
-  takeoff_id INT,
-  cost DECIMAL(10,2) default 0,
-  applied TINYINT(1) DEFAULT 1,
-  PRIMARY KEY (id),
-  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
 );
 
 
