@@ -28,11 +28,16 @@ CREATE TABLE users (
   FOREIGN KEY (user_type) REFERENCES user_types(id),
   PRIMARY KEY (id)
 );
-
+-- exmaple entry for settings table: 
 CREATE TABLE system_settings (
-  levens_threshold INT
-  
+  setting_id INT NOT NULL AUTO_INCREMENT, 
+  setting_name INT,
+  setting_value VARCHAR(64),
+  PRIMARY KEY (setting_id)
 );
+-- actual defaults
+INSERT INTO system_settings (setting_name, setting_value) VALUES ('default_labor_cost', '0.00');
+INSERT INTO system_settings (setting_name, setting_value) VALUES ('levens_threshold', '2'); 
 
 CREATE TABLE estimate (
   id INT NOT NULL AUTO_INCREMENT,
@@ -83,6 +88,15 @@ CREATE TABLE takeoffs (
 );
 
 
+-- seperate owner table
+CREATE TABLE owners (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(64),
+  billing_address VARCHAR(64),
+  email VARCHAR(64),
+  phone_number VARCHAR(12),
+  PRIMARY KEY (id)
+);
 
 
 
