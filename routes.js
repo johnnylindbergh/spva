@@ -866,6 +866,29 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
   });
 });
 
+app.post("/viewPaymentHistory", mid.isAuth, function (req, res) {
+  const takeoff_id = req.body.takeoff_id;
+  console.log("viewing payment history");
+  db.getPaymentHistory(req.body.takeoff_id, function (err, payments) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.render("viewPaymentHistory.html", { takeoff_id: takeoff_id });
+    }
+  });
+});
+
+app.post("/retrievePaymentHistory", mid.isAuth, function (req, res) {
+  console.log("retrieving payment history");
+  db.getPaymentHistory(req.body.takeoff_id, function (err, payments) {
+    if (err) {
+      console.log(err);
+    }
+    res.send(payments);
+  });
+});
+
+
 app.get('/session-status', async (req, res) => {
   const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
 

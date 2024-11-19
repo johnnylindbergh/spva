@@ -40,10 +40,6 @@ INSERT INTO system_settings (setting_name, setting_value) VALUES ('default_labor
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('levens_threshold', '2');
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('chatgpt_prompt', 'Default prompt goes here');
 
-INSERT INTO system_settings (setting_name, setting_value) VALUES ('default_labor_cost', '0.00');
-INSERT INTO system_settings (setting_name, setting_value) VALUES ('levens_threshold', '2'); 
-INSERT INTO system_settings (setting_name, setting_value) VALUES ('chatgpt_prompt', 'Default prompt goes here');
-
 
 
 CREATE TABLE estimate (
@@ -104,6 +100,42 @@ CREATE TABLE owners (
   phone_number VARCHAR(12),
   PRIMARY KEY (id)
 );
+
+-- statements table
+-- statement are static 
+CREATE TABLE statements (
+  id INT NOT NULL AUTO_INCREMENT,
+  takeoff_id INT,
+  total DECIMAL(10,2),
+  price_paid DECIMAL(10,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id)
+);
+-- invoices table
+CREATE TABLE invoices (
+  id INT NOT NULL AUTO_INCREMENT,
+  takeoff_id INT,
+  total DECIMAL(10,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id)
+);
+
+-- payment history table
+CREATE TABLE payment_history (
+  id INT NOT NULL AUTO_INCREMENT,
+  takeoff_id INT,
+  amount DECIMAL(10,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id)
+);
+-- example payment_history entry
+
+
 
 
 

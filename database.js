@@ -319,6 +319,30 @@ module.exports = {
     );
   },
 
+
+  getPaymentHistory: function (takeoff_id, callback) {
+    con.query(
+      "SELECT * FROM payment_history WHERE takeoff_id = ?;",
+      [takeoff_id],
+      function (err, payments) {
+        if (err) return callback(err);
+        console.log(payments);
+        callback(null, payments);
+      }
+    );
+  },
+   // used for code reference
+   getSystemSettingById: function (setting_id, callback) {
+    con.query(
+      "SELECT * FROM system_settings WHERE setting_id = ?;",
+      [setting_name],
+      function (err, settings) {
+        if (err) return callback(err);
+        callback(null, settings);
+      }
+    );
+  },
+
   generateEstimate: function (takeoff_id, callback) {
     // query takeoffs table for estimate_id
     // if the estimate_id is null, create a new estimate insert it into the db, and update the takeoff's estimate_id in the takeoffs table
