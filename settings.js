@@ -26,8 +26,6 @@ module.exports = {
 
   PROJECT_PATH: '/var/www/spva', 
 
-  PROJECT_PATH: '/var/www/spvaTrack', 
-
 
   /*  regex restriction to apply to emails of new accounts requesting access 
       (only if automatic creation enabled) */
