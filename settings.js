@@ -6,7 +6,7 @@
 module.exports = {
 
   // server port
-  PORT: 8080,
+  PORT: 5000,
 
   // is the system in development mode (explicit error messages, etc)
   DEV_MODE: false,
@@ -16,7 +16,7 @@ module.exports = {
   DB_NAME: 'spvaTrack',
 
   // domain through which server is accessible
-  DOMAIN: 'https://estimate.johnnylindbergh.com',
+  DOMAIN: 'https://estimate.sunpaintingva.com',
 
   /*  does the system allow automatic creation of new user accounts
       when authentication is attempted. */
@@ -24,10 +24,7 @@ module.exports = {
 
   // project path used for uploads. No tailing slash
 
-  PROJECT_PATH: '/var/www/spva', 
-
   PROJECT_PATH: '/var/www/spvaTrack', 
-
 
   /*  regex restriction to apply to emails of new accounts requesting access 
       (only if automatic creation enabled) */

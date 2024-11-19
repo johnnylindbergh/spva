@@ -31,7 +31,7 @@ CREATE TABLE users (
 -- exmaple entry for settings table: 
 CREATE TABLE system_settings (
   setting_id INT NOT NULL AUTO_INCREMENT, 
-  setting_name INT,
+  setting_name VARCHAR(64),
   setting_value VARCHAR(64),
   PRIMARY KEY (setting_id)
 );
