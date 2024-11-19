@@ -84,6 +84,7 @@ app.get('*', (req, res) => { res.redirect('/'); });
  
            // whether or not to run at cloudscale
            cluster: false
+
          }).serve(app);
 
        
