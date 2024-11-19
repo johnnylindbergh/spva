@@ -367,12 +367,41 @@ module.exports = function (app) {
     );
   });
 
+  app.get("/settings", mid.isAuth, function (req, res) {
+  db.getAllSystemSettings(function (err, settings) {
+    if (err) {
+      console.log(err);
+      res.status(500).send("Failed to retrieve settings");
+    } else {
+      res.render("settings.html", { settings: settings });
+    }
+  });
+});
+
+app.post("/updateSetting", mid.isAuth, function (req, res) {
+  const { setting_name, setting_value } = req.body;
+  db.updateSystemSetting(setting_name, setting_value, function (err) {
+    if (err) {
+      console.log(err);
+      res.status(500).send("Failed to update setting");
+    } else {
+      res.send({ success: true });
+    }
+  });
+});
+
+
   app.post("/generateEstimate", function (req, res) {
     // priority: this function should check to see if an estimate has been generated, if yes, send to client, if no, generate
     var takeoff_id = req.body.takeoff_id;
     console.log("Generating estimate for takeoff", takeoff_id);
 
-    var prompt = sys.PROMPT;
+      // Fetch the ChatGPT prompt dynamically from the database
+    db.getSystemSetting("chatgpt_prompt", function (err, prompt) {
+      if (err || !prompt) {
+        console.error("Error fetching ChatGPT prompt, using default.");
+        prompt = "Default fallback prompt goes here."; // Fallback prompt
+      }
 
     db.takeoffSetStatus(takeoff_id, 2, function (err) {
       if (err) {
@@ -439,6 +468,8 @@ module.exports = function (app) {
       });
     });
   });
+});
+  
 
   app.post("/viewEstimate", mid.isAuth, function (req, res) {
     console.log("estimate view");
@@ -826,7 +857,7 @@ app.get('/session-status', async (req, res) => {
   });
 });
   
-  // ending perentheses do not delete
+  // ending perentheses do not delete (for the module.exports thing)
 };
 
 function arrayToCSV(objArray) {

@@ -45,25 +45,7 @@ module.exports = {
 
   // middleware to check if a user is authenticated
   isAuth: (req, res, next) => {
-  // first check if the system is in dev mode. if so, bypass the check
-    if (sys.DEV_MODE){
-      // does req.user.local exist?
-      if (req.user && req.user.local){
-       return next();
-      } else {
-        // create it
-        req.user = {};
-        req.user.local = {};
-        req.user.local.role = 1;
-        req.user.local.isAdmin = true;
-        req.name = {givenName: "John"};
-        console.log(req)
 
-        // define req.user.name.givenName
-        req.user.name = {givenName: "John"};
-        return next();
-      }
-    }
     // if authenticated and has session data from our system
     if (req.isAuthenticated() && req.user.local) {
       return next();

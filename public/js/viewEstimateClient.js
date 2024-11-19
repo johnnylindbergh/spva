@@ -210,13 +210,13 @@ function createPaymentIntent() {
     // Send the data to the server via a POST request using jQuery
 
     // form the post url
-    const url = '/checkout/' + takeoff_id;
+    const url = '/checkMeout/' + takeoff_id;
     $.post(url, data)
         .done(function(response) {
             console.log('Success:', response);
             if (response) {
                 // Redirect to the checkout page
-                window.location.href = '/checkout/'+takeoff_id;
+                window.location.href = '/checkMeout/'+takeoff_id;
             }
         })
         .fail(function(error) {

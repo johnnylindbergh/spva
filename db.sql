@@ -36,8 +36,15 @@ CREATE TABLE system_settings (
   PRIMARY KEY (setting_id)
 );
 -- actual defaults
+INSERT INTO system_settings (setting_name, setting_value) VALUES ('default_labor_cost', '0.40');
+INSERT INTO system_settings (setting_name, setting_value) VALUES ('levens_threshold', '2');
+INSERT INTO system_settings (setting_name, setting_value) VALUES ('chatgpt_prompt', 'Default prompt goes here');
+
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('default_labor_cost', '0.00');
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('levens_threshold', '2'); 
+INSERT INTO system_settings (setting_name, setting_value) VALUES ('chatgpt_prompt', 'Default prompt goes here');
+
+
 
 CREATE TABLE estimate (
   id INT NOT NULL AUTO_INCREMENT,
