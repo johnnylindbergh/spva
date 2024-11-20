@@ -1,4 +1,18 @@
 
+// Function to convert markdown-like text to HTML
+function formatTextToHTML(text) {
+    return text
+        .replace(/### (.+)/g, '<h3>$1</h3>')        // Replace ### with <h3> for headings
+        .replace(/## (.+)/g, '<h2>$1</h2>')        // Replace ## with <h2> for subheadings
+        .replace(/# (.+)/g, '<h1>$1</h1>')         // Replace # with <h1> for main headings
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Replace **text** with <strong>text</strong>
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')      // Replace *text* with <em>text</em>
+        .replace(/- (.+)/g, '<li>$1</li>')         // Replace - text with list items
+        .replace(/\n\n/g, '</p><p>')              // Replace double newlines with paragraph separation
+        .replace(/\n/g, '<br>')                   // Replace single newline with <br> for minor breaks
+        .replace(/^(.+?)$/gm, '<p>$1</p>');       // Wrap all remaining lines in <p>
+}
+
 // Function to populate the "Proposal Includes" section
 function populateProposalIncludes(items) {
     const includesList = $('#proposal-includes');
@@ -6,7 +20,7 @@ function populateProposalIncludes(items) {
 
     // set the content of the includesList to the items
     // items is a string 
-    includesList.text(items);
+    includesList.html(formatTextToHTML(items));
    // $('#includes-total').text(calculateTotal(items.length, 50)); // Example calculation
 }
 
@@ -15,7 +29,7 @@ function populateExclusions(exclusions) {
     const exclusionsList = $('#exclusions-list');
     exclusionsList.empty(); // Clear any existing content
 
-    exclusionsList.text(exclusions);
+    exclusionsList.html(formatTextToHTML(exclusions));
 
 
     $('#excludes-total').text("$0.00"); 
