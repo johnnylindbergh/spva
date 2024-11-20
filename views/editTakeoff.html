@@ -14,13 +14,14 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="/js/editTakeoff.js" type="text/javascript"></script>
-  <script> loadTakeoffMaterials({{takeoff_id}}); </script>
+  <script> loadTakeoffMaterials({takeoff_id}); </script>
 
 
 </head>
 <body>
   <div class="navbar">
     <ul> 
+      <li><a href="javascript:history.back()">Back</a></li>
       <li><a href="/">{{defaults.sysName}}</a></li>
       {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
       <li><a href="/dashboard">dashboard</a></li>
@@ -41,7 +42,7 @@
 
           {{#materials}}
             <!-- a link that when you click it it runs a js function -->
-            <a href="#" onclick="add_material({{id}})">{{name}} <i style= "font-size: 6;">${{cost}} </i></a>
+            <a href="#" onclick="add_material({id})">{{name}} <i style= "font-size: 6;">${{cost}} </i></a>
 
           {{/materials}}
         </div>
