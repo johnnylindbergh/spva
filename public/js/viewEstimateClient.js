@@ -156,7 +156,7 @@ function handleSignatureChange() {
     }
 
     const signatureInput = $('#signature').val();
-    const dateInput = $('#signedDate"]').val();
+    const dateInput = $('#signedDate').val();
 
 
     if (signatureInput === '') {
