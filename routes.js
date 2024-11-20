@@ -392,6 +392,18 @@ module.exports = function (app) {
   });
 });
 
+
+app.get("/getSettings", mid.isAuth, function (req, res) {
+  db.getAllSystemSettings(function (err, settings) {
+    if (err) {
+      console.log(err);
+      res.status(500).send("Failed to retrieve settings");
+    } else {
+      res.send(settings);
+    }
+  });
+});
+
 app.post("/updateSetting", mid.isAuth, function (req, res) {
   const { setting_id, setting_value } = req.body;
   console.log("updating setting ", setting_id, setting_value);
@@ -418,8 +430,12 @@ app.post("/updateSetting", mid.isAuth, function (req, res) {
     db.getSystemSettingByName("chatgpt_prompt", function (err, prompt) {
       if (err || !prompt) {
         console.error("Error fetching ChatGPT prompt, using default.");
-        prompt = "Default fallback prompt goes here."; // Fallback prompt
+        prompt = sys.PROMPT; // Fallback prompt
       }
+
+      prompt = prompt.setting_value;
+
+    console.log("Prompt:", prompt);
 
     db.takeoffSetStatus(takeoff_id, 2, function (err) {
       if (err) {
@@ -869,13 +885,7 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
 app.post("/viewPaymentHistory", mid.isAuth, function (req, res) {
   const takeoff_id = req.body.takeoff_id;
   console.log("viewing payment history");
-  db.getPaymentHistory(req.body.takeoff_id, function (err, payments) {
-    if (err) {
-      console.log(err);
-    } else {
-      res.render("viewPaymentHistory.html", { takeoff_id: takeoff_id });
-    }
-  });
+  res.render("viewPaymentHistory.html", { takeoff_id: takeoff_id });
 });
 
 app.post("/retrievePaymentHistory", mid.isAuth, function (req, res) {

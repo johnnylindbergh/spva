@@ -44,3 +44,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// get /retrieveSettings
+// populate the settings table with the current settings
+
+
+$(document).ready(function() {
+    fetch('/retrieveSettings')
+    .then(response => response.json())
+    .then(data => {
+        const settingsTable = document.getElementById('settingsTable');
+        for (const key in data) {
+            const row = settingsTable.insertRow();
+            const keyCell = row.insertCell(0);
+            const valueCell = row.insertCell(1);
+            keyCell.textContent = key;
+            valueCell.textContent = data[key];
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}

@@ -204,7 +204,8 @@ $(document).ready(function() {
     const includesItems = ['Preparation of surfaces', 'Primer application', 'Final paint coat'];
     // post takeoff_id to getEstimateData to set includesItems and exclusionsItems
     
-    $.post('/getEstimateData', {takeoff_id: 1}, function(data) {
+    var takeoff_id = $('#takeoff_id').val();
+    $.post('/getEstimateData', {takeoff_id: takeoff_id}, function(data) {
         console.log(data)
 
         populateProposalIncludes(data.estimate[0].inclusions);
