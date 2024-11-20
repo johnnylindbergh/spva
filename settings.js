@@ -6,7 +6,7 @@
 module.exports = {
 
   // server port
-  PORT: 8080,
+  PORT: 5000,
 
   // is the system in development mode (explicit error messages, etc)
   DEV_MODE: false,
@@ -23,9 +23,7 @@ module.exports = {
   ALLOW_NEW_ACCOUNTS: true,
 
   // project path used for uploads. No tailing slash
-
   PROJECT_PATH: '/var/www/spva', 
-
 
   /*  regex restriction to apply to emails of new accounts requesting access 
       (only if automatic creation enabled) */

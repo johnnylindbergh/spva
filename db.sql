@@ -31,8 +31,8 @@ CREATE TABLE users (
 -- exmaple entry for settings table: 
 CREATE TABLE system_settings (
   setting_id INT NOT NULL AUTO_INCREMENT, 
-  setting_name INT,
-  setting_value VARCHAR(64),
+  setting_name VARCHAR(512),
+  setting_value VARCHAR(512),
   PRIMARY KEY (setting_id)
 );
 -- actual defaults
@@ -98,6 +98,42 @@ CREATE TABLE owners (
   phone_number VARCHAR(12),
   PRIMARY KEY (id)
 );
+
+-- statements table
+-- statement are static 
+CREATE TABLE statements (
+  id INT NOT NULL AUTO_INCREMENT,
+  takeoff_id INT,
+  total DECIMAL(10,2),
+  price_paid DECIMAL(10,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id)
+);
+-- invoices table
+CREATE TABLE invoices (
+  id INT NOT NULL AUTO_INCREMENT,
+  takeoff_id INT,
+  total DECIMAL(10,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id)
+);
+
+-- payment history table
+CREATE TABLE payment_history (
+  id INT NOT NULL AUTO_INCREMENT,
+  takeoff_id INT,
+  amount DECIMAL(10,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id)
+);
+-- example payment_history entry
+
+
 
 
 

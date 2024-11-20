@@ -367,20 +367,47 @@ module.exports = function (app) {
     );
   });
 
+
+  /* this funciton should be split into two functions one POST /settings to render the settings page. The settings page with then pull the 
+  settings from the server so we will need a second function that res.send the settings to the client */
+  
   app.get("/settings", mid.isAuth, function (req, res) {
+    
+    /* since this page is accessed through clicking the settings button in the navbar while editing a takeoff, 
+    we can assume that the rendering of this page must also reference some takeoff-specific data  
+    therefore, we should pass a takeoff_id (from the post request) to the settings page
+    retrived by either querystring or stored in cookie or session storage OR convert this into a post request
+    */
   db.getAllSystemSettings(function (err, settings) {
     if (err) {
       console.log(err);
       res.status(500).send("Failed to retrieve settings");
     } else {
-      res.render("settings.html", { settings: settings });
+      console.log(settings);
+
+      res.render("userSettings.html", { settings: settings });
+    }
+  });
+});
+
+app.get("/getSettings", mid.isAuth, function (req, res) {
+  db.getAllSystemSettings(function (err, settings) {
+    if (err) {
+      console.log(err);
+      res.status(500).send("Failed to retrieve settings");
+    } else {
+      res.send(settings);
     }
   });
 });
 
 app.post("/updateSetting", mid.isAuth, function (req, res) {
-  const { setting_name, setting_value } = req.body;
-  db.updateSystemSetting(setting_name, setting_value, function (err) {
+  const { setting_id, setting_value } = req.body;
+  console.log("updating setting ", setting_id, setting_value);
+  /* edit
+  since matching strings is harder than matching integers, and, if someone decided to make two custom settings of the same name, 
+    this function should match by id and not name*/
+  db.updateSystemSetting(setting_id, setting_value, function (err) {
     if (err) {
       console.log(err);
       res.status(500).send("Failed to update setting");
@@ -397,7 +424,7 @@ app.post("/updateSetting", mid.isAuth, function (req, res) {
     console.log("Generating estimate for takeoff", takeoff_id);
 
       // Fetch the ChatGPT prompt dynamically from the database
-    db.getSystemSetting("chatgpt_prompt", function (err, prompt) {
+    db.getSystemSettingByName("chatgpt_prompt", function (err, prompt) {
       if (err || !prompt) {
         console.error("Error fetching ChatGPT prompt, using default.");
         prompt = "Default fallback prompt goes here."; // Fallback prompt
@@ -847,6 +874,29 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
     }
   });
 });
+
+app.post("/viewPaymentHistory", mid.isAuth, function (req, res) {
+  const takeoff_id = req.body.takeoff_id;
+  console.log("viewing payment history");
+  db.getPaymentHistory(req.body.takeoff_id, function (err, payments) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.render("viewPaymentHistory.html", { takeoff_id: takeoff_id });
+    }
+  });
+});
+
+app.post("/retrievePaymentHistory", mid.isAuth, function (req, res) {
+  console.log("retrieving payment history");
+  db.getPaymentHistory(req.body.takeoff_id, function (err, payments) {
+    if (err) {
+      console.log(err);
+    }
+    res.send(payments);
+  });
+});
+
 
 app.get('/session-status', async (req, res) => {
   const session = await stripe.checkout.sessions.retrieve(req.query.session_id);

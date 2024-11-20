@@ -4,6 +4,7 @@
 /credentials.js
 /settings.js
 package-lock.json
+spvaUsers.sql
 # SSL Stuff
 greenlock.d/
 # Dependency directories

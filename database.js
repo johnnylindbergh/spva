@@ -290,6 +290,59 @@ module.exports = {
     );
   },
 
+  getAllSystemSettings: function (callback) {
+    con.query("SELECT * FROM system_settings;", function (err, settings) {
+      if (err) return callback(err);
+      callback(null, settings);
+    });
+  },
+
+  updateSystemSetting: function (setting_id, value, callback) {
+    con.query(
+      "UPDATE system_settings SET setting_value = ? WHERE setting_id = ?;",
+      [value, setting_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );  
+  },
+  // used for code reference
+  getSystemSettingByName: function (setting_name, callback) {
+    con.query(
+      "SELECT * FROM system_settings WHERE setting_name = ?;",
+      [setting_name],
+      function (err, settings) {
+        if (err) return callback(err);
+        callback(null, settings);
+      }
+    );
+  },
+
+
+  getPaymentHistory: function (takeoff_id, callback) {
+    con.query(
+      "SELECT * FROM payment_history WHERE takeoff_id = ?;",
+      [takeoff_id],
+      function (err, payments) {
+        if (err) return callback(err);
+        console.log(payments);
+        callback(null, payments);
+      }
+    );
+  },
+   // used for code reference
+   getSystemSettingById: function (setting_id, callback) {
+    con.query(
+      "SELECT * FROM system_settings WHERE setting_id = ?;",
+      [setting_name],
+      function (err, settings) {
+        if (err) return callback(err);
+        callback(null, settings);
+      }
+    );
+  },
+
   generateEstimate: function (takeoff_id, callback) {
     // query takeoffs table for estimate_id
     // if the estimate_id is null, create a new estimate insert it into the db, and update the takeoff's estimate_id in the takeoffs table

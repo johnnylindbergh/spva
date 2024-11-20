@@ -31,104 +31,87 @@ $(document).ready(function () {
     return progressBar;
   }
 
-  function viewTakeoff(id) {
-    // make a post to viewEstimate with takeoff_id: id
-    $.post("/viewEstimate", { takeoff_id: id }, function (data) {
-      // Display the HTML content in a specific element
-      var page_containter = $("#estimate_view");
-      if (page_containter.html() == "") {
-        page_containter.html(data);
-      } else {
-        page_containter.empty();
-        page_containter.html;
-      }
-
-      // Redirect to the /viewEstimate page
-      //window.location.href = "/viewEstimate";
+  function viewPaymentHistory(id) {
+    // Send a POST request to viewPaymentHistory with takeoff_id
+    $.post("/viewPaymentHistory", { takeoff_id: id }, function (data) {
+      // Handle successful response (e.g., display data or navigate)
+      console.log("Payment history loaded:", data);
     }).fail(function (jqXHR, textStatus, errorThrown) {
-      console.error("Error viewing takeoff:", textStatus, errorThrown);
+      console.error("Error viewing payment history:", textStatus, errorThrown);
     });
   }
 
   function getTakeoffs() {
-    console.log("retrieving takeoffs");
-    // empty the table
+    console.log("Retrieving takeoffs...");
+    // Clear the table
     $("#takeoffs_table").empty();
+  
+    // Fetch takeoff data from the server
     $.get("/getTakeoffs", function (data) {
       console.log(data);
+  
       data.forEach(function (takeoff) {
         let row = $("<tr>");
         row.append(`<td>${takeoff.name}</td>`);
-
-        // Create the form for editing
-        let form = $("<form>", {
-          action: "/editTakeoff",
-          method: "POST",
+  
+        // Create the 'Edit' form
+        let editForm = $("<form>", {
+          action: "/editTakeoff", // Edit URL
+          method: "POST",        // POST request
         });
-
-        let input = $("<input>", {
-          type: "hidden",
-          name: "takeoff_id",
-          value: takeoff.id,
-        });
-
-        let submit = $("<input>", {
-          type: "submit",
-          value: "Edit",
-        });
-
-        form.append(input, submit);
-
-        let tdForm = $("<td>").append(form);
-        row.append(tdForm);
-
-        // Format dates using Intl.DateTimeFormat
+        editForm.append(
+          $("<input>", { type: "hidden", name: "takeoff_id", value: takeoff.id }),
+          $("<input>", { type: "submit", value: "Edit" })
+        );
+        row.append($("<td>").append(editForm));
+  
+        // Format and display the creation date
         let createdAt = new Date(takeoff.created_at).toLocaleString("en-US", {
           month: "long",
           day: "numeric",
           year: "numeric",
           hour: "numeric",
           minute: "numeric",
-          second: "numeric",
         });
-
         row.append(`<td>${createdAt}</td>`);
-
-        // Add the 'View' button with a link to /share/+takeoff.passcode with proper event handling
-        row.append(
-          `<td><input type="button" onclick="location.href='/share/`+takeoff.passcode+`';" value="View" /></td>`
+  
+        // Create the 'View' form, similar to 'Edit'
+        let viewForm = $("<form>", {
+          action: "/viewPaymentHistory", // View URL
+          method: "POST",                // POST request
+        });
+        viewForm.append(
+          $("<input>", { type: "hidden", name: "takeoff_id", value: takeoff.id }),
+          $("<input>", { type: "submit", value: "View" }) // Submit button
         );
-
-        // Create the progress bar cell AFTER the 'View' column
-        let tdProgress = $("<td>");
+        row.append($("<td>").append(viewForm));
+  
+        // Add the progress bar
         let progressBar = createProgressBar(takeoff.status);
+        let tdProgress = $("<td>");
         if (takeoff.status === 4) {
-          // add a hover element to the progress bar that just shows the date the estimate was signed
-          tdProgress.addClass("hoverable");
-          tdProgress.attr("title", `Estimate Signed: ${new Date(takeoff.signed_at).toLocaleString("en-US")}`);
-
-        }
-
-        if (takeoff.status > 3) {
-          // add a hover element to the progress bar that just shows the date the estimate was signed
-          progressBar.addClass("hoverable");
-          progressBar.attr("title", `View Count: ${takeoff.view_count}`);
+          tdProgress.addClass("hoverable").attr(
+            "title",
+            `Estimate Signed: ${new Date(takeoff.signed_at).toLocaleString("en-US")}`
+          );
+        } else if (takeoff.status > 3) {
+          progressBar.addClass("hoverable").attr(
+            "title",
+            `View Count: ${takeoff.view_count}`
+          );
         }
         tdProgress.append(progressBar);
         row.append(tdProgress);
-
+  
+        // Append the row to the table
         $("#takeoffs_table").append(row);
       });
     }).fail(function (jqXHR, textStatus, errorThrown) {
       console.error("Error retrieving takeoffs:", textStatus, errorThrown);
     });
   }
-
-  // Bind event handler for dynamically added 'View' buttons
-  $(document).on("click", ".view-button", function () {
-    const id = $(this).data("id");
-    viewTakeoff(id);
-  });
+  
+  
 
   // Initialize the takeoffs table
   getTakeoffs();
