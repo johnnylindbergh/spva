@@ -1,7 +1,7 @@
 
 // Function to populate the "Proposal Includes" section
 function populateProposalIncludes(items) {
-    const includesList = $('#includes-list');
+    const includesList = $('#proposal-includes');
     includesList.empty(); // Clear any existing content
 
     // set the content of the includesList to the items
@@ -54,7 +54,7 @@ function populateOptions(takeoff_id) {
         for (let i = 0; i < data.length; i++) {
             const newRow = $('<tr>').data('row_id', data[i].id); // Store row_id as data attribute
             const descriptionCell = $('<td contenteditable="true" class="editable">').text(data[i].description);
-            const amountCell = $('<td contenteditable="true" class="editable">').text(data[i].cost);
+            const amountCell = $('<td contenteditable="true" class="editable">').text(numberWithCommas(data[i].cost));
             newRow.append(descriptionCell);
             newRow.append(amountCell);
             table.append(newRow);
@@ -88,6 +88,18 @@ function addOption(takeoff_id) {
     // Trigger post to server when editing is finished (focusout)
     descriptionCell.on('focusout', function() {
        // postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
+        // if amount is not 0.00, postToAddOption
+        var amount = amountCell.text();
+        if (amount != "0.00" && descriptionCell.text() != '') {
+            // remove the row
+            newRow.remove();
+        }
+
+        if (amount != "0.00") {
+            postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
+        } else {
+           
+        }
     });
     amountCell.on('focusout', function() {
         if (descriptionCell.text() == '') { // Don't allow empty descriptions
@@ -104,6 +116,9 @@ function addOption(takeoff_id) {
 }
 
 function postToAddOption(description, amount, takeoff_id, row_id) {
+
+    // Prepare the data to send to the server
+    amount = amount.replace(/[^0-9.-]+/g, '');
     const data = {
         option: description,
         cost_delta: amount,
@@ -179,15 +194,15 @@ function addEditableListeners() {
         // On input, send POST request to server when content changes
         element.on('focusout', function() {
             // determine if the element is in the includes or excludes section
-            const inclusions = $('#includes-list').text();
+            const includes = $('#proposal-includes').text(); // weird naming convention
             const exclusions = $('#exclusions-list').text();
-            const elementId = element.attr('id');
-        
+            
+            
 
             // Send POST request with the new content
             var takeoff_id = $('#takeoff_id').val(); // not super safe, but just for example
-            console.log(takeoff_id);
-            $.post('/update-content', { id: takeoff_id, inclusions: inclusions, exclusions: exclusions})
+            console.log('Updating content for takeoff:', takeoff_id);
+            $.post('/update-content', { id: takeoff_id, includes: includes, exclusions: exclusions})
                 .done(function(response) {
                     console.log('Content updated successfully:', response);
                 })
@@ -197,11 +212,13 @@ function addEditableListeners() {
         });
     });
 }
+numberWithCommas = (x) => {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 // Example to dynamically populate content on page load
 $(document).ready(function() {
     // Populate the "Proposal Includes" section with dynamic data
-    const includesItems = ['Preparation of surfaces', 'Primer application', 'Final paint coat'];
     // post takeoff_id to getEstimateData to set includesItems and exclusionsItems
     
     var takeoff_id = $('#takeoff_id').val();
@@ -210,9 +227,9 @@ $(document).ready(function() {
 
         populateProposalIncludes(data.estimate[0].inclusions);
         populateExclusions(data.estimate[0].exclusions);
-        populateOptions(parseInt($('#takeoff_id').val()));
+        populateOptions(parseInt(takeoff_id));
         console.log(data.takeoff[0].total);
-        $('#includes-total').text("$"+data.takeoff[0].total);
+        $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].total));
  
     });
 

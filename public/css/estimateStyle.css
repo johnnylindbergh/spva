@@ -312,3 +312,20 @@ input[type="text"]:focus, input[type="date"]:focus {
     margin: 6px 4px;
     cursor: pointer;
   }
+
+  .input-group {
+    /* style for text input boxes */
+    margin-bottom: 10px;
+    margin-left: 50px;
+    
+
+  }
+
+  .input-group input {
+    display:block;
+    width: 360px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+  }

@@ -2,7 +2,7 @@
 *.csv
 # Credentials file
 /credentials.js
-/settings.js
+settings.js
 package-lock.json
 # SSL Stuff
 greenlock.d/

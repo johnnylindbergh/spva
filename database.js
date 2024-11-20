@@ -423,18 +423,23 @@ module.exports = {
   },
 
   updateContent: function (id, inclusions, exclusions, callback) {
-    if (inclusions == null) {
-      inclusions = "";
-    }
-    if (exclusions == null) {
-      exclusions = "";
-    }
+    // if (inclusions == null) {
+    //   inclusions = "";
+    // }
+    // if (exclusions == null) {
+    //   exclusions = "";
+    // }
+    // console.log("inclusions: ", inclusions);
+    // console.log("exclusions: ", exclusions);
 
     con.query(
       "UPDATE estimate SET inclusions = ?, exclusions = ? WHERE id = ?;",
       [inclusions, exclusions, id],
       function (err) {
-        if (err) return callback(err);
+        if (err){
+          console.log(err);
+          return callback(err);
+        }
         callback(null);
       }
     );

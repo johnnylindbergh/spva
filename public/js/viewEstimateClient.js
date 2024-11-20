@@ -133,8 +133,8 @@ function updateTotals() {
     const total = subtotal + optionsTotal;
 
     // Update the text content of subtotal, options-total, and total
-    $('#subtotal').text("Subtotal: $" + subtotal.toFixed(2));
-    $('#total').text("Total: $" + total.toFixed(2));
+    $('#subtotal').text("Subtotal: $" +numberWithCommas(subtotal.toFixed(2)));
+    $('#total').text("Total: $" + numberWithCommas(total.toFixed(2)));
 
     // Optional: Log to console for debugging purposes
     console.log("Subtotal:", subtotal);
@@ -152,18 +152,22 @@ function handleSignatureChange() {
     const options = $('#options-table tr').length;
 
     if (!optionsTouched && options > 0) {
-        alert("Please select options before signing");
-        return;
+//        return;
     }
 
     const signatureInput = $('#signature').val();
-    const dateInput = $('input[type="date"]').val();
+    const dateInput = $('#signedDate"]').val();
 
 
     if (signatureInput === '') {
         alert('Please provide a signature');
         return;
     }   
+
+    if (dateInput === '') {
+        alert('Please provide a date');
+        return;
+    }
 
     //console.log('Signature Updated:', signatureInput);
     
@@ -224,6 +228,9 @@ function createPaymentIntent() {
         });
 }   
 
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 
 
@@ -244,8 +251,8 @@ $(document).ready(function() {
         populateOptions(parseInt($('#takeoff_id').val()));
         console.log(data.takeoff[0].total);
 
-        $('#includes-total').text("$"+data.takeoff[0].total);
-        $('#subtotal').text("$"+data.takeoff[0].total);
+        $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].total));
+        $('#subtotal').text("$"+numberWithCommas(data.takeoff[0].total));
 
 
       
