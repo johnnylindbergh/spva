@@ -123,6 +123,8 @@ function removeMaterial(subject_id, id) {
 
 }
 
+
+
 function add_material_subject() {
   console.log("Adding material " + material_id + " to subject " + subject_id);
 
@@ -348,7 +350,7 @@ function loadTakeoffMaterials(id) {
       });
 
       // Update total sum
-      $("#sum").text("Total Cost: $" + sum.toFixed(2));
+      $("#sum").text("Total Cost: $" + numberWithCommas(sum.toFixed(2)));
 
       //now post the new sum to /updateTakeoffTotal
       $.post("/updateTakeoffTotal", { takeoff_id: takeoff_id, total: sum.toFixed(2) })
@@ -365,7 +367,9 @@ function loadTakeoffMaterials(id) {
     });
 }
 
-
+function numberWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 function updateMeasurement(rowId, newMeasurement) {
   $.post("/update-measurement", { id: rowId, measurement: newMeasurement })

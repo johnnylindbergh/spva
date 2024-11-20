@@ -51,12 +51,9 @@
 
        <input type='hidden' id='takeoff_total' value='{{takeoff_info.total}}'>
 
-      <h2>{{name}}</h2>
-    </br>
-   
+      <h2 style="text-align: left;">{{name}}</h2>
       Owner:  {{owner}}</br>
       Billing Address: {{owner_billing_address}}</br>
-      {{created_at}}</br>
 
       </br>
     {{/takeoff}}
@@ -71,14 +68,12 @@
             </tr>
             <tr>
                 <td contenteditable="true" class="editable" id="proposal-includes">
-                    Proposal Includes:
                     <ul id="includes-list"></ul>
                 </td>
                 <td id="includes-total">{{includes_total}}</td>
             </tr>
             <tr>
                 <td contenteditable="true" class="editable" id="exclusions">
-                    Exclusions & Assumptions:
                     <ul id="exclusions-list"></ul>
                 </td>
                 <td id="excludes-total">${{exclude_total}}</td>
@@ -93,7 +88,7 @@
         <button id="add-row-btn" onclick="addOption({{estimate.takeoff_id}})">Add Row</button>
 
         <!-- Signature section with IDs for signature input -->
-        <div class="signature">
+        <!-- <div class="signature">
             <p><em>This budget estimate is not a contract until signed and returned to Sun Painting.</em></p> </br>
             <p>
                 <strong>Authorized Signature:</strong> 
@@ -101,7 +96,7 @@
                 <strong>Date:</strong> 
                 <input type="date">
             </p>
-        </div>
+        </div> -->
     </div>
 
 

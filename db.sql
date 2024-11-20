@@ -31,8 +31,8 @@ CREATE TABLE users (
 -- exmaple entry for settings table: 
 CREATE TABLE system_settings (
   setting_id INT NOT NULL AUTO_INCREMENT, 
-  setting_name VARCHAR(512),
-  setting_value VARCHAR(512),
+  setting_name VARCHAR(64),
+  setting_value TEXT,
   PRIMARY KEY (setting_id)
 );
 -- actual defaults
@@ -100,29 +100,34 @@ CREATE TABLE owners (
 );
 
 -- statements table
--- statement are static 
+-- statement are a static list of statements that HAVE been shared with the customer
+ 
 CREATE TABLE statements (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT,
   total DECIMAL(10,2),
   price_paid DECIMAL(10,2),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  last_viewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  view_count INT DEFAULT 0,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id)
 );
 -- invoices table
+-- a list of invoices that HAVE been shared with the customer
 CREATE TABLE invoices (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT,
   total DECIMAL(10,2),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  last_viewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  view_count INT DEFAULT 0,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id)
 );
 
 -- payment history table
+-- a complete list of all payments made by the customer
 CREATE TABLE payment_history (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT,
@@ -132,7 +137,7 @@ CREATE TABLE payment_history (
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id)
 );
 -- example payment_history entry
-
+INSERT INTO payment_history (takeoff_id, amount) VALUES (1, 100.00);
 
 
 
@@ -218,10 +223,11 @@ CREATE TABLE applied_materials (
 
 CREATE TABLE string_match_subject (
   id INT NOT NULL AUTO_INCREMENT,
+  type INT NOT NULL,
   material_id INT,
   labor_cost DECIMAL(10,2),
   unit_cost DECIMAL(10,2),
-  string_match VARCHAR(64),
+  string_match VARCHAR(128),
   PRIMARY KEY (id),
   FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
 );

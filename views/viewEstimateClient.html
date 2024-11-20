@@ -46,7 +46,6 @@
    
       Owner:  {{owner}}</br>
       Billing Address: {{owner_billing_address}}</br>
-      {{created_at}}</br>
 
       </br>
     {{/takeoff}}
@@ -85,12 +84,27 @@
         <div class="total" >
             <h3 class="total" id = "subtotal">$</h3>
             <h3 class="total" id = "options-total">$</h3>
+            <h3 class="total" id = "tax">$</h3>
+            <h3 class="total" id = "commission">$</h3>
             <h3 class="total" id = "total" onchange="updateTotal()">$</h3> </br>
 
         </div>
     </br>
+    <div class="input-group">
+       
+  
+        Phone Number: <input type="tel" id="phone" class="input-field" placeholder="123-456-7890" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
+             <br>
+    
+        Email:<input type="email" id="email" class="input-field" value="{{takeoff.owner_email}}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required> 
+        <br>
 
-    <strong>  Prefered Start Date:</strong> <input type="date">
+        Preferred Start Date: <input type="date" class="input-field"> <br>
+    </div>
+
+    
+
+    
 
         <!-- no adding rows on the client -->
         <!-- <button id="add-row-btn" onclick="addOption({{estimate.takeoff_id}})">Add Row</button> -->
@@ -99,7 +113,8 @@
         <div class="signature">
             <p><em>This budget estimate is not a contract until signed and returned to Sun Painting.</em></p> </br>
             <p>
-                <strong>Authorized Signature:</strong><input type="text" id="signature" value='{{takeoff.owner}}' placeholder="Sign here"><strong>  Date:</strong> <input type="date"> <i class="loader" style ="margin-bottom: -10px; margin-left:2px"></i>
+                <!-- <p style="float:up;">[{{takeoff.owner}}]</p> -->
+                <strong>Authorized Signature:</strong><input type="text" id="signature" value='' placeholder="{{takeoff.owner}}"><strong> &nbsp Date:</strong> <input type="date" id="signedDate"> <i class="loader" style ="margin-bottom: -10px; margin-left:2px"></i>
                 <!-- submit button that calls handleSig.. -->
                 <button class="sign-btn" onclick="handleSignatureChange()">Sign</button>
             

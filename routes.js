@@ -440,8 +440,9 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
     db.getSystemSettingByName("chatgpt_prompt", function (err, prompt) {
       if (err || !prompt) {
         console.error("Error fetching ChatGPT prompt, using default.");
-        prompt = "Default fallback prompt goes here."; // Fallback prompt
+        prompt = sys.PROMPT; // Fallback prompt
       }
+
 
     db.takeoffSetStatus(takeoff_id, 2, function (err) {
       if (err) {
@@ -450,14 +451,19 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
         
       }
 
-      // Proceed to generate the estimate regardless of the error in setting status
       db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
         if (err) {
           console.log(err);
           res.status(500).send("Error generating estimate");
         } else {
-          if (takeoff_info[0].estimate_id != null) {
+          console.log(takeoff_info[0].estimate_id)
+          if (takeoff_info[0].estimate_id == null || takeoff_info[0].estimate_id == undefined) {
             // Build the prompt
+
+
+             prompt = prompt[0].setting_value;
+
+            console.log("Prompt:", prompt);
             for (var i = 0; i < estimate.length; i++) {
               prompt += " subject={ " + estimate[i].material_name;
               prompt +=
@@ -467,7 +473,7 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
               " " + estimate[i].measurement_unit;
               if (estimate[i].selected_materials != null) {
                 for (var j = 0; j < estimate[i].selected_materials.length; j++) {
-                  console.log(estimate[i].selected_materials[j]);
+                  //console.log(estimate[i].selected_materials[j]);
                   prompt +=
                     " name: " + estimate[i].selected_materials[j].name + "'";
                   prompt +=
@@ -481,7 +487,7 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
             let response = "";
             chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
               response = subres;
-              console.log("Response:", response);
+             // console.log("Response:", response);
 
               // process response for render
               // split into two vars called includes, and exclusions
@@ -672,7 +678,9 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
     if (req.body.id == null) {
       req.body.id = req.user.local.takeoff_id; 
     }
-    db.updateContent(req.body.id, req.body.inclusions, req.body.exclusions, function (err) {
+
+
+    db.updateContent(req.body.id, req.body.includes, req.body.exclusions, function (err) {
       if (err) {
         console.log(err);
       } else {
@@ -891,13 +899,7 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
 app.post("/viewPaymentHistory", mid.isAuth, function (req, res) {
   const takeoff_id = req.body.takeoff_id;
   console.log("viewing payment history");
-  db.getPaymentHistory(req.body.takeoff_id, function (err, payments) {
-    if (err) {
-      console.log(err);
-    } else {
-      res.render("viewPaymentHistory.html", { takeoff_id: takeoff_id });
-    }
-  });
+  res.render("viewPaymentHistory.html", { takeoff_id: takeoff_id });
 });
 
 app.post("/retrievePaymentHistory", mid.isAuth, function (req, res) {
