@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // async..await is not allowed in global scope, must use a wrapper
-async function sendEstimateEmail(takeoff_id) {
+async function sendEstimateEmail(takeoff_id, callback) {
   db.getTakeoffById(takeoff_id, (err, takeoff) => {
     if (err) {
       console.log(err);
@@ -40,10 +40,12 @@ async function sendEstimateEmail(takeoff_id) {
             console.log(err);
           } else {
             console.log("Email sent: " + info.response);
+            callback(null, info.response);
           }
         });
       } else {
         console.log("Some info is missing from this takeoff takeoff.owner, takeoff.owner_email, or takeoff.passcode");
+        callback("Some info is missing from this takeoff takeoff.owner, takeoff.owner_email, or takeoff.passcode", null);
       }
     }
   });

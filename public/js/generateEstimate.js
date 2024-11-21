@@ -167,7 +167,7 @@ function shareClient(){
         if(value == "ok"){
 
             $.post('/shareClient', {takeoff_id: takeoff_id}, function(data) {
-                console.log(data);
+                console.log("twas the email sent?",data);
             });
 
         }

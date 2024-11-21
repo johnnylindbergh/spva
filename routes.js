@@ -790,13 +790,23 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
     console.log("sending email to client ", req.body.takeoff_id);
     if (req.body.takeoff_id) {
       console.log("sending email ");
-      emailer.sendEstimateEmail(req.body.takeoff_id);
-      db.takeoffSetStatus(req.body.takeoff_id, 3, function (err) {
+      emailer.sendEstimateEmail(req.body.takeoff_id, function (err, response){
         if (err) {
           console.log(err);
+          res.send("email failed");
+        } else {
+          console.log(response);
+          db.takeoffSetStatus(req.body.takeoff_id, 3, function (err) {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("email sent");
+            }
+          }
+          );
         }
-      }
-      );
+      }); // how do we get the response from this function
+     
     } else {
       console.log(""); 
     }
