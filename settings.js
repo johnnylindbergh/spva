@@ -16,15 +16,14 @@ module.exports = {
   DB_NAME: 'spvaTrack',
 
   // domain through which server is accessible
-  DOMAIN: 'https://estimate.sunpaintingva.com',
+  DOMAIN: 'https://estimate.johnnylindbergh.com',
 
   /*  does the system allow automatic creation of new user accounts
       when authentication is attempted. */
   ALLOW_NEW_ACCOUNTS: true,
 
   // project path used for uploads. No tailing slash
-
-  PROJECT_PATH: '/var/www/spvaTrack', 
+  PROJECT_PATH: '/var/www/spva', 
 
   /*  regex restriction to apply to emails of new accounts requesting access 
       (only if automatic creation enabled) */

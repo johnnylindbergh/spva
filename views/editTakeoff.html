@@ -21,6 +21,7 @@
 <body>
   <div class="navbar">
     <ul> 
+      <li><a href="javascript:history.back()">Back</a></li>
       <li><a href="/">{{defaults.sysName}}</a></li>
       {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
       <li><a href="/dashboard">dashboard</a></li>
@@ -50,9 +51,9 @@
                     <p id="selected_subject"></p>
 
       </div>
-
+      <!-- as a get request, changed from material settings to settings -->
       <div>
-        <li><a href="/materialSettings">Material Settings</a></li>
+        <li><a href="/settings">Settings</a></li>
       </div>
     
       <div>

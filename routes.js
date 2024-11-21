@@ -375,49 +375,59 @@ module.exports = function (app) {
     
     /* since this page is accessed through clicking the settings button in the navbar while editing a takeoff, 
     we can assume that the rendering of this page must also reference some takeoff-specific data  
-    therefore, we should pass a takeoff_id to the settings page
+    therefore, we should pass a takeoff_id (from the post request) to the settings page
     retrived by either querystring or stored in cookie or session storage OR convert this into a post request
-
     */
   db.getAllSystemSettings(function (err, settings) {
     if (err) {
       console.log(err);
       res.status(500).send("Failed to retrieve settings");
     } else {
-      JSON.stringify(settings);
       console.log(settings);
 
-      res.render("settings.html", { settings: settings });
+      res.render("userSettings.html", { settings: settings });
     }
   });
 });
 
-
-app.get("/getSettings", mid.isAuth, function (req, res) {
-  db.getAllSystemSettings(function (err, settings) {
-    if (err) {
-      console.log(err);
-      res.status(500).send("Failed to retrieve settings");
-    } else {
-      res.send(settings);
-    }
-  });
+app.get('/getSettings', mid.isAuth, function (req, res) {
+    db.getAllSystemSettings(function (err, settings) {
+        if (err) {
+            console.error('Error retrieving settings:', err);
+            res.status(500).send({ success: false, error: 'Failed to retrieve settings' });
+        } else {
+            res.send(settings.map(setting => ({
+                setting_id: setting.setting_id,
+                setting_name: setting.setting_name,
+                setting_value: setting.setting_value,
+            })));
+        }
+    });
 });
 
-app.post("/updateSetting", mid.isAuth, function (req, res) {
-  const { setting_id, setting_value } = req.body;
-  console.log("updating setting ", setting_id, setting_value);
-  /* edit
-  since matching strings is harder than matching integers, and, if someone decided to make two custom settings of the same name, 
-    this function should match by id and not name*/
-  db.updateSystemSetting(setting_id, setting_value, function (err) {
-    if (err) {
-      console.log(err);
-      res.status(500).send("Failed to update setting");
-    } else {
-      res.send({ success: true });
-    }
-  });
+app.post('/updateSettings', mid.isAuth, function (req, res) {
+    const settings = req.body;
+    const updatePromises = Object.entries(settings).map(([setting_name, setting_value]) => {
+        return new Promise((resolve, reject) => {
+            db.getSystemSettingByName(setting_name, (err, [setting]) => {
+                if (err || !setting) {
+                    reject(err || 'Setting not found');
+                } else {
+                    db.updateSystemSetting(setting.setting_id, setting_value, (updateErr) => {
+                        if (updateErr) reject(updateErr);
+                        else resolve();
+                    });
+                }
+            });
+        });
+    });
+
+    Promise.all(updatePromises)
+        .then(() => res.send({ success: true }))
+        .catch(err => {
+            console.error('Error updating settings:', err);
+            res.status(500).send({ success: false, error: 'Failed to update settings' });
+        });
 });
 
 
