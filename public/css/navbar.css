@@ -50,7 +50,7 @@
 
 /* highlight and change cursor when navbar links hovered */
 .navbar li a:hover {
-  background-color: #05666f
+  background-color: #05666f;
   cursor: pointer;
 }
 
