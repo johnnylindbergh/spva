@@ -466,3 +466,12 @@ function priceChange(id) {
 
 
 
+// on document ready, get the takeoff id from the hidden input field
+$(document).ready(function() {
+  takeoff_id = $("#takeoff_id").val();
+  console.log("Takeoff ID: " + takeoff_id);
+  loadTakeoffMaterials(takeoff_id); // better
+
+  
+
+});

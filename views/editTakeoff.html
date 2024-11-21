@@ -19,6 +19,7 @@
 
 </head>
 <body>
+  <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
   <div class="navbar">
     <ul> 
       <li><a href="javascript:history.back()">Back</a></li>
@@ -53,7 +54,12 @@
       </div>
       <!-- as a get request, changed from material settings to settings -->
       <div>
-        <li><a href="/settings">Settings</a></li>
+        <li>
+          <form action="/settings" method="POST">
+            <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+            <button type="submit" id="settingsButton">Settings</button>
+          </form>
+        </li>
       </div>
     
       <div>

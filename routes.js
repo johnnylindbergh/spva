@@ -371,7 +371,7 @@ module.exports = function (app) {
   /* this funciton should be split into two functions one POST /settings to render the settings page. The settings page with then pull the 
   settings from the server so we will need a second function that res.send the settings to the client */
   
-  app.get("/settings", mid.isAuth, function (req, res) {
+  app.post("/settings", mid.isAuth, function (req, res) {
     
     /* since this page is accessed through clicking the settings button in the navbar while editing a takeoff, 
     we can assume that the rendering of this page must also reference some takeoff-specific data  
@@ -385,7 +385,7 @@ module.exports = function (app) {
     } else {
       console.log(settings);
 
-      res.render("userSettings.html", { settings: settings });
+      res.render("userSettings.html", { settings: settings, takeoff_id: req.body.takeoff_id });
     }
   });
 });

@@ -27,10 +27,23 @@
       </div>
 
       <div>
-        <li><a href="/generateEstimate/{{takeoff_id}}">Generate Estimate</a></li>
+        <form action="/generateEstimate" method="POST" style="display:inline;">
+          <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+          <button type="submit" id="generateEstimate">Generate Estimate</button>
+        </form>
       </div>
+
+      <div>
+        <form action="/editTakeoff" method="POST" style="display:inline;">
+          <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+          <button type="submit" id="editTakeoff">Edit Takeoff</button>
+        </form>
+      </div>
+
+      
     </ul>
   </div>
+  <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
 
   <div class="container">
     <h1>System Settings</h1>
