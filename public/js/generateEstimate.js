@@ -168,6 +168,19 @@ function shareClient(){
 
             $.post('/shareClient', {takeoff_id: takeoff_id}, function(data) {
                 console.log("twas the email sent?",data);
+                if (data == "email sent") {
+                    XSAlert({
+                        title: 'Email Sent',
+                        message: 'The estimate has been sent to the client.',
+                        icon: 'success',
+                    });
+                } else {
+                    XSAlert({
+                        title: 'Error',
+                        message: "The estimate could not be sent. Please set an owner email.",
+                        icon: 'error',
+                    });
+                }
             });
 
         }

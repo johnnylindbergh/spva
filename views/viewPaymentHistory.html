@@ -6,10 +6,12 @@
     <title>Payment History</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script src="/js/viewPaymentHistory.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+
     <link rel="stylesheet" href="/css/defaults.css">
 </head>
 <body>
-    <!-- hidden input takeoff_id -->
+    <!-- Hidden input for takeoff_id -->
     <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
     <h1>Payment History</h1>
     <table id="paymentHistoryTable">
@@ -24,6 +26,67 @@
             <!-- Rows will be populated by JavaScript -->
         </tbody>
     </table>
+
+    <!-- Action Buttons -->
+    <div id="actionButtons">
+        <button id="createInvoiceBtn">Create Invoice</button>
+        <button id="createStatementBtn">Create Statement</button>
+        <button id="pushToQuickbooksBtn">Push to QuickBooks</button>
+    </div>
+
+    <div id="estimates">
+        <h2>Estimates</h2>
+        <table id="estimatesTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <!-- button to create an invoice -->
+                    <th><button id="createInvoiceButton">Create Invoice</button></th>
+                    <!-- button to create statments -->
+                    <th><button id="createStatementButton">Create Statement</button></th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- invoices section -->
+    <div id="invoices">
+        <h2>Invoices</h2>
+        <table id="invoicesTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>QuickBooks ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+    <!-- statements Section -->
+    <div id="statements">
+        <h2>Statements</h2>
+        <table id="statementsTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>QuickBooks ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be populated by JavaScript -->
+            </tbody>
+        </table>
 
 </body>
 </html>

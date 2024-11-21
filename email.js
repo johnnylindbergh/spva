@@ -18,6 +18,7 @@ async function sendEstimateEmail(takeoff_id, callback) {
   db.getTakeoffById(takeoff_id, (err, takeoff) => {
     if (err) {
       console.log(err);
+      callback("big error", null);
     } else {
       console.log(takeoff);
       if (takeoff[0].owner_email && takeoff[0].owner && takeoff[0].passcode) { 
@@ -38,6 +39,7 @@ async function sendEstimateEmail(takeoff_id, callback) {
         const info = transporter.sendMail(mailOptions, (err, info) => {
           if (err) {
             console.log(err);
+            callback(err, null);
           } else {
             console.log("Email sent: " + info.response);
             callback(null, info.response);
