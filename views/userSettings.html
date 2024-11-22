@@ -18,13 +18,10 @@
 <body>
   <div class="navbar">
     <ul>
+      <!-- back button that posts to editTakeoff -->
 
-       <div>
-        <form action="/generateEstimate" method="POST" style="display:inline;">
-          <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
-          <button type="submit" id="generateEstimate"><li>back</li></button>
-        </form>
-      </div>
+      <li><a href="javascript:history.back()">Back</a></li>
+       
       <li><a href="/">{{defaults.sysName}}</a></li>
       {{#isAdmin}} <li><a href="/admin">Admin</a></li> {{/isAdmin}} 
       <li><a href="/dashboard">Dashboard</a></li>
@@ -40,9 +37,7 @@
           <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
           <button type="submit" id="editTakeoff">Edit Takeoff</button>
         </form>
-      </div>
-
-      
+      </div>      
     </ul>
   </div>
   <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
