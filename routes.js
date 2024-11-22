@@ -702,6 +702,18 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
     });
   }); 
 
+  app.post("/update-takeoff-invoice-email", mid.isAuth, function (req, res) {
+    console.log("updating takeoff invoice email ", req.body);
+    db.updateTakeoffInvoiceEmail(req.body.takeoff_id, req.body.invoice_email_address, function (
+      err
+    ) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("updated");
+      }
+    });
+  });
 
   app.post("/add-row", mid.isAuth, function (req, res) {
     console.log("Adding row to takeoff", req.body.takeoff_id);

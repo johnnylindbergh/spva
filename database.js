@@ -354,7 +354,7 @@ module.exports = {
         if (err) return callback(err);
         console.log(estimate_id);
 
-        if (estimate_id[0].estimate_id == null) {
+        if (estimate_id[0]==null || estimate_id[0].estimate_id == null) {
           con.query(
             "INSERT INTO estimate (takeoff_id) VALUES (?); SELECT LAST_INSERT_ID() as last;",
             [takeoff_id],
@@ -451,6 +451,21 @@ module.exports = {
     } else {
       con.query(
         "UPDATE takeoffs SET owner_email = ? WHERE id = ?;",
+        [owner_email, takeoff_id],
+        function (err) {
+          if (err) return callback(err);
+          callback(null);
+        }
+      );
+    }
+  },
+
+  updateTakeoffInvoiceEmail: function (takeoff_id, owner_email, callback) {
+    if (!takeoff_id || !owner_email) {
+      return callback("Missing required parameters");
+    } else {
+      con.query(
+        "UPDATE takeoffs SET invoice_email = ? WHERE id = ?;",
         [owner_email, takeoff_id],
         function (err) {
           if (err) return callback(err);

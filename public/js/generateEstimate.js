@@ -1,4 +1,31 @@
 
+
+function updateTakeoffOwnerEmailAddress(){
+    let email = $("#owner_email_address").val();
+    let takeoff_id = $("#takeoff_id").val();
+    console.log("Updating takeoff owner email address: " + email);
+    $.post("/update-takeoff-owner-email", { takeoff_id: takeoff_id, owner_email_address: email })
+      .done(function() {
+        console.log("Takeoff owner email address updated: " + email);
+      })
+      .fail(function() {
+        console.log("Failed to update takeoff owner email address: " + email);
+      });
+  }
+
+  function updateTakeoffInvoiceEmailAddress(){
+    let email = $("#invoice_email_address").val();
+    let takeoff_id = $("#takeoff_id").val();
+    console.log("Updating takeoff owner email address: " + email);
+    $.post("/update-takeoff-invoice-email", { takeoff_id: takeoff_id, invoice_email_address: email })
+      .done(function() {
+        console.log("Takeoff invoice email address updated: " + email);
+      })
+      .fail(function() {
+        console.log("Failed to update takeoff invoive email address: " + email);
+      });
+  }
+
 // Function to convert markdown-like text to HTML
 function formatTextToHTML(text) {
     return text

@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sun Painting Estimate</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/themes/light-theme.css">
 
@@ -47,7 +47,15 @@
 
         
          {{#takeoff}}
+
+
        <input type='hidden' id='takeoff_id' value='{{id}}'>
+
+            Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{owner}}'></br>
+      Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{owner_billing_address}}'></br>
+      Owner Email Address: <input type= 'text' class="hiddenInput" id= 'owner_email_address' onchange='updateTakeoffOwnerEmailAddress()' value='{{owner_email}}'></br>
+      Invoice Email Address: <input type= 'text' class="hiddenInput" id= 'invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email}}'></br>
+
 
        <input type='hidden' id='takeoff_total' value='{{takeoff_info.total}}'>
 

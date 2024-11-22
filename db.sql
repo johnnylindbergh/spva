@@ -71,6 +71,7 @@ CREATE TABLE takeoffs (
   owner VARCHAR(64) default 'Owner Name',
   owner_billing_address VARCHAR(64),
   owner_email VARCHAR(64),
+  invoice_email VARCHAR(64),
   file_path_of_plans VARCHAR(255),
   estimate_id INT,
   status TINYINT(1) DEFAULT 0,
@@ -118,6 +119,7 @@ CREATE TABLE statements (
 CREATE TABLE invoices (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT,
+  invoice_id INT UNIQUE,
   total DECIMAL(10,2),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_viewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -133,8 +135,7 @@ CREATE TABLE payment_history (
   takeoff_id INT,
   amount DECIMAL(10,2),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id)
+  PRIMARY KEY (id)
 );
 -- example payment_history entry
 INSERT INTO payment_history (takeoff_id, amount) VALUES (1, 100.00);
