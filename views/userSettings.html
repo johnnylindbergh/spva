@@ -18,6 +18,13 @@
 <body>
   <div class="navbar">
     <ul>
+
+       <div>
+        <form action="/generateEstimate" method="POST" style="display:inline;">
+          <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+          <button type="submit" id="generateEstimate"><li>back</li></button>
+        </form>
+      </div>
       <li><a href="/">{{defaults.sysName}}</a></li>
       {{#isAdmin}} <li><a href="/admin">Admin</a></li> {{/isAdmin}} 
       <li><a href="/dashboard">Dashboard</a></li>
@@ -26,12 +33,7 @@
         <li><a href="/logout">Log Out</a></li>
       </div>
 
-      <div>
-        <form action="/generateEstimate" method="POST" style="display:inline;">
-          <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
-          <button type="submit" id="generateEstimate">Generate Estimate</button>
-        </form>
-      </div>
+     
 
       <div>
         <form action="/editTakeoff" method="POST" style="display:inline;">
