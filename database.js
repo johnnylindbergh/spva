@@ -714,26 +714,34 @@ module.exports = {
       function (err, subjects) {
         if (err) return callback(err);
         //console.log(subjects);
-        for (var i = 0; i < subjects.length; i++) {
-          // insert into applied_materials
-          con.query(
-            "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit) VALUES (?,?,?,?);",
-            [
-              takeoff_id,
-              subjects[i].subject,
-              subjects[i]["SUM(measurement)"],
-              subjects[i]["MAX(measurement_unit)"],
-            ],
-            function (err) {
-              if (err) {
-                console.log(err);
-              } else {
-                console.log("matching subject strings.");
-                // find the closest match in the materials table useing l
-              }
+        // get labor_cost setting
+        con.query(
+          "SELECT setting_value FROM system_settings where setting_name = 'default_labor_cost';", function(err, default_labor_cost){
+            for (var i = 0; i < subjects.length; i++) {
+              // insert into applied_materials
+              con.query(
+                "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost) VALUES (?,?,?,?,?);",
+                [
+                  takeoff_id,
+                  subjects[i].subject,
+                  subjects[i]["SUM(measurement)"],
+                  subjects[i]["MAX(measurement_unit)"],
+                  default_labor_cost[0].setting_value
+                ],
+                function (err) {
+                  if (err) {
+                    console.log(err);
+                  } else {
+                    console.log("matching subject strings.");
+                    // find the closest match in the materials table useing l
+                  }
+                }
+              );
             }
-          );
-        }
+
+          }
+        );
+    
       }
     );
   },
