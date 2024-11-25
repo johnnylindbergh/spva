@@ -974,16 +974,18 @@ app.post('/invoiceCreator', mid.isAuth, function (req, res) {
 });
 
 app.post('/create-invoice', mid.isAuth, function (req, res) {
-  console.log("generating invoice for", req.body);
-  const customerName = req.body.customerName;
+  const takeoff_id = req.body.takeoff_id;
+  const customerName = req.body.customer_name;
   const email = req.body.email;
-  const invoiceDate = req.body.invoiceDate;
-  const paymentAmount = req.body.paymentAmount;
-  const customAmount = req.body.customAmount;
+  const invoiceDate = req.body.invoice_date;// the date the invoice is to be sent
+  const paymentAmount = req.body.payment_amount;
+  const customAmount = req.body.custom_amount;
   const amountToInvoice = customAmount ? customAmount : paymentAmount;
   
+  console.log("generating invoice for", req.body);
+
   // print them all in an english sentence
-  console.log("Customer " + customerName + " with email " + email + " was invoiced on " + invoiceDate + " for " + paymentAmount + " with an amount of " + amountToInvoice);
+  console.log("Customer " + customerName + " with email " + email + " will be invoiced on " + invoiceDate + " for " + paymentAmount + " with an amount of " + amountToInvoice);
   db.generateInvoice(req.body.takeoff_id, function (err, takeoff, estimate, materials, options, payments) {
     if (err) {
       console.log(err);

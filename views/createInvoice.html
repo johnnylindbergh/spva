@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <title>Create Invoice</title>
     <style>
         body {
@@ -27,6 +32,7 @@
         .form-container input,
         .form-container select,
         .form-container button {
+            background-color: white;
             width: 80%;
             padding: 10px;
             margin-bottom: 15px;
@@ -34,13 +40,13 @@
             border-radius: 4px;
         }
         .form-container button {
-            background-color: #007BFF;
+            background-color: #0893A1;
             color: white;
             border: none;
             cursor: pointer;
         }
         .form-container button:hover {
-            background-color: #0071b3;
+            background-color:  #056b74;
         }
         .custom-amount-container {
             display: none;
@@ -69,9 +75,12 @@
             const invoiceDate = document.getElementById('invoice-date').value;
             const paymentAmount = document.getElementById('payment-amount').value;
             const customAmount = document.getElementById('custom-amount').value;
+            const takeoff_id = document.getElementById('takeoff_id').value;
 
             if (!customerName || !email || !invoiceDate || !paymentAmount) {
-                alert('Please fill out all required fields');
+                // pretty alert box
+                XSAlert.alert('Please fill out all required fields');
+               // alert('Please fill out all required fields');
                 return;
             }
 
@@ -79,24 +88,30 @@
                 alert('Please enter a custom amount');
                 return;
             }
-            var takeoff_id = $('#takeoff_id').val();
+
+            if (takeoff_id === undefined) {
+                alert('Takeoff not defined');
+                return;
+            }
+            console.log('takeoff_id', takeoff_id);
 
             $.ajax({
                 url: '/create-invoice',
                 method: 'POST',
                 data: {
-                    takeoff_id: takeoff_id,
                     customer_name: customerName,
                     email: email,
                     invoice_date: invoiceDate,
                     payment_amount: paymentAmount,
-                    custom_amount: customAmount
+                    custom_amount: customAmount,
+                    takeoff_id: takeoff_id
                 },
                 success: function(data) {
                     document.querySelector('.form-container').innerHTML = data;
                 }
             });
         });
+        
 
 
 
@@ -108,19 +123,25 @@
 <div class="form-container">
     <h2>Create Invoice</h2>
 
-    <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+    
     <form action="/create-invoice" method="POST">
+            <!-- hidden fields -->
+        <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
         <!-- Customer Name -->
         <label for="customer-name">Customer Name</label>
         <input type="text" id="customer-name" name="customer_name" value="John Doe" required>
 
         <!-- Email -->
-        <label for="email">Email</label>
+        <label for="email">Invoice Email</label>
         <input type="email" id="email" name="email" value="johndoe@example.com" required>
 
         <!-- Invoice Date -->
         <label for="invoice-date">Invoice Date</label>
         <input type="date" id="invoice-date" name="invoice_date" value="2024-11-26" required>
+
+        <!-- time input -->
+        <label for="time">Time</label>
+        <input type="time" id="time" name="time" value="13:00" >
 
         <!-- Payment Amount -->
         <label for="payment-amount">Payment Amount</label>
