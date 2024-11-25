@@ -52,49 +52,41 @@
             display: none;
         }
     </style>
-    <script>
-        function toggleCustomAmount() {
-            const paymentAmount = document.getElementById('payment-amount').value;
-            const customAmountContainer = document.getElementById('custom-amount-container');
-            if (paymentAmount === 'custom') {
-                customAmountContainer.style.display = 'block';
-            } else {
-                customAmountContainer.style.display = 'none';
-                document.getElementById('custom-amount').value = ''; // Clear custom amount input
-            }
-        }
+   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Form submission event listener
+        const form = document.querySelector('form');
 
-        // when the /create-invoice form is submitted, this function will be called
-        // prevent defaults and validate the form
-        // if the form is valid, use jquery to submit the form
-        // when the data is returned, clear the invoice div and append the data
-        document.querySelector('form').addEventListener('submit', function(event) {
+        form.addEventListener('submit', function(event) {
             event.preventDefault();
+
+            // Gather form data
             const customerName = document.getElementById('customer-name').value;
             const email = document.getElementById('email').value;
             const invoiceDate = document.getElementById('invoice-date').value;
             const paymentAmount = document.getElementById('payment-amount').value;
             const customAmount = document.getElementById('custom-amount').value;
-            const takeoff_id = document.getElementById('takeoff_id').value;
+            const takeoffId = document.getElementById('takeoff_id').value;
 
+            // Validate form fields
             if (!customerName || !email || !invoiceDate || !paymentAmount) {
-                // pretty alert box
                 XSAlert.alert('Please fill out all required fields');
-               // alert('Please fill out all required fields');
                 return;
             }
 
             if (paymentAmount === 'custom' && !customAmount) {
-                alert('Please enter a custom amount');
+                XSAlert.alert('Please enter a custom amount');
                 return;
             }
 
-            if (takeoff_id === undefined) {
-                alert('Takeoff not defined');
+            if (!takeoffId) {
+                XSAlert.alert('Takeoff ID not defined');
                 return;
             }
-            console.log('takeoff_id', takeoff_id);
 
+            console.log('Submitting takeoff_id:', takeoffId);
+
+            // Send data using AJAX
             $.ajax({
                 url: '/create-invoice',
                 method: 'POST',
@@ -104,19 +96,25 @@
                     invoice_date: invoiceDate,
                     payment_amount: paymentAmount,
                     custom_amount: customAmount,
-                    takeoff_id: takeoff_id
+                    takeoff_id: takeoffId
                 },
                 success: function(data) {
-                    document.querySelector('.form-container').innerHTML = data;
+                    // Clear and update the form container with the response
+                    const invoiceContainer = document.querySelector('.invoice-container');
+                    console.log(data)
+                    invoiceContainer.innerHTML = `
+                        <h2>Invoice added Here</h2>
+                    `;
+                },
+                error: function(error) {
+                    XSAlert.alert('Failed to create invoice. Please try again.');
+                    console.error('Error:', error);
                 }
             });
         });
-        
+    });
+</script>
 
-
-
-       
-    </script>
 </head>
 <body>
 
@@ -161,6 +159,9 @@
         <button type="submit">Create Invoice</button>
     </form>
 </div>
+
+<div class="invoice-container"></div>
+
 
 </body>
 </html>
