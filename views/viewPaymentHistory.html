@@ -7,12 +7,29 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script src="/js/viewPaymentHistory.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+    <script src="/js/viewPaymentHistory.js"></script>
 
     <link rel="stylesheet" href="/css/defaults.css">
 </head>
 <body>
+
+
+
+    <!-- Action Buttons -->
+    <div id="actionButtons">
+        <button id="createStatementBtn">Create Statement</button>
+        <form id="createInvoiceBtn" action="/invoiceCreator" method="POST">
+            <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
+            <button type="submit">Create Invoice</button>
+        </form>
+        <button id="pushToQuickbooksBtn">Push to QuickBooks</button>
+    </div>
+    </body><br>
+
+    
     <!-- Hidden input for takeoff_id -->
     <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
+
     <h1>Payment History</h1>
     <table id="paymentHistoryTable">
         <thead>
@@ -27,12 +44,8 @@
         </tbody>
     </table>
 
-    <!-- Action Buttons -->
-    <div id="actionButtons">
-        <button id="createInvoiceBtn">Create Invoice</button>
-        <button id="createStatementBtn">Create Statement</button>
-        <button id="pushToQuickbooksBtn">Push to QuickBooks</button>
-    </div>
+
+
 
     <div id="estimates">
         <h2>Estimates</h2>

@@ -119,7 +119,6 @@ CREATE TABLE statements (
 CREATE TABLE invoices (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT,
-  invoice_id INT UNIQUE,
   total DECIMAL(10,2),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_viewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -133,8 +132,10 @@ CREATE TABLE invoices (
 CREATE TABLE payment_history (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT,
+  invoice_id INT,
   amount DECIMAL(10,2),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (invoice_id) REFERENCES invoices(id),
   PRIMARY KEY (id)
 );
 -- example payment_history entry

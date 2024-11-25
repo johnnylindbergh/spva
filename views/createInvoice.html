@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-container {
+            float:left;
+            max-width: 20%;
+            margin: auto;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            z-index: 1;
+        }
+        .form-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-container input,
+        .form-container select,
+        .form-container button {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #f9f9f9;
+            border-radius: 4px;
+        }
+        .form-container button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .form-container button:hover {
+            background-color: #0071b3;
+        }
+        .custom-amount-container {
+            display: none;
+        }
+    </style>
+    <script>
+        function toggleCustomAmount() {
+            const paymentAmount = document.getElementById('payment-amount').value;
+            const customAmountContainer = document.getElementById('custom-amount-container');
+            if (paymentAmount === 'custom') {
+                customAmountContainer.style.display = 'block';
+            } else {
+                customAmountContainer.style.display = 'none';
+                document.getElementById('custom-amount').value = ''; // Clear custom amount input
+            }
+        }
+
+        // when the /create-invoice form is submitted, this function will be called
+        // prevent defaults and validate the form
+        // if the form is valid, use jquery to submit the form
+        // when the data is returned, clear the invoice div and append the data
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const customerName = document.getElementById('customer-name').value;
+            const email = document.getElementById('email').value;
+            const invoiceDate = document.getElementById('invoice-date').value;
+            const paymentAmount = document.getElementById('payment-amount').value;
+            const customAmount = document.getElementById('custom-amount').value;
+
+            if (!customerName || !email || !invoiceDate || !paymentAmount) {
+                alert('Please fill out all required fields');
+                return;
+            }
+
+            if (paymentAmount === 'custom' && !customAmount) {
+                alert('Please enter a custom amount');
+                return;
+            }
+            var takeoff_id = $('#takeoff_id').val();
+
+            $.ajax({
+                url: '/create-invoice',
+                method: 'POST',
+                data: {
+                    takeoff_id: takeoff_id,
+                    customer_name: customerName,
+                    email: email,
+                    invoice_date: invoiceDate,
+                    payment_amount: paymentAmount,
+                    custom_amount: customAmount
+                },
+                success: function(data) {
+                    document.querySelector('.form-container').innerHTML = data;
+                }
+            });
+        });
+
+
+
+       
+    </script>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Create Invoice</h2>
+
+    <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+    <form action="/create-invoice" method="POST">
+        <!-- Customer Name -->
+        <label for="customer-name">Customer Name</label>
+        <input type="text" id="customer-name" name="customer_name" value="John Doe" required>
+
+        <!-- Email -->
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="johndoe@example.com" required>
+
+        <!-- Invoice Date -->
+        <label for="invoice-date">Invoice Date</label>
+        <input type="date" id="invoice-date" name="invoice_date" value="2024-11-26" required>
+
+        <!-- Payment Amount -->
+        <label for="payment-amount">Payment Amount</label>
+        <select id="payment-amount" name="payment_amount" onchange="toggleCustomAmount()" required>
+            <option value="20%">20% of Estimate</option>
+            <option value="100%">Full Estimate</option>
+            <option value="custom">Custom Amount</option>
+        </select>
+
+        <!-- Custom Amount Input -->
+        <div id="custom-amount-container" class="custom-amount-container">
+            <label for="custom-amount">Enter Custom Amount</label>
+            <input type="number" id="custom-amount" name="custom_amount" placeholder="Enter custom amount" min="0">
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">Create Invoice</button>
+    </form>
+</div>
+
+</body>
+</html>

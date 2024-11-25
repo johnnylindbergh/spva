@@ -487,13 +487,25 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
             let response = "";
             chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
               response = subres;
-             // console.log("Response:", response);
+              //console.log("Response:", response);
 
               // process response for render
               // split into two vars called includes, and exclusions
               let inclusions = response.split("</br>")[0];
               let exclusions = response.split("</br>")[1];
 
+              // check if the response has been split correctly
+                console.log("Includes:", inclusions.substring(0, 20) + "...");
+                console.log("Exclusions:", exclusions.substring(0, 20) + "...");
+              //nul checking for inclusions and exclusions
+              if (inclusions == null) {
+                // set the inclusions to the response
+                inclusions = response;
+              }
+              if (exclusions == null) {
+                // set the exclusions to the response
+                exclusions = "";
+              }
               db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
                 res.render("viewEstimate.html", {
                   estimate: estimate,
@@ -918,6 +930,15 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
   });
 });
 
+app.get('/session-status', async (req, res) => {
+  const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+
+  res.send({
+    status: session.status,
+    customer_email: session.customer_details.email
+  });
+});
+
 app.post("/viewPaymentHistory", mid.isAuth, function (req, res) {
   const takeoff_id = req.body.takeoff_id;
   console.log("viewing payment history");
@@ -935,15 +956,48 @@ app.post("/retrievePaymentHistory", mid.isAuth, function (req, res) {
 });
 
 
-app.get('/session-status', async (req, res) => {
-  const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
 
-  res.send({
-    status: session.status,
-    customer_email: session.customer_details.email
+
+app.post('/invoiceCreator', mid.isAuth, function (req, res) {
+  console.log("creating invoice for", req.body);  
+
+  db.getTakeoffById(req.body.takeoff_id, function (err, takeoff) {
+    console.log(takeoff);
+    // is the estimate not signed?
+    if (takeoff[0].status != 4) {
+      console.log("estimate not signed");
+      res.send("estimate not signed");
+    } else {
+      res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id });
+    }
   });
 });
+
+app.post('/create-invoice', mid.isAuth, function (req, res) {
+  console.log("generating invoice for", req.body);
+  const customerName = req.body.customerName;
+  const email = req.body.email;
+  const invoiceDate = req.body.invoiceDate;
+  const paymentAmount = req.body.paymentAmount;
+  const customAmount = req.body.customAmount;
+  const amountToInvoice = customAmount ? customAmount : paymentAmount;
   
+  // print them all in an english sentence
+  console.log("Customer " + customerName + " with email " + email + " was invoiced on " + invoiceDate + " for " + paymentAmount + " with an amount of " + amountToInvoice);
+  db.generateInvoice(req.body.takeoff_id, function (err, takeoff, estimate, materials, options, payments) {
+    if (err) {
+      console.log(err);
+      res.send("error generating invoice");
+    } else {
+      res.send({ takeoff: takeoff, estimate: estimate, materials: materials, options: options, payments: payments });
+    }
+  });
+});
+
+
+   
+
+
   // ending perentheses do not delete (for the module.exports thing)
 };
 

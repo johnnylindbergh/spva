@@ -354,7 +354,7 @@ module.exports = {
         if (err) return callback(err);
         console.log(estimate_id);
 
-        if (estimate_id[0]==null || estimate_id[0].estimate_id == null) {
+        if (estimate_id[0].estimate_id == null) {
           con.query(
             "INSERT INTO estimate (takeoff_id) VALUES (?); SELECT LAST_INSERT_ID() as last;",
             [takeoff_id],
@@ -476,7 +476,7 @@ module.exports = {
   },
 
   saveEstimate: function (takeoff_id, inclusions, exclusions, callback) {
-    console.log("saving estimate");
+    console.log("saving estimate function recieved: ", inclusions, exclusions);
     con.query(
       "UPDATE estimate SET inclusions = ?, exclusions = ? WHERE id = ?;",
       [inclusions, exclusions, takeoff_id],
@@ -1017,6 +1017,50 @@ module.exports = {
         } else {
           cb(null);
         }
+      }
+    );
+  },
+
+  generateInvoice: function (takeoff_id, callback) {
+    con.query(
+      "SELECT * FROM takeoffs WHERE id = ?;",
+      [takeoff_id],
+      function (err, takeoff) {
+        if (err) return callback(err);
+
+        con.query(
+          "SELECT * FROM estimate WHERE takeoff_id = ?;",
+          [takeoff_id],
+          function (err, estimate) {
+            if (err) return callback(err);
+
+            con.query(
+              "SELECT * FROM applied_materials WHERE takeoff_id = ?;",
+              [takeoff_id],
+              function (err, materials) {
+                if (err) return callback(err);
+
+                con.query(
+                  "SELECT * FROM options WHERE takeoff_id = ?;",
+                  [takeoff_id],
+                  function (err, options) {
+                    if (err) return callback(err);
+
+                    con.query(
+                      "SELECT * FROM payment_history WHERE takeoff_id = ?;",
+                      [takeoff_id],
+                      function (err, payments) {
+                        if (err) return callback(err);
+
+                        callback(null, takeoff, estimate, materials, options, payments);
+                      }
+                    );
+                  }
+                );
+              }
+            );
+          }
+        );
       }
     );
   },
