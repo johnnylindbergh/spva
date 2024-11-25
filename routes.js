@@ -986,7 +986,7 @@ app.post('/create-invoice', mid.isAuth, function (req, res) {
 
   // print them all in an english sentence
   console.log("Customer " + customerName + " with email " + email + " will be invoiced on " + invoiceDate + " for " + paymentAmount + " with an amount of " + amountToInvoice);
-  db.generateInvoice(req.body.takeoff_id, function (err, takeoff, estimate, materials, options, payments) {
+  db.generateInvoice(req.body.takeoff_id, function (err, takeoff, estimate, options, payments) {
     if (err) {
       console.log(err);
       res.send("error generating invoice");
