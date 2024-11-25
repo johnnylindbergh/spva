@@ -22,6 +22,11 @@
             <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
             <button type="submit">Create Invoice</button>
         </form>
+
+        <form id="change-order-btn" action="/changeOrderCreator" method="POST">
+            <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
+            <button type="submit">Create Change Order</button>
+        </form>
         <button id="pushToQuickbooksBtn">Push to QuickBooks</button>
     </div>
     </body><br>

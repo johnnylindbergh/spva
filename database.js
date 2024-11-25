@@ -1034,12 +1034,6 @@ module.exports = {
           function (err, estimate) {
             if (err) return callback(err);
 
-            con.query(
-              "SELECT * FROM applied_materials WHERE takeoff_id = ?;",
-              [takeoff_id],
-              function (err, materials) {
-                if (err) return callback(err);
-
                 con.query(
                   "SELECT * FROM options WHERE takeoff_id = ?;",
                   [takeoff_id],
@@ -1052,13 +1046,12 @@ module.exports = {
                       function (err, payments) {
                         if (err) return callback(err);
 
-                        callback(null, takeoff, estimate, materials, options, payments);
+                        callback(null, takeoff, estimate, options, payments);
                       }
                     );
                   }
                 );
-              }
-            );
+
           }
         );
       }

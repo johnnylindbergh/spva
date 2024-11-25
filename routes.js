@@ -968,7 +968,7 @@ app.post('/invoiceCreator', mid.isAuth, function (req, res) {
       console.log("estimate not signed");
       res.send("estimate not signed");
     } else {
-      res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id });
+      res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_email: req.body.invoice_email, takeoff: takeoff });
     }
   });
 });
@@ -991,7 +991,7 @@ app.post('/create-invoice', mid.isAuth, function (req, res) {
       console.log(err);
       res.send("error generating invoice");
     } else {
-      res.send({ takeoff: takeoff, estimate: estimate, materials: materials, options: options, payments: payments });
+      res.send({ takeoff: takeoff, estimate: estimate, options: options, payments: payments });
     }
   });
 });

@@ -102,9 +102,10 @@
                     // Clear and update the form container with the response
                     const invoiceContainer = document.querySelector('.invoice-container');
                     console.log(data)
-                    invoiceContainer.innerHTML = `
-                        <h2>Invoice added Here</h2>
-                    `;
+                    // stringify the data
+                    const dataString = JSON.stringify(data, null, 2);
+                    invoiceContainer.innerHTML = `<pre>${dataString}</pre>`;
+                    
                 },
                 error: function(error) {
                     XSAlert.alert('Failed to create invoice. Please try again.');
