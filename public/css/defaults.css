@@ -6,6 +6,7 @@
 
 * {
   font-family: "Quicksand", sans-serif;
+  zoom:95%
 }
 .container {
   text-align: left;
@@ -221,3 +222,7 @@ input:checked + .slider:before {
   border-spacing: 0;
 }
 
+
+.laborInput {
+  width: 12em;
+}

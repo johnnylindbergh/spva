@@ -41,6 +41,70 @@ https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js
 <div>
 <form action="/uploadTakeoff" method="post" enctype="multipart/form-data">
   <input type = "hidden" name = "takeoff_id" value = "1">
+  <!-- customer div -->
+    <!-- searchable dropdown with list of customers -->
+    <!-- then, a searchable dropdown appears and shows a list of projects -->
+     <!-- and then a button that says create new project, whe clicked, an input box appears -->
+
+     <div class="customer-section">
+      <h3>Select Customer and Project</h3>
+    
+      <!-- Searchable dropdown for customers -->
+      <label for="customerDropdown">Customer:</label>
+      <select id="customerDropdown" name="customer" class="searchable-dropdown">
+        <option value="" disabled selected>Select a Customer</option>
+        <!-- Example values -->
+        <option value="customer1">Customer 1</option>
+        <option value="customer2">Customer 2</option>
+        <option value="customer3">Customer 3</option>
+      </select>
+      <br><br>
+    
+      <!-- Searchable dropdown for projects, dynamically updated -->
+      <label for="projectDropdown">Project:</label>
+      <select id="projectDropdown" name="project" class="searchable-dropdown">
+        <option value="" disabled selected>Select a Project</option>
+        <!-- Options dynamically updated based on selected customer -->
+      </select>
+      <br><br>
+    
+      <!-- Button to create a new project -->
+      <button type="button" id="createNewProjectButton">Create New Project</button>
+      <div id="newProjectDiv" style="display: none; margin-top: 10px;">
+        <label for="newProjectName">New Project Name:</label>
+        <input type="text" id="newProjectName" name="newProjectName" placeholder="Enter project name">
+      </div>
+    </div>
+    
+    <script>
+      // JavaScript for dynamic behavior
+      $(document).ready(function () {
+        const customerProjects = {
+          customer1: ["Project A", "Project B"],
+          customer2: ["Project C"],
+          customer3: ["Project D", "Project E", "Project F"]
+        };
+    
+        // Update projects dropdown based on selected customer
+        $('#customerDropdown').on('change', function () {
+          const selectedCustomer = $(this).val();
+          const projects = customerProjects[selectedCustomer] || [];
+    
+          const projectDropdown = $('#projectDropdown');
+          projectDropdown.empty().append('<option value="" disabled selected>Select a Project</option>');
+          projects.forEach(project => {
+            projectDropdown.append(`<option value="${project}">${project}</option>`);
+          });
+        });
+    
+        // Show input box for creating a new project
+        $('#createNewProjectButton').on('click', function () {
+          $('#newProjectDiv').toggle();
+        });
+      });
+    </script>
+    
+
   <h2></h2> 
   Takeoff Name: <input type="text" name="takeoffName"/> <br>
   <input type="file" name="takeoff" />

@@ -25,33 +25,12 @@
       <li><a href="javascript:history.back()">Back</a></li>
       <li><a href="/">{{defaults.sysName}}</a></li>
       {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
-      <li><a href="/dashboard">dashboard</a></li>
       <div style="float:right">
         <li><a href="/auth/google">Log In</a></li>
         <li><a href="/logout">Log Out</a></li>
       </div>
 
-        <div>
-        <li><!-- material library -->
-          <div class="dropdown" >
-
-          <div class="dropdown">
-        <a onclick="myFunction()" class="dropbtn">Material Library</a>
-        <div id="myDropdown" class="dropdown-content">
-          <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
-            
-
-          {{#materials}}
-            <!-- a link that when you click it it runs a js function -->
-            <a href="#" onclick="add_material({{id}})">{{name}} <i style= "font-size: 6;">${{cost}} </i></a>
-
-          {{/materials}}
-        </div>
-        </div>
-        </div></li>
-                    <p id="selected_subject"></p>
-
-      </div>
+        
       <!-- as a get request, changed from material settings to settings -->
       <div>
         <li>
@@ -103,26 +82,38 @@
 
      <h1 style=" font-size: 20px;" id = "sum"> </h1> </br>
 
+     <div>
+      <li><!-- material library -->
+        <div class="dropdown" >
+
+        <div class="dropdown">
+      <a onclick="myFunction()" class="dropbtn">Material Library</a>
+      <div id="myDropdown" class="dropdown-content">
+        <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+          
+
+        {{#materials}}
+          <!-- a link that when you click it it runs a js function -->
+          <a href="#" onclick="add_material({{id}})">{{name}} <i style= "font-size: 6;">${{cost}} </i></a>
+
+        {{/materials}}
+      </div>
+      </div>
+      </div></li>
+                  <p id="selected_subject"></p>
+
+    </div>
+
   </div>
 
 
 
-<table style="width:90%;"id="header">
+<table style="width: 88%;" id = "takeoff_materials_table">
+  
   <tr>
-    <th>Applied</th>
-    <th>Separate </br> Line item</th>
-
-    <th>Name</th>
-    <th>Measurement</th> 
-    <th>laborCost</th> 
-    <th>Materials</th> 
-    <th>Subtotal</th> 
+ 
     
   </tr>
-</table>
-<table id = "takeoff_materials_table">
-  
-
    
 
     {{^subjects}}

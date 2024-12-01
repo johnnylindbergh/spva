@@ -5,6 +5,7 @@
 settings.js
 package-lock.json
 spvaUsers.sql
+/public/buildingGraphic
 # SSL Stuff
 greenlock.d/
 # Dependency directories

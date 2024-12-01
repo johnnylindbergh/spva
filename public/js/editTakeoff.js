@@ -155,6 +155,17 @@ function loadTakeoffMaterials(id) {
     .done(function (data) {
       console.log("Takeoff materials loaded");
       $("#takeoff_materials_table").empty();
+
+      let headerRow = $("<tr></tr>");
+      headerRow.append("<th>Applied</th>");
+      headerRow.append("<th>Separate <br> Line item</th>");
+      headerRow.append("<th>Name</th>");
+      headerRow.append("<th>Measurement</th>");
+      headerRow.append("<th>Labor Cost</th>");
+      headerRow.append("<th>Materials</th>");
+      headerRow.append("<th>Subtotal</th>");
+      $("#takeoff_materials_table").append(headerRow);
+
       let sum = 0;
 
       data.subjects.forEach((row) => {
@@ -233,8 +244,12 @@ function loadTakeoffMaterials(id) {
         });
 
         // Labor price input
-        let laborPrice = $("<input type='number' id='labor_price_" + row.id + "' value='" + row.labor_cost + "' step='any' min='0' onchange='laborPriceChange(" + row.id + ")'>");
-        let laborCell = $("<td style=' '>Labor Cost $</td>").append(laborPrice);
+        let laborPrice = $("<input type='number' class='laborInput' id='labor_price_" + row.id + "' value='" + row.labor_cost + "' step='any' min='0' onchange='laborPriceChange(" + row.id + ")'>");
+        laborPrice.attr("style", "width: 100px;");
+        let laborCell =$("<td></td>");
+        // make the labor cell width smaller
+        laborCell.attr("style", "width: 10px;");
+        laborCell.append(laborPrice);
         newRow.append(laborCell);
 
         // Materials and cost calculation

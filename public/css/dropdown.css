@@ -1,9 +1,7 @@
-/* Dropdown Button */
+Dropdown Button
 .dropbtn {
-  background-color:#f48847;
-  color: white;
-  padding: 16px;
-  font-size: 16px;
+  color:black;
+
   border: none;
   cursor: pointer;
 }
@@ -33,26 +31,28 @@
 
 /* The container <div> - needed to position the dropdown content */
 .dropdown {
-  position: right;
+  position: absolute;
   display: inline-block;
+  float: right;
+
 }
 
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
   height: 400px;
   overflow-y: scroll;
-  
   display: none;
   position: absolute;
-  background-color: #f48847;
-  min-width: 230px;
+  /* background-color:whitesmoke; */
+  background-color:#84a2f5;
+  /* min-width: 230px; */
   border: 1px solid #ddd;
   z-index: 1;
 }
 
 /* Links inside the dropdown */
 .dropdown-content a {
-  color: black;
+
   padding: 12px 16px;
   text-decoration: none;
   display: block;
