@@ -85,16 +85,17 @@ function add_subject(id, material_name) {
   console.log("Adding material for subject: " + material_name);
  // $("#selected_subject").text("Selected subject: " + material_name);
   document.getElementById("myDropdown").classList.toggle("show");
-  // move div to mouse x,y
-  // var x = event.clientX;
-  // var y = event.clientY;
-  // var div = document.getElementById("myDropdown");
-  // div.style.top = y + 'px';
-  // div.style.left = x + 'px';
-  // console.log("x: " + x + " y: " + y);
-  // console.log("div x: " + div.style.left + " div y: " + div.style.top);
+  // move the dropdown to the position of the button that was clicked the row id is the subject id
+  let button = $("#add_material_button_" + id);
+  let dropdown = $("#myDropdown");
+  // get the coordinates of the button
+  let offset = button.offset();
 
-
+  console.log("Offset: " + offset);
+  dropdown.css("left", offset.left+220 + "px");
+  dropdown.css("top", offset.top-180 + "px");
+  
+  
 }
 
 function add_material(id) {
@@ -254,6 +255,8 @@ function loadTakeoffMaterials(id) {
 
         // Materials and cost calculation
         let materialsCell = $("<td></td>");
+        // make the width of the materials cell bigger
+        materialsCell.attr("style", "min-width: 300px;");
         let subsum = 0;
 
         if (row.applied != 0) {
@@ -344,6 +347,8 @@ function loadTakeoffMaterials(id) {
 
           // "Add Material" button
           let addSubject = $("<input type='button' onclick='add_subject(" + row.id + ")'>");
+          // add an id to the button so we can style it
+          addSubject.attr("id", "add_material_button_" + row.id);
           addSubject.attr("value", "Add Material");
           newRow.append(addSubject);
 
