@@ -29,6 +29,7 @@
     "date-and-time": "^3.3.0",
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
     "express": "^4.17.1",
     "fast-levenshtein": "^3.0.0",
     "greenlock": "^2.8.8",

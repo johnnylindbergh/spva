@@ -22,7 +22,7 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false });
  * @type {null}
  */
 let oauth2_token_json = null;
-let redirectUri = '';
+let redirectUri = creds.domain + '/callback';
 
 /**
  * Instantiate new Client
@@ -36,14 +36,25 @@ let oauthClient = null;
 module.exports = function(app) {
 
 /**
- * Get the AuthorizeUri
+ * Configure View and Handlebars
  */
+// app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(express.static(path.join(__dirname, '/public')));
+// app.engine('html', require('ejs').renderFile);
+
+// app.set('view engine', 'html');
+// app.use(bodyParser.json());
+
+// const urlencodedParser = bodyParser.urlencoded({ extended: false });
+
 
 app.get('/quickbooks', function (req, res) {
     res.render('quickbooks.html');
 });
 
 app.get('/authUri', urlencodedParser, function (req, res) {
+
+    console.log(req.query.json);
   oauthClient = new OAuthClient({
     clientId: req.query.json.clientId,
     clientSecret: req.query.json.clientSecret,
