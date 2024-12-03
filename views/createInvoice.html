@@ -100,7 +100,12 @@
                 },
                 success: function(data) {
                     // Clear and update the form container with the response
-                    const invoiceContainer = document.querySelector('.invoice-container');
+                   // const invoiceContainer = document.querySelector('.invoice-container');
+
+                    let invoiceContainer = $('#invoice-container');
+
+                    invoiceContainer.empty();
+                    invoiceContainer.text(JSON.stringify(data, null, 2));
                     console.log(data)
                     // stringify the data
                     const dataString = JSON.stringify(data, null, 2);

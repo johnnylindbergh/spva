@@ -29,6 +29,8 @@ const creds = require("./credentials.js");
 
 const stripe = require('stripe')(creds.stripe.secret);
 
+const qb = require("./quickbooks.js");
+
 
 const YOUR_DOMAIN = creds.domain;
 
@@ -158,8 +160,18 @@ module.exports = function (app) {
   app.get("/addTakeoff", mid.isAuth, (req, res) => {
     var render = defaultRender(req);
     // db
-    res.render("addTakeoff.html", render);
+
+    qb.getCustomers(req, res);
+
   });
+
+  // oauth callback
+  app.get("/callback", mid.isAuth, (req, res) => {
+    console.log("callback");
+    res.render("addTakeoff.html", defaultRender(req));
+  });
+
+
 
   //updateTakeoff POST
   app.post("/update-takeoff-name", mid.isAuth, (req, res) => {
