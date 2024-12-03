@@ -70,6 +70,7 @@ app.use((req, res, next) => {
 // import local modules for routes / all other functionality
  const auth = require('./auth.js')(app, passport);
 const routes = require('./routes.js')(app);
+const quickbooks = require('./quickbooks.js')(app); 
 // unhandled routes redirect to home
 app.get('*', (req, res) => { res.redirect('/'); });
 
