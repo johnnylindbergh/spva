@@ -161,8 +161,7 @@ module.exports = function (app) {
     var render = defaultRender(req);
     // db
 
-    qb.getCustomers(req, res);
-
+    res.render("addTakeoff.html", render);
   });
 
   //updateTakeoff POST

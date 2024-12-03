@@ -59,7 +59,7 @@ app.get('/authUri', urlencodedParser, function (req, res) {
   oauthClient = new OAuthClient({
     clientId: creds.quickbooks.consumerKey,
     clientSecret: creds.quickbooks.consumerSecret,
-    environment: "sandbox",
+    environment: creds.quickbooks.environment,
     redirectUri: creds.domain + '/callback',
   });
 
@@ -132,7 +132,7 @@ app.get('/getCompanyInfo', function (req, res) {
     });
 });
 
-app.get('/getCustomers', function (req, res) {
+app.get('/getCustomers', mid.isAuth, function (req, res) {
   const companyID = oauthClient.getToken().realmId;
 
   const url =
@@ -142,6 +142,21 @@ app.get('/getCustomers', function (req, res) {
 
   oauthClient
     .makeApiCall({ url: `${url}v3/company/${companyID}/query?query=select * from Customer` })
+    .then(function (authResponse) {
+      console.log(`\n The response for API call is :${JSON.stringify(authResponse.json)}`);
+      res.send(authResponse.json);
+    })
+    .catch(function (e) {
+      console.error(e);
+    });
+});
+
+app.get('/getJobs', mid.isAuth, function (req, res) {
+  const companyID = oauthClient.getToken().realmId;
+  
+  const url = oauthClient.environment == 'sandbox' ? OAuthClient.environment.sandbox : OAuthClient.environment.production;
+  oauthClient
+    .makeApiCall({ url: `${url}v3/company/${companyID}/query?query=select * from Job` })
     .then(function (authResponse) {
       console.log(`\n The response for API call is :${JSON.stringify(authResponse.json)}`);
       res.send(authResponse.json);
