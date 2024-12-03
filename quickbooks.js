@@ -52,14 +52,15 @@ app.get('/quickbooks', function (req, res) {
     res.render('quickbooks.html');
 });
 
+
 app.get('/authUri', urlencodedParser, function (req, res) {
 
     console.log(req.query.json);
   oauthClient = new OAuthClient({
-    clientId: req.query.json.clientId,
-    clientSecret: req.query.json.clientSecret,
-    environment: req.query.json.environment,
-    redirectUri: req.query.json.redirectUri,
+    clientId: creds.quickbooks.consumerKey,
+    clientSecret: creds.quickbooks.consumerSecret,
+    environment: "sandbox",
+    redirectUri: creds.domain + '/callback',
   });
 
   const authUri = oauthClient.authorizeUri({
@@ -77,6 +78,7 @@ app.get('/callback', function (req, res) {
     .createToken(req.url)
     .then(function (authResponse) {
       oauth2_token_json = JSON.stringify(authResponse.json, null, 2);
+      console.log(`The Token is  ${oauth2_token_json}`);
     })
     .catch(function (e) {
       console.error(e);
@@ -130,6 +132,25 @@ app.get('/getCompanyInfo', function (req, res) {
     });
 });
 
+app.get('/getCustomers', function (req, res) {
+  const companyID = oauthClient.getToken().realmId;
+
+  const url =
+    oauthClient.environment == 'sandbox'
+      ? OAuthClient.environment.sandbox
+      : OAuthClient.environment.production;
+
+  oauthClient
+    .makeApiCall({ url: `${url}v3/company/${companyID}/query?query=select * from Customer` })
+    .then(function (authResponse) {
+      console.log(`\n The response for API call is :${JSON.stringify(authResponse.json)}`);
+      res.send(authResponse.json);
+    })
+    .catch(function (e) {
+      console.error(e);
+    });
+});
+
 /**
  * disconnect ()
  */
@@ -140,6 +161,6 @@ app.get('/disconnect', function (req, res) {
     state: 'intuit-test',
   });
   res.redirect(authUri);
-})
+});
 
 }

@@ -165,14 +165,6 @@ module.exports = function (app) {
 
   });
 
-  // oauth callback
-  app.get("/callback", mid.isAuth, (req, res) => {
-    console.log("callback");
-    res.render("addTakeoff.html", defaultRender(req));
-  });
-
-
-
   //updateTakeoff POST
   app.post("/update-takeoff-name", mid.isAuth, (req, res) => {
     console.log("updating takeoff name");
