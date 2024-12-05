@@ -28,7 +28,7 @@ function updateTakeoffOwnerEmailAddress(){
 
 // Function to convert markdown-like text to HTML
 function formatTextToHTML(text) {
-    return text
+    return text;
         .replace(/### (.+)/g, '<h3>$1</h3>')        // Replace ### with <h3> for headings
         .replace(/## (.+)/g, '<h2>$1</h2>')        // Replace ## with <h2> for subheadings
         .replace(/# (.+)/g, '<h1>$1</h1>')         // Replace # with <h1> for main headings
@@ -47,7 +47,7 @@ function populateProposalIncludes(items) {
 
     // set the content of the includesList to the items
     // items is a string 
-    includesList.html(formatTextToHTML(items));
+    includesList.text(items);
    // $('#includes-total').text(calculateTotal(items.length, 50)); // Example calculation
 }
 
@@ -56,7 +56,7 @@ function populateExclusions(exclusions) {
     const exclusionsList = $('#exclusions-list');
     exclusionsList.empty(); // Clear any existing content
 
-    exclusionsList.html(formatTextToHTML(exclusions));
+    exclusionsList.test(formatTextToHTML(exclusions));
 
 
     $('#excludes-total').text("$0.00"); 

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,19 +6,17 @@
   <link rel="stylesheet" type="text/css" href="css/defaults.css">
   <link rel="stylesheet" type="text/css" href="css/navbar.css">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
-<script src="
-https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js
-"></script>  
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <!-- Select2 CSS and JS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-  </script>
 </head>
 <body>
   <div class="navbar">
-    <ul> 
+    <ul>
       <li><a href="/">{{defaults.sysName}}</a></li>
       {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
       <div style="float:right">
@@ -39,126 +36,107 @@ https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js
 
 <div>
 <form action="/uploadTakeoff" method="post" enctype="multipart/form-data">
-  <input type = "hidden" name = "takeoff_id" value = "1">
-  <!-- customer div -->
-    <!-- searchable dropdown with list of customers -->
-    <!-- then, a searchable dropdown appears and shows a list of projects -->
-     <!-- and then a button that says create new project, whe clicked, an input box appears -->
-
-     <div class="customer-section">
-      <h3>Select Customer and Project</h3>
+  <input type="hidden" name="takeoff_id" value="1">
+  
+  <div class="customer-section">
+    <h3>Select Customer and Project</h3>
     
-      <!-- Searchable dropdown for customers -->
-      <label for="customerDropdown">Customer:</label>
-      <select id="customerDropdown" name="customer" class="searchable-dropdown">
-        <option value="" disabled selected>Select a Customer</option>
-      </select>
-      <br><br>
+    <!-- Searchable dropdown for customers -->
+    <label for="customerDropdown">Customer:</label>
+    <select id="customerDropdown" name="customer" class="searchable-dropdown">
+      <option value="" disabled selected>Select a Customer</option>
+    </select>
+    <br><br>
     
-      <!-- Searchable dropdown for projects, dynamically updated -->
-      <label for="projectDropdown">Project:</label>
-      <select id="projectDropdown" name="project" class="searchable-dropdown">
-        <option value="" disabled selected>Select a Project</option>
-        <!-- Options dynamically updated based on selected customer -->
-      </select>
-      <br><br>
+    <!-- Searchable dropdown for projects, dynamically updated -->
+    <label for="projectDropdown">Project:</label>
+    <select id="projectDropdown" name="project" class="searchable-dropdown">
+      <option value="" disabled selected>Select a Project</option>
+    </select>
+    <br><br>
     
-      <!-- Button to create a new project -->
-      <button type="button" id="createNewProjectButton">Create New Project</button>
-      <div id="newProjectDiv" style="display: none; margin-top: 10px;">
-        <label for="newProjectName">New Project Name:</label>
-        <input type="text" id="newProjectName" name="newProjectName" placeholder="Enter project name">
-      </div>
+    <!-- Button to create a new project -->
+    <button type="button" id="createNewProjectButton">Create New Project</button>
+    <div id="newProjectDiv" style="display: none; margin-top: 10px;">
+      <label for="newProjectName">New Project Name:</label>
+      <input type="text" id="newProjectName" name="newProjectName" placeholder="Enter project name">
     </div>
-    
-    <script>
-    $(document).ready(function () {
-      let customers = {};
-
-      // Fetch customer data
-      $.get('/getCustomers')
-        .done(function (response) {
-          const data = response.QueryResponse.Customer; // Access the array of customers
-          for (let i = 0; i < data.length; i++) {
-            const customer = data[i];
-            const customerName = customer.DisplayName || customer.FullyQualifiedName;
-
-            if (customer.Job) {
-              if (customer.ParentRef && customer.ParentRef.value) {
-                const parentCustomer = data.find(c => c.Id === customer.ParentRef.value);
-                const parentName = parentCustomer?.DisplayName || parentCustomer?.FullyQualifiedName;
-                if (parentName) {
-                  customers[parentName] = customers[parentName] || [];
-                  customers[parentName].push(customerName);
-                }
-              }
-            } else {
-              customers[customerName] = [];
-            }
-          }
-
-          // Populate the customer dropdown
-          for (const customer in customers) {
-            $('#customerDropdown').append(`<option value="${customer}">${customer}</option>`);
-          }
-        })
-        .fail(function () {
-          alert('Failed to load customer data. Please authenticate with QuickBooks again.');
-          window.location.href = '/quickbooks';
-        });
-
-      // Update projects dropdown based on selected customer
-      $('#customerDropdown').on('change', function () {
-        const selectedCustomer = $(this).val();
-        const projects = customers[selectedCustomer] || [];
-
-        const projectDropdown = $('#projectDropdown');
-        projectDropdown.empty().append('<option value="" disabled selected>Select a Project</option>');
-        projects.forEach(project => {
-          projectDropdown.append(`<option value="${project}">${project}</option>`);
-        });
-      });
-
-      // Show input box for creating a new project
-      $('#createNewProjectButton').on('click', function () {
-        $('#newProjectDiv').toggle();
-      });
-
-      // Save new project (example implementation)
-      $('#saveNewProjectButton').on('click', function () {
-        const newProject = $('#newProjectInput').val();
-        const selectedCustomer = $('#customerDropdown').val();
-
-        if (newProject && selectedCustomer) {
-          customers[selectedCustomer].push(newProject);
-
-          const projectDropdown = $('#projectDropdown');
-          projectDropdown.append(`<option value="${newProject}">${newProject}</option>`);
-
-          alert(`New project "${newProject}" added for customer "${selectedCustomer}".`);
-          $('#newProjectInput').val('');
-          $('#newProjectDiv').hide();
-        } else {
-          alert('Please select a customer and enter a project name.');
-        }
-      });
-    });
-
-    </script>
-    
-
-  <h2></h2> 
+  </div>
+  
+  <h2></h2>
   Takeoff Name: <input type="text" name="takeoffName"/> <br>
   <input type="file" name="takeoff" />
   <input type="submit" value="Upload" class="btn btn-default">
 </form>
-
 </div>
 <div class="container">
   <form action="/alButton" method="post">
     <input type="submit" value="AL Button" />
-</form>
+  </form>
 </div>
+
+<script>
+$(document).ready(function () {
+  let customers = {};
+
+  // Initialize Select2 for dropdowns with the dropdownParent option
+  $('#customerDropdown, #projectDropdown').select2({
+    dropdownParent: $('.customer-section') // Ensures proper behavior inside the container
+  });
+
+  // Fetch customer data
+  $.get('/getCustomers')
+    .done(function (response) {
+      const data = response.QueryResponse.Customer; // Access the array of customers
+      for (let i = 0; i < data.length; i++) {
+        const customer = data[i];
+        const customerName = customer.DisplayName || customer.FullyQualifiedName;
+
+        if (customer.Job) {
+          if (customer.ParentRef && customer.ParentRef.value) {
+            const parentCustomer = data.find(c => c.Id === customer.ParentRef.value);
+            const parentName = parentCustomer?.DisplayName || parentCustomer?.FullyQualifiedName;
+            if (parentName) {
+              customers[parentName] = customers[parentName] || [];
+              customers[parentName].push(customerName);
+            }
+          }
+        } else {
+          customers[customerName] = [];
+        }
+      }
+
+      // Populate the customer dropdown
+      for (const customer in customers) {
+        $('#customerDropdown').append(`<option value="${customer}">${customer}</option>`);
+      }
+      $('#customerDropdown').trigger('change'); // Refresh Select2
+    })
+    .fail(function () {
+      alert('Failed to load customer data. Please authenticate with QuickBooks again.');
+      window.location.href = '/quickbooks';
+    });
+
+  // Update projects dropdown based on selected customer
+  $('#customerDropdown').on('change', function () {
+    const selectedCustomer = $(this).val();
+    const projects = customers[selectedCustomer] || [];
+
+    const projectDropdown = $('#projectDropdown');
+    projectDropdown.empty().append('<option value="" disabled selected>Select a Project</option>');
+    projects.forEach(project => {
+      projectDropdown.append(`<option value="${project}">${project}</option>`);
+    });
+    projectDropdown.trigger('change'); // Refresh Select2
+  });
+
+  // Show input box for creating a new project
+  $('#createNewProjectButton').on('click', function () {
+    $('#newProjectDiv').toggle();
+  });
+});
+
+</script>
+
 </body>
 </html>
-

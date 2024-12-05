@@ -476,12 +476,15 @@ module.exports = {
   },
 
   saveEstimate: function (takeoff_id, inclusions, exclusions, callback) {
-    console.log("saving estimate function recieved: ", inclusions, exclusions);
+    console.log("saving estimate function received: ", inclusions, exclusions);
     con.query(
-      "UPDATE estimate SET inclusions = ?, exclusions = ? WHERE id = ?;",
+      "UPDATE estimate SET inclusions = COALESCE(inclusions, ?), exclusions = COALESCE(exclusions, ?) WHERE id = ?;",
       [inclusions, exclusions, takeoff_id],
       function (err) {
-        if (err) return callback(err);
+        if (err) {
+          console.log("Error updating estimate: ", err);
+          return callback(err);
+        }
         callback(null);
       }
     );

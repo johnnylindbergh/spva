@@ -16,7 +16,7 @@ const YOUR_DOMAIN = creds.domain;
 
 async function createCheckoutSession(hash, priceId) {
     // query the takeoffs table select *
-    
+
     
     const session = await stripe.checkout.sessions.create({
         ui_mode: 'embedded',
@@ -45,11 +45,13 @@ async function getSessionStatus(sessionId) {
 
 async function createPaymentIntent(takeoffd) {
     // query the takeoffs table select total to get the total price of the takeoff
-     const takeoff = await db.query('SELECT total, owner_email FROM takeoffs WHERE id = ?', [takeoffId]);
-     // null checking for the takeoff
+    const takeoff = await db.query('SELECT total, owner_email FROM takeoffs WHERE id = ?', [takeoffId]);
+    
+    // null checking for the takeoff
         if (!takeoff) {
             throw new Error('Takeoff not found');
-        }   
+        }
+
     // create a payment intent with the total price
     const paymentIntent = await stripe.paymentIntents.create({
         amount: takeoff.total,
@@ -59,6 +61,7 @@ async function createPaymentIntent(takeoffd) {
     });
 
     return { clientSecret: paymentIntent.client_secret };
+
 }
 
 

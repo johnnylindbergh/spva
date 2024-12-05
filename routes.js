@@ -288,7 +288,7 @@ module.exports = function (app) {
   });
 
   app.post("/editTakeoff", mid.isAuth, function (req, res) {
-    // console.log("editing", req.body.takeoff_id);
+     console.log("editing", req.body.takeoff_id);
 
     db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
       if (err) {
@@ -511,6 +511,9 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
               }
               db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
                 res.render("viewEstimate.html", {
+                  inclusions: inclusions,
+                  exclusions: exclusions,
+                  takeoff_id: takeoff_id,
                   estimate: estimate,
                   takeoff: takeoff_info,
                 });
@@ -522,6 +525,7 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
             res.render("viewEstimate.html", {
               estimate: estimate,
               takeoff: takeoff_info,
+              takeoff_id: takeoff_id,
             });
 
           }
