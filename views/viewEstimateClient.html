@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="/css/estimateStyle.css">
         <link rel="stylesheet" href="/css/bottomNavbar.css">
     <script src="/js/viewEstimateClient.js"></script>
+    <script src="/js/checkout.js"></script>
 </head>
 <body>
 <body>
@@ -128,6 +129,11 @@
 
 
             <!-- a PAY NOW button that posts to /create-payment-intent -->
+             <!-- <form action="/checkMeout" method="post">
+                 hidden takeoff if -->
+                <!-- <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
+            <button id="pay-now" type="submit">Pay Now</button>
+             </form> -->
             <button id="pay-now" onclick="createPaymentIntent()">Pay Now</button>
       
 </body>

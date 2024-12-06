@@ -843,8 +843,9 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
     }
   });
 
-  app.get('/checkMeout/:id', function (req, res) {
-    const takeoff_id = req.params.id;
+  app.post('/checkMeout/:takeoff_id', function (req, res) {
+    console.log("/checkMeout/");
+    const takeoff_id = req.params.takeoff_id;
     if (takeoff_id == null) {
       console.log("takeoff_id is null");
       res.redirect("/");
@@ -887,12 +888,62 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
     }
   );
 });
+app.get('/checkMeout/:takeoff_id', function (req, res) {
+  console.log("/checkMeout/");
+  const takeoff_id = req.params.takeoff_id;
+  if (takeoff_id == null) {
+    console.log("takeoff_id is null");
+    res.redirect("/");
+  }
+  // get takeoff
+  db.getTakeoffTotal(takeoff_id, function (err, takeoffName, total) {
+    console.log(takeoffName + " has a total of " + total);
+    if (err) {
+      console.log(err);
+    } else {
+      // post to /v1/prices to create a price_id
+      // get the price_id
+      // render the checkout page
+      //takeoff = takeoff[0];
+    //cnvert rows into json object
+
+
+    // if (total == null) {
+    //   console.log('total is null');
+    //   total = 50.00;
+    // }
+
+    // create a stripe price_id
+    const price = stripe.prices.create({
+      unit_amount: Math.floor(total*100),
+      currency: 'usd',
+      product_data: {
+        name: takeoffName +' Estimate'
+      },
+
+    });
+      //console.log(price.id);
+      
+     // console.log("takeoff is ", takeoff);
+      res.render("checkout.html", {
+        takeoff_id: takeoff_id,
+        priceId: price.id
+      });
+    }
+  }
+);
+});
    
 
 app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
   // create a price_id
   // get whole takeoff
   console.log(req.params);
+  if (req.params.takeoff_id == null) {
+    console.log("takeoff_id is null");
+    res.redirect("/");
+  }
+  
   db.getTakeoffTotal(req.params.takeoff_id, async function (err, takeoffName, total) {
     if (err) {
       console.log(err);
