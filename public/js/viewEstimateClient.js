@@ -240,7 +240,6 @@ $(document).ready(function() {
      $(".loader").toggle(); // hide it initially
      $(".signature-success").toggle(); // hide it initially
     // Populate the "Proposal Includes" section with dynamic data
-    const includesItems = ['Preparation of surfaces', 'Primer application', 'Final paint coat'];
     // post takeoff_id to getEstimateData to set includesItems and exclusionsItems
     
     $.post('/getEstimateData', {takeoff_id: parseInt($('#takeoff_id').val())}, function(data) {

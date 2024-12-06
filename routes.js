@@ -460,7 +460,7 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
           res.status(500).send("Error generating estimate");
         } else {
           console.log(takeoff_info[0].estimate_id)
-          if (takeoff_info[0].estimate_id == null || takeoff_info[0].estimate_id == undefined) {
+          if (takeoff_info[0].estimate_id == null) {
             // Build the prompt
 
 

@@ -476,18 +476,49 @@ module.exports = {
   },
 
   saveEstimate: function (takeoff_id, inclusions, exclusions, callback) {
-    console.log("saving estimate function received: ", inclusions, exclusions);
-    con.query(
-      "UPDATE estimate SET inclusions = COALESCE(inclusions, ?), exclusions = COALESCE(exclusions, ?) WHERE id = ?;",
-      [inclusions, exclusions, takeoff_id],
-      function (err) {
+    console.log("saving estimate function received: ", inclusions, exclusions, takeoff_id);
+    if (takeoff_id == null) {
+      // get the last insert id takeoff_id
+      con.query("SELECT MAX(id) as last FROM takeoffs;", function (err, last) {
         if (err) {
-          console.log("Error updating estimate: ", err);
+          console.log("Error getting last takeoff_id: ", err);
           return callback(err);
+        } else {
+          takeoff_id = last[0].last;
+          con.query(
+            "INSERT INTO estimate (takeoff_id, inclusions, exclusions) VALUES (?,?,?);",
+            [takeoff_id, inclusions, exclusions],
+            function (err) {
+              if (err) {
+                console.log("Error saving estimate: ", err);
+                return callback(err);
+              }
+              callback(null);
+            }
+          );
         }
-        callback(null);
-      }
-    );
+      });
+    } else {
+      // get the estimate_id from the takeoff_id  
+      con.query('SELECT estimate_id FROM takeoffs WHERE id = ?;', [takeoff_id], function(err, estimate_id){
+        estimate_id = estimate_id[0].estimate_id;
+        if (estimate_id == null) {
+          console.log("No estimate_id found for takeoff_id: ", takeoff_id);
+        }
+        
+        con.query(
+          "UPDATE estimate SET inclusions = COALESCE(inclusions, ?), exclusions = COALESCE(exclusions, ?) WHERE id = ?;",
+          [inclusions, exclusions, estimate_id],
+          function (err) {
+            if (err) {
+              console.log("Error updating estimate: ", err);
+              return callback(err);
+            }
+            callback(null);
+          }
+        );
+      });
+    }
   },
 
   getOptions: function (takeoff_id, callback) {
@@ -1011,14 +1042,29 @@ module.exports = {
 
   takeoffSetStatus: function (takeoff_id, status, cb) {
     con.query(
-      "UPDATE takeoffs SET status = ? WHERE id = ?;",
-      [status, takeoff_id],
-      function (err) {
+      "SELECT status FROM takeoffs WHERE id = ?;",
+      [takeoff_id],
+      function (err, results) {
         if (err) {
           console.log(err);
-          cb(err);
+          return cb(err);
+        }
+        const currentStatus = results[0].status;
+        if (currentStatus < status) {
+          con.query(
+            "UPDATE takeoffs SET status = ? WHERE id = ?;",
+            [status, takeoff_id],
+            function (err) {
+              if (err) {
+                console.log(err);
+                cb(err);
+              } else {
+                cb(null);
+              }
+            }
+          );
         } else {
-          cb(null);
+          cb(new Error("Cannot decrease status"));
         }
       }
     );
