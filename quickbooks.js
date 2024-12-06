@@ -151,6 +151,26 @@ app.get('/getCustomers', mid.isAuth, function (req, res) {
     });
 });
 
+app.get('/currentBalance', mid.isAuth, function (req, res) {
+  const companyID = oauthClient.getToken().realmId;
+
+  const url =
+    oauthClient.environment == 'sandbox'
+      ? OAuthClient.environment.sandbox
+      : OAuthClient.environment.production;
+
+  oauthClient
+    .makeApiCall({ url: `${url}v3/company/${companyID}/companyinfo/${companyID}` })
+    .then(function (authResponse) {
+      console.log(`\n The response for API call is :${JSON.stringify(authResponse.json)}`);
+      res.send(authResponse.json.CompanyInfo.BalanceWithSubAccounts);
+    })
+    .catch(function (e) {
+      console.error(e);
+    });
+});
+
+
 app.get('/getJobs', mid.isAuth, function (req, res) {
   const companyID = oauthClient.getToken().realmId;
   
