@@ -130,12 +130,12 @@ function updateTotals() {
     const optionsTotal = parseFloat(optionsTotalText) || 0;
 
     // Calculate the total as the sum of subtotal and options total
-    const total = subtotal + optionsTotal;
+    const total = subtotal + optionsTotal + (tax* total);
 
     // Update the text content of subtotal, options-total, and total
     $('#subtotal').text("Subtotal: $" +numberWithCommas(subtotal.toFixed(2)));
     $('#total').text("Total: $" + numberWithCommas(total.toFixed(2)));
-
+    $('#tax').text("Tax: $" + numberWithCommas(tax.toFixed(2)));
     // Optional: Log to console for debugging purposes
     console.log("Subtotal:", subtotal);
     console.log("Options Total:", optionsTotal);
@@ -234,7 +234,7 @@ function numberWithCommas(x) {
 
 
 
-
+let tax = 0;
 // Example to dynamically populate content on page load
 $(document).ready(function() {
      $(".loader").toggle(); // hide it initially
@@ -244,15 +244,18 @@ $(document).ready(function() {
     
     $.post('/getEstimateData', {takeoff_id: parseInt($('#takeoff_id').val())}, function(data) {
         console.log(data)
+        tax = (parseFloat(data.tax)/100)*subtotal;
+
 
         populateProposalIncludes(data.estimate[0].inclusions);
         populateExclusions(data.estimate[0].exclusions);
         populateOptions(parseInt($('#takeoff_id').val()));
         console.log(data.takeoff[0].total);
+        console.log("tax: "+data.takeoff[0].tax);
 
         $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].total));
         $('#subtotal').text("$"+numberWithCommas(data.takeoff[0].total));
-
+        var subtotal = data.takeoff[0].total;
 
       
         

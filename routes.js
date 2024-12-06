@@ -538,7 +538,7 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
 
   app.post("/viewEstimate", mid.isAuth, function (req, res) {
     console.log("estimate view");
-    db.getEstimateData(req.body.id, function (err, estimate, takeoff) {
+    db.getEstimateData(req.body.id, function (err, estimate, takeoff, tax) {
       if (err) {
         console.log(err);
       } else {
@@ -768,11 +768,11 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
 
   app.post("/getEstimateData", function (req, res) {
     console.log("just viewing takeoff id: ", req.body.takeoff_id);
-    db.getEstimateData(req.body.takeoff_id, function (err, estimate, takeoff) {
+    db.getEstimateData(req.body.takeoff_id, function (err, estimate, takeoff, tax) {
       if (err) {
         console.log(err);
       } else {
-        res.send({ estimate: estimate, takeoff: takeoff });
+        res.send({ estimate: estimate, takeoff: takeoff , tax: tax});
       }
     });
   });

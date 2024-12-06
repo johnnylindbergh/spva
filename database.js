@@ -607,12 +607,21 @@ module.exports = {
       "SELECT * FROM estimate WHERE takeoff_id = ?;",
       [takeoff_id],
       function (err, estimate) {
+        if (err) return callback(err);
+
         con.query(
           "SELECT * FROM takeoffs WHERE id = ?;",
           [takeoff_id],
           function (err, takeoff) {
             if (err) return callback(err);
-            callback(null, estimate, takeoff);
+
+            con.query(
+              "SELECT setting_value FROM system_settings WHERE setting_name = 'sales_tax';",
+              function (err, salesTax) {
+                if (err) return callback(err);
+                callback(null, estimate, takeoff, salesTax[0].setting_value);
+              }
+            );
           }
         );
       }
