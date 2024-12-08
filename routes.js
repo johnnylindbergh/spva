@@ -298,12 +298,19 @@ module.exports = function (app) {
         if (err) {
           console.log(err);
         } else {
+          db.getSystemSettingByName("variant", function (err, variantSetting) {
+            if (err || !variantSetting) {
+              console.error("Error fetching variant setting, using default.");
+              variantSetting = { setting_value: 'en_with_numbers' }; // Fallback variant
+          }
           res.render("editTakeoff.html", {
             takeoff: takeoff,
             subjects: materials,
             materials: allMaterials,
             takeoff_id: req.body.takeoff_id,
+            variant: variantSetting.setting_value, 
           });
+        });
         }
       });
     });
