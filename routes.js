@@ -437,7 +437,9 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
   app.post("/generateEstimate", function (req, res) {
     // priority: this function should check to see if an estimate has been generated, if yes, send to client, if no, generate
     var takeoff_id = req.body.takeoff_id;
-    console.log("Generating estimate for takeoff", takeoff_id);
+    var variant = req.body.variant; // Get the variant from the request body
+    console.log("Request body:", req.body);
+    console.log("Generating estimate for takeoff", takeoff_id, "with variant", variant);
 
       // Fetch the ChatGPT prompt dynamically from the database
     db.getSystemSettingByName("chatgpt_prompt", function (err, prompt) {
@@ -446,6 +448,19 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
         prompt = sys.PROMPT; // Fallback prompt
       }
 
+      // Modify the prompt based on the variant
+      switch (variant) {
+        case "es_with_numbers":
+          prompt += " Translate the following to Spanish.";
+          break;
+        case "es_without_numbers":
+          prompt += " Translate the following to Spanish and remove all numbers.";
+          break;
+        case "en_without_numbers":
+          prompt += " Remove all numbers.";
+          break;
+        // No need to modify for "en_with_numbers"
+      }
 
     db.takeoffSetStatus(takeoff_id, 2, function (err) {
       if (err) {
@@ -462,9 +477,7 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
           console.log(takeoff_info[0].estimate_id)
           if (takeoff_info[0].estimate_id == null) {
             // Build the prompt
-
-
-             prompt = prompt[0].setting_value;
+            prompt = prompt[0].setting_value;
 
             console.log("Prompt:", prompt);
             for (var i = 0; i < estimate.length; i++) {

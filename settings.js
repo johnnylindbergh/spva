@@ -23,7 +23,7 @@ module.exports = {
   ALLOW_NEW_ACCOUNTS: true,
 
   // project path used for uploads. No tailing slash
-  PROJECT_PATH: '/var/www/spvaTrack', 
+  PROJECT_PATH: '/var/www/spva', 
 
   /*  regex restriction to apply to emails of new accounts requesting access 
       (only if automatic creation enabled) */
