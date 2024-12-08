@@ -565,6 +565,22 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
     }
   });
 
+  app.post("/separate-line-item", mid.isAuth, function (req, res) {
+    console.log("separating ", req.body.material_id);
+    let material_id = req.body.material_id;
+    if (material_id) {
+      db.separateLineItem(req.body.material_id, function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.end();
+        }
+      });
+    }
+  }
+  );
+
+
   //add-material-subject POST
 
   app.post("/add-material-subject", mid.isAuth, function (req, res) {

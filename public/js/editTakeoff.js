@@ -21,6 +21,23 @@ function myFunction() {
   document.getElementById("myDropdown").classList.toggle("show");
 }
 
+function separateLineItem(materialId, checkbox) {
+  console.log("Material separate line item toggled: " + materialId);
+
+  let isChecked = checkbox.checked ? 1 : 0;
+
+  $.post("/separate-line-item", { material_id: materialId })  
+    .done(function () {
+      console.log("Material separate line item toggled successfully: " + materialId);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      console.log("Failed to toggle material separate line item: " + materialId);
+    });
+}
+
+
+
 function filterFunction() {
   let input, filter, div, a, i, txtValue;
   input = document.getElementById("myInput");
@@ -194,7 +211,7 @@ function loadTakeoffMaterials(id) {
             row.id +
             ", this)'>"
         );
-        if (row.separateLineItem == 1) {
+        if (row.separate_line_item == 1) {
           separateLineCheckbox.attr("checked", "checked");
         }
         newRow.append($("<td></td>").append(separateLineCheckbox));
@@ -598,7 +615,7 @@ $(document).ready(function () {
   loadTakeoffMaterials(takeoff_id); // better
 
   // call load takeoff materials every 5 seconds
-  setInterval(function () {
-    loadTakeoffMaterials(takeoff_id);
-  }, 5000);
+  // setInterval(function () {
+  //   loadTakeoffMaterials(takeoff_id);
+  // }, 5000);
 });

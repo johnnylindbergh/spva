@@ -40,16 +40,16 @@ INSERT INTO system_settings (setting_name, setting_value) VALUES ('default_labor
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('levens_threshold', '2');
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('chatgpt_prompt', "Consider the following json object. The output must be two description sections titled 'Proposal Includes' and 'Exclusions and assumptions' separated by a </br> tag. If an object has no selected materials, its name is listed in the 'Exclusions and assumptions' section; otherwise, a one-sentence description in the 'Proposal Includes' section that includes the name. \n. Do not include extra symbols like (* or -)");
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('sales_tax', '5.3');
+
+
 CREATE TABLE estimate (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT,
   isArchived TINYINT(1) DEFAULT 0,
   date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   inclusions TEXT,
-  options TEXT,
   labor TEXT,
   exclusions TEXT,
-  footer TEXT,
   PRIMARY KEY (id)
 );
 
@@ -214,6 +214,7 @@ CREATE TABLE applied_materials (
   
   labor_cost DECIMAL(10,2) NOT NULL default 0.40,
   applied TINYINT(1) DEFAULT 1,
+  separate_line_item TINYINT(1) DEFAULT 0,
 
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,

@@ -375,6 +375,7 @@ module.exports = {
       }
     );
 
+    // get all the applied_materials for the takeoff_id
     con.query(
       "SELECT * FROM takeoffs WHERE id = ?;",
       [takeoff_id],
@@ -868,6 +869,43 @@ module.exports = {
       }
     );
   },
+
+  separateLineItem: function (applied_material_id, callback) {
+    // update the this.separateLineItem value in the applied_materials table
+    con.query(
+      "SELECT separate_line_item FROM applied_materials WHERE id = ?;",
+      [applied_material_id],
+      function (err, material) {
+        if (err || material.length == 0) {
+          console.log(err);
+        }
+        let separate_line_item = !material[0].separate_line_item;
+        console.log("new state", separate_line_item);
+        con.query(
+          "UPDATE applied_materials SET separate_line_item = ? WHERE id = ?;",
+          [separate_line_item, applied_material_id],
+          function (err) {
+            if (err) {
+              console.log(err);
+              // finally, set applied to false
+              con.query(
+                "UPDATE applied_materials SET applied = 0 WHERE id = ?;",
+                [applied_material_id],
+                function (err) {
+                  if (err) {
+                    console.log(err);
+                    return callback(err);
+                  }
+                  callback(err);
+                }
+              );
+            }
+          }
+        );
+      }
+    );
+  },
+    
 
   changeLaborPrice: function (subject, price, callback) {
     con.query(

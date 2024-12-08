@@ -3,6 +3,7 @@ module.exports = {
           applied_materials.id AS id,
           applied_materials.material_id AS material_id,
           applied_materials.applied AS applied,
+          applied_materials.separate_line_item AS separate_line_item,
           materials.name AS primary_material,
           applied_materials.name  AS material_name,
           applied_materials.secondary_material_id AS secondary_material_id,
@@ -26,7 +27,7 @@ module.exports = {
 
 
 // module.exports = {
-//             getTakeoff: `SELECT 
+//   getTakeoff: `SELECT 
 //   t.id AS takeoff_id,
 //   t.name AS takeoff_name,
   
