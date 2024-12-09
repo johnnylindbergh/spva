@@ -439,25 +439,17 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
     var takeoff_id = req.body.takeoff_id;
     console.log("Generating estimate for takeoff", takeoff_id);
 
-      // Fetch the ChatGPT prompt dynamically from the database
+    // Fetch the ChatGPT prompt dynamically from the database
     db.getSystemSettingByName("chatgpt_prompt", function (err, prompt) {
       if (err || !prompt) {
         console.error("Error fetching ChatGPT prompt, using default.");
         prompt = sys.PROMPT; // Fallback prompt
       }
 
-
-    db.takeoffSetStatus(takeoff_id, 2, function (err) {
-      if (err) {
-        console.log(err);
-        // Handle the error if necessary
-        
-      }
-
-      db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
+      db.takeoffSetStatus(takeoff_id, 2, function (err) {
         if (err) {
           console.log(err);
-          res.status(500).send("Error generating estimate");
+	  res.status(500).send("Error generating estimate");
         } else {
           console.log(takeoff_info[0].estimate_id)
           if (takeoff_info[0].estimate_id == null) {
@@ -530,10 +522,112 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
 
           }
         }
+
+        db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
+          if (err) {
+            console.log(err);
+            res.status(500).send("Error generating estimate");
+          } else {
+            console.log(takeoff_info[0].estimate_id);
+            if (
+              takeoff_info[0].estimate_id == null ||
+              takeoff_info[0].estimate_id == undefined
+            ) {
+              // Build the prompt
+
+              prompt = prompt[0].setting_value;
+
+              // console.log("Prompt:", prompt);
+              for (var i = 0; i < estimate.length; i++) {
+                prompt += " subject={ " + estimate[i].material_name;
+                prompt +=
+                  " measurement: " +
+                  estimate[i].measurement +
+                  estimate[i].measurement_unit;
+                " " + estimate[i].measurement_unit;
+                if (estimate[i].selected_materials != null) {
+                  for (
+                    var j = 0;
+                    j < estimate[i].selected_materials.length;
+                    j++
+                  ) {
+                    //console.log(estimate[i].selected_materials[j]);
+                    prompt +=
+                      " name: " + estimate[i].selected_materials[j].name + "'";
+                    prompt +=
+                      " desc: " + estimate[i].selected_materials[j].description;
+                  }
+                }
+                prompt += "}";
+              }
+
+              // call to  async function callChatGPT with the response as the return value and saves the it to the database
+              let response = "";
+              chatgpt
+                .sendChat(prompt + JSON.stringify(estimate))
+                .then((subres) => {
+                  response = subres;
+                  console.log("Response:", response);
+
+                  // process response for render
+                  // split into two vars called includes, and exclusions
+                  let inclusions = response.split("</br>")[0];
+                  let exclusions = response.split("</br>")[1];
+                  // check if the response has been split correctly
+                  if (inclusions == null) {
+                    // set the inclusions to the response
+                    inclusions = response;
+                  }
+
+                  // if (exclusions == null) {
+                  //   // set the exclusions to the response
+                  //   exclusions = response;
+                  // }
+                  // check if the response has been split correctly
+                  console.log("Includes:", inclusions.substring(0, 20) + "...");
+                  console.log(
+                    "Exclusions:",
+                    exclusions.substring(0, 20) + "..."
+                  );
+                  //nul checking for inclusions and exclusions
+                  if (inclusions == null) {
+                    // set the inclusions to the response
+                    console.log("inclusions is null");
+                    inclusions = response;
+                  }
+                  if (exclusions == null) {
+                    // set the exclusions to the response
+                    console.log("exclusions is null");
+                    exclusions = "";
+                  }
+                  db.saveEstimate(
+                    takeoff_id,
+                    inclusions,
+                    exclusions,
+                    function (err) {
+                      res.render("viewEstimate.html", {
+                        inclusions: inclusions,
+                        exclusions: exclusions,
+                        takeoff_id: takeoff_id,
+                        estimate: estimate,
+                        takeoff: takeoff_info,
+                      });
+                    }
+                  );
+                });
+            } else {
+              console.log("No estimate generated, just retrieved");
+              res.render("viewEstimate.html", {
+                estimate: estimate,
+                takeoff: takeoff_info,
+                takeoff_id: takeoff_id,
+              });
+            }
+          }
+        });
       });
     });
   });
-});
   
 
   app.post("/viewEstimate", mid.isAuth, function (req, res) {

@@ -351,7 +351,9 @@ module.exports = {
       "SELECT estimate_id FROM takeoffs WHERE id = ?;",
       [takeoff_id],
       function (err, estimate_id) {
-        if (err) return callback(err);
+        if (err) {
+          callback(err);
+        }
         console.log(estimate_id);
 
         if (estimate_id[0].estimate_id == null) {
@@ -360,6 +362,7 @@ module.exports = {
             [takeoff_id],
             function (err, result) {
               if (err) {
+                console.log(err);
               }
               con.query(
                 "UPDATE takeoffs SET estimate_id = ? WHERE id = ?;",
@@ -414,9 +417,9 @@ module.exports = {
             const updatedRows = await Promise.all(promises);
             // Once all material info has been fetched, pass the updated rows to the callback
             //console.log(updatedRows);
-            callback(null, takeoff_info, updatedRows);
+           // callback(null, takeoff_info, updatedRows);
           } catch (queryErr) {
-            callback(queryErr);
+            //callback(queryErr);
           }
         });
       }

@@ -44,9 +44,10 @@
       <div>
         <form action='/generateEstimate' method='POST' > 
           <li>
+            <input type='hidden' name='takeoff_id' value='{{takeoff_id}}'>
+
             <input type="submit" value="Generate Estimate">
           </li>
-            <input type='hidden' name='takeoff_id' value='{{takeoff_id}}'>
 
         </form>
         
