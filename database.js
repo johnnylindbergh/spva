@@ -10,6 +10,7 @@ const queries = require("./queries.js");
 // Levenshtein distance
 const levenshtein = require("fast-levenshtein");
 const crypto = require("crypto");
+const e = require("express");
 
 // establish database connection
 const con = mysql.createPool({
@@ -27,6 +28,32 @@ function generatePasscode() {
     .replace(/\+/g, "0")
     .replace(/\//g, "0")
     .slice(0, 16);
+}
+
+
+function getFrequentMaterials(subject, callback) {
+  con.query('SELECT material_id, COUNT(*) as count FROM applied_materials WHERE name = ? GROUP BY material_id ORDER BY count DESC LIMIT 1;', [subject], function(err, materials){
+    if (err) {
+      console.log(err);
+      return callback(err);
+    }
+    // do the same for the secondary material_id
+    con.query('SELECT secondary_material_id, COUNT(*) as count FROM applied_materials WHERE name = ? GROUP BY secondary_material_id ORDER BY count DESC LIMIT 1;', [subject], function(err, secondaryMaterials){
+      if (err) {
+        console.log(err);
+        return callback(err);
+      }
+      // do the same for the tertiary material_id
+      con.query('SELECT tertiary_material_id, COUNT(*) as count FROM applied_materials WHERE name = ? GROUP BY tertiary_material_id ORDER BY count DESC LIMIT 1;', [subject], function(err, tertiaryMaterials){
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
+        // return the most frequent materials
+        callback(null, [materials[0], secondaryMaterials[0], tertiaryMaterials[0]]);
+      });
+    });
+  });
 }
 
 module.exports = {
@@ -753,46 +780,103 @@ module.exports = {
     );
   },
 
+  // this function get all the subjects for a takeoff and then adds blank (no materials) applied_materials for each subject
+
   generateTakeoffMaterials: function (takeoff_id, callback) {
-    // kill me
     con.query(
-      "SELECT subject, SUM(measurement), MAX(measurement_unit), MAX(color) FROM subjects WHERE takeoff_id = ? GROUP BY subject;",
+      "SELECT subject, SUM(measurement) AS total_measurement, MAX(measurement_unit) AS measurement_unit, MAX(color) AS color FROM subjects WHERE takeoff_id = ? GROUP BY subject;",
       [takeoff_id],
       function (err, subjects) {
         if (err) return callback(err);
-        //console.log(subjects);
-        // get labor_cost setting
+  
+        // Get labor_cost setting
         con.query(
-          "SELECT setting_value FROM system_settings where setting_name = 'default_labor_cost';", function(err, default_labor_cost){
+          "SELECT setting_value FROM system_settings WHERE setting_name = 'default_labor_cost';",
+          function (err, default_labor_cost) {
+            if (err) return callback(err);
+  
             for (var i = 0; i < subjects.length; i++) {
-              // insert into applied_materials
-              con.query(
-                "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost) VALUES (?,?,?,?,?);",
+              // Insert into applied_materials
+                con.query(
+                "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost) VALUES (?, ?, ?, ?, ?);",
                 [
                   takeoff_id,
                   subjects[i].subject,
-                  subjects[i]["SUM(measurement)"],
-                  subjects[i]["MAX(measurement_unit)"],
+                  subjects[i].total_measurement,
+                  subjects[i].measurement_unit,
                   default_labor_cost[0].setting_value
                 ],
                 function (err) {
                   if (err) {
-                    console.log(err);
+                  console.log(err);
                   } else {
-                    console.log("matching subject strings.");
-                    // find the closest match in the materials table useing l
+                  console.log("Matching subject strings.");
+                  // First, get the frequency of materials applied to any subject in the applied_materials table
+                  con.query(
+                    "SELECT material_id, subject, COUNT(*) as count FROM applied_materials WHERE subject = ? GROUP BY material_id ORDER BY count DESC LIMIT 1;",
+                    [subjects[i].subject],
+                    function (err, materials) {
+                    if (err) {
+                      console.log(err);
+                    }
+          
+                    // Assign these materials to the applied_materials table
+                    console.log("Frequent materials: ", materials);
+          
+                    if (materials.length > 0) {
+                      con.query(
+                      "UPDATE applied_materials SET material_id = ? WHERE subject = ?;",
+                      [materials[0].material_id, subjects[i].subject],
+                      function (err) {
+                        if (err) {
+                        console.log(err);
+                        }
+                      }
+                      );
+                    } else {
+                      console.log("No predicted materials found");
+          
+                      // Find the closest match in the materials table using Levenshtein distance
+                      con.query("SELECT * FROM materials;", function (err, allMaterials) {
+                      if (err) {
+                        console.log(err);
+                      }
+          
+                      var minDistance = 100;
+                      var min_id = 0;
+                      for (var j = 0; j < allMaterials.length; j++) {
+                        var distance = levenshtein.get(allMaterials[j].name, subjects[i].subject);
+                        if (distance < minDistance) {
+                        minDistance = distance;
+                        min_id = allMaterials[j].id;
+                        }
+                      }
+          
+                      if (minDistance < 3) {
+                        con.query(
+                        "UPDATE applied_materials SET material_id = ? WHERE subject = ?;",
+                        [min_id, subjects[i].subject],
+                        function (err) {
+                          if (err) {
+                          console.log(err);
+                          }
+                        }
+                        );
+                      }
+                      });
+                    }
+                    }
+                  );
                   }
                 }
-              );
+                );
             }
-
           }
         );
-    
       }
     );
   },
-
+  
   removeMaterialSubject: function (material_id, subject_id, callback) {
     // First, get the subject and the applied materials
     con.query(
