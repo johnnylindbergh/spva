@@ -30,7 +30,7 @@ function generatePasscode() {
     .slice(0, 16);
 }
 
-
+// unused function
 function getFrequentMaterials(subject, callback) {
   con.query('SELECT material_id, COUNT(*) as count FROM applied_materials WHERE name = ? GROUP BY material_id ORDER BY count DESC LIMIT 1;', [subject], function(err, materials){
     if (err) {
@@ -370,88 +370,61 @@ module.exports = {
     );
   },
 
-  generateEstimate: function (takeoff_id, callback) {
-    // query takeoffs table for estimate_id
-    // if the estimate_id is null, create a new estimate insert it into the db, and update the takeoff's estimate_id in the takeoffs table
-    // if the estimate_id is not null, update the existing estimate with the new data
-    con.query(
+generateEstimate: async function (takeoff_id, callback) {
+  try {
+    const [estimateRows] = await con.promise().query(
       "SELECT estimate_id FROM takeoffs WHERE id = ?;",
-      [takeoff_id],
-      function (err, estimate_id) {
-        if (err) {
-          callback(err);
-        }
-        console.log(estimate_id);
-
-        if (estimate_id[0].estimate_id == null) {
-          con.query(
-            "INSERT INTO estimate (takeoff_id) VALUES (?); SELECT LAST_INSERT_ID() as last;",
-            [takeoff_id],
-            function (err, result) {
-              if (err) {
-                console.log(err);
-              }
-              con.query(
-                "UPDATE takeoffs SET estimate_id = ? WHERE id = ?;",
-                [result[1][0].last, takeoff_id],
-                function (err) {
-                  if (err) return callback(err);
-                }
-              );
-            }
-          );
-        } else {
-        }
-      }
+      [takeoff_id]
     );
 
-    // get all the applied_materials for the takeoff_id
-    con.query(
+    const estimateId = estimateRows[0]?.estimate_id;
+
+    if (!estimateId) {
+      const [insertResult] = await con.promise().query(
+        "INSERT INTO estimate (takeoff_id) VALUES (?);",
+        [takeoff_id]
+      );
+
+      const lastInsertId = insertResult.insertId;
+
+      await con.promise().query(
+        "UPDATE takeoffs SET estimate_id = ? WHERE id = ?;",
+        [lastInsertId, takeoff_id]
+      );
+    }
+
+    const [takeoffInfo] = await con.promise().query(
       "SELECT * FROM takeoffs WHERE id = ?;",
-      [takeoff_id],
-      function (err, takeoff_info) {
-        if (err) return callback(err);
-
-        con.query(queries.getTakeoff, [takeoff_id], async function (err, rows) {
-          if (err) return callback(err);
-
-          // Create an array of promises to fetch material names
-          const promises = rows.map((row) => {
-            if (row && row.material_id) {
-              return new Promise((resolve, reject) => {
-                con.query(
-                  "SELECT * FROM materials WHERE id IN (?, ?, ?);",
-                  [
-                    row.material_id,
-                    row.secondary_material_id,
-                    row.tertiary_material_id,
-                  ],
-                  function (err, materials) {
-                    if (err) return reject(err);
-
-                    // Add material names to the row
-                    row.selected_materials = materials; // You can customize how you want to store the materials info
-                    resolve(row);
-                  }
-                );
-              });
-            } else {
-              return Promise.resolve(row); // If no material_id, just resolve the row as is
-            }
-          });
-
-          try {
-            const updatedRows = await Promise.all(promises);
-            // Once all material info has been fetched, pass the updated rows to the callback
-            //console.log(updatedRows);
-           // callback(null, takeoff_info, updatedRows);
-          } catch (queryErr) {
-            //callback(queryErr);
-          }
-        });
-      }
+      [takeoff_id]
     );
-  },
+
+    const [rows] = await con.promise().query(queries.getTakeoff, [takeoff_id]);
+
+    const updatedRows = await Promise.all(
+      rows.map(async (row) => {
+        if (row.material_id) {
+          const [materials] = await con
+            .promise()
+            .query(
+              "SELECT * FROM materials WHERE id IN (?, ?, ?);",
+              [
+                row.material_id,
+                row.secondary_material_id,
+                row.tertiary_material_id,
+              ]
+            );
+          row.selected_materials = materials;
+        }
+        return row;
+      })
+    );
+
+    callback(null, takeoffInfo, updatedRows);
+  } catch (err) {
+    callback(err);
+  }
+},
+
 
   updateContent: function (id, inclusions, exclusions, callback) {
     // if (inclusions == null) {
@@ -797,6 +770,7 @@ module.exports = {
   
             for (var i = 0; i < subjects.length; i++) {
               // Insert into applied_materials
+              let currentSubject = subjects[i].subject;
                 con.query(
                 "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost) VALUES (?, ?, ?, ?, ?);",
                 [
@@ -811,22 +785,23 @@ module.exports = {
                   console.log(err);
                   } else {
                   console.log("Matching subject strings.");
-                  // First, get the frequency of materials applied to any subject in the applied_materials table
+                  // First, get the frequency of materials applied to a given subject in the applied_materials table
                   con.query(
-                    "SELECT material_id, subject, COUNT(*) as count FROM applied_materials WHERE subject = ? GROUP BY material_id ORDER BY count DESC LIMIT 1;",
-                    [subjects[i].subject],
+                    "SELECT material_id, name, COUNT(*) as count FROM applied_materials WHERE name = ? AND material_id IS NOT NULL GROUP BY material_id ORDER BY count DESC LIMIT 1;",
+                    [currentSubject],
                     function (err, materials) {
                     if (err) {
                       console.log(err);
                     }
-          
+                    
                     // Assign these materials to the applied_materials table
-                    console.log("Frequent materials: ", materials);
+                    console.log("Frequent materials for " + currentSubject + ":" + materials);
           
-                    if (materials.length > 0) {
+                    if (materials != null && materials.length > 0) {
+                      //very important to match to takeoff_id or else this query would update all the takeoffs in the table
                       con.query(
-                      "UPDATE applied_materials SET material_id = ? WHERE subject = ?;",
-                      [materials[0].material_id, subjects[i].subject],
+                      "UPDATE applied_materials SET material_id = ? WHERE name = ? AND takeoff_id = ?;", 
+                      [materials[0].material_id, currentSubject, takeoff_id],
                       function (err) {
                         if (err) {
                         console.log(err);
@@ -845,7 +820,7 @@ module.exports = {
                       var minDistance = 100;
                       var min_id = 0;
                       for (var j = 0; j < allMaterials.length; j++) {
-                        var distance = levenshtein.get(allMaterials[j].name, subjects[i].subject);
+                        var distance = levenshtein.get(allMaterials[j].name, currentSubject);
                         if (distance < minDistance) {
                         minDistance = distance;
                         min_id = allMaterials[j].id;
@@ -871,6 +846,7 @@ module.exports = {
                 }
                 );
             }
+            callback(null);
           }
         );
       }
@@ -1198,8 +1174,11 @@ module.exports = {
             }
           );
         } else {
-          cb(new Error("Cannot decrease status"));
+         // cb(new Error("Cannot decrease status"));
+         console.log("Make copy?");
+         cb(null);
         }
+        cb(null);
       }
     );
   },
