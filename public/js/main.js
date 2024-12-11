@@ -4,7 +4,7 @@ $(document).ready(function () {
       { code: 1, label: "Takeoff Uploaded" },
       { code: 2, label: "Estimate Generated" },
       { code: 3, label: "Estimate Published" },
-      { code: 4, label: "Estimate Signed" },
+      { code: 4, label: "Estimate Approved" },
     ];
 
     // Find the index of the current status
