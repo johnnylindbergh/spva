@@ -16,7 +16,7 @@ module.exports = {
   DB_NAME: 'spvaTrack',
 
   // domain through which server is accessible
-  DOMAIN: 'https://estimate.sunpaintingva.com',
+  DOMAIN: 'https://estimate.johnnylindbergh.com',
 
   /*  does the system allow automatic creation of new user accounts
       when authentication is attempted. */
