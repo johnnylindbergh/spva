@@ -434,41 +434,37 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
 });
 
 
-app.post("/generateEstimate", mid.isAuth, function (req, res) {
+app.post("/generateEstimate", function (req, res) {
   // priority: this function should check to see if an estimate has been generated, if yes, send to client, if no, generate
   var takeoff_id = req.body.takeoff_id;
   console.log("Generating estimate for takeoff", takeoff_id);
 
     // Fetch the ChatGPT prompt dynamically from the database
-  db.getSystemSettingByName("chatgpt_prompt", function (err, setting) {
-    if (err || !setting) {
+  db.getSystemSettingByName("chatgpt_prompt", function (err, prompt) {
+    if (err || !prompt) {
       console.error("Error fetching ChatGPT prompt, using default.");
-      setting  = sys.PROMPT; // Fallback prompt
+      prompt = sys.PROMPT; // Fallback prompt
     }
 
-    let prompt = setting[0].setting_value;
 
-  
-    console.log("setting status to 2");
   db.takeoffSetStatus(takeoff_id, 2, function (err) {
     if (err) {
       console.log(err);
       // Handle the error if necessary
-      console.log(err);
       
     }
-    db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
 
+    db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
       if (err) {
         console.log(err);
-        //res.status(500).send("Error generating estimate");
+        res.status(500).send("Error generating estimate");
       } else {
-        console.log(takeoff_info[0].estimate_id,  estimate);
-        // if the 
-        if (takeoff_info[0].estimate_id == null || estimate.inclusions == null) {
+        console.log(takeoff_info[0].estimate_id)
+        if (takeoff_info[0].estimate_id == null) {
           // Build the prompt
 
 
+           prompt = prompt[0].setting_value;
 
           console.log("Prompt:", prompt);
           for (var i = 0; i < estimate.length; i++) {
@@ -493,7 +489,6 @@ app.post("/generateEstimate", mid.isAuth, function (req, res) {
           // call to  async function callChatGPT with the response as the return value and saves the it to the database
           let response = "";
           chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
-
             response = subres;
             //console.log("Response:", response);
 
@@ -503,8 +498,8 @@ app.post("/generateEstimate", mid.isAuth, function (req, res) {
             let exclusions = response.split("</br>")[1];
 
             // check if the response has been split correctly
-              // console.log("Includes:", inclusions.substring(0, 20) + "...");
-              // console.log("Exclusions:", exclusions.substring(0, 20) + "...");
+              console.log("Includes:", inclusions.substring(0, 20) + "...");
+              console.log("Exclusions:", exclusions.substring(0, 20) + "...");
             //nul checking for inclusions and exclusions
             if (inclusions == null) {
               // set the inclusions to the response
@@ -527,10 +522,19 @@ app.post("/generateEstimate", mid.isAuth, function (req, res) {
 
         } else {
           console.log("No estimate generated, just retrieved");
-          res.render("viewEstimate.html", {
-            estimate: estimate,
-            takeoff: takeoff_info,
-            takeoff_id: takeoff_id,
+
+          // get the inclusions and exclusions from the database
+          db.getEstimateData(takeoff_id, function (err, estimate, takeoff_info) {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log(estimate);
+              res.render("viewEstimate.html", {
+                estimate: estimate,
+                takeoff: takeoff_info,
+                takeoff_id: takeoff_id,
+              });
+            }
           });
 
         }
@@ -539,7 +543,6 @@ app.post("/generateEstimate", mid.isAuth, function (req, res) {
   });
 });
 });
-
   
 
   app.post("/viewEstimate", mid.isAuth, function (req, res) {
@@ -790,11 +793,11 @@ app.post("/generateEstimate", mid.isAuth, function (req, res) {
 
   app.post("/getEstimateData", function (req, res) {
     console.log("just viewing takeoff id: ", req.body.takeoff_id);
-    db.getEstimateData(req.body.takeoff_id, function (err, estimate, takeoff, tax) {
+    db.getEstimateData(req.body.takeoff_id, function (err, estimate, takeoff) {
       if (err) {
         console.log(err);
       } else {
-        res.send({ estimate: estimate, takeoff: takeoff , tax: tax});
+        res.send({ estimate: estimate, takeoff: takeoff });
       }
     });
   });

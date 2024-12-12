@@ -282,11 +282,13 @@ $(document).ready(function() {
     $.post('/getEstimateData', {takeoff_id: takeoff_id}, function(data) {
         console.log(data)
         tax = data.takeoff[0].tax; // consider that the tax percentage will be zero if the server returns zero.
-        
+
+    
         populateProposalIncludes(data.estimate[0].inclusions);
         populateExclusions(data.estimate[0].exclusions);
         populateOptions(parseInt(takeoff_id));
         console.log(data.takeoff[0].total);
+
         $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].total));
  
     });

@@ -370,61 +370,85 @@ module.exports = {
     );
   },
 
-generateEstimate: async function (takeoff_id, callback) {
-  try {
-    const [estimateRows] = await con.promise().query(
+  generateEstimate: function (takeoff_id, callback) {
+    // query takeoffs table for estimate_id
+    // if the estimate_id is null, create a new estimate insert it into the db, and update the takeoff's estimate_id in the takeoffs table
+    // if the estimate_id is not null, update the existing estimate with the new data
+    con.query(
       "SELECT estimate_id FROM takeoffs WHERE id = ?;",
-      [takeoff_id]
-    );
+      [takeoff_id],
+      function (err, estimate_id) {
+        if (err) return callback(err);
+        console.log(estimate_id);
 
-    const estimateId = estimateRows[0]?.estimate_id;
-    console.log("databse saw an estimate id of: ", estimateId);
-
-    if (!estimateId) {
-      const [insertResult] = await con.promise().query(
-        "INSERT INTO estimate (takeoff_id) VALUES (?);",
-        [takeoff_id]
-      );
-
-      const lastInsertId = insertResult.insertId;
-
-      await con.promise().query(
-        "UPDATE takeoffs SET estimate_id = ? WHERE id = ?;",
-        [lastInsertId, takeoff_id]
-      );
-    }
-
-    const [takeoffInfo] = await con.promise().query(
-      "SELECT * FROM takeoffs WHERE id = ?;",
-      [takeoff_id]
-    );
-
-    const [rows] = await con.promise().query(queries.getTakeoff, [takeoff_id]);
-
-    const updatedRows = await Promise.all(
-      rows.map(async (row) => {
-        if (row.material_id) {
-          const [materials] = await con
-            .promise()
-            .query(
-              "SELECT * FROM materials WHERE id IN (?, ?, ?);",
-              [
-                row.material_id,
-                row.secondary_material_id,
-                row.tertiary_material_id,
-              ]
-            );
-          row.selected_materials = materials;
+        if (estimate_id[0].estimate_id == null) {
+          con.query(
+            "INSERT INTO estimate (takeoff_id) VALUES (?); SELECT LAST_INSERT_ID() as last;",
+            [takeoff_id],
+            function (err, result) {
+              if (err) {
+              }
+              con.query(
+                "UPDATE takeoffs SET estimate_id = ? WHERE id = ?;",
+                [result[1][0].last, takeoff_id],
+                function (err) {
+                  if (err) return callback(err);
+                }
+              );
+            }
+          );
+        } else {
         }
-        return row;
-      })
+      }
     );
 
-    callback(null, takeoffInfo, updatedRows);
-  } catch (err) {
-    callback(err);
-  }
-},
+    con.query(
+      "SELECT * FROM takeoffs WHERE id = ?;",
+      [takeoff_id],
+      function (err, takeoff_info) {
+        if (err) return callback(err);
+
+        con.query(queries.getTakeoff, [takeoff_id], async function (err, rows) {
+          if (err) return callback(err);
+
+          // Create an array of promises to fetch material names
+          const promises = rows.map((row) => {
+            if (row && row.material_id) {
+              return new Promise((resolve, reject) => {
+                con.query(
+                  "SELECT * FROM materials WHERE id IN (?, ?, ?);",
+                  [
+                    row.material_id,
+                    row.secondary_material_id,
+                    row.tertiary_material_id,
+                  ],
+                  function (err, materials) {
+                    if (err) return reject(err);
+
+                    // Add material names to the row
+                    row.selected_materials = materials; // You can customize how you want to store the materials info
+                    resolve(row);
+                  }
+                );
+              });
+            } else {
+              return Promise.resolve(row); // If no material_id, just resolve the row as is
+            }
+          });
+
+          try {
+            const updatedRows = await Promise.all(promises);
+            // Once all material info has been fetched, pass the updated rows to the callback
+            //console.log(updatedRows);
+            callback(null, takeoff_info, updatedRows);
+          } catch (queryErr) {
+            callback(queryErr);
+          }
+        });
+      }
+    );
+  },
+
 
 
   updateContent: function (id, inclusions, exclusions, callback) {
@@ -609,11 +633,10 @@ generateEstimate: async function (takeoff_id, callback) {
   // the get request for the viewEstimate page
   getEstimateData: function (takeoff_id, callback) {
     con.query(
-      "SELECT * FROM estimate WHERE takeoff_id = ?;",
+      "SELECT * FROM estimate WHERE takeoff_id = ? LIMIT 1;",
       [takeoff_id],
       function (err, estimate) {
         if (err) return callback(err);
-
         con.query(
           "SELECT * FROM takeoffs WHERE id = ?;",
           [takeoff_id],
@@ -624,8 +647,8 @@ generateEstimate: async function (takeoff_id, callback) {
               "SELECT setting_value FROM system_settings WHERE setting_name = 'sales_tax';",
               function (err, salesTax) {
                 if (err) return callback(err);
-                callback(null, estimate, takeoff, salesTax[0].setting_value);
-              }
+                  callback(null, estimate, takeoff, salesTax[0].setting_value);
+                }
             );
           }
         );
@@ -1175,11 +1198,8 @@ generateEstimate: async function (takeoff_id, callback) {
             }
           );
         } else {
-         // cb(new Error("Cannot decrease status"));
-         console.log("Make copy?");
-         cb(null);
+          cb(new Error("Cannot decrease status"));
         }
-        cb(null);
       }
     );
   },
