@@ -50,8 +50,8 @@
         <div>
             <label for="language">Language:</label>
             <select id="language" name="language" onchange="updateChatGPTPrompt()">
-          <option value="english">English</option>
-          <option value="spanish">Spanish</option>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
             </select>
         </div>
         <table id="global_settings">
@@ -138,15 +138,15 @@
   </script>
   <script>
   function updateChatGPTPrompt() {
-    const language = document.getElementById('language').value;
-    const chatgptPrompt = document.getElementById('chatgpt_prompt');
+      const language = document.getElementById('language').value;
+      const chatgptPrompt = document.getElementById('chatgpt_prompt');
 
-    if (language === 'spanish') {
-      chatgptPrompt.value += "\nGive the answer in Spanish.";
-    } else {
-      // Optionally, you can remove the Spanish line if switching back to English
-      chatgptPrompt.value = chatgptPrompt.value.replace("\nGive the answer in Spanish.", "");
-    }
+      if (language === 'es') {
+          chatgptPrompt.value += "\nGive the answer in Spanish.";
+      } else {
+          // Remove the Spanish line when switching back to English
+          chatgptPrompt.value = chatgptPrompt.value.replace("\nGive the answer in Spanish.", "");
+      }
   }
 </script>
 </body>

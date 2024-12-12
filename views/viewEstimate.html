@@ -30,21 +30,18 @@
 <body>
     <!-- button of the class shareBtn,. on click, call function share -->
     <button class="shareClientBtn" onclick="shareClient()">Share With Client</button>
-        <!-- Language toggle button -->
-    <li>
-        <button onclick="changeLanguage('en')">English</button>
-        <button onclick="changeLanguage('es')">Español</button>
-    </li>
-    <!-- Toggle numbers button -->
-    <li>
-        <button onclick="toggleNumbers()">Show Without Numbers</button>
-    </li>
 </body>
 </html>
 
         
         </ul>
     </nav>
+        <!-- Buttons at the top -->
+    <div class="top-buttons">
+        <button onclick="changeLanguage('en')" class="language-btn">English</button>
+        <button onclick="changeLanguage('es')" class="language-btn">Español</button>
+        <button onclick="toggleNumbers()" class="toggle-btn">Show Without Numbers</button>
+    </div>
     <div class="container">
 
          <div class="image-container">
@@ -82,19 +79,19 @@
         <table id="estimate-table">
             <tr>
                 <th data-i18n="Description">Description</th>
-                <th data-i18n="Amount">Amount</th>
+                <th data-i18n="Amount" class="amount-column">Amount</th>
             </tr>
             <tr>
                 <td contenteditable="true" class="editable" id="proposal-includes">
                     <ul id="includes-list"></ul>
                 </td>
-                <td id="includes-total">{{includes_total}}</td>
+                <td id="includes-total" class="amount-column">{{includes_total}}</td>
             </tr>
             <tr>
                 <td contenteditable="true" class="editable" id="exclusions">
                     <ul id="exclusions-list"></ul>
                 </td>
-                <td id="excludes-total">${{exclude_total}}</td>
+                <td id="excludes-total" class="amount-column">${{exclude_total}}</td>
             </tr>
         </table>
 
@@ -185,26 +182,37 @@
     </div>
     <br>
     <script>
-        import i18next from './i18n.js';
+        import i18next from 'public/js/i18n.js';
 
         function changeLanguage(language) {
+            console.log(`Changing language to: ${language}`);
+            
             i18next.changeLanguage(language, () => {
+                console.log('Language changed successfully. Updating text...');
                 document.querySelectorAll('[data-i18n]').forEach(element => {
                     const key = element.getAttribute('data-i18n');
+                    console.log(`Updating element with key: ${key}`);
                     element.innerHTML = i18next.t(key);
                 });
                 document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
                     const key = element.getAttribute('data-i18n-placeholder');
+                    console.log(`Updating placeholder for key: ${key}`);
                     element.setAttribute('placeholder', i18next.t(key));
                 });
             });
         }
 
         function toggleNumbers() {
+            console.log('Toggling visibility of Amount columns...');
             const amountColumns = document.querySelectorAll('.amount-column');
-            amountColumns.forEach(column => {
-                column.style.display = column.style.display === 'none' ? '' : 'none';
-            });
+            if (amountColumns.length === 0) {
+                console.error('No elements with class "amount-column" found.');
+            } else {
+                amountColumns.forEach((column, index) => {
+                    console.log(`Toggling column ${index}: current display = ${column.style.display}`);
+                    column.style.display = column.style.display === 'none' ? '' : 'none';
+                });
+            }
         }
     </script>
     <script src="scripts.js"></script>
