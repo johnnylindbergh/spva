@@ -74,7 +74,7 @@ CREATE TABLE takeoffs (
   invoice_email VARCHAR(64),
   file_path_of_plans VARCHAR(255),
   estimate_id INT,
-  prompt_variant VARCHAR(64),
+  prompt_variant VARCHAR(64) DEFAULT 'en_with_numbers',
   status TINYINT(1) DEFAULT 0,
   passcode VARCHAR(64),
   view_count INT DEFAULT 0,

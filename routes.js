@@ -434,39 +434,41 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
 });
 
 
-app.post("/generateEstimate", function (req, res) {
+app.post("/generateEstimate", mid.isAuth, function (req, res) {
   // priority: this function should check to see if an estimate has been generated, if yes, send to client, if no, generate
   var takeoff_id = req.body.takeoff_id;
   console.log("Generating estimate for takeoff", takeoff_id);
 
     // Fetch the ChatGPT prompt dynamically from the database
-  db.getSystemSettingByName("chatgpt_prompt", function (err, prompt) {
-    if (err || !prompt) {
+  db.getSystemSettingByName("chatgpt_prompt", function (err, setting) {
+    if (err || !setting) {
       console.error("Error fetching ChatGPT prompt, using default.");
-      prompt = sys.PROMPT; // Fallback prompt
+      setting  = sys.PROMPT; // Fallback prompt
     }
+
+    let prompt = setting[0].setting_value;
+
   
     console.log("setting status to 2");
   db.takeoffSetStatus(takeoff_id, 2, function (err) {
     if (err) {
       console.log(err);
       // Handle the error if necessary
+      console.log(err);
       
     }
-    console.log("getting info for estimate");
     db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
-      console.log("got info for estimate");
 
       if (err) {
         console.log(err);
-        res.status(500).send("Error generating estimate");
+        //res.status(500).send("Error generating estimate");
       } else {
-        console.log(takeoff_info[0].estimate_id)
-        if (takeoff_info[0].estimate_id == null) {
+        console.log(takeoff_info[0].estimate_id,  estimate);
+        // if the 
+        if (takeoff_info[0].estimate_id == null || estimate.inclusions == null) {
           // Build the prompt
 
 
-           prompt = prompt[0].setting_value;
 
           console.log("Prompt:", prompt);
           for (var i = 0; i < estimate.length; i++) {
@@ -501,8 +503,8 @@ app.post("/generateEstimate", function (req, res) {
             let exclusions = response.split("</br>")[1];
 
             // check if the response has been split correctly
-              console.log("Includes:", inclusions.substring(0, 20) + "...");
-              console.log("Exclusions:", exclusions.substring(0, 20) + "...");
+              // console.log("Includes:", inclusions.substring(0, 20) + "...");
+              // console.log("Exclusions:", exclusions.substring(0, 20) + "...");
             //nul checking for inclusions and exclusions
             if (inclusions == null) {
               // set the inclusions to the response
