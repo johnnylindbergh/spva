@@ -30,6 +30,10 @@
 <body>
     <!-- button of the class shareBtn,. on click, call function share -->
     <button class="shareClientBtn" onclick="shareClient()">Share With Client</button>
+    <!-- Toggle numbers button -->
+    <li>
+        <button onclick="toggleNumbers()">Show Without Numbers</button>
+    </li>
 </body>
 </html>
 
@@ -152,7 +156,14 @@
     
     </div>
     <br>
-
+    <script>
+        function toggleNumbers() {
+            const amountColumns = document.querySelectorAll('.amount-column');
+            amountColumns.forEach(column => {
+                column.style.display = column.style.display === 'none' ? '' : 'none';
+            });
+        }
+    </script>
     <script src="scripts.js"></script>
 </body>
 </html>
