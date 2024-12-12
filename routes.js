@@ -446,10 +446,8 @@ app.post("/generateEstimate", function (req, res) {
       prompt = sys.PROMPT; // Fallback prompt
     }
 
-
   db.takeoffSetStatus(takeoff_id, 2, function (err) {
     if (err) {
-      console.log(err);
       // Handle the error if necessary
       
     }

@@ -30,6 +30,11 @@
 <body>
     <!-- button of the class shareBtn,. on click, call function share -->
     <button class="shareClientBtn" onclick="shareClient()">Share With Client</button>
+        <!-- Language toggle button -->
+    <li>
+        <button onclick="changeLanguage('en')">English</button>
+        <button onclick="changeLanguage('es')">Español</button>
+    </li>
     <!-- Toggle numbers button -->
     <li>
         <button onclick="toggleNumbers()">Show Without Numbers</button>
@@ -45,7 +50,7 @@
          <div class="image-container">
             <img src="sunpainting_logo_blue.png" alt="Sun Painting Logo">
         </div>
-        <p>1819 Broadway St, Charlottesville, VA 22902 US</p>
+       <p data-i18n="ThankYouMessage">1819 Broadway St, Charlottesville, VA 22902 US</p>
         <p>Phone: +1 434-207-2025 | Email: <a href="mailto:sales@sunpaintingva.com" style="color:#000000;">sales@sunpaintingva.com</a></p>
         <p>Website: <a href="http://www.sunpaintingva.com" style="color:#000000;">www.sunpaintingva.com</a></p>
 
@@ -55,11 +60,14 @@
 
        <input type='hidden' id='takeoff_id' value='{{id}}'>
 
-            Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{owner}}'></br>
-      Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{owner_billing_address}}'></br>
-      Owner Email Address: <input type= 'text' class="hiddenInput" id= 'owner_email_address' onchange='updateTakeoffOwnerEmailAddress()' value='{{owner_email}}'></br>
-      Invoice Email Address: <input type= 'text' class="hiddenInput" id= 'invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email}}'></br>
-
+        <p data-i18n="Owner">Owner:</p>
+        <input type='text' class="hiddenInput" id='takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{owner}}'></br>
+        <p data-i18n="Billing Address">Billing Address:</p>
+        <input type='text' class="hiddenInput" id='owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{owner_billing_address}}'></br>
+        <p data-i18n="Owner Email Address">Owner Email Address:</p>
+        <input type='text' class="hiddenInput" id='owner_email_address' onchange='updateTakeoffOwnerEmailAddress()' value='{{owner_email}}'></br>
+        <p data-i18n="Invoice Email Address">Invoice Email Address:</p>
+        <input type='text' class="hiddenInput" id='invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email}}'></br>
 
        <input type='hidden' id='takeoff_total' value='{{takeoff_info.total}}'>
 
@@ -73,10 +81,8 @@
     <p> {{response}}</p>
         <table id="estimate-table">
             <tr>
-                <th>Description</th>
-
-
-                <th>Amount</th>
+                <th data-i18n="Description">Description</th>
+                <th data-i18n="Amount">Amount</th>
             </tr>
             <tr>
                 <td contenteditable="true" class="editable" id="proposal-includes">
@@ -121,42 +127,79 @@
 </body>
 </html>
 
-        <p>Thank you for allowing us to work with you!</p>
-        <p>This Proposal must be signed and dated by the contracting authority for the project and must be received by Sun Painting within 30 days following the listed Proposal Date to be considered formally approved. Proposals received by Sun Painting after 30 Days may require re-pricing.</p>
+    <p data-i18n="ThankYouMessage">Thank you for allowing us to work with you!</p>
+    <p data-i18n="ProposalSignatureNotice">
+        This Proposal must be signed and dated by the contracting authority for the project and must be received by Sun Painting within 30 days following the listed Proposal Date to be considered formally approved. Proposals received by Sun Painting after 30 Days may require re-pricing.
+    </p>
 
-        <!-- Restored Terms and Conditions Section -->
-        <div class="terms-section">
-            <h4> Terms and Conditions - Updated 2/28/24 </h4>
+    <!-- Restored Terms and Conditions Section -->
+    <div class="terms-section">
+        <h4 data-i18n="TermsAndConditions">Terms and Conditions - Updated 2/28/24</h4>
 
-            <p><strong>General Terms:</strong> Sun Painting, LLC proposes to furnish all necessary equipment and perform the labor in a first-class, workmanlike manner according to the terms indicated in this estimate. Before starting, a deposit may be required, with the remaining due upon completion. The client agrees to pay for expenses related to collecting unpaid contract balances and agreed-upon changes.</p>
+        <p data-i18n="GeneralTerms">
+            <strong>General Terms:</strong> Sun Painting, LLC proposes to furnish all necessary equipment and perform the labor in a first-class, workmanlike manner according to the terms indicated in this estimate. Before starting, a deposit may be required, with the remaining due upon completion. The client agrees to pay for expenses related to collecting unpaid contract balances and agreed-upon changes.
+        </p>
 
-            <p>This budget proposal is a contract once signed and returned to Sun Painting. The project's contracting authority must sign and date this proposal, and it must be received by Sun Painting within 30 days following the listed Proposal Date to be considered formally approved. Proposals received by Sun Painting after 30 Days may require re-pricing.</p>
+        <p data-i18n="ProposalContractNotice">
+            This budget proposal is a contract once signed and returned to Sun Painting. The project's contracting authority must sign and date this proposal, and it must be received by Sun Painting within 30 days following the listed Proposal Date to be considered formally approved. Proposals received by Sun Painting after 30 Days may require re-pricing.
+        </p>
 
-            <p>This proposal is strictly limited to the scope of work and inclusions defined within and is based solely on the supplied drawings dated as indicated in the proposal. Please contact our office to submit updated drawings or specifications for a revised estimate. This Proposal assumes reasonable site access and regular working hours (Monday through Friday, 7:00 AM to 5:00 PM). The customer has a 72-hour right to rescind after the date of acceptance.</p>
+        <p data-i18n="ProposalScopeNotice">
+            This proposal is strictly limited to the scope of work and inclusions defined within and is based solely on the supplied drawings dated as indicated in the proposal. Please contact our office to submit updated drawings or specifications for a revised estimate. This Proposal assumes reasonable site access and regular working hours (Monday through Friday, 7:00 AM to 5:00 PM). The customer has a 72-hour right to rescind after the date of acceptance.
+        </p>
 
-            <p><strong>Included Warranty Period:</strong> Sun Painting, LLC warrants labor and materials for a period of 1 year. Responsibility is limited to the supply of labor and materials to correct the defective condition. This warranty expressly excludes damages caused by accident/abuse, weather conditions such as temperature changes or excessive moisture, defective building materials or faulty workmanship by others. This warranty does not include adhesion failure of previously applied coatings to the surface below it.</p>
+        <p data-i18n="IncludedWarranty">
+            <strong>Included Warranty Period:</strong> Sun Painting, LLC warrants labor and materials for a period of 1 year. Responsibility is limited to the supply of labor and materials to correct the defective condition. This warranty expressly excludes damages caused by accident/abuse, weather conditions such as temperature changes or excessive moisture, defective building materials or faulty workmanship by others. This warranty does not include adhesion failure of previously applied coatings to the surface below it.
+        </p>
 
-            <p><strong>Change Orders:</strong> Work crews are not authorized to complete work beyond the detailed specifications of this proposal without a written and signed contract change order. Please contact our office for an estimate on any additional work.</p>
+        <p data-i18n="ChangeOrders">
+            <strong>Change Orders:</strong> Work crews are not authorized to complete work beyond the detailed specifications of this proposal without a written and signed contract change order. Please contact our office for an estimate on any additional work.
+        </p>
 
-            <p><strong>Payment and Invoicing:</strong> A 20% deposit on all approved proposals is required within three (3) business days of the signed contract. (Effective October 1, 2022) Invoices are payable upon receipt and due in full within 30 days of the Invoice Date. A finance charge of 1.5% per month is assessed on all amounts if payment is not received within 30 days of the Invoice Date. Sun Painting, LLC accepts Check, ACH Transfer, or Credit Card payments. - A 3% Convenience Fee will apply to the Invoice Total for Credit Card or ACH payments.</p>
+        <p data-i18n="PaymentAndInvoicing">
+            <strong>Payment and Invoicing:</strong> A 20% deposit on all approved proposals is required within three (3) business days of the signed contract. (Effective October 1, 2022) Invoices are payable upon receipt and due in full within 30 days of the Invoice Date. A finance charge of 1.5% per month is assessed on all amounts if payment is not received within 30 days of the Invoice Date. Sun Painting, LLC accepts Check, ACH Transfer, or Credit Card payments. - A 3% Convenience Fee will apply to the Invoice Total for Credit Card or ACH payments.
+        </p>
 
-            <ul>
-                <li>Lead Paint Abatement/RRP is excluded unless explicitly stated otherwise.</li>
-                <li>Asbestos Containing Material is excluded unless explicitly stated otherwise.</li>
-                <li>Mold Remediation is excluded unless explicitly stated otherwise.</li>
-                <li>Multi-color-surface paint schemes are excluded unless explicitly stated otherwise.</li>
-                <li>Concrete grinding or other surface preparation is excluded unless explicitly stated otherwise.</li>
-                <li>Assumes no more than five (5) paint colors and/or finishes unless otherwise stated within the proposal estimate.</li>
-                <li>Drywall repairs and undue surface preparation (Assumes minimum Level 4 Drywall finish clean and free of dirt/debris.)</li>
-                <li>Paint samples are limited to five (5) total samples (each color and each finish are considered a sample). Additional sample trips will be charged as time and material and will be in addition to any estimate or proposed costs.</li>
-                <li>Changes to selections (paint color, finishes, materials, etc.) made after the material is purchased will be subject to a 25% restocking fee.</li>
-            </ul>
-        </div>
+        <ul>
+            <li data-i18n="ExclusionLeadPaint">Lead Paint Abatement/RRP is excluded unless explicitly stated otherwise.</li>
+            <li data-i18n="ExclusionAsbestos">Asbestos Containing Material is excluded unless explicitly stated otherwise.</li>
+            <li data-i18n="ExclusionMold">Mold Remediation is excluded unless explicitly stated otherwise.</li>
+            <li data-i18n="ExclusionPaintSchemes">Multi-color-surface paint schemes are excluded unless explicitly stated otherwise.</li>
+            <li data-i18n="ExclusionConcretePrep">Concrete grinding or other surface preparation is excluded unless explicitly stated otherwise.</li>
+            <li data-i18n="ExclusionPaintColors">
+                Assumes no more than five (5) paint colors and/or finishes unless otherwise stated within the proposal estimate.
+            </li>
+            <li data-i18n="ExclusionDrywallRepairs">
+                Drywall repairs and undue surface preparation (Assumes minimum Level 4 Drywall finish clean and free of dirt/debris.)
+            </li>
+            <li data-i18n="ExclusionPaintSamples">
+                Paint samples are limited to five (5) total samples (each color and each finish are considered a sample). Additional sample trips will be charged as time and material and will be in addition to any estimate or proposed costs.
+            </li>
+            <li data-i18n="ExclusionRestockingFee">
+                Changes to selections (paint color, finishes, materials, etc.) made after the material is purchased will be subject to a 25% restocking fee.
+            </li>
+        </ul>
+    </div>
 
     
     </div>
     <br>
     <script>
+        import i18next from './i18n.js';
+
+        function changeLanguage(language) {
+            i18next.changeLanguage(language, () => {
+                document.querySelectorAll('[data-i18n]').forEach(element => {
+                    const key = element.getAttribute('data-i18n');
+                    element.innerHTML = i18next.t(key);
+                });
+                document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                    const key = element.getAttribute('data-i18n-placeholder');
+                    element.setAttribute('placeholder', i18next.t(key));
+                });
+            });
+        }
+
         function toggleNumbers() {
             const amountColumns = document.querySelectorAll('.amount-column');
             amountColumns.forEach(column => {

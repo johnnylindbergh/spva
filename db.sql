@@ -35,6 +35,11 @@ CREATE TABLE system_settings (
   setting_value TEXT,
   PRIMARY KEY (setting_id)
 );
+
+-- Add the separate_line_item column to the applied_materials table
+ALTER TABLE applied_materials ADD COLUMN separate_line_item TINYINT(1) DEFAULT 0;
+
+
 -- actual defaults
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('default_labor_cost', '0.40');
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('levens_threshold', '2');
