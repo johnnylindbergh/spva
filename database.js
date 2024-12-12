@@ -378,6 +378,7 @@ generateEstimate: async function (takeoff_id, callback) {
     );
 
     const estimateId = estimateRows[0]?.estimate_id;
+    console.log("databse saw an estimate id of: ", estimateId);
 
     if (!estimateId) {
       const [insertResult] = await con.promise().query(
@@ -480,7 +481,7 @@ generateEstimate: async function (takeoff_id, callback) {
   },
 
   saveEstimate: function (takeoff_id, inclusions, exclusions, callback) {
-    console.log("saving estimate function received: ", inclusions, exclusions, takeoff_id);
+    //console.log("saving estimate function received: ", inclusions, exclusions, takeoff_id);
     if (takeoff_id == null) {
       // get the last insert id takeoff_id
       con.query("SELECT MAX(id) as last FROM takeoffs;", function (err, last) {
