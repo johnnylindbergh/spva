@@ -56,7 +56,7 @@ function populateProposalIncludes(items) {
 
 // Function to populate the "Exclusions & Assumptions" section
 function populateExclusions(exclusions) {
-    const exclusionsList = $('#exclusions-list');
+    const exclusionsList = $('#exclusions');
     exclusionsList.empty(); // Clear any existing content
 
     exclusionsList.html(formatTextToHTML(exclusions));
@@ -236,6 +236,7 @@ function shareSelf(){
     });
 }
 
+let estimate_id;
 // Function to add onclick and oninput listeners to all editable elements
 function addEditableListeners() {
     // Add listeners to all elements with the class "editable"
@@ -259,7 +260,7 @@ function addEditableListeners() {
             // Send POST request with the new content
             var takeoff_id = $('#takeoff_id').val(); // not super safe, but just for example
             console.log('Updating content for takeoff:', takeoff_id);
-            $.post('/update-content', { id: takeoff_id, includes: includes, exclusions: exclusions})
+            $.post('/update-content', { id: estimate_id, includes: includes, exclusions: exclusions})
                 .done(function(response) {
                     console.log('Content updated successfully:', response);
                 })
@@ -281,9 +282,8 @@ $(document).ready(function() {
     var takeoff_id = $('#takeoff_id').val();
     $.post('/getEstimateData', {takeoff_id: takeoff_id}, function(data) {
         console.log(data)
-        tax = data.takeoff[0].tax; // consider that the tax percentage will be zero if the server returns zero.
-
-    
+        tax = data.takeoff[0].tax; // consider that the tax percentage will be zero if the server returns zero.  
+        estimate_id = data.estimate[0].id;  
         populateProposalIncludes(data.estimate[0].inclusions);
         populateExclusions(data.estimate[0].exclusions);
         populateOptions(parseInt(takeoff_id));

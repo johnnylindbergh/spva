@@ -734,7 +734,6 @@ app.post("/generateEstimate", function (req, res) {
   app.post("/update-content", mid.isAuth, function (req, res) {
     console.log("updating content ", req.body);
     if (req.body.id == null) {
-      req.body.id = req.user.local.takeoff_id; 
     }
 
 
