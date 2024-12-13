@@ -6,7 +6,8 @@
 
 * {
   font-family: "Quicksand", sans-serif;
-  zoom:95%
+  zoom:95%;
+  scroll-behavior: smooth;
 }
 .container {
   text-align: left;

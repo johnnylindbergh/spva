@@ -608,6 +608,39 @@ function priceChange(id) {
   }, 500);
 }
 
+
+function createSubjectIntent() {
+  // togle add-subject-form
+  $("#add-subject-form").toggle();
+  // hide the button
+  $("#add-subject-button").hide();
+
+    // scroll the page down 500px
+    window.scrollBy(0, 100);
+
+  let name = $("#new_subject_name").val();
+  console.log("Creating new subject: " + name);
+
+}
+
+function createSubject(){
+
+
+
+  let name = $("#subject_name").val();
+  let measurement = $("#subject_measurement").val();
+  let measurement_unit = $("#subject_measurement_unit").val();
+  console.log("Creating new subject: " + name);
+  $.post("/create-subject", { name: name, takeoff_id: takeoff_id })
+    .done(function () {
+      console.log("Subject created: " + name);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      console.log("Failed to create subject: " + name);
+    });
+}
+
 // on document ready, get the takeoff id from the hidden input field
 $(document).ready(function () {
   takeoff_id = $("#takeoff_id").val();

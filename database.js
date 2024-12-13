@@ -209,6 +209,25 @@ module.exports = {
       }
     );
   },
+                //  "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost) VALUES (?, ?, ?, ?, ?);",
+                 
+                
+  createSubject: function (subject, takeoff_id, callback) {
+    console.log("subject: ", subject.name);
+    console.log("takeoff_id: ", takeoff_id);
+    con.query(
+      "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost) VALUES (?, ?, ?, ?, ?);",
+      [takeoff_id, subject.name, subject.measurement, subject.measurement_unit, subject.labor_cost],
+      function (err) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
+        callback(null);
+      }
+    );
+  },
+    
   updateTakeoffName: function (takeoff_id, name, callback) {
     if (!takeoff_id || !name) {
       return callback("Missing required parameters");

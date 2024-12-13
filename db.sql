@@ -47,6 +47,7 @@ CREATE TABLE estimate (
   takeoff_id INT,
   isArchived TINYINT(1) DEFAULT 0,
   date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  variant VARCHAR(64) DEFAULT 'en_with_numbers',
   inclusions TEXT,
   labor TEXT,
   exclusions TEXT,

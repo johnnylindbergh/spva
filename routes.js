@@ -695,6 +695,21 @@ app.post("/generateEstimate", function (req, res) {
     });
   });
 
+  app.post('/create-subject', mid.isAuth, function (req, res) {
+    console.log("creating subject ", req.body);
+    res.end();
+    // // get the subject object
+   
+    // db.createSubject(req.body.name, req.body.desc, function (err) {
+    //   if (err) {
+    //     console.log(err);
+    //   } else {
+    //     res.end();
+    //   }
+    // });
+  }
+  );
+
   app.post("/update-measurement", mid.isAuth, function (req, res) {
     console.log("updating measurement ", req.body);
     db.updateMeasurement(req.body.id, req.body.measurement, function (err) {
