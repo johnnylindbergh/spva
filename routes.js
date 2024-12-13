@@ -707,8 +707,7 @@ app.post("/generateEstimate", function (req, res) {
     //     res.end();
     //   }
     // });
-  }
-  );
+  });
 
   app.post("/update-measurement", mid.isAuth, function (req, res) {
     console.log("updating measurement ", req.body);

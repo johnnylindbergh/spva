@@ -252,7 +252,7 @@ function addEditableListeners() {
         element.on('focusout', function() {
             // determine if the element is in the includes or excludes section
             const includes = $('#proposal-includes').text(); // weird naming convention
-            const exclusions = $('#exclusions-list').text();
+            const exclusions = $('#exclusions').text();
             
             
 
