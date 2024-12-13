@@ -123,34 +123,34 @@
 </table>
 
 
-<!-- <table id = "options">
-    <tr>
-      <th>Name</th>
-      <th>Cost</th> 
-      <th></th>
-    </tr>
+<br>
 
-    {{#options}}
-    <tr id = "option_{{id}}">
-      <td>{{name}}</td>
-      <td>${{cost}}</td>
-      <td><button onclick="removeOption({{id}})">Remove</button></td>
-    </tr>
-    {{/options}}
+  <div class="container">
+<!-- add subject button with add icon -->
+ <!-- on click, the form appears  -->
+  <button id="add-subject-btn" onclick="createSubjectIntent()">
+    <i class="fa fa-plus"></i> Add Subject
+  </button>
+
+  <!-- hidden add subject form  -->
+  <form id="add-subject-form" style="display: none;" action="/createSubject" method="POST">
+    <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+    <input type="text" name="subject_name" id="subject_name" placeholder="Subject Name">
+    <input type="text" name="measurement" id="measurement" placeholder="Measurement">
+    <!-- unit dropdown -->
+    <select name="unit" id="unit">
+      <option value="sqft">sqft</option>
+      <option value="lf">lf</option>
+      <option value="ea">ea</option>
+    </select>
+    <button type="submit" style="background-color: green; color: white; border: none; padding: 10px; border-radius: 5px;">
+      <i class="fa fa-check"></i> Add
+    </button>
+  </form>
+</div>
 
 
-</table> -->
 
-  
-
-
-
-
-  </div>
-
-
-
- 
 
 </body>
 </html>
