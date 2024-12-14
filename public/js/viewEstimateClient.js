@@ -1,3 +1,4 @@
+
 // Function to convert markdown-like text to HTML
 function formatTextToHTML(text) {
     if (text == null) {
@@ -147,7 +148,7 @@ function updateTotals() {
     const optionsTotal = parseFloat(optionsTotalText) || 0;
 
     // Calculate the total as the sum of subtotal and options total
-    const total = subtotal + optionsTotal + (tax* total);
+    const total = subtotal + optionsTotal + (tax* (subtotal));
 
     // Update the text content of subtotal, options-total, and total
     $('#subtotal').text("Subtotal: $" +numberWithCommas(subtotal.toFixed(2)));
@@ -258,6 +259,15 @@ $(document).ready(function() {
      $(".signature-success").toggle(); // hide it initially
     // Populate the "Proposal Includes" section with dynamic data
     // post takeoff_id to getEstimateData to set includesItems and exclusionsItems
+
+    // Event listener for language change buttons
+    $(".language-btn").on("click", function () {
+        const language = $(this).data("lang"); // Get the language from the data-lang attribute
+        changeLanguage(language);
+    });
+
+    // Event listener for toggle numbers button
+    $(".toggle-btn").on("click", toggleNumbers);
     
     $.post('/getEstimateData', {takeoff_id: parseInt($('#takeoff_id').val())}, function(data) {
         console.log(data)
@@ -275,10 +285,10 @@ $(document).ready(function() {
         var subtotal = data.takeoff[0].total;
 
       
-        
-
         //call update totals every few seconds
         //setInterval(updateTotals, 5000);
         
     });
+    // Add event listeners for editable fields
+    addEditableListeners();
 });

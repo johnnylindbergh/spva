@@ -45,14 +45,12 @@ INSERT INTO system_settings (setting_name, setting_value) VALUES ('default_labor
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('levens_threshold', '2');
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('chatgpt_prompt', "Consider the following json object. The output must be two description sections titled 'Proposal Includes' and 'Exclusions and assumptions' separated by a </br> tag. If an object has no selected materials, its name is listed in the 'Exclusions and assumptions' section; otherwise, a one-sentence description in the 'Proposal Includes' section that includes the name. \n. Do not include extra symbols like (* or -)");
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('sales_tax', '5.3');
-INSERT INTO system_settings (setting_name, setting_value) VALUES ('language', 'en');
 
 CREATE TABLE estimate (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT,
   isArchived TINYINT(1) DEFAULT 0,
   date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  variant VARCHAR(64) DEFAULT 'en_with_numbers',
   inclusions TEXT,
   labor TEXT,
   exclusions TEXT,
@@ -80,7 +78,6 @@ CREATE TABLE takeoffs (
   invoice_email VARCHAR(64),
   file_path_of_plans VARCHAR(255),
   estimate_id INT,
-  prompt_variant VARCHAR(64) DEFAULT 'en_with_numbers',
   status TINYINT(1) DEFAULT 0,
   passcode VARCHAR(64),
   view_count INT DEFAULT 0,
