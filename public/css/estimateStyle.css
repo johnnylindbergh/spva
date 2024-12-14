@@ -329,3 +329,25 @@ input[type="text"]:focus, input[type="date"]:focus {
     border-radius: 5px;
     font-size: 1em;
   }
+
+  /* Table styles */
+    #estimate-table {
+        width: 90%; /* Make the table take up the full width of the container */
+        border-collapse: collapse; /* Remove extra spaces between table cells */
+    }
+
+    #estimate-table th,
+    #estimate-table td {
+        padding: 10px; /* Add padding for better readability */
+        text-align: left; /* Align text to the left */
+        border: 1px solid #ddd; /* Add borders to define table cells */
+        word-wrap: break-word; /* Ensure text doesn't overflow cells */
+    }
+
+    /* Ensure headers stay fixed if table is wide */
+    #estimate-table th {
+        background-color: #f9f9f9; /* Light background for header */
+        position: sticky;
+        top: 0; /* Keep the header on top while scrolling */
+        z-index: 1;
+    }
