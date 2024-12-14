@@ -27,7 +27,6 @@ $(document).ready(function () {
 
     // Apply gradient color to "Estimate Published"
     if (stage.code === 3) {
-      console.log("Applying gradient to 'Estimate Published' segment");
       if (dateCreated) {
         const color = getColor(dateCreated);
         console.log("Computed color:", color);
@@ -44,8 +43,6 @@ $(document).ready(function () {
   }
 
   function getColor(dateCreated) {
-    console.log("Calculating color for dateCreated:", dateCreated);
-
     const now = moment();
     const created = moment(dateCreated);
     const duration = moment.duration(now.diff(created));
@@ -96,29 +93,6 @@ $(document).ready(function () {
     console.log("Computed color:", rgbColor);
     return rgbColor;
 }
-  // function getColor(dateCreated) {
-  //   console.log("Calculating color for dateCreated:", dateCreated);
-
-  //   const now = moment();
-  //   const created = moment(dateCreated);
-  //   const duration = moment.duration(now.diff(created));
-  //   const days = duration.asDays();
-
-  //   console.log("Days since creation:", days);
-
-  //   // Assuming the estimate should turn red after 30 days
-  //   const maxDays = 30;
-  //   const percentage = Math.min(days / maxDays, 1);
-  //   console.log("Gradient percentage (0 to 1):", percentage);
-
-  //   // Calculate the color based on the percentage
-  //   const red = Math.min(255, Math.floor(255 * percentage));
-  //   const green = Math.max(0, Math.floor(255 * (1 - percentage)));
-  //   const color = `rgb(${red}, ${green}, 0)`;
-
-  //   console.log("Computed color:", color);
-  //   return color;
-  // }
 
   function viewPaymentHistory(id) {
     // Send a POST request to viewPaymentHistory with takeoff_id
@@ -155,13 +129,15 @@ $(document).ready(function () {
         row.append($("<td>").append(editForm));
   
         // Format and display the creation date
-        let createdAt = new Date(takeoff.created_at).toLocaleString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-          hour: "numeric",
-          minute: "numeric",
-        });
+        // let createdAt = new Date(takeoff.created_at).toLocaleString("en-US", {
+        //   month: "long",
+        //   day: "numeric",
+        //   year: "numeric",
+        //   hour: "numeric",
+        //   minute: "numeric",
+        // });
+        // row.append(`<td>${createdAt}</td>`);
+        let createdAt = moment(takeoff.date_created).format("MMMM Do YYYY, h:mm:ss a");
         row.append(`<td>${createdAt}</td>`);
   
         // Create the 'View' form, similar to 'Edit'
