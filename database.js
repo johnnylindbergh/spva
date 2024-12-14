@@ -208,24 +208,27 @@ module.exports = {
         cb(null, result[1][0].last);
       }
     );
-  },
-                //  "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost) VALUES (?, ?, ?, ?, ?);",
-                 
-                
-  createSubject: function (subject, takeoff_id, callback) {
-    console.log("subject: ", subject.name);
+  },                 
+
+  createSubject: function (takeoff_id, subject, callback) {
+    console.log("subject: ", subject);
     console.log("takeoff_id: ", takeoff_id);
-    con.query(
-      "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost) VALUES (?, ?, ?, ?, ?);",
-      [takeoff_id, subject.name, subject.measurement, subject.measurement_unit, subject.labor_cost],
-      function (err) {
-        if (err) {
-          console.log(err);
-          return callback(err);
+    // is any of these value null?
+    if (!takeoff_id || !subject.name || !subject.measurement || !subject.measurement_unit || !subject.labor_cost) {
+      con.query(
+        "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost) VALUES (?, ?, ?, ?, ?);",
+        [takeoff_id, subject.name, subject.measurement, subject.measurement_unit, subject.labor_cost],
+        function (err) {
+          if (err) {
+            console.log(err);
+            return callback(err);
+          }
+          callback(null);
         }
-        callback(null);
-      }
-    );
+      );
+    } else {
+      console.log("Hey man you screwed up")
+    }
   },
     
   updateTakeoffName: function (takeoff_id, name, callback) {
@@ -666,6 +669,8 @@ module.exports = {
               "SELECT setting_value FROM system_settings WHERE setting_name = 'sales_tax';",
               function (err, salesTax) {
                 if (err) return callback(err);
+
+
                   callback(null, estimate, takeoff, salesTax[0].setting_value);
                 }
             );
@@ -673,6 +678,7 @@ module.exports = {
         );
       }
     );
+
   },
 
   getSharedEstimate: function (hash, callback) {
@@ -1217,7 +1223,8 @@ module.exports = {
             }
           );
         } else {
-          cb(new Error("Cannot decrease status"));
+          // cb(new Error("Cannot decrease status"));console.log("Cannot decrease status");
+          cb(null);
         }
       }
     );

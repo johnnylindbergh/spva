@@ -697,16 +697,26 @@ app.post("/generateEstimate", function (req, res) {
 
   app.post('/create-subject', mid.isAuth, function (req, res) {
     console.log("creating subject ", req.body);
-    res.end();
+    // CREATE THE SUBJECT OBJECT
+    // get the takeoff_id
+    let takeoff_id = req.body.takeoff_id;
+
+    let subject  = {
+      name: req.body.subject_name,
+      measurement: req.body.measurement,
+      measurement_unit: req.body.measurement_unit,
+      labor_cost: req.body.labor_cost
+    }
     // // get the subject object
    
-    // db.createSubject(req.body.name, req.body.desc, function (err) {
-    //   if (err) {
-    //     console.log(err);
-    //   } else {
-    //     res.end();
-    //   }
-    // });
+    db.createSubject(takeoff_id, subject, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.end();
+      }
+    });
+
   });
 
   app.post("/update-measurement", mid.isAuth, function (req, res) {
@@ -734,6 +744,7 @@ app.post("/generateEstimate", function (req, res) {
   app.post("/update-content", mid.isAuth, function (req, res) {
     console.log("updating content ", req.body);
     if (req.body.id == null) {
+      res.send("no id posted to update-content");
     }
 
 
@@ -816,26 +827,61 @@ app.post("/generateEstimate", function (req, res) {
   });
 
   app.get("/share/:hash", function (req, res) {
-    console.log("sharing takeoff ", req.params.hash);
     if (req.params.hash.length != 16) {
       res.redirect("/");
     }
-    db.getSharedEstimate(
-      req.params.hash,
-      function (err, estimate, takeoff, options) {
-        if (err) {
-          console.log(err);
-          res.redirect("/");
-        } else {
-          console.log("shared");
-          res.render("viewEstimateClient.html", {
-            takeoff: takeoff,
-            estimate: estimate,
-            options: options,
+
+    console.log("sharing takeoff ", req.params.hash);
+
+
+    // check the status of the takeoff
+    // cal db.getTakeoffs
+    db.getTakeoffs(function (err, takeoffs) {
+      if (err) {
+        console.log(err);
+      } else {
+       
+        const takeoff = takeoffs.find(t => t.passcode === req.params.hash);
+        console.log("takeoff found  ", takeoff);
+        if (!takeoff) {
+          // res.redirect("/");
+          return;
+        }
+
+        const status = takeoff.status;
+        
+        if (status > 2) { // takeoff is published
+
+          db.getEstimateData(takeoff.id, function (err, estimate, takeoff, options) {
+            if (err) {
+              console.log(err);
+              res.redirect("/");
+            } else {
+              // if the takeoff has not expired, render the viewEstimate page
+              // takeoff expired if the estimate.date_published is more than 30 days ago
+              // if the takeoff has expired, render the expired estimate page
+              if (moment().diff(moment(estimate[0].date_created), "days") > 30) { // use system.settings instead of 30 days
+                res.render("expiredEstimate.html", {
+                  takeoff: takeoff,
+                  estimate: estimate,
+                  option: options,
+                });
+              } else {
+                console.log("shared");
+                res.render("viewEstimate.html", {
+                  takeoff: takeoff,
+                  estimate: estimate,
+                  options: options
+                });
+              }
+            }
           });
+
+        } else {
+          res.redirect("/");
         }
       }
-    );
+    });
   });
 
   app.post("/share/updateOptionsSelection", function (req, res) {

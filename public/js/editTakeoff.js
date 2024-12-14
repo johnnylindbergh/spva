@@ -622,24 +622,24 @@ function createSubjectIntent() {
   console.log("Creating new subject: " + name);
 
 }
+ // function replaced by html form
+// function createSubject(){
 
-function createSubject(){
 
 
-
-  let name = $("#subject_name").val();
-  let measurement = $("#subject_measurement").val();
-  let measurement_unit = $("#subject_measurement_unit").val();
-  console.log("Creating new subject: " + name);
-  $.post("/create-subject", { name: name, takeoff_id: takeoff_id })
-    .done(function () {
-      console.log("Subject created: " + name);
-      loadTakeoffMaterials(takeoff_id);
-    })
-    .fail(function () {
-      console.log("Failed to create subject: " + name);
-    });
-}
+//   let name = $("#subject_name").val();
+//   let measurement = $("#subject_measurement").val();
+//   let measurement_unit = $("#subject_measurement_unit").val();
+//   console.log("Creating new subject: " + name);
+//   $.post("/create-subject", { name: name, takeoff_id: takeoff_id })
+//     .done(function () {
+//       console.log("Subject created: " + name);
+//       loadTakeoffMaterials(takeoff_id);
+//     })
+//     .fail(function () {
+//       console.log("Failed to create subject: " + name);
+//     });
+// }
 
 // on document ready, get the takeoff id from the hidden input field
 $(document).ready(function () {

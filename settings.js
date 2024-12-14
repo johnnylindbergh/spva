@@ -20,7 +20,7 @@ module.exports = {
 
   /*  does the system allow automatic creation of new user accounts
       when authentication is attempted. */
-  ALLOW_NEW_ACCOUNTS: true,
+  ALLOW_NEW_ACCOUNTS: false,
 
   // project path used for uploads. No tailing slash
   PROJECT_PATH: '/var/www/spvaTrack', 

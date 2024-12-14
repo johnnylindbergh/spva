@@ -133,12 +133,13 @@
   </button>
 
   <!-- hidden add subject form  -->
-  <form id="add-subject-form" style="display: none;" action="/createSubject" method="POST">
+  <form id="add-subject-form" style="display: none;" action="/create-subject" method="POST">
     <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
     <input type="text" name="subject_name" id="subject_name" placeholder="Subject Name">
     <input type="text" name="measurement" id="measurement" placeholder="Measurement">
+    <input type="text" name="labor_cost" id="unit" placeholder="$0.00">
     <!-- unit dropdown -->
-    <select name="unit" id="unit">
+    <select name="measurement_unit" id="measurement_unit">
       <option value="sqft">sqft</option>
       <option value="lf">lf</option>
       <option value="ea">ea</option>
