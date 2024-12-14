@@ -53,12 +53,11 @@ $(document).ready(function () {
     const maxDays = 30;
     const percentage = Math.min(days / maxDays, 1); // Clamp percentage between 0 and 1
 
-    // Refined gradient stops to avoid "mud green"
     const gradientStops = [
         { day: 0, color: { r: 76, g: 175, b: 80 } },  // #4CAF50 - vibrant green
         { day: 10, color: { r: 173, g: 204, b: 78 } }, // Slightly yellow-green
         { day: 20, color: { r: 255, g: 193, b: 7 } },  // #FFC107 - bright yellow
-        { day: 30, color: { r: 255, g: 87, b: 34 } },  // #FF5722 - vibrant red-orange
+        { day: 30, color: { r: 255, g: 13, b: 13 } },  // #FF0D0D - red
     ];
 
     // Interpolate between stops
