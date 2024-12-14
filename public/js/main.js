@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  function createProgressBar(statusCode) {
+  function createProgressBar(statusCode, dateCreated) {
     const statuses = [
       { code: 1, label: "Takeoff Uploaded" },
       { code: 2, label: "Estimate Generated" },
@@ -25,11 +25,73 @@ $(document).ready(function () {
         segment.addClass("completed");
       }
 
+    // Apply gradient color to "Estimate Published"
+    if (stage.code === 3) {
+      if (dateCreated) {
+        const color = getColor(dateCreated);
+        console.log("Computed color:", color);
+        segment.attr("style", `background-color: ${color}; color: white !important`);
+      } else {
+        console.warn("'dateCreated' is not provided for 'Estimate Published'");
+      }
+    }
+
       progressBar.append(segment);
     });
 
     return progressBar;
   }
+
+  function getColor(dateCreated) {
+    const now = moment();
+    const created = moment(dateCreated);
+    const duration = moment.duration(now.diff(created));
+    const days = duration.asDays();
+
+    console.log("Days since creation:", days);
+
+    const maxDays = 30;
+    const percentage = Math.min(days / maxDays, 1); // Clamp percentage between 0 and 1
+
+    const gradientStops = [
+        { day: 0, color: { r: 76, g: 175, b: 80 } },  // #4CAF50 - vibrant green
+        { day: 10, color: { r: 173, g: 204, b: 78 } }, // Slightly yellow-green
+        { day: 20, color: { r: 255, g: 193, b: 7 } },  // #FFC107 - bright yellow
+        { day: 30, color: { r: 255, g: 13, b: 13 } },  // #FF0D0D - red
+    ];
+
+    // Interpolate between stops
+    function interpolateColor(start, end, factor) {
+        return {
+            r: Math.round(start.r + (end.r - start.r) * factor),
+            g: Math.round(start.g + (end.g - start.g) * factor),
+            b: Math.round(start.b + (end.b - start.b) * factor),
+        };
+    }
+
+    let color;
+    for (let i = 0; i < gradientStops.length - 1; i++) {
+        const startStop = gradientStops[i];
+        const endStop = gradientStops[i + 1];
+
+        if (days >= startStop.day && days <= endStop.day) {
+            const range = endStop.day - startStop.day;
+            const factor = (days - startStop.day) / range;
+            color = interpolateColor(startStop.color, endStop.color, factor);
+            break;
+        }
+    }
+
+    if (!color) {
+        // Default to the last color stop if days exceed maxDays
+        const lastStop = gradientStops[gradientStops.length - 1];
+        color = lastStop.color;
+    }
+
+    const rgbColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
+    console.log("Computed color:", rgbColor);
+    return rgbColor;
+}
 
   function viewPaymentHistory(id) {
     // Send a POST request to viewPaymentHistory with takeoff_id
@@ -66,13 +128,7 @@ $(document).ready(function () {
         row.append($("<td>").append(editForm));
   
         // Format and display the creation date
-        let createdAt = new Date(takeoff.created_at).toLocaleString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-          hour: "numeric",
-          minute: "numeric",
-        });
+        let createdAt = moment(takeoff.date_created).format("MMMM Do YYYY, h:mm a");
         row.append(`<td>${createdAt}</td>`);
   
         // Create the 'View' form, similar to 'Edit'
@@ -87,7 +143,7 @@ $(document).ready(function () {
         row.append($("<td>").append(viewForm));
   
         // Add the progress bar
-        let progressBar = createProgressBar(takeoff.status);
+        let progressBar = createProgressBar(takeoff.status, takeoff.date_created);
         let tdProgress = $("<td>");
         if (takeoff.status === 4) {
           tdProgress.addClass("hoverable").attr(

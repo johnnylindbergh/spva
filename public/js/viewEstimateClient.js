@@ -199,7 +199,6 @@ function handleSignatureChange() {
 }
 
 
-
 function createPaymentIntent() {
     // Prepare the data to send to the server
 
