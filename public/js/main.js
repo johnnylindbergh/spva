@@ -129,15 +129,7 @@ $(document).ready(function () {
         row.append($("<td>").append(editForm));
   
         // Format and display the creation date
-        // let createdAt = new Date(takeoff.created_at).toLocaleString("en-US", {
-        //   month: "long",
-        //   day: "numeric",
-        //   year: "numeric",
-        //   hour: "numeric",
-        //   minute: "numeric",
-        // });
-        // row.append(`<td>${createdAt}</td>`);
-        let createdAt = moment(takeoff.date_created).format("MMMM Do YYYY, h:mm:ss a");
+        let createdAt = moment(takeoff.date_created).format("MMMM Do YYYY, h:mm a");
         row.append(`<td>${createdAt}</td>`);
   
         // Create the 'View' form, similar to 'Edit'
