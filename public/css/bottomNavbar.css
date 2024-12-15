@@ -87,3 +87,42 @@
     margin: 6px 4px;
     cursor: pointer;
   }
+
+  .toggle-btn {
+    background-color: #FA8847;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    margin: 6px 4px;
+    cursor: pointer;
+  }
+
+  .translate-button {
+    background-color: #0893A1;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    margin: 6px 4px;
+    cursor: pointer;
+  }
+
+  .translate-button:hover {
+      background-color: #E8733A;
+  }
+
+  /* Hide and style the dropdown menu */
+  .google_translate_element {
+      position: absolute;
+      top: 40px; /* Adjust position below the button */
+      left: 0;
+      background-color: #0893A1;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      z-index: 999;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+  }

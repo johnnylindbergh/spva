@@ -1,4 +1,22 @@
 
+// Function to convert markdown-like text to HTML
+function formatTextToHTML(text) {
+    if (text == null) {
+        return "Chat GPT ERROR: No text provided";
+    }
+    return text
+        .replace(/### (.+)/g, '<h3>$1</h3>')        // Replace ### with <h3> for headings
+        .replace(/## (.+)/g, '<h2>$1</h2>')        // Replace ## with <h2> for subheadings
+        .replace(/# (.+)/g, '<h1>$1</h1>')         // Replace # with <h1> for main headings
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Replace **text** with <strong>text</strong>
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')      // Replace *text* with <em>text</em>
+        .replace(/- (.+)/g, '<li>$1</li>')         // Replace - text with list items
+        .replace(/\n\n/g, '</p><p>')              // Replace double newlines with paragraph separation
+        .replace(/\n/g, '<br>')                   // Replace single newline with <br> for minor breaks
+        .replace(/^(.+?)$/gm, '<p>$1</p>');       // Wrap all remaining lines in <p>
+}
+
+
 // Function to populate the "Proposal Includes" section
 function populateProposalIncludes(items) {
     const includesList = $('#includes-list');
@@ -6,7 +24,7 @@ function populateProposalIncludes(items) {
 
     // set the content of the includesList to the items
     // items is a string 
-    includesList.text(items);
+    includesList.html(formatTextToHTML(items));
    // $('#includes-total').text(calculateTotal(items.length, 50)); // Example calculation
 }
 
@@ -15,7 +33,7 @@ function populateExclusions(exclusions) {
     const exclusionsList = $('#exclusions-list');
     exclusionsList.empty(); // Clear any existing content
 
-    exclusionsList.text(exclusions);
+    exclusionsList.html(formatTextToHTML(exclusions));
 
 
     $('#excludes-total').text("$0.00"); 
@@ -130,7 +148,7 @@ function updateTotals() {
     const optionsTotal = parseFloat(optionsTotalText) || 0;
 
     // Calculate the total as the sum of subtotal and options total
-    const total = subtotal + optionsTotal + (tax* total);
+    const total = subtotal + optionsTotal + (tax* (total));
 
     // Update the text content of subtotal, options-total, and total
     $('#subtotal').text("Subtotal: $" +numberWithCommas(subtotal.toFixed(2)));
@@ -199,7 +217,6 @@ function handleSignatureChange() {
 }
 
 
-
 function createPaymentIntent() {
     // Prepare the data to send to the server
 
@@ -241,6 +258,9 @@ $(document).ready(function() {
      $(".signature-success").toggle(); // hide it initially
     // Populate the "Proposal Includes" section with dynamic data
     // post takeoff_id to getEstimateData to set includesItems and exclusionsItems
+
+    // Event listener for toggle numbers button
+    $(".toggle-btn").on("click", toggleNumbers);
     
     $.post('/getEstimateData', {takeoff_id: parseInt($('#takeoff_id').val())}, function(data) {
         console.log(data)
@@ -258,10 +278,10 @@ $(document).ready(function() {
         var subtotal = data.takeoff[0].total;
 
       
-        
-
         //call update totals every few seconds
         //setInterval(updateTotals, 5000);
         
     });
+    // Add event listeners for editable fields
+    addEditableListeners();
 });

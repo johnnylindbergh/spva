@@ -1,41 +1,96 @@
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sun Painting Estimate</title>
+        <!-- Include the Google Translate scripts -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en', // Default language of the page
+                includedLanguages: 'en,es', // Restrict to English and Spanish
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE // Optional: Simplified layout
+            }, 'google_translate_element');
+        }
+    </script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/themes/light-theme.css">
 
     <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <script src="checkout.js" defer></script>
-            <link rel="stylesheet" href="css/estimateStyle.css">
-        <link rel="stylesheet" href="css/bottomNavbar.css">
+    <link rel="stylesheet" href="css/estimateStyle.css">
+    <link rel="stylesheet" href="css/bottomNavbar.css">
+    <link rel="stylesheet" type="text/css" href="css/reset.css">
+    <link rel="stylesheet" type="text/css" href="css/defaults.css">
+    <link rel="stylesheet" href="css/navbar.css">
     <script src="/js/generateEstimate.js"></script>
+    <script src="/js/viewEstimateClient.js"></script>
 </head>
-<body>
-<body>
+<script>
+    $(document).ready(function() {
+        $(document).keydown(function(event) {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
+                document.querySelector('.navbar').style.display = 'none';
+                document.querySelector('.bottom-navbar').style.display = 'none';
+            }
+        });
 
-    <nav class="bottom-navbar">
-        <ul>
-            <li><input type="button" value="Share With Sun Painting" onclick="shareSelf()" class="img-button-client"</li> /<br>
-            <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-</head>
-<body>
-    <!-- button of the class shareBtn,. on click, call function share -->
-    <button class="shareClientBtn" onclick="shareClient()">Share With Client</button>
-</body>
-</html>
+        // Event listener for toggle numbers button
+        $('.toggle-btn').click(toggleNumbers);
+    });
 
-        
-        </ul>
-    </nav>
+    function toggleNumbers() {
+        console.log('Toggling visibility of Amount columns...');
+        const amountColumns = $('.amount-column');
+        if (amountColumns.length === 0) {
+            console.error('No elements with class "amount-column" found.');
+        } else {
+            amountColumns.each(function(index) {
+                console.log(`Toggling column ${index}: current display = ${$(this).css('display')}`);
+                $(this).css('display', $(this).css('display') === 'none' ? '' : 'none');
+            });
+        }
+    }
+    function toggleTranslateMenu() {
+    const translateElement = document.getElementById("google_translate_element");
+    translateElement.style.display = translateElement.style.display === "none" ? "block" : "none";
+    }
+</script>
+<body>
+<body>
+  <div class="navbar">
+    <ul>
+      <li><a href="javascript:history.back()">Back</a></li>
+      <li><a href="/">{{defaults.sysName}}</a></li>
+      {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
+      <div style="float:right">
+        <li><a href="/auth/google">Log In</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </div>
+    </ul>
+  </div>
+<nav class="bottom-navbar">
+    <ul>
+        <li>
+            <input type="button" value="Share With Sun Painting" onclick="shareSelf()" class="img-button-client">
+        </li>
+        <li>
+            <button class="shareClientBtn" onclick="shareClient()">Share With Client</button>
+        </li>
+        <li>
+            <button class="toggle-btn"onclick="toggleNumbers()">Toggle Numbers</button>
+        </li>
+        <!-- Add Google Translate Widget -->
+        <li id="translate-container">
+            <button class="translate-button" onclick="toggleTranslateMenu()">Select Language</button>
+            <div id="google_translate_element" style="display: none;"></div>
+        </li>
+    </ul>
+</nav>
+
     <div class="container">
 
          <div class="image-container">
@@ -51,11 +106,10 @@
 
        <input type='hidden' id='takeoff_id' value='{{id}}'>
 
-      Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{owner}}'></br>
-      Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{owner_billing_address}}'></br>
-      Owner Email Address: <input type= 'text' class="hiddenInput" id= 'owner_email_address' onchange='updateTakeoffOwnerEmailAddress()' value='{{owner_email}}'></br>
-      Invoice Email Address: <input type= 'text' class="hiddenInput" id= 'invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email}}'></br>
-
+        Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{owner}}'></br>
+        Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{owner_billing_address}}'></br>
+        Owner Email Address: <input type= 'text' class="hiddenInput" id= 'owner_email_address' onchange='updateTakeoffOwnerEmailAddress()' value='{{owner_email}}'></br>
+        Invoice Email Address: <input type= 'text' class="hiddenInput" id= 'invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email}}'></br>
 
        <input type='hidden' id='takeoff_total' value='{{takeoff_info.total}}'>
 
@@ -70,21 +124,19 @@
         <table id="estimate-table">
             <tr>
                 <th>Description</th>
-
-
                 <th>Amount</th>
             </tr>
             <tr>
                 <td contenteditable="true" class="editable" id="proposal-includes">
                     <ul id="includes-list"></ul>
                 </td>
-                <td id="includes-total">{{includes_total}}</td>
+                <td id="includes-total" class="amount-column">{{includes_total}}</td>
             </tr>
             <tr>
                 <td contenteditable="true" class="editable" id="exclusions">
                     <ul id="exclusions-list"></ul>
                 </td>
-                <td id="excludes-total">${{exclude_total}}</td>
+                <td id="excludes-total" class="amount-column">${{exclude_total}}</td>
             </tr>
         </table>
 
@@ -152,5 +204,7 @@
     
     </div>
     <br>
+    <!-- <script src="scripts.js"></script> -->
 </body>
 </html>
+

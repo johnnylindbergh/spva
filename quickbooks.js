@@ -186,6 +186,40 @@ app.get('/getJobs', mid.isAuth, function (req, res) {
     });
 });
 
+  // Create an Invoice
+app.post('/create-invoice', async (req, res) => {
+    try {
+      const invoiceData = {
+        Line: [
+          {
+            Amount: req.body.amount,
+            DetailType: 'SalesItemLineDetail',
+            SalesItemLineDetail: {
+              ItemRef: { value: req.body.itemRef },
+            },
+          },
+        ],
+        CustomerRef: { value: req.body.customerRef },
+      };
+
+      const response = await axios.post(
+        `https://sandbox-quickbooks.api.intuit.com/v3/company/${realmId}/invoice`,
+        invoiceData,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      res.json(response.data);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error creating invoice.');
+    }
+  });
+
 /**
  * disconnect ()
  */
@@ -197,5 +231,4 @@ app.get('/disconnect', function (req, res) {
   });
   res.redirect(authUri);
 });
-
-}
+};

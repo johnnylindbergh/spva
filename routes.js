@@ -414,11 +414,16 @@ app.post('/updateSettings', mid.isAuth, function (req, res) {
         return new Promise((resolve, reject) => {
             db.getSystemSettingByName(setting_name, (err, [setting]) => {
                 if (err || !setting) {
+                    console.error(`Setting not found: ${setting_name}`); 
                     reject(err || 'Setting not found');
                 } else {
                     db.updateSystemSetting(setting.setting_id, setting_value, (updateErr) => {
-                        if (updateErr) reject(updateErr);
-                        else resolve();
+                        if (updateErr) {
+                            console.error(`Error updating setting: ${setting_name}`); // Debugging statement
+                            reject(updateErr);
+                        } else {
+                            resolve();
+                        }
                     });
                 }
             });
@@ -446,10 +451,8 @@ app.post("/generateEstimate", function (req, res) {
       prompt = sys.PROMPT; // Fallback prompt
     }
 
-
   db.takeoffSetStatus(takeoff_id, 2, function (err) {
     if (err) {
-      console.log(err);
       // Handle the error if necessary
       
     }

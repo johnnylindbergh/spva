@@ -1160,8 +1160,27 @@ module.exports = {
   },
 
   getTakeoffs: function (callback) {
-    con.query("SELECT * FROM takeoffs;", function (err, takeoffs) {
-      if (err) return callback(err);
+    const query = `
+      SELECT 
+        takeoffs.id,
+        takeoffs.name,
+        takeoffs.status,
+        estimate.date_created,
+        takeoffs.created_at AS takeoff_created_at
+      FROM 
+        takeoffs
+      LEFT JOIN 
+        estimate
+      ON 
+        takeoffs.estimate_id = estimate.id;
+    `;
+
+    con.query(query, function (err, takeoffs) {
+      if (err) {
+        console.error("Error fetching takeoffs:", err);
+        return callback(err);
+      }
+      console.log("Fetched takeoffs with estimates:", takeoffs);
       callback(null, takeoffs);
     });
   },
