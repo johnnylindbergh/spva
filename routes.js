@@ -827,11 +827,14 @@ app.post("/generateEstimate", function (req, res) {
   });
 
   app.get("/share/:hash", function (req, res) {
-    if (req.params.hash.length != 16) {
+    console.log("sharing takeoff ", req.params.hash);
+    
+    if (req.params.hash.length != 32) {
       res.redirect("/");
+    } else {
+      console.log("sharing takeoff ", req.params.hash);
     }
 
-    console.log("sharing takeoff ", req.params.hash);
 
 
     // check the status of the takeoff

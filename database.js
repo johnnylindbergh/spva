@@ -27,7 +27,7 @@ function generatePasscode() {
     .toString("base64")
     .replace(/\+/g, "0")
     .replace(/\//g, "0")
-    .slice(0, 16);
+    .slice(0, 32);
 }
 
 // unused function
