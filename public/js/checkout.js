@@ -3,7 +3,9 @@
 // You can also find your test secret API key at https://dashboard.stripe.com/test/apikeys.
 const stripe = Stripe("pk_test_51QT40vCrYS7os4xoP2Ugbf78pbZJSYw9JkYf95ragWcabOvYaxHb8BIdTJGSgAN5lWOPGwqbVxS9BegDvzuDIibD00oZqQnPT9");
 
-initialize();
+$(document).ready(function() {
+  initialize();
+});
 
 var takeoff_id = $('#takeoff_id').val();
 
@@ -27,4 +29,7 @@ async function initialize() {
 
   // Mount Checkout
   checkout.mount('#checkout');
+
+
+  
 }

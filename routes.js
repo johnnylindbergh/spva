@@ -990,8 +990,9 @@ app.get('/checkMeout/:takeoff_id', function (req, res) {
 app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
   // create a price_id
   // get whole takeoff
+  const takeoff_id = req.params.takeoff_id;
   console.log(req.params);
-  if (req.params.takeoff_id == null) {
+  if (req.params.takeoff_id == null || req.params.takeoff_id == undefined) {
     console.log("takeoff_id is null");
     res.redirect("/");
   }
@@ -1016,8 +1017,10 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
        // unit_amount: takeoff.total,
       });
      
+      let total_in_cents = Math.floor(total*100);
+      let total_with_tax = total_in_cents + Math.floor(total*0.03*100);
       const price = await stripe.prices.create({
-        unit_amount: total,
+        unit_amount:total_with_tax,
         currency: 'usd',
         product: product.id,
       });
@@ -1035,7 +1038,7 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
         return_url: creds.domain + `/return.html?session_id={CHECKOUT_SESSION_ID}`,
       });
 
-      res.send({ clientSecret: session.client_secret });
+      res.send({ clientSecret: session.client_secret});
     }
   });
 });
