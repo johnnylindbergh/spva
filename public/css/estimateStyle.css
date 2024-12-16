@@ -137,10 +137,35 @@ td {
     margin: 6px 4px;
     cursor: pointer;
 }
+
+/* Notice section */
+.notice {
+    padding: 20px;
+    margin: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    font-size: 1.25em;
+    font-weight: bold;
+    margin-top: 40px;
+    text-align: center;
+}
+
+.notice p {
+    margin-bottom: 15px;
+    color: #444;
+}
+
 /* Terms and Conditions section */
 .terms-section {
+    padding: 20px;
+    margin: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     font-size: 0.9em;
     margin-top: 40px;
+    margin-bottom: 100px;
 }
 
 .terms-section h4 {
