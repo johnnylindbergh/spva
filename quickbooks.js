@@ -1,6 +1,7 @@
 var QuickBooks = require('node-quickbooks');
 const mid = require("./middleware.js");
 var creds = require('./credentials');
+var axios = require('axios');
 
 'use strict';
 
@@ -48,9 +49,33 @@ module.exports = function(app) {
 // const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 
-app.get('/quickbooks', function (req, res) {
+app.get('/quickbooks', mid.isAuth, function (req, res) {
     res.render('quickbooks.html');
 });
+
+
+
+
+  app.get('/getCompanyInfo', mid.isAuth, function (req, res) {
+    const companyID = oauthClient.getToken().realmId;
+  
+    const url =
+      oauthClient.environment == 'sandbox'
+        ? OAuthClient.environment.sandbox
+        : OAuthClient.environment.production;
+
+    const invoiceNumber = req.body.invoiceNumber;
+  
+    oauthClient
+      .makeApiCall({ url: `${url}v3/company/${companyID}/invoice/${invoiceNumber}/pdf?minorversion=59` })
+      .then(function (authResponse) {
+        console.log(`\n The response for API call is :${JSON.stringify(authResponse.json)}`);
+        res.send(authResponse.json);
+      })
+      .catch(function (e) {
+        console.error(e);
+      });
+  });
 
 
 app.get('/authUri', urlencodedParser, function (req, res) {
@@ -90,7 +115,7 @@ app.get('/callback', function (req, res) {
 /**
  * Display the token : CAUTION : JUST for sample purposes
  */
-app.get('/retrieveToken', function (req, res) {
+app.get('/retrieveToken', mid.isAuth, function (req, res) {
   res.send(oauth2_token_json);
 });
 
@@ -113,7 +138,7 @@ app.get('/refreshAccessToken', function (req, res) {
 /**
  * getCompanyInfo ()
  */
-app.get('/getCompanyInfo', function (req, res) {
+app.get('/getCompanyInfo', mid.isAuth, function (req, res) {
   const companyID = oauthClient.getToken().realmId;
 
   const url =

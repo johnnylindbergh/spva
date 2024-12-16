@@ -23,7 +23,7 @@ const con = mysql.createPool({
 
 function generatePasscode() {
   return crypto
-    .randomBytes(12)
+    .randomBytes(24)
     .toString("base64")
     .replace(/\+/g, "0")
     .replace(/\//g, "0")
@@ -137,7 +137,16 @@ module.exports = {
         }
       }
 
-      results[i][2] = moment(results[i][2]).format("YYYY-MM-DD HH:mm:ss");
+      // determine whuch column is Labled "Date"
+      var dateIndex = headers.indexOf("Date");
+      if (dateIndex === -1) {
+        dateIndex = headers.indexOf("date");
+      } else {
+        results[i][dateIndex] = date(results[i][2]).format("YYYY-MM-DD HH:mm:ss");
+
+      }
+
+
 
       // console.log(results[i]);
       // console.log("subject: ", results[i][0]);
@@ -215,6 +224,8 @@ module.exports = {
     console.log("takeoff_id: ", takeoff_id);
     // is any of these value null?
     if (!takeoff_id || !subject.name || !subject.measurement || !subject.measurement_unit || !subject.labor_cost) {
+      console.log("createSubject got null value");
+    } else {
       con.query(
         "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost) VALUES (?, ?, ?, ?, ?);",
         [takeoff_id, subject.name, subject.measurement, subject.measurement_unit, subject.labor_cost],
@@ -226,8 +237,6 @@ module.exports = {
           callback(null);
         }
       );
-    } else {
-      console.log("Hey man you screwed up")
     }
   },
     

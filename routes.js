@@ -715,6 +715,7 @@ app.post("/generateEstimate", function (req, res) {
     db.createSubject(takeoff_id, subject, function (err) {
       if (err) {
         console.log(err);
+        res.send(err);
       } else {
         res.end();
       }
@@ -831,65 +832,26 @@ app.post("/generateEstimate", function (req, res) {
 
   app.get("/share/:hash", function (req, res) {
     console.log("sharing takeoff ", req.params.hash);
-    
     if (req.params.hash.length != 32) {
       res.redirect("/");
-    } else {
-      console.log("sharing takeoff ", req.params.hash);
     }
-
-
-
-    // check the status of the takeoff
-    // cal db.getTakeoffs
-    db.getTakeoffs(function (err, takeoffs) {
-      if (err) {
-        console.log(err);
-      } else {
-       
-        const takeoff = takeoffs.find(t => t.passcode === req.params.hash);
-        console.log("takeoff found  ", takeoff);
-        if (!takeoff) {
-          // res.redirect("/");
-          return;
-        }
-
-        const status = takeoff.status;
-        
-        if (status > 2) { // takeoff is published
-
-          db.getEstimateData(takeoff.id, function (err, estimate, takeoff, options) {
-            if (err) {
-              console.log(err);
-              res.redirect("/");
-            } else {
-              // if the takeoff has not expired, render the viewEstimate page
-              // takeoff expired if the estimate.date_published is more than 30 days ago
-              // if the takeoff has expired, render the expired estimate page
-              if (moment().diff(moment(estimate[0].date_created), "days") > 30) { // use system.settings instead of 30 days
-                res.render("expiredEstimate.html", {
-                  takeoff: takeoff,
-                  estimate: estimate,
-                  option: options,
-                });
-              } else {
-                console.log("shared");
-                res.render("viewEstimate.html", {
-                  takeoff: takeoff,
-                  estimate: estimate,
-                  options: options
-                });
-              }
-            }
-          });
-
-        } else {
+    db.getSharedEstimate(
+      req.params.hash,
+      function (err, estimate, takeoff, options) {
+        if (err) {
+          console.log(err);
           res.redirect("/");
+        } else {
+          console.log("shared");
+          res.render("viewEstimateClient.html", {
+            takeoff: takeoff,
+            estimate: estimate,
+            options: options,
+          });
         }
       }
-    });
+    );
   });
-
   app.post("/share/updateOptionsSelection", function (req, res) {
     console.log("updating options selection ", req.body);
     db.updateOptionSelection(

@@ -128,7 +128,7 @@ $(document).ready(function () {
         row.append($("<td>").append(editForm));
   
         // Format and display the creation date
-        let createdAt = moment(takeoff.date_created).format("MMMM Do YYYY, h:mm a");
+        let createdAt = moment(takeoff.takeoff_created_at).format("MMMM Do YYYY, h:mm a");
         row.append(`<td>${createdAt}</td>`);
   
         // Create the 'View' form, similar to 'Edit'

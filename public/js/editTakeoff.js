@@ -622,24 +622,49 @@ function createSubjectIntent() {
   console.log("Creating new subject: " + name);
 
 }
- // function replaced by html form
-// function createSubject(){
 
+function createSubject(event) {
+  // Prevent default form submission
+  event.preventDefault();
 
+  // Get form values
+  let name = $("#subject_name").val();
+  let measurement = $("#measurement").val();
+  let labor_cost = $("#labor_cost").val();
+  let measurement_unit = $("#measurement_unit").val();
+  let takeoff_id = $("#takeoff_id").val();
 
-//   let name = $("#subject_name").val();
-//   let measurement = $("#subject_measurement").val();
-//   let measurement_unit = $("#subject_measurement_unit").val();
-//   console.log("Creating new subject: " + name);
-//   $.post("/create-subject", { name: name, takeoff_id: takeoff_id })
-//     .done(function () {
-//       console.log("Subject created: " + name);
-//       loadTakeoffMaterials(takeoff_id);
-//     })
-//     .fail(function () {
-//       console.log("Failed to create subject: " + name);
-//     });
-// }
+  // Validate inputs
+  if (!name || !measurement || !labor_cost || !takeoff_id) {
+    alert("Please fill in all fields.");
+    return false;
+  }
+
+  if (isNaN(measurement) || isNaN(labor_cost)) {
+    alert("Measurement and labor cost must be numbers.");
+    return false;
+  }
+
+  // Send data via AJAX
+  console.log("Creating new subject: " + name);
+  $.post("/create-subject", {
+    subject_name: name,
+    takeoff_id: takeoff_id,
+    measurement: measurement,
+    labor_cost: labor_cost,
+    measurement_unit: measurement_unit
+  })
+    .done(function () {
+      alert("Subject created successfully!");
+      loadTakeoffMaterials(takeoff_id); // Reload necessary data without redirecting
+    })
+    .fail(function () {
+      alert("Failed to create the subject. Please try again.");
+    });
+
+  return false; // Prevent any further default behavior
+}
+
 
 // on document ready, get the takeoff id from the hidden input field
 $(document).ready(function () {
