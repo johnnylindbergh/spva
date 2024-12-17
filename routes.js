@@ -966,6 +966,9 @@ app.get('/checkMeout/:takeoff_id', function (req, res) {
     //   total = 50.00;
     // }
 
+    // add 3% and 30 cents
+    total *= 0.0288;
+    total += 30;
     // create a stripe price_id
     const price = stripe.prices.create({
       unit_amount: Math.floor(total*100),
@@ -1018,10 +1021,12 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
        // unit_amount: takeoff.total,
       });
      
-      let total_in_cents = Math.floor(total*100);
-      let total_with_tax = total_in_cents + Math.floor(total*0.03*100);
+      total *= 1.0288; // add 2.88%
+      total += 0.30; // add 30 cents
+
+      
       const price = await stripe.prices.create({
-        unit_amount:total_with_tax,
+        unit_amount:Math.floor(total*100),
         currency: 'usd',
         product: product.id,
       });
@@ -1053,14 +1058,13 @@ app.get('/session-status', async (req, res) => {
  console.log("amount_total: " + session.amount_total);
 
  // compute the raw amount. subtract 3%
-  let raw_amount = session.amount_total - Math.floor(session.amount_total * 0.03);
-  console.log("Amount Recieved from stripe"raw_amount);
+  let raw_amount = session.amount_total - Math.floor((session.amount_tota) * 0.0288);
+  console.log("Amount Recieved from stripe"+ raw_amount);
 
 
 // take this information and insert it into the data base
 
 // send confirmation email to the customer with the invoice
-
   res.send({
     status: session.status,
     customer_email: session.customer_details.email
