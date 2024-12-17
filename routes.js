@@ -37,6 +37,7 @@ const YOUR_DOMAIN = creds.domain;
 
 const fs = require("fs");
 const { parse } = require("csv-parse");
+const { raw } = require("body-parser");
 
 var fileCounter = Math.floor(1000 + Math.random() * 9000);
 
@@ -1045,12 +1046,35 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
 
 app.get('/session-status', async (req, res) => {
   const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+ console.log("session id: " + req.query.session_id);
+ console.log("session status: " + session.status);
+ console.log("customer email: " + session.customer_details.email);
+ console.log("status: " + session.status);
+ console.log("amount_total: " + session.amount_total);
+
+ // compute the raw amount. subtract 3%
+  let raw_amount = session.amount_total - Math.floor(session.amount_total * 0.03);
+  console.log("Amount Recieved from stripe"raw_amount);
+
+
+// take this information and insert it into the data base
+
+// send confirmation email to the customer with the invoice
 
   res.send({
     status: session.status,
     customer_email: session.customer_details.email
   });
 });
+
+// app.post('/sessionComplete', async (req, res) => {
+//   // get the session object
+// //  const session = await stripe.checkout.sessions.retrieve(req.body.session_id);
+// //  const session = await stripe.checkout.sessions.retrieve(req.body.sessionId);
+//   console.log("session id:" + req.body.sessionId);
+
+//   res.send({ success: true });
+// });
 
 app.post("/viewPaymentHistory", mid.isAuth, function (req, res) {
   const takeoff_id = req.body.takeoff_id;
