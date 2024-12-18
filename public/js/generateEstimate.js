@@ -236,6 +236,17 @@ function shareSelf(){
     });
 }
 
+let isTranslating = false;
+
+function toggleTranslateMenu() {
+    const translateElement = document.getElementById("google_translate_element");
+    translateElement.style.display = translateElement.style.display === "none" ? "block" : "none";
+    isTranslating = true; // Set the flag to true when translation starts
+    setTimeout(() => {
+        isTranslating = false; // Reset the flag after a delay (adjust the delay as needed)
+    }, 5000); // Adjust the delay as needed (delay needed so that the translation process has enough time to finish before updating the database with the translated content)
+}
+
 let estimate_id;
 // Function to add onclick and oninput listeners to all editable elements
 function addEditableListeners() {
@@ -251,11 +262,14 @@ function addEditableListeners() {
 
         // On input, send POST request to server when content changes
         element.on('focusout', function() {
+            if (isTranslating) {
+                console.log('Skipping update during translation');
+                return; // Skip the update if translation is happening
+            }
+
             // determine if the element is in the includes or excludes section
             const includes = $('#proposal-includes').text(); // weird naming convention
             const exclusions = $('#exclusions').text();
-            
-            
 
             // Send POST request with the new content
             var takeoff_id = $('#takeoff_id').val(); // not super safe, but just for example
@@ -292,10 +306,6 @@ $(document).ready(function() {
         $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].total));
  
     });
-
-
-
-    
 
     // Add event listeners for editable fields
     addEditableListeners();
