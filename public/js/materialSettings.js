@@ -22,31 +22,41 @@ function populateMaterials(materials) {
 
 // Function to add a new material
 function addMaterial() {
-    const name = document.getElementById('name').value;
-    const desc = document.getElementById('desc').value;
-    const cost = document.getElementById('cost').value;
-    const coverage = document.getElementById('coverage').value;
-    const type =  $('#type :selected').text();
+    const form = document.getElementById('add_material_form');
+    const feedback = document.getElementById('feedback');
+
+    const data = {
+        name: form.name.value,
+        desc: form.desc.value,
+        cost: parseFloat(form.cost.value),
+        coverage: parseFloat(form.coverage.value),
+        material_type: form.material_type.value
+    };
 
     // Implement the logic to add a new material
     // This might involve an AJAX call to your server to save the material
+    // Implement the logic to add a new material using jQuery's $.ajax method
     $.ajax({
         url: '/newMaterial',
-        method: 'POST',
-        data: {
-            name: name,
-            desc: desc,
-            cost: cost,
-            coverage: coverage,
-            type: type
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(result) {
+            if (result.success) {
+                feedback.style.display = 'block';
+                feedback.style.color = 'green';
+                feedback.textContent = 'Material added successfully!';
+                form.reset();
+            } else {
+                feedback.style.display = 'block';
+                feedback.style.color = 'red';
+                feedback.textContent = 'Failed to add material: ' + result.message;
+            }
         },
-        success: function(data) {
-            // reload page
-            location.reload();
-            
-        },
-        error: function(error) {
-            console.error('Error adding material:', error);
+        error: function(xhr, status, error) {
+            feedback.style.display = 'block';
+            feedback.style.color = 'red';
+            feedback.textContent = 'Error: ' + error;
         }
     });
 }

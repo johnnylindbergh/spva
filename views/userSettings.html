@@ -14,6 +14,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="/js/userSettings.js" type="text/javascript"></script>
+  <script src="materialSettings.js"></script>
 </head>
 <body>
   <div class="navbar">
@@ -80,14 +81,15 @@
     <form id="add_material_form">
       <input type="text" id="name" name="name" placeholder="Material Name">
       <input type="text" id="desc" name="desc" placeholder="Material Description">
-      <input type="text" id="cost" name="cost" placeholder="Material Cost">
-      <input type="text" id="coverage" name="coverage" placeholder="Material Coverage">
+      <input type="number" id="cost" name="cost" placeholder="Material Cost (number only)">
+      <input type="number" id="coverage" name="coverage" placeholder="Material Coverage (number only)">
       <select id="material_type" name="material_type">
         <option value="6">Paint</option>
         <option value="7">Misc</option>
       </select>
       <button type="button" onclick="addMaterial()">Add Material</button>
     </form>
+    <div id="feedback" style="display: none;"></div>
   </div>
 
   <script>

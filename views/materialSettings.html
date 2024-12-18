@@ -61,15 +61,15 @@
         <form id="add_material_form">
           <input type="text" id="name" name="name" placeholder="Material Name">
           <input type="text" id="desc" name="desc" placeholder="Material Description">
-          <input type="text" id="cost" name="cost" placeholder="Material Cost">
-          <input type="text" id="coverage" name="coverage" placeholder="Material Coverage">
-          <!-- a dropdown that is just a placeholder for the material_archytypestyoes -->
+          <input type="number" id="cost" name="cost" placeholder="Material Cost" step="0.01">
+          <input type="number" id="coverage" name="coverage" placeholder="Material Coverage" step="0.01">
           <select id="material_type" name="material_type">
             <option value="6">Paint</option>
             <option value="7">Misc</option>
-          </select> 
+          </select>
           <button type="button" onclick="addMaterial()">Add Material</button>
         </form>
+        <div id="feedback" style="display: none;"></div>
 
       <!-- applied to all takeoffs -->
   </div>

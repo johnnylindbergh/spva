@@ -725,23 +725,47 @@ app.post("/generateEstimate", function (req, res) {
   });
 
   app.post("/update-measurement", mid.isAuth, function (req, res) {
-    console.log("updating measurement ", req.body);
-    db.updateMeasurement(req.body.id, req.body.measurement, function (err) {
+    console.log("Updating measurement ", req.body);
+
+    // Extract the id and measurement from the request body
+    const id = req.body.id;
+    const measurement = req.body.measurement;
+
+    // Validate the input
+    if (!id || !measurement) {
+      return res.status(400).send("Missing required fields");
+    }
+
+    // Update the measurement in the database
+    db.updateMeasurement(id, measurement, function (err) {
       if (err) {
         console.log(err);
+        return res.status(500).send("Error updating measurement");
       } else {
-        console.log("updated");
+        res.send("Measurement updated successfully");
       }
     });
   });
 
   app.post("/update-measurement-unit", mid.isAuth, function (req, res) {
-    console.log("updating measurement unit ", req.body);
-    db.updateMeasurementUnit(req.body.id, req.body.unit, function (err) {
+    console.log("Updating measurement unit ", req.body);
+
+    // Extract the id and unit from the request body
+    const id = req.body.id;
+    const unit = req.body.unit;
+
+    // Validate the input
+    if (!id || !unit) {
+      return res.status(400).send("Missing required fields");
+    }
+
+    // Update the measurement unit in the database
+    db.updateMeasurementUnit(id, unit, function (err) {
       if (err) {
         console.log(err);
+        return res.status(500).send("Error updating measurement unit");
       } else {
-        console.log("updated");
+        res.send("Measurement unit updated successfully");
       }
     });
   });
@@ -764,16 +788,26 @@ app.post("/generateEstimate", function (req, res) {
 
   app.post("/update-takeoff-owner-email", mid.isAuth, function (req, res) {
     console.log("updating takeoff owner email ", req.body);
-    db.updateTakeoffOwnerEmail(req.body.takeoff_id, req.body.owner_email_address, function (
-      err
-    ) {
+
+      // Extract the takeoff_id and name from the request body
+    const takeoff_id = req.body.takeoff_id;
+    const name = req.body.name;
+
+      // Validate the input
+    if (!takeoff_id || !name) {
+      return res.status(400).send("Missing required fields");
+    }
+
+    // Update the takeoff name in the database
+    db.updateTakeoffName(takeoff_id, name, function (err) {
       if (err) {
         console.log(err);
+        return res.status(500).send("Error updating takeoff name");
       } else {
-        console.log("updated");
+        res.send("Takeoff name updated successfully");
       }
     });
-  }); 
+  });
 
   app.post("/update-takeoff-invoice-email", mid.isAuth, function (req, res) {
     console.log("updating takeoff invoice email ", req.body);
