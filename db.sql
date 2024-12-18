@@ -82,6 +82,7 @@ CREATE TABLE takeoffs (
   passcode VARCHAR(64),
   view_count INT DEFAULT 0,
   total DECIMAL(10,2),
+  tax DECIMAL(10,2) DEFAULT 5.3,
   duration_hours INT,
   start_date DATETIME,
   end_date DATETIME,

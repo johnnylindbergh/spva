@@ -1032,7 +1032,7 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
     res.redirect("/");
   }
   
-  db.getTakeoffTotal(req.params.takeoff_id, async function (err, takeoffName, total) {
+  db.getTakeoffTotalForStripe(req.params.takeoff_id, async function (err, takeoffName, total) {
     if (err) {
       console.log(err);
       res.status(500).send("Error retrieving takeoff");
@@ -1054,6 +1054,7 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
      
       total *= 1.0288; // add 2.88%
       total += 0.30; // add 30 cents
+
 
       
       const price = await stripe.prices.create({
