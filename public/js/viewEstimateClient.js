@@ -260,7 +260,7 @@ $(document).ready(function() {
     // post takeoff_id to getEstimateData to set includesItems and exclusionsItems
 
     // Event listener for toggle numbers button
-    $(".toggle-btn").on("click", toggleNumbers);
+ //   $(".toggle-btn").on("click", toggleNumbers);
     
     $.post('/getEstimateData', {takeoff_id: parseInt($('#takeoff_id').val())}, function(data) {
         console.log(data)

@@ -134,9 +134,31 @@
                 <!-- <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
             <button id="pay-now" type="submit">Pay Now</button>
              </form> -->
+
+            <!-- input box labeled 'Amount to pay' that, when user enters a number, it calulates the percentage of the total and the remaining amount -->
+
+            <div class="payment">
+                <label for="amount">Amount to Pay:</label>
+                <input type="number" id="amount" name="amount" min="0" max="100" step="1" value="0" oninput="calculatePayment()">
+                <p id="percent">0%</p>
+                <p id="remaining">Remaining: ${{total}}</p>
+            </div>
+
+        
             <button id="pay-now" onclick="createPaymentIntent()">Pay Now</button>
       
 </body>
+<script>
+    // calculate the percentage of the total and the remaining amount
+    function calculatePayment() {
+        const amount = document.getElementById('amount').value;
+        const estimateTotal = {{total}};
+        const percent = (amount / estimateTotal) * 100;
+        const remaining = estimateTotal - amount;
+        document.getElementById('percent').innerText = percent + '%';
+        document.getElementById('remaining').innerText = 'Remaining: $' + remaining;
+    }
+</script>
 </html>
 
         <p>Thank you for allowing us to work with you!</p>

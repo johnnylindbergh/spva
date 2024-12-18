@@ -712,7 +712,7 @@ module.exports = {
           [takeoff.estimate_id],
           function (err, estimateResults) {
             if (err) return callback(err);
-            const estimate = estimateResults[0]; // assuming only one result
+            // const estimate = estimateResults[0]; // assuming only one result
 
             // Query the options table for the estimate_id
             con.query(
@@ -720,7 +720,7 @@ module.exports = {
               [takeoff.estimate_id],
               function (err, optionsResults) {
                 if (err) return callback(err);
-                callback(null, estimate, takeoff, optionsResults);
+                callback(null, estimateResults, takeoff, optionsResults);
               }
             );
           }
@@ -736,6 +736,17 @@ module.exports = {
         if (err) {
           console.log(err);
         }
+      }
+    );
+  },
+
+  renewEstimate: function (takeoff_id, callback) {
+    con.query(
+      "UPDATE takeoffs SET status = 6 WHERE id = ?;", // 6 for staged for renewal
+      [takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
       }
     );
   },

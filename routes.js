@@ -843,16 +843,47 @@ app.post("/generateEstimate", function (req, res) {
           console.log(err);
           res.redirect("/");
         } else {
-          console.log("shared");
-          res.render("viewEstimateClient.html", {
-            takeoff: takeoff,
-            estimate: estimate,
-            options: options,
-          });
+          console.log(estimate[0])
+          console.log("estimate created at ", estimate[0].date_created);
+          console.log("estimate expires at ", moment(estimate[0].date_created).add(30, 'days').format('YYYY-MM-DD HH:mm:ss')); // 30 days from creation
+
+          // if the current date is greater than the expiration date, redirect to the home page
+          if (moment().isAfter(moment(estimate[0].date_created).add(30, 'days'))) {
+            console.log("expired");
+            res.render("expiredEstimate.html", {
+              takeoff: takeoff,
+              estimate: estimate[0],
+              options: options
+            });
+          } else {
+            res.render("viewEstimateClient.html", {
+              takeoff: takeoff,
+              estimate: estimate[0],
+              options: options,
+            });
+
+          }
+
+     
         }
       }
     );
   });
+
+  // renewEstimate POST
+
+  app.post("/renewEstimate", function (req, res) {
+    console.log("renewing estimate ", req.body.estimate_id);
+    db.renewEstimate(req.body.estimate_id, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("renewed");
+        res.end();
+      }
+    });
+  });
+
   app.post("/share/updateOptionsSelection", function (req, res) {
     console.log("updating options selection ", req.body);
     db.updateOptionSelection(
