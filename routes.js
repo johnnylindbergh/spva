@@ -935,7 +935,7 @@ app.post("/generateEstimate", function (req, res) {
       res.redirect("/");
     }
     // get takeoff
-    db.getTakeoffTotal(takeoff_id, function (err, takeoffName, total) {
+    db.getTakeoffTotalForStripe(takeoff_id, function (err, takeoffName, total) {
       console.log(takeoffName + " has a total of " + total);
       if (err) {
         console.log(err);
@@ -985,24 +985,14 @@ app.get('/checkMeout/:takeoff_id', function (req, res) {
     if (err) {
       console.log(err);
     } else {
-      // post to /v1/prices to create a price_id
-      // get the price_id
-      // render the checkout page
-      //takeoff = takeoff[0];
-    //cnvert rows into json object
-
-
-    // if (total == null) {
-    //   console.log('total is null');
-    //   total = 50.00;
-    // }
 
     // add 3% and 30 cents
     total *= 0.0288;
     total += 30;
+    console.log("total is ",  Math.floor(total*100.0));
     // create a stripe price_id
     const price = stripe.prices.create({
-      unit_amount: Math.floor(total*100),
+      unit_amount: Math.floor(total*100.0),
       currency: 'usd',
       product_data: {
         name: takeoffName +' Estimate'
@@ -1044,7 +1034,7 @@ app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
        total = 13000.00 * 100;
       }
       // determine the total
-      console.log("total is ", total);
+      console.log("total  is ", total);
 
       // create a product
       const product = await stripe.products.create({

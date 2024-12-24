@@ -1247,7 +1247,7 @@ module.exports = {
             [takeoff_id],
             function (err, options) {
               if (err) return callback(err);
-              let total = parseFloat(rows[0].total) + parseFloat(options[0].total);
+              let total = parseFloat(rows[0].total) + (parseFloat(options[0].total) || 0); // if no options, set to 0
               let takeoffName = rows[0].name;
               callback(null, takeoffName, total);
 
