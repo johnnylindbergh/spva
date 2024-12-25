@@ -243,6 +243,14 @@ function loadTakeoffMaterials(id) {
           measurementUnitInput.append(option);
         });
 
+        if (row.measurement_unit === "ft' in\"") {
+              // add an alert icon to the cell
+              let alertIcon = $("<i class='fa fa-exclamation-triangle'><i style = 'font-size:9px;'>measurement is in linear ft</i>");
+              newRow.append(alertIcon);
+        }
+
+
+
         let measurementCell = $("<td></td>")
           .append(measurementInput)
           .append(" ")
@@ -258,7 +266,7 @@ function loadTakeoffMaterials(id) {
           // Wait one sec and then reload the table to reflect changes
           setTimeout(function () {
             loadTakeoffMaterials(takeoff_id);
-          }, 1000);
+          }, 500);
         });
 
         measurementUnitInput.on("change", function () {
@@ -268,7 +276,7 @@ function loadTakeoffMaterials(id) {
           // Wait one sec and then reload the table to reflect changes
           setTimeout(function () {
             loadTakeoffMaterials(takeoff_id);
-          }, 1000);
+          }, 500);
         });
 
         // Labor price input
@@ -281,7 +289,7 @@ function loadTakeoffMaterials(id) {
             row.id +
             ")'>"
         );
-        laborPrice.attr("style", "width: 100px;");
+        laborPrice.attr("style", "width: 50px;");
         let laborCell = $("<td></td>");
         // make the labor cell width smaller
         laborCell.attr("style", "width: 10px;");
@@ -423,6 +431,7 @@ function loadTakeoffMaterials(id) {
 
               if (row.measurement_unit === "ft' in\"") {
                 subsum += newCost * Math.ceil(adjustedMeasurement/coverage);
+            
               }
 
               if (row.measurement_unit === "Count") {

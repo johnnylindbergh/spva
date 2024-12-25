@@ -911,59 +911,125 @@ module.exports = {
       }
     );
   },
-  
   removeMaterialSubject: function (material_id, subject_id, callback) {
     // First, get the subject and the applied materials
     con.query(
-      "SELECT * FROM applied_materials WHERE id = ?;",
-      [subject_id],
-      function (err, material) {
-        if (err) {
-          console.log(err);
-          return callback(err); // Ensure the callback is called on error
-        }
-
-        if (!material || material.length === 0) {
-          console.log("Subject ID not found");
-          return callback("Subject ID not found");
-        }
-
-        const materialRow = material[0];
-        const fields = [
-          "material_id",
-          "secondary_material_id",
-          "tertiary_material_id",
-        ];
-        let fieldToUpdate = null;
-
-        // Check which material slot matches the material_id
-        for (let field of fields) {
-          if (materialRow[field] == material_id) {
-            fieldToUpdate = field;
-            break;
-          }
-        }
-
-        if (fieldToUpdate) {
-          // Construct the SQL query dynamically
-          const sql = `UPDATE applied_materials SET ${fieldToUpdate} = NULL WHERE id = ?;`;
-          con.query(sql, [subject_id], function (err) {
+        "SELECT * FROM applied_materials WHERE id = ?;",
+        [subject_id],
+        function (err, materials) {
             if (err) {
-              console.log(err);
-              return callback(err);
+                console.error("Database query error:", err);
+                return callback(err); // Ensure the callback is called on error
             }
-            console.log(
-              `${fieldToUpdate} updated to NULL for subject ID ${subject_id}`
-            );
-            callback(null); // Indicate success
-          });
-        } else {
-          console.log("No material slots match the material ID");
-          callback("No material slots match the material ID");
+
+            if (!materials || materials.length === 0) {
+                console.warn("Subject ID not found");
+                return callback("Subject ID not found");
+            }
+
+            const materialRow = materials[0];
+            const fields = [
+                "material_id",
+                "secondary_material_id",
+                "tertiary_material_id",
+            ];
+            let fieldToUpdate = null;
+
+            // Check which material slot matches the material_id
+            for (let field of fields) {
+                if (materialRow[field] == material_id) {
+                    fieldToUpdate = field;
+                    break;
+                }
+            }
+
+            if (fieldToUpdate) {
+                // Construct the SQL query dynamically
+                const sql = `UPDATE applied_materials SET ${fieldToUpdate} = NULL WHERE id = ? AND ${fieldToUpdate} = ? LIMIT 1;`;
+                con.query(sql, [subject_id, material_id], function (err, result) {
+                    if (err) {
+                        console.error("Error updating material slot:", err);
+                        return callback(err);
+                    }
+
+                    // Check if any rows were actually updated
+                    if (result.affectedRows === 0) {
+                        console.warn(
+                            `No matching material ID ${material_id} found for subject ID ${subject_id}`
+                        );
+                        return callback(
+                            `Material ID ${material_id} not found for subject ID ${subject_id}`
+                        );
+                    }
+
+                    console.log(
+                        `${fieldToUpdate} updated to NULL for subject ID ${subject_id}`
+                    );
+                    callback(null); // Indicate success
+                });
+            } else {
+                console.warn("No material slots match the material ID");
+                callback("No material slots match the material ID");
+            }
         }
-      }
     );
-  },
+},
+
+
+  // removeMaterialSubject: function (material_id, subject_id, callback) {
+  //   // First, get the subject and the applied materials
+  //   con.query(
+  //     "SELECT * FROM applied_materials WHERE id = ?;",
+  //     [subject_id],
+  //     function (err, material) {
+  //       if (err) {
+  //         console.log(err);
+  //         return callback(err); // Ensure the callback is called on error
+  //       }
+
+  //       if (!material || material.length === 0) {
+  //         console.log("Subject ID not found");
+  //         return callback("Subject ID not found");
+  //       }
+
+  //       const materialRow = material[0];
+  //       const fields = [
+  //         "material_id",
+  //         "secondary_material_id",
+  //         "tertiary_material_id",
+  //       ];
+  //       let fieldToUpdate = null;
+
+  //       // Check which material slot matches the material_id
+  //       for (let field of fields) {
+  //         if (materialRow[field] == material_id) {
+  //           fieldToUpdate = field;
+  //           break;
+  //         }
+  //       }
+
+  //       if (fieldToUpdate) {
+  //         // Construct the SQL query dynamically
+  //         const sql = `UPDATE applied_materials SET ${fieldToUpdate} = NULL WHERE id = ? LIMIT 1;`;
+  //         con.query(sql, [subject_id], function (err) {
+  //           if (err) {
+  //             console.log(err);
+  
+  
+  //             return callback(err);
+  //           }
+  //           console.log(
+  //             `${fieldToUpdate} updated to NULL for subject ID ${subject_id}`
+  //           );
+  //           callback(null); // Indicate success
+  //         });
+  //       } else {
+  //         console.log("No material slots match the material ID");
+  //         callback("No material slots match the material ID");
+  //       }
+  //     }
+  //   );
+  // },
 
   toggleMaterial: function (applied_material_id, callback) {
     // a call to this function should not accept a toggle state, it should select the current state of the applied_material_id and then toggle it
@@ -1114,9 +1180,17 @@ module.exports = {
                   console.log(err);
                   callback(err);
                 } else {
-                  callback(err);
+                  // set the primary_cost_delta to zero
+                  con.query("UPDATE applied_materials SET primary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
+                    if (err) {
+                      console.log(err);
+                        callback(err);
+                    } else {
+                      callback(err);
+                    }
+                  });
+
                 }
-                //callback(err);
               }
             );
           } else if (material[0].secondary_material_id == null) {
@@ -1129,7 +1203,15 @@ module.exports = {
                   console.log(err);
                   callback(err);
                 } else {
-                  callback(err);
+                  // set the secondary_cost_delta to zero
+                  con.query("UPDATE applied_materials SET secondary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
+                    if (err) {
+                      console.log(err);
+                        callback(err);
+                    } else {
+                      callback(err);
+                    }
+                  });                  
                 }
               }
             );
@@ -1142,8 +1224,17 @@ module.exports = {
                 if (err) {
                   console.log(err);
                   callback(err);
+            
                 } else {
-                  callback(err);
+                  // set the tertiary_cost_delta to zero
+                  con.query("UPDATE applied_materials SET tertiary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
+                    if (err) {
+                      console.log(err);
+                        callback(err);
+                    } else {
+                      callback(err);
+                    }
+                  });
                 }
               }
             );
