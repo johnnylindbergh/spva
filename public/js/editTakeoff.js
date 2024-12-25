@@ -2,27 +2,19 @@ let subject_id = 0;
 let material_id = 0;
 let takeoff_id = 0;
 
-// the takeoff object
-let takeoff;
-
 function toggleMaterial(materialId, checkbox) {
   console.log("Material toggled: " + materialId);
 
   let isChecked = checkbox.checked ? 1 : 0;
 
-  // Comment out the server call:
-  // $.post("/toggle-material", { material_id: materialId })
-  //   .done(...)
-  //   .fail(...);
-
-  // Update the local takeoff object (assuming each "subject" has an .id and .applied):
-  if (takeoff && takeoff.subjects) {
-    let subject = takeoff.subjects.find(s => s.id === materialId);
-    if (subject) {
-      subject.applied = isChecked;
-      console.log("Material toggled locally: ", subject);
-    }
-  }
+  $.post("/toggle-material", { material_id: materialId })
+    .done(function () {
+      console.log("Material toggled successfully: " + materialId);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      console.log("Failed to toggle material: " + materialId);
+    });
 }
 
 function myFunction() {
@@ -175,16 +167,8 @@ function add_material_subject() {
     alert("Please select both a material and a subject before adding.");
   }
 }
-// just load the data into the global variable
-
-function loadTakeoffMaterials(id) {
-  takeoff_id = id;
-  console.log("Loading takeoff materials");
-  takeoff = $.post("/loadTakeoffMaterials", { takeoff_id: takeoff_id });
-}
 
 // the big one
-// deprecated
 function loadTakeoffMaterials(id) {
   takeoff_id = id;
   console.log("Loading takeoff materials");
@@ -270,13 +254,21 @@ function loadTakeoffMaterials(id) {
         measurementInput.on("change", function () {
           let newMeasurement = $(this).val();
           let rowId = $(this).data("row-id");
-          updateLocalMeasurement(rowId, newMeasurement);
+          updateMeasurement(rowId, newMeasurement);
+          // Wait one sec and then reload the table to reflect changes
+          setTimeout(function () {
+            loadTakeoffMaterials(takeoff_id);
+          }, 1000);
         });
 
         measurementUnitInput.on("change", function () {
           let newMeasurementUnit = $(this).val();
           let rowId = $(this).data("row-id");
-          updateLocalMeasurementUnit(rowId, newMeasurementUnit);
+          updateMeasurementUnit(rowId, newMeasurementUnit);
+          // Wait one sec and then reload the table to reflect changes
+          setTimeout(function () {
+            loadTakeoffMaterials(takeoff_id);
+          }, 1000);
         });
 
         // Labor price input
@@ -285,18 +277,20 @@ function loadTakeoffMaterials(id) {
             row.id +
             "' value='" +
             row.labor_cost +
-            "' step='any' min='0' onchange='updateLocalLaborPrice(" +
+            "' step='any' min='0' onchange='laborPriceChange(" +
             row.id +
             ")'>"
         );
         laborPrice.attr("style", "width: 100px;");
         let laborCell = $("<td></td>");
+        // make the labor cell width smaller
         laborCell.attr("style", "width: 10px;");
         laborCell.append(laborPrice);
         newRow.append(laborCell);
 
         // Materials and cost calculation
         let materialsCell = $("<td></td>");
+        // make the width of the materials cell bigger
         materialsCell.attr("style", "min-width: 300px;");
         let subsum = 0;
         let laborsum = 0;
@@ -318,9 +312,10 @@ function loadTakeoffMaterials(id) {
               );
               materialsCell.append(materialCell);
 
+              // Parse values and handle NaN
               let materialCost = parseFloat(material.cost) || 0;
               let measurement = parseFloat(row.measurement) || 0;
-              let coverage = parseFloat(material.coverage) || 1;
+              let coverage = parseFloat(material.coverage) || 1; // Default to 1 to avoid division by zero
               console.log(
                 "Material cost: " +
                   materialCost +
@@ -334,7 +329,6 @@ function loadTakeoffMaterials(id) {
               // Adjust cost for primary, secondary, and tertiary materials
               if (material.id == row.material_id) {
                 let primaryCostDelta = parseFloat(row.primary_cost_delta) || 0;
-                // if the cost delta is positive color the input red and if negative color it green
                 newCost += primaryCostDelta;
                 // if the cost delta is positive color the input red and if negative color it green
                 let materialPrice = $(
@@ -521,24 +515,34 @@ function loadTakeoffMaterials(id) {
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
 function updateMeasurement(rowId, newMeasurement) {
-  if (takeoff && takeoff.subjects) {
-    let subject = takeoff.subjects.find(s => s.id === rowId);
-    if (subject) {
-      subject.measurement = newMeasurement;
-      console.log("Measurement updated locally for subject: " + rowId);
-    }
-  }
+  $.post("/update-measurement", { id: rowId, measurement: newMeasurement })
+    .done(function () {
+      console.log("Measurement updated for subject: " + rowId);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      console.log("Failed to update measurement for subject: " + rowId);
+    });
 }
 
 function updateMeasurementUnit(rowId, newUnit) {
-  if (takeoff && takeoff.subjects) {
-    let subject = takeoff.subjects.find(s => s.id === rowId);
-    if (subject) {
-      subject.measurement_unit = newUnit;
-      console.log("Measurement unit updated locally for subject: " + rowId);
-    }
-  }
+  console.log(
+    "Updating measurement unit for subject: " + rowId + " to: " + newUnit
+  );
+
+  $.post("/update-measurement-unit", { id: rowId, unit: newUnit })
+    .done(function () {
+      console.log(
+        "Measurement unit updated successfully for subject: " + rowId
+      );
+      loadTakeoffMaterials(takeoff_id); // Reload the materials to reflect changes
+    })
+    .fail(function () {
+      console.log("Failed to update measurement unit for subject: " + rowId);
+      // alert("Failed to update the measurement unit. Please try again.");
+    });
 }
 
 function updateTakeoffOwnerEmailAddress() {
@@ -559,17 +563,20 @@ function updateTakeoffOwnerEmailAddress() {
 function laborPriceChange(id) {
   newPrice = $("#labor_price_" + id).val();
 
-  if (takeoff && takeoff.subjects) {
-    let subject = takeoff.subjects.find(s => s.id === id);
-    if (subject) {
-      subject.labor_cost = newPrice;
-      console.log("Labor price updated locally for subject: " + id);
-    }
-  }
-
+  $.post("/change-labor-price", { subject: id, price: newPrice })
+    .done(function () {
+      console.log("Price updated for material: " + id);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      console.log("Failed to update price for material: " + id);
+    });
 }
 
 function priceChange(id) {
+  //this function doesent actually change the price of the material, it changes the price delta
+  //so just get the newPrice and subtract it from the original price
+
   console.log("Price change for material " + id);
 
   let newPrice = $("#material_price_" + id).val();
@@ -587,18 +594,13 @@ function priceChange(id) {
 
   console.log("New price: " + newPrice);
 
-  // Update the local takeoff object
-  if (takeoff && takeoff.subjects) {
-    takeoff.subjects.forEach(subject => {
-      if (subject.selected_materials) {
-        let material = subject.selected_materials.find(m => m.id === id);
-        if (material) {
-          material.cost = newPrice;
-          console.log("Material price updated locally: ", material);
-        }
-      }
+  $.post("/change-material-price", { material_id: id, delta: delta })
+    .done(function (response) {
+      console.log("Price updated for material: " + id);
+    })
+    .fail(function () {
+      console.log("Failed to update price for material: " + id);
     });
-  }
 
   // wait 0.5 seconds and then call loadTakeoffMaterials
   setTimeout(function () {

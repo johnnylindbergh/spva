@@ -50,7 +50,7 @@ CREATE TABLE estimate (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT,
   isArchived TINYINT(1) DEFAULT 0,
-  date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   inclusions TEXT,
   labor TEXT,
   exclusions TEXT,
