@@ -144,9 +144,17 @@
             </table>
 
 
-        <!-- Button to add a new row -->
-        <button id="add-row-btn" onclick="addOption({{estimate.takeoff_id}})">Add Row</button>
-
+       
+            <div class="addOption">
+                <form id="addOptionForm" onsubmit="postToAddOption(event)">
+                    <label for="description">Description:</label>
+                    <input type="text" id="description" name="description" required>
+                    <label for="optionPrice">Option Price:</label>
+                    <input type="text" id="cost_delta" name="cost_delta" required>
+                    <input type="hidden" id="takeoff_id" name="takeoff_id" value="1234">
+                    <input type="submit" value="Add Option">
+                </form>
+            </div>
         <!-- Signature section with IDs for signature input -->
         <!-- <div class="signature">
             <p><em>This budget estimate is not a contract until signed and returned to Sun Painting.</em></p> </br>

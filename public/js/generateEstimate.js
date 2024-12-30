@@ -1,4 +1,4 @@
-
+const takeoff_data = [];
 
 function updateTakeoffOwnerEmailAddress(){
     let email = $("#owner_email_address").val();
@@ -159,31 +159,48 @@ function addOption(takeoff_id) {
    // postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
 }
 
-function postToAddOption(description, amount, takeoff_id, row_id) {
+
+function postToAddOption(event) {
+    event.preventDefault(); // Prevent the default form submission behavior
+
+    const takeoff_id = $('#takeoff_id').val();
+    const description = $('#description').val();
+    let cost = $('#cost_delta').val();
+
+    // Clean and validate the cost input
+    cost = cost.replace(/[^0-9.-]+/g, '');
+    if (isNaN(parseFloat(cost))) {
+        alert('Please enter a valid number for Option Price.');
+        return;
+    }
 
     // Prepare the data to send to the server
-    amount = amount.replace(/[^0-9.-]+/g, '');
     const data = {
-        option: description,
-        cost_delta: amount,
+        description: description,
+        cost_delta: cost, // Consistent naming with backend
         takeoff_id: takeoff_id,
-        row_id: row_id // Include row_id in the data
     };
 
     // Send the data to the server via a POST request using jQuery
-    $.post('/add-row', data)
+    $.post('/addOption', data)
         .done(function(response) {
             console.log('Row added/updated successfully:', response);
+            if (response.new_row_id) { // if the insert was successful,
+                // reload the page
+                 populateOptions(takeoff_id);  
+                 
+                 // empty the input fields
+                    $('#description').val('');
+                    $('#cost_delta').val('');
 
-            // Update the row_id if it was a new row and server provided an ID
-            if (!row_id && response.new_row_id) {
-                $('[data-row-id="null"]').attr('data-row-id', response.new_row_id);
+                
             }
         })
         .fail(function(error) {
             console.error('Error adding/updating row:', error);
         });
 }
+
 
 function shareClient(){
     const takeoff_id = $('#takeoff_id').val();
@@ -293,14 +310,15 @@ $(document).ready(function() {
     // Populate the "Proposal Includes" section with dynamic data
     // post takeoff_id to getEstimateData to set includesItems and exclusionsItems
     
-    var takeoff_id = $('#takeoff_id').val();
+    var takeoff_id = parseInt($('#takeoff_id').val());
+
     $.post('/getEstimateData', {takeoff_id: takeoff_id}, function(data) {
         console.log(data)
         tax = data.takeoff[0].tax; // consider that the tax percentage will be zero if the server returns zero.  
         estimate_id = data.estimate[0].id;  
         populateProposalIncludes(data.estimate[0].inclusions);
         populateExclusions(data.estimate[0].exclusions);
-        populateOptions(parseInt(takeoff_id));
+        populateOptions(takeoff_id);
         console.log(data.takeoff[0].total);
 
         $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].total));

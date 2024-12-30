@@ -789,27 +789,27 @@ app.post("/generateEstimate", function (req, res) {
     });
   });
 
-  app.post("/add-row", mid.isAuth, function (req, res) {
+  app.post("/addOption", mid.isAuth, function (req, res) {
     console.log("Adding row to takeoff", req.body.takeoff_id);
-    console.log("Getting option:", req.body.option);
+    console.log("Getting option:", req.body.description);
     console.log("Cost Delta:", req.body.cost_delta);
-    console.log("Row ID:", req.body.row_id);
 
     db.addOption(
-      req.body.takeoff_id,
-      req.body.option,
-      req.body.cost_delta,
-      req.body.row_id,
-      function (err, new_row_id) {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("added");
-          res.send({ new_row_id: new_row_id });
+        req.body.takeoff_id,
+        req.body.description,
+        req.body.cost_delta,
+        function (err, new_row_id) {
+            if (err) {
+                console.error("Error adding option:", err);
+                return res.status(500).send({ error: "Failed to add option" });
+            } else {
+                console.log("Added successfully");
+                res.send({ new_row_id: new_row_id });
+            }
         }
-      }
     );
-  });
+});
+
 
   app.post("/loadOptions", function (req, res) {
     console.log("loading options for takeoff ", req.body.takeoff_id);

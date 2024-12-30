@@ -42,83 +42,83 @@ function populateExclusions(exclusions) {
 
 var optionsTouched = false;
 
-// function populateOptions(takeoff_id) {   
-//     // Use the global optionsTotal variable
-//     optionsTotal = 0;
+function populateOptions(takeoff_id) {   
+    // Use the global optionsTotal variable
+    optionsTotal = 0;
 
-//     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
+    $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
         
-//         var mutable = data.mutable;
-//         if (!mutable) {
-//             $('.signature').toggle();
-//             $('.signature-success').toggle();
-//             $('#options-table').find('input').prop('disabled', true);
-//         }
+        var mutable = data.mutable;
+        if (!mutable) {
+            $('.signature').toggle();
+            $('.signature-success').toggle();
+            $('#options-table').find('input').prop('disabled', true);
+        }
 
-//         data = data.options;
-//         const table = $('#options-table');
-//         table.empty(); // Clear any existing content
-//         for (let i = 0; i < data.length; i++) {
-//             const newRow = $('<tr>').attr('data-row-id', data[i].id);
-//             const descriptionCell = $('<td>').text(data[i].description);
-//             const amountCell = $('<td id= "amount">').text(data[i].cost);
+        data = data.options;
+        const table = $('#options-table');
+        table.empty(); // Clear any existing content
+        for (let i = 0; i < data.length; i++) {
+            const newRow = $('<tr>').attr('data-row-id', data[i].id);
+            const descriptionCell = $('<td>').text(data[i].description);
+            const amountCell = $('<td id= "amount">').text(data[i].cost);
             
-//             const checkboxCell = $('<td >');
-//             checkboxCell.css('width', '105px');
-//             const includeCheckbox = $('<input>').attr('type', 'checkbox').attr('name', 'option-' + data[i].id).attr('value', 'include');
+            const checkboxCell = $('<td >');
+            checkboxCell.css('width', '105px');
+            const includeCheckbox = $('<input>').attr('type', 'checkbox').attr('name', 'option-' + data[i].id).attr('value', 'include');
             
-//             if (data[i].applied) {
-//                 includeCheckbox.prop('checked', true);
-//                 optionsTotal += parseFloat(data[i].cost.replace('$',''));
-//             }
+            if (data[i].applied) {
+                includeCheckbox.prop('checked', true);
+                optionsTotal += parseFloat(data[i].cost.replace('$',''));
+            }
             
-//             includeCheckbox.on('change', function() {
-//                 if ($(this).is(':checked')) {
-//                     $.post('updateOptionsSelection', {
-//                         takeoff_id: takeoff_id,
-//                         option_id: data[i].id,
-//                         applied: true
-//                     }, function(response) {
-//                         console.log('Checkbox updated:', response);
-//                         updateTotals();
-//                         optionsTouched = true;
-//                     });
-//                 } else {
-//                     $.post('updateOptionsSelection', {
-//                         takeoff_id: takeoff_id,
-//                         option_id: data[i].id,
-//                         applied: false
-//                     }, function(response) {
-//                         console.log('Checkbox updated:', response);
-//                         optionsTouched = true;
-//                         populateOptions(takeoff_id);
-//                     });
-//                 }
-//             });
+            includeCheckbox.on('change', function() {
+                if ($(this).is(':checked')) {
+                    $.post('updateOptionsSelection', {
+                        takeoff_id: takeoff_id,
+                        option_id: data[i].id,
+                        applied: true
+                    }, function(response) {
+                        console.log('Checkbox updated:', response);
+                        updateTotals();
+                        optionsTouched = true;
+                    });
+                } else {
+                    $.post('updateOptionsSelection', {
+                        takeoff_id: takeoff_id,
+                        option_id: data[i].id,
+                        applied: false
+                    }, function(response) {
+                        console.log('Checkbox updated:', response);
+                        optionsTouched = true;
+                        populateOptions(takeoff_id);
+                    });
+                }
+            });
 
-//             if (!mutable) {
-//                 includeCheckbox.prop('disabled', true);
-//             }
+            if (!mutable) {
+                includeCheckbox.prop('disabled', true);
+            }
             
-//             checkboxCell.append(includeCheckbox).append(' Yes ');
-//             newRow.append(descriptionCell);
-//             newRow.append(amountCell);
-//             newRow.append(checkboxCell);
-//             table.append(newRow);
+            checkboxCell.append(includeCheckbox).append(' Yes ');
+            newRow.append(descriptionCell);
+            newRow.append(amountCell);
+            newRow.append(checkboxCell);
+            table.append(newRow);
 
-//             descriptionCell.on('focusout', function() {
-//                 postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
-//             });
-//             amountCell.on('focusout', function() {
-//                 postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
-//             });
-//         }
+            descriptionCell.on('focusout', function() {
+                postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
+            });
+            amountCell.on('focusout', function() {
+                postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
+            });
+        }
 
-//         $('#options-total').text("Options: $" + optionsTotal.toFixed(2));
+        $('#options-total').text("Options: $" + optionsTotal.toFixed(2));
 
-//         updateTotals();
-//     });
-// }
+        updateTotals();
+    });
+}
 
 function updateTotals() {
     const subtotalText = $('#subtotal').text().replace(/[^0-9.-]+/g, '');

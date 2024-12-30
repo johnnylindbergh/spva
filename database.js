@@ -604,40 +604,24 @@ module.exports = {
     );
   },
 
-  addOption: function (takeoff_id, option, cost_delta, row_id, callback) {
+  addOption: function (takeoff_id, description, cost_delta, callback) {
     // first check if the row_id is null, if it is, insert a new row
     // if it is not, update the existing row
-    if (row_id == null) {
-      con.query(
-        "INSERT INTO options (takeoff_id, description, cost) VALUES (?,?,?); SELECT LAST_INSERT_ID() as last;",
-        [takeoff_id, option, cost_delta],
-        function (err, results) {
-          if (err) return callback(err);
-          callback(null, results[1][0].last);
-        }
-      );
-    } else {
+ 
       // if row exists but is now blank, delete the row
-      if (option == "") {
-        con.query(
-          "DELETE FROM options WHERE id = ?;",
-          [row_id],
-          function (err) {
-            if (err) return callback(err);
-            callback(null);
-          }
-        );
+      if (description == "" || cost_delta == null) {
+        callback("Option or cost_delta is blank");
       } else {
         con.query(
-          "UPDATE options SET description = ?, cost = ? WHERE id = ?;",
-          [option, cost_delta, row_id],
-          function (err) {
+          "INSERT INTO options (takeoff_id, description, cost) VALUES (?,?,?); SELECT LAST_INSERT_ID() as last;",
+          [takeoff_id, description, cost_delta],
+          function (err, last) {
             if (err) return callback(err);
-            callback(null);
+            callback(null, last[1][0].last);
           }
         );
       }
-    }
+    
   },
 
   getMaterialTypes: function (callback) {

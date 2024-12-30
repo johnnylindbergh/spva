@@ -62,7 +62,7 @@ CREATE TABLE options (
   takeoff_id INT,
   description TEXT,
   cost DECIMAL(10,2),
-  applied TINYINT(1) DEFAULT 0,
+  applied TINYINT(1) DEFAULT 1,
   PRIMARY KEY (id)
 );
 
