@@ -36,8 +36,6 @@ CREATE TABLE system_settings (
   PRIMARY KEY (setting_id)
 );
 
--- Add the separate_line_item column to the applied_materials table
-ALTER TABLE applied_materials ADD COLUMN separate_line_item TINYINT(1) DEFAULT 0;
 
 
 -- actual defaults
@@ -77,7 +75,7 @@ CREATE TABLE takeoffs (
   owner_email VARCHAR(64),
   invoice_email VARCHAR(64),
   file_path_of_plans VARCHAR(255),
-  estimate_id INT,
+  estimate_id INT UNIQUE,
   status TINYINT(1) DEFAULT 0,
   passcode VARCHAR(64),
   view_count INT DEFAULT 0,
@@ -227,6 +225,7 @@ CREATE TABLE applied_materials (
   FOREIGN KEY (secondary_material_id) REFERENCES materials(id) ON DELETE CASCADE,
   FOREIGN KEY (tertiary_material_id) REFERENCES materials(id) ON DELETE CASCADE
 );
+
 
 
 CREATE TABLE string_match_subject (

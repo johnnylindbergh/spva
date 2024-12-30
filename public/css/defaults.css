@@ -65,7 +65,7 @@ td {
 }
 
 th {
-  padding: 12px;
+  padding: 10px;
 }
 
 .hiddenDiv {
@@ -102,7 +102,7 @@ button,
 input[type="button"],
 input[type="submit"],
 input[type="reset"] {
-  background-color: #f48847;
+  background-color: #01aaff;
   border: none;
   border-radius: 5px;
   color: white;
