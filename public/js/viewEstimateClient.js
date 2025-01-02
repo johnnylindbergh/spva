@@ -73,27 +73,18 @@ function populateOptions(takeoff_id) {
             }
             
             includeCheckbox.on('change', function() {
-                if ($(this).is(':checked')) {
-                    $.post('updateOptionsSelection', {
-                        takeoff_id: takeoff_id,
-                        option_id: data[i].id,
-                        applied: true
-                    }, function(response) {
-                        console.log('Checkbox updated:', response);
-                        updateTotals();
-                        optionsTouched = true;
-                    });
-                } else {
-                    $.post('updateOptionsSelection', {
-                        takeoff_id: takeoff_id,
-                        option_id: data[i].id,
-                        applied: false
-                    }, function(response) {
-                        console.log('Checkbox updated:', response);
-                        optionsTouched = true;
-                        populateOptions(takeoff_id);
-                    });
-                }
+                const state = $(this).is(':checked');
+
+                $.post('updateOptionsSelection', {
+                    takeoff_id: takeoff_id,
+                    option_id: data[i].id,
+                    applied: state
+                }, function(response) {
+                    console.log('Checkbox updated:', response);
+                    populateOptions(takeoff_id);
+                    optionsTouched = true;
+                });
+        
             });
 
             if (!mutable) {

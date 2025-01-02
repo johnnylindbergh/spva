@@ -14,7 +14,7 @@
     </script>
     <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/themes/light-theme.css">
 
     <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
@@ -27,38 +27,7 @@
     <link rel="stylesheet" type="text/css" href="css/defaults.css">
     <link rel="stylesheet" href="css/navbar.css">
     <script src="/js/generateEstimate.js"></script>
-    <script src="/js/viewEstimateClient.js"></script>
 </head>
-<script>
-    $(document).ready(function() {
-        $(document).keydown(function(event) {
-            if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
-                document.querySelector('.navbar').style.display = 'none';
-                document.querySelector('.bottom-navbar').style.display = 'none';
-            }
-        });
-
-        // Event listener for toggle numbers button
-        $('.toggle-btn').click(toggleNumbers);
-    });
-
-    function toggleNumbers() {
-        console.log('Toggling visibility of Amount columns...');
-        const amountColumns = $('.amount-column');
-        if (amountColumns.length === 0) {
-            console.error('No elements with class "amount-column" found.');
-        } else {
-            amountColumns.each(function(index) {
-                console.log(`Toggling column ${index}: current display = ${$(this).css('display')}`);
-                $(this).css('display', $(this).css('display') === 'none' ? '' : 'none');
-            });
-        }
-    }
-    function toggleTranslateMenu() {
-    const translateElement = document.getElementById("google_translate_element");
-    translateElement.style.display = translateElement.style.display === "none" ? "block" : "none";
-    }
-</script>
 <body>
 <body>
   <div class="navbar">
@@ -86,7 +55,7 @@
          <div class="image-container">
             <img src="sunpainting_logo_blue.png" alt="Sun Painting Logo">
         </div>
-        <p>1819 Broadway St, Charlottesville, VA 22902 US</p>
+        <p>1819 Broadway St, Charlottesville, VA 22902 US</p> </br>
         <p>Phone: +1 434-207-2025 | Email: <a href="mailto:sales@sunpaintingva.com" style="color:#000000;">sales@sunpaintingva.com</a></p>
         <p>Website: <a href="http://www.sunpaintingva.com" style="color:#000000;">www.sunpaintingva.com</a></p>
 
@@ -102,15 +71,14 @@
         Invoice Email Address: <input type= 'text' class="hiddenInput" id= 'invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email}}'></br>
 
        <input type='hidden' id='takeoff_total' value='{{takeoff_info.total}}'>
-
-      <h2 style="text-align: left;">{{name}}</h2>
-      Owner:  {{owner}}</br>
-      Billing Address: {{owner_billing_address}}</br>
+         <input type='hidden' id='takeoff_tax' value='{{takeoff_info.tax}}'>
 
       </br>
     {{/takeoff}}
 
     <p> {{response}}</p>
+
+    <div class="subcontainer">
         <table id="estimate-table">
             <tr>
                 <th>Description</th>
@@ -130,22 +98,32 @@
             </tr>
         </table>
 
+         </br>
+
         <table id="options-table">
-            </table>
+
+        </table>
 
 
-       
-            <div class="addOption">
-                <form id="addOptionForm" onsubmit="postToAddOption(event)">
-                    <label for="description">Description:</label>
-                    <input type="text" id="description" name="description" required>
-                    <label for="optionPrice">Option Price:</label>
-                    <input type="text" id="cost_delta" name="cost_delta" required>
-                    <input type="hidden" id="takeoff_id" name="takeoff_id" value="1234">
-                    <input type="submit" value="Add Option">
-                </form>
-            </div>
-        <!-- Signature section with IDs for signature input -->
+        </div>
+
+
+    <div class="options-container">
+        <div class="addOption">
+            <form id="addOptionForm" onsubmit="postToAddOption(event)">
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description" required>
+                <label for="optionPrice">Option Price:</label>
+                <input type="text" id="cost_delta" name="cost_delta" required>
+                <input type="hidden" id="takeoff_id" name="takeoff_id" value="1234">
+                <input type="submit" value="Add Option">
+            </form>
+        </div>
+    </div>
+    
+        
+        
+            <!-- Signature section with IDs for signature input -->
         <!-- <div class="signature">
             <p><em>This budget estimate is not a contract until signed and returned to Sun Painting.</em></p> </br>
             <p>

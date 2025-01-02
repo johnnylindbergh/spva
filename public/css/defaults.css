@@ -1,3 +1,49 @@
+button { font-family: "Quicksand", 
+  sans-serif; font-size: 1.2rem; /* 
+  Increased font size */ color: 
+  #ffffff; /* White text */
+  background-color: #01aaff; /* 
+  Bright blue background */ border: 
+  none; /* Remove border */ 
+  border-radius: 8px; /* Rounded 
+  corners */ padding: 12px 24px; /* 
+  Larger padding for a bigger 
+  button */ cursor: pointer; /* 
+  Pointer cursor for interactivity 
+  */ transition: background-color 
+  0.3s ease, transform 0.2s ease; 
+  /* Smooth hover effects */ 
+  display: inline-block; /* Inline 
+  for alignment */ margin: 8px; /* 
+  Space between buttons */
+}
+button:hover { background-color: 
+  #007bbd; /* Darker shade on hover 
+  */ transform: scale(1.05); /* 
+  Slight zoom effect */
+}
+button:active { background-color: 
+  #005f8a; /* Even darker on click 
+  */ transform: scale(0.98); /* 
+  Slight shrink effect */
+}
+/* Responsive adjustments */ @media 
+(max-width: 768px) {
+  button { font-size: 1rem; /* 
+    Slightly smaller font on 
+    smaller screens */ padding: 
+    10px 20px;
+  }
+}
+@media (max-width: 480px) { button 
+  {
+    font-size: 0.9rem; /* Adjust 
+    font size for very small 
+    screens */ padding: 8px 16px; 
+    width: 100%; /* Full-width 
+    buttons for narrow screens */
+  }
+}
 /*
   defaults.css: Default style to apply to all pages 
 */
@@ -10,6 +56,17 @@
   scroll-behavior: smooth;
 }
 .container {
+  text-align: left;
+  display: center;
+
+  margin-left: auto;
+  margin-right: auto;
+  width: 85%;
+  background-color: #f5f5f5;
+  padding: 8px 21px;
+}
+
+.subcontainer {
   text-align: left;
   display: center;
 
@@ -239,4 +296,47 @@ input[type=number] {
 
 .laborInput {
   width: 12em;
+}
+
+.options-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+#addOptionForm {
+  display: flex;
+  flex-wrap: nowrap; /* Default: items stay in one line */
+  gap: 10px; /* Space between items */
+  align-items: center;
+}
+
+#addOptionForm label {
+  white-space: nowrap; /* Prevents label text from wrapping */
+}
+
+#addOptionForm input {
+  flex: 1; /* Inputs expand to fill available space */
+  box-sizing: border-box;
+}
+
+#addOptionForm input[type="submit"] {
+  flex: 0; /* Submit button stays fixed size */
+  cursor: pointer;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  #addOptionForm {
+      flex-wrap: wrap; /* Allows wrapping on smaller screens */
+  }
+
+  #addOptionForm label,
+  #addOptionForm input {
+      flex: 1 1 100%; /* Full width for each item */
+  }
+
+  #addOptionForm input[type="submit"] {
+      margin-top: 10px; /* Add spacing for the submit button */
+  }
 }

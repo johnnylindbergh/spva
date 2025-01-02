@@ -94,11 +94,32 @@ function populateExclusions(exclusions) {
 function populateOptions(takeoff_id) {   
     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
         data = data.options;
-        const table = $('#estimate-table');
+        const table = $('#options-table');
         for (let i = 0; i < data.length; i++) {
             const newRow = $('<tr>').data('row_id', data[i].id); // Store row_id as data attribute
-            const descriptionCell = $('<td contenteditable="true" class="editable">').text(data[i].description);
-            const amountCell = $('<td contenteditable="true" class="editable">').text(numberWithCommas(data[i].cost));
+            const descriptionCell = $('<td contenteditable="false" class="editable">').text(data[i].description);
+            const amountCell = $('<td contenteditable="false" class="editable">').text(numberWithCommas(data[i].cost));
+            // delete cell with a fontawesome trashcan
+            const deleteCell = $('<td>').html('<i class="fa fa-trash"></i>');
+
+            // "<i class='fa fa-trash' onclick='removeMaterial(" +
+            // row.id 
+            // edit cell with a fontawesome pencil
+            const editCell = $('<td>').html('<i class="fa fa-pencil"></i>');
+
+            // make the edit cell 15px wide
+
+            editCell.css('width', '5px');
+
+            deleteCell.css('width', '5px');
+
+            amountCell.addClass('amount-column'); // Add class to identify amount columns
+
+            amountCell.css('width', '100px');
+
+
+            newRow.append(deleteCell);
+            newRow.append(editCell);
             newRow.append(descriptionCell);
             newRow.append(amountCell);
             table.append(newRow);
@@ -121,7 +142,7 @@ function addOption(takeoff_id) {
 
     console.log("Adding option to takeoff ", takeoff_id);
 
-    const table = $('#estimate-table');
+    const table = $('#options-table');
     const newRow = $('<tr>').attr('data-row-id', null); // New rows initially have no row_id
     const descriptionCell = $('<td contenteditable="true" class="editable">').text('');
     const amountCell = $('<td contenteditable="true" class="editable">').text('0.00');
@@ -160,12 +181,13 @@ function addOption(takeoff_id) {
 }
 
 
-function postToAddOption(event) {
-    event.preventDefault(); // Prevent the default form submission behavior
-
-    const takeoff_id = $('#takeoff_id').val();
-    const description = $('#description').val();
-    let cost = $('#cost_delta').val();
+function postToAddOption(description, cost, takeoff_id, row_id) {
+    // Clean and validate the cost input
+    cost = cost.replace(/[^0-9.-]+/g, '');
+    if (isNaN(parseFloat(cost))) {
+        alert('Please enter a valid number for Option Price.');
+        return;
+    }
 
     // Clean and validate the cost input
     cost = cost.replace(/[^0-9.-]+/g, '');
@@ -305,6 +327,29 @@ numberWithCommas = (x) => {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+
+function toggleNumbers() {
+    console.log('Toggling visibility of Amount columns...');
+    const amountColumns = $('.amount-column');
+    if (amountColumns.length === 0) {
+        console.error('No elements with class "amount-column" found.');
+    } else {
+        amountColumns.each(function(index) {
+            console.log(`Toggling column ${index}: current display = ${$(this).css('display')}`);
+            $(this).css('display', $(this).css('display') === 'none' ? '' : 'none');
+        });
+    }
+}
+function toggleTranslateMenu() {
+    const translateElement = document.getElementById("google_translate_element");
+    translateElement.style.display = translateElement.style.display === "none" ? "block" : "none";
+}
+
+
+
+
+   
+
 // Example to dynamically populate content on page load
 $(document).ready(function() {
     // Populate the "Proposal Includes" section with dynamic data
@@ -325,6 +370,16 @@ $(document).ready(function() {
  
     });
 
-    // Add event listeners for editable fields
-    addEditableListeners();
+    $(document).keydown(function(event) {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
+            document.querySelector('.navbar').style.display = 'none';
+            document.querySelector('.bottom-navbar').style.display = 'none';
+        }
+    });
+
+
+    // Add listeners to toggle number 
+
+    $('.toggle-btn').click(toggleNumbers);
+
 });

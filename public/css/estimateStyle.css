@@ -357,7 +357,7 @@ input[type="text"]:focus, input[type="date"]:focus {
 
   /* Table styles */
     #estimate-table {
-        width: 90%; /* Make the table take up the full width of the container */
+        width: 100%; /* Make the table take up the full width of the container */
         border-collapse: collapse; /* Remove extra spaces between table cells */
     }
 
