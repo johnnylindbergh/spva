@@ -212,6 +212,21 @@ module.exports = function (app) {
     });
   });
 
+  app.post("/update-takeoff-invoice-email", mid.isAuth, (req, res) => {
+    console.log("updating takeoff name");
+    let email = req.body.invoice_email_address;
+    let takeoff_id = req.body.takeoff_id;
+    console.log(req.body);
+    db.updateTakeoffInvoiceEmail(req.body.takeoff_id, email, function (err) {
+      if (err) {
+        console.log(err);
+        res.end();
+      } else {
+        res.redirect("/");
+      }
+    });
+  });
+
   app.get("/getTakeoffs", mid.isAuth, (req, res) => {
     db.getTakeoffs(function (err, takeoffs) {
       if (err) {
@@ -906,7 +921,7 @@ module.exports = function (app) {
     console.log("sending email to client ", req.body.takeoff_id);
     if (req.body.takeoff_id) {
       console.log("sending email ");
-      emailer.sendEstimateEmail(req.body.takeoff_id, function (err, response) {
+      emailer.sendEstimateEmail(req,res,req.body.takeoff_id, function (err, response) {
         if (err) {
           console.log(err);
           res.send("email failed");
@@ -933,7 +948,7 @@ module.exports = function (app) {
     console.log()
     if (req.body.takeoff_id) {
       console.log("sending email ");
-      emailer.sendEstimateEmailInternally(req.body.takeoff_id, req.user.local.email, function (err, response) {
+      emailer.sendEstimateEmailInternally(req, res,req.body.takeoff_id, req.user.local.email, function (err, response) {
         if (err) {
           console.log(err);
           res.send("email failed");
@@ -1192,11 +1207,11 @@ module.exports = function (app) {
       db.getTakeoffById(req.body.takeoff_id, function (err, takeoff) {
         console.log(takeoff);
         // is the estimate not signed?
-        if (takeoff[0].status != 4) {
+        if (takeoff[0].status <= 3) { // at least the estimate is signed
           console.log("estimate not signed");
-          res.send("estimate not signed");
+          //res.send("estimate not signed");
         } else {
-          res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_email: req.body.invoice_email, takeoff: takeoff });
+          res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_email: req.body.invoice_email, takeoff: takeoff[0] });
         }
       });
     });

@@ -243,15 +243,20 @@ CREATE TABLE string_match_subject (
 
 
 
--- Emails table
-CREATE TABLE emails (
-  id INT NOT NULL AUTO_INCREMENT,
-  sender_id INT,
-  sender VARCHAR(64),
-  customer_takeoff_id INT,
-  first_opened TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  last_opened TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  FOREIGN KEY (customer_takeoff_id) REFERENCES takeoffs(id)
-);
 
+  -- Emails table
+  CREATE TABLE emails (
+    id INT NOT NULL AUTO_INCREMENT,
+    takeoff_id INT,
+    sender_id INT,
+    recipient_email VARCHAR(64),
+    type VARCHAR(64),
+    response VARCHAR(128),
+    first_opened TIMESTAMP,
+    last_opened TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id),
+    FOREIGN KEY (sender_id) REFERENCES users(id)
+  );
+  

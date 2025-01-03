@@ -96,6 +96,22 @@ function updateTakeoffBillingAddress() {
     });
 }
 
+function updateTakeoffInvoiceEmailAddress() {
+  // get the newname from the input field
+  let email = $("#invoice_email_address").val();
+  console.log("Updating takeoff owner email address: " + email);
+  $.post("/update-takeoff-invoice-email", {
+    takeoff_id: takeoff_id,
+    owner_invoice_email_address: email,
+  })
+    .done(function () {
+      console.log("Takeoff owner email address updated: " + email);
+    })
+    .fail(function () {
+      console.log("Failed to update takeoff owner email address: " + email);
+    });
+}
+
 function add_subject(id, material_name) {
   subject_id = id;
   console.log("Adding material for subject: " + material_name);

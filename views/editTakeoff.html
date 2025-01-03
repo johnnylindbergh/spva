@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title> edit takofff | {{defaults.sysName}}</title>
+  <title>Edit Takofff | {{defaults.sysName}}</title>
   <link rel="stylesheet" type="text/css" href="css/reset.css">
   <link rel="stylesheet" type="text/css" href="css/defaults.css">
   <link rel="stylesheet" type="text/css" href="css/navbar.css">
@@ -72,7 +72,7 @@
       Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{owner}}'></br>
       Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{owner_billing_address}}'></br>
       Owner Email Address: <input type= 'text' class="hiddenInput" id= 'owner_email_address' onchange='updateTakeoffOwnerEmailAddress()' value='{{owner_email}}'></br>
-
+      Invoice Email Address: <input type= 'text' class="hiddenInput" id= 'invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email}}'></br>
       {{created_at}}</br>
       {{status}}
       <a href='/share/{{passcode}}'> Shared Link</a>

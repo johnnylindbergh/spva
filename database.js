@@ -535,6 +535,22 @@ module.exports = {
     }
   },
 
+
+  
+  logEmailSent: function (takeoff_id, sender_id, recipient_email, type, response, callback) {
+
+    // add a check to the respose to see if it is a success or failure
+
+    con.query(
+      "INSERT INTO emails (takeoff_id, sender_id, recipient_email, type, response) VALUES (?,?,?,?,?);",
+      [takeoff_id, sender_id, recipient_email, type, response],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
   saveEstimate: function (takeoff_id, inclusions, exclusions, callback) {
     //console.log("saving estimate function received: ", inclusions, exclusions, takeoff_id);
     if (takeoff_id == null) {

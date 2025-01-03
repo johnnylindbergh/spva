@@ -1,6 +1,7 @@
 const credentials = require("./credentials");
 const nodemailer = require("nodemailer");
 const db = require("./database.js");
+const { response } = require("express");
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -14,7 +15,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // async..await is not allowed in global scope, must use a wrapper
-async function sendEstimateEmail(takeoff_id, callback) {
+async function sendEstimateEmail(req, res, takeoff_id, callback) {
   db.getTakeoffById(takeoff_id, (err, takeoff) => {
     if (err) {
       console.log(err);
@@ -42,7 +43,13 @@ async function sendEstimateEmail(takeoff_id, callback) {
             callback(err, null);
           } else {
             console.log("Email sent: " + info.response);
-            callback(null, info.response);
+            console.log(req.user.local);
+
+            
+            db.logEmailSent(takeoff_id, req.user.local.id, takeoff[0].owner_email, "Estimate", info.response, (err, result) => {
+              if (err) { console.log(err); } 
+               callback(null, info.response);
+            });
           }
         });
       } else {
@@ -53,7 +60,7 @@ async function sendEstimateEmail(takeoff_id, callback) {
   });
 }
 
-// same as sendEstimateEmail but email is always system.
+// same as sendEstimateEmail but email is passed as parameter
 async function sendEstimateEmailInternally(takeoff_id, targetEmail, callback) {
 
   db.getTakeoffById(takeoff_id, (err, takeoff) => {

@@ -1,3 +1,5 @@
+// const { name } = require("ejs");
+
 $(document).ready(function () {
   function createProgressBar(statusCode, dateCreated) {
     const statuses = [
@@ -114,7 +116,16 @@ $(document).ready(function () {
   
       data.forEach(function (takeoff) {
         let row = $("<tr>");
-        row.append(`<td>${takeoff.name}</td>`);
+        
+        let nameCell  = $("<td>").text(takeoff.name);
+        nameCell.css("width", "160px");
+
+
+        // show the date when you hoever over the name
+        nameCell.attr("title", moment(takeoff.takeoff_created_at).format("YYYY-MM-DD HH:mm:ss"));
+
+
+        row.append(nameCell);
   
         // Create the 'Edit' form
         let editForm = $("<form>", {
@@ -128,8 +139,8 @@ $(document).ready(function () {
         row.append($("<td>").append(editForm));
   
         // Format and display the creation date
-        let createdAt = moment(takeoff.takeoff_created_at).format("MMMM Do YYYY, h:mm a");
-        row.append(`<td>${createdAt}</td>`);
+    
+
   
         // Create the 'View' form, similar to 'Edit'
         let viewForm = $("<form>", {
