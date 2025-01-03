@@ -34,7 +34,7 @@ $(document).ready(function () {
         console.log("Computed color:", color);
         segment.attr("style", `background-color: ${color}; color: white !important`);
       } else {
-        console.warn("'dateCreated' is not provided for 'Estimate Published'");
+       // console.warn("'dateCreated' is not provided for 'Estimate Published'");
       }
     }
 

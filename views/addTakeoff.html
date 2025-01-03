@@ -2,7 +2,7 @@
 <html>
 <head>
   <title> Add Takeoff | {{defaults.sysName}}</title>
-  <link rel="stylesheet" type="text/css" href="css/reset.css">
+  <!-- <link rel="stylesheet" type="text/css" href="css/reset.css"> -->
   <link rel="stylesheet" type="text/css" href="css/defaults.css">
   <link rel="stylesheet" type="text/css" href="css/navbar.css">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -66,20 +66,20 @@
   <h2></h2>
   Takeoff Name: <input type="text" name="takeoffName"/> <br>
   <input type="file" name="takeoff" />
-  <input type="submit" value="Upload" class="btn btn-default">
+  <input type="submit" value="Upload">
 </form>
 </div>
 
 <div class = "upload_plans">
   <form action="/uploadPlans" method="post" enctype="multipart/form-data">
     <input type="hidden" name="takeoff_id" value="1">
-    <input type="file" name="plans" />
-    <input type="submit" value="Upload Plans" class="btn btn-default">
+    <input type="file" name="plans"/>
+    <input type="submit" value="Upload Plans">
   </form>
 </div>
 <div class="container">
   <form action="/alButton" method="post">
-    <input type="submit" value="AL Button" />
+    <input type="submit" value="AL Button"/>
   </form>
 </div>
 

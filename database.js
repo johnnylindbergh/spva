@@ -1300,7 +1300,7 @@ module.exports = {
   },
 
   //    db.getTakeoffTotal(takeoff_id, function (err, takeoff, total) {
-
+// get the raw pretax total excluding options
   getTakeoffTotal: function (takeoff_id, callback) {
     con.query(
       "SELECT total, name FROM takeoffs WHERE id = ?;",
@@ -1341,6 +1341,7 @@ module.exports = {
     );
   },
 
+  // get the raw toatal + options + tax
   getTakeoffTotalForStripe: function (takeoff_id, callback) {
     con.query(
       "SELECT total, name, tax FROM takeoffs WHERE id = ?;",
@@ -1363,7 +1364,7 @@ module.exports = {
               if (err) return callback(err);
               let total = parseFloat(rows[0].total) + (parseFloat(options[0].total) || 0); // if no options, set to 0
               let takeoffName = rows[0].name;
-              callback(null, takeoffName, total*(tax/100.0 + 1));
+              callback(null, takeoffName, total*(tax/100.0 + 1.0));
 
             }
           );

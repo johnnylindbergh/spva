@@ -123,9 +123,12 @@ function add_subject(id, material_name) {
   // get the coordinates of the button
   let offset = button.offset();
 
-  console.log("Offset: " + offset);
-  dropdown.css("left", offset.left + 220 + "px");
-  dropdown.css("top", offset.top - 180 + "px");
+  if (offset) {
+    dropdown.css("left", offset.left - 380 + "px");
+    dropdown.css("top", offset.top - 250 + "px");
+  } else {
+    console.log("Button not found for subject id: " + id);
+  }
 }
 
 function add_material(id) {

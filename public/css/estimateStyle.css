@@ -372,9 +372,6 @@ input[type="text"]:focus, input[type="date"]:focus {
     /* Ensure headers stay fixed if table is wide */
     #estimate-table th {
         background-color: #f9f9f9; /* Light background for header */
-        position: sticky;
-        top: 0; /* Keep the header on top while scrolling */
-        z-index: 1;
     }
     /* the button to pay with credit Card */
 

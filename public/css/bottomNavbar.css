@@ -123,6 +123,6 @@
       border: 1px solid #ccc;
       border-radius: 5px;
       padding: 10px;
-      z-index: 999;
+      /* z-index: 999; */
       box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
   }

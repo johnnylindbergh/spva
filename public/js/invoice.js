@@ -1,8 +1,10 @@
+
+
 $(document).ready(function() {
     $('#submitEstimate').on('click', function() {
         var estimateId = $('#estimateId').val();
         
-        $.post('/getInvoice', { estimate_id: estimateId }, function(response) {
+        $.post('/create-invoice', { estimate_id: estimateId }, function(response) {
             // Handle the response here
             console.log(response);
         }).fail(function(error) {
@@ -11,3 +13,4 @@ $(document).ready(function() {
         });
     });
 });
+

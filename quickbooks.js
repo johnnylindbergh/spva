@@ -2,6 +2,7 @@ var QuickBooks = require('node-quickbooks');
 const mid = require("./middleware.js");
 var creds = require('./credentials');
 var axios = require('axios');
+let db = require('./database.js');
 
 'use strict';
 
@@ -16,6 +17,8 @@ const express = require('express');
 const path = require('path');
 const OAuthClient = require('intuit-oauth');
 const bodyParser = require('body-parser');
+const { DB_NAME } = require('./settings.js');
+const { devNull } = require('os');
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 /**
@@ -211,39 +214,6 @@ app.get('/getJobs', mid.isAuth, function (req, res) {
     });
 });
 
-  // Create an Invoice
-app.post('/create-invoice', async (req, res) => {
-    try {
-      const invoiceData = {
-        Line: [
-          {
-            Amount: req.body.amount,
-            DetailType: 'SalesItemLineDetail',
-            SalesItemLineDetail: {
-              ItemRef: { value: req.body.itemRef },
-            },
-          },
-        ],
-        CustomerRef: { value: req.body.customerRef },
-      };
-
-      const response = await axios.post(
-        `https://sandbox-quickbooks.api.intuit.com/v3/company/${realmId}/invoice`,
-        invoiceData,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      res.json(response.data);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Error creating invoice.');
-    }
-  });
 
 /**
  * disconnect ()

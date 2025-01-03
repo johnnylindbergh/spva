@@ -7,6 +7,8 @@
     <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="/js/invoice.js"></script>
+
 
     <title>Create Invoice</title>
     <style>
@@ -128,7 +130,7 @@
     <h2>Create Invoice</h2>
 
     
-    <form action="/create-invoice" method="POST">
+    <form action="/createInvoice" method="POST">
             <!-- hidden fields -->
         <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
         <!-- Customer Name -->
@@ -137,7 +139,7 @@
 
         <!-- Email -->
         <label for="email">Invoice Email</label>
-        <input type="email" id="email" name="email" value="{{takeoff.invoice_email}}" required>
+        <input type="email" id="email" name="invoice_email" value="{{takeoff.invoice_email}}" required>
 
         <!-- Invoice Date -->
         <label for="invoice-date">Invoice Date</label>

@@ -10,7 +10,7 @@
   width: 100%;
   font-size: 14px;
   background-color:#f48947c8;
-  z-index: 3;
+  /* z-index: 3; */
 }
 
 /* make all navbar content non-highlightable */

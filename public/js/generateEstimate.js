@@ -95,6 +95,7 @@ function populateOptions(takeoff_id) {
     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
         data = data.options;
         const table = $('#options-table');
+        table.empty(); // Clear the table before populating it with new data
         for (let i = 0; i < data.length; i++) {
             const newRow = $('<tr>').data('row_id', data[i].id); // Store row_id as data attribute
             const descriptionCell = $('<td contenteditable="false" class="editable">').text(data[i].description);
@@ -124,71 +125,27 @@ function populateOptions(takeoff_id) {
             newRow.append(amountCell);
             table.append(newRow);
 
-            // Trigger post to server when editing is finished (focusout)
-            descriptionCell.on('focusout', function() {
-               // postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.data('row_id'));
-            });
-            amountCell.on('focusout', function() {
-                postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.data('row_id'));
-            });
+            // // Trigger post to server when editing is finished (focusout)
+            // descriptionCell.on('focusout', function() {
+            //    // postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.data('row_id'));
+            // });
+            // amountCell.on('focusout', function() {
+            //     postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.data('row_id'));
+            // });
         }
     });
 }
 
-function addOption(takeoff_id) {
-    if (takeoff_id == null) {
-        takeoff_id = parseInt($('#takeoff_id').val());
-    }
-
-    console.log("Adding option to takeoff ", takeoff_id);
-
-    const table = $('#options-table');
-    const newRow = $('<tr>').attr('data-row-id', null); // New rows initially have no row_id
-    const descriptionCell = $('<td contenteditable="true" class="editable">').text('');
-    const amountCell = $('<td contenteditable="true" class="editable">').text('0.00');
-    newRow.append(descriptionCell);
-    newRow.append(amountCell);
-    table.append(newRow);
-
-    // Trigger post to server when editing is finished (focusout)
-    descriptionCell.on('focusout', function() {
-       // postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
-        // if amount is not 0.00, postToAddOption
-        var amount = amountCell.text();
-        if (amount != "0.00" && descriptionCell.text() != '') {
-            // remove the row
-            newRow.remove();
-        }
-
-        if (amount != "0.00") {
-            postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
-        } else {
-           
-        }
-    });
-    amountCell.on('focusout', function() {
-        if (descriptionCell.text() == '') { // Don't allow empty descriptions
-            descriptionCell.text('WRITE DESCRIPTION HERE');
-        } else {
-            postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
-
-        }
-
-    });
-
-    // Initial post when row is added
-   // postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.attr('data-row-id'));
-}
 
 
-function postToAddOption(description, cost, takeoff_id, row_id) {
-    // Clean and validate the cost input
-    cost = cost.replace(/[^0-9.-]+/g, '');
-    if (isNaN(parseFloat(cost))) {
-        alert('Please enter a valid number for Option Price.');
-        return;
-    }
+   
 
+		
+function postToAddOption(event) {
+    event.preventDefault(); // Prevent the default form submission behavior
+    const takeoff_id = $('#takeoff_id').val();
+    const description = $('#description').val();
+    let cost = $('#cost_delta').val();
     // Clean and validate the cost input
     cost = cost.replace(/[^0-9.-]+/g, '');
     if (isNaN(parseFloat(cost))) {
@@ -214,7 +171,6 @@ function postToAddOption(description, cost, takeoff_id, row_id) {
                  // empty the input fields
                     $('#description').val('');
                     $('#cost_delta').val('');
-
                 
             }
         })
@@ -222,7 +178,6 @@ function postToAddOption(description, cost, takeoff_id, row_id) {
             console.error('Error adding/updating row:', error);
         });
 }
-
 
 function shareClient(){
     const takeoff_id = $('#takeoff_id').val();

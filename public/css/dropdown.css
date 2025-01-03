@@ -47,7 +47,7 @@ Dropdown Button
   background-color:white;
   /* min-width: 230px; */
   border: 1px solid #ddd;
-  z-index: 1;
+  /* z-index: 1; */
 }
 
 /* Links inside the dropdown */
