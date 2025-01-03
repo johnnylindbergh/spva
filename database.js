@@ -1303,9 +1303,31 @@ module.exports = {
     );
   },
 
+  updatePaymentMethod: function (takeoff_id, payment_method, callback) {
+    con.query(
+      "UPDATE takeoffs SET payment_method = ? WHERE id = ?;",
+      [payment_method, takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
+  getPaymentMethod: function (takeoff_id, callback) {
+    con.query(
+      "SELECT payment_method FROM takeoffs WHERE id = ?;",
+      [takeoff_id],
+      function (err, results) {
+        if (err) return callback(err);
+        callback(null, results[0].payment_method);
+      }
+    );
+  },
+
   getTakeoffTotalForStripe: function (takeoff_id, callback) {
     con.query(
-      "SELECT total, name FROM takeoffs WHERE id = ?;",
+      "SELECT total, name, tax FROM takeoffs WHERE id = ?;",
       [takeoff_id],
       function (err, rows) {
         if (err) return callback(err);
@@ -1314,6 +1336,7 @@ module.exports = {
           console.log(rows[0]);
           let total = rows[0].total;
           let takeoffName = rows[0].name;
+          let tax = parseFloat(rows[0].tax);
 
 
           // get the optiontotal
@@ -1324,7 +1347,7 @@ module.exports = {
               if (err) return callback(err);
               let total = parseFloat(rows[0].total) + (parseFloat(options[0].total) || 0); // if no options, set to 0
               let takeoffName = rows[0].name;
-              callback(null, takeoffName, total);
+              callback(null, takeoffName, total*(tax/100.0 + 1));
 
             }
           );

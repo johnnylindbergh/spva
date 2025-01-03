@@ -243,18 +243,20 @@ function loadTakeoffMaterials(id) {
           measurementUnitInput.append(option);
         });
 
-        if (row.measurement_unit === "ft' in\"") {
-              // add an alert icon to the cell
-              let alertIcon = $("<i class='fa fa-exclamation-triangle'><i style = 'font-size:9px;'>measurement is in linear ft</i>");
-              newRow.append(alertIcon);
-        }
-
-
+    
 
         let measurementCell = $("<td></td>")
           .append(measurementInput)
           .append(" ")
           .append(measurementUnitInput);
+
+          if (row.measurement_unit === "ft' in\"") {
+            // add an alert icon to the cell
+            let alertIcon = $("<i class='fa fa-exclamation-triangle'><i style = 'font-size:9px;'>measurement is in linear ft</i>");
+            measurementCell.append(alertIcon);
+          }
+
+
 
         newRow.append(measurementCell);
 

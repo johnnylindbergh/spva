@@ -44,7 +44,7 @@ var fileCounter = Math.floor(1000 + Math.random() * 9000);
 // file upload stuff
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, sys.PROJECT_PATH+"/uploads");
+    cb(null, sys.PROJECT_PATH + "/uploads");
   },
   filename: function (req, file, cb) {
     cb(null, file.fieldname + "" + fileCounter + ".csv");
@@ -122,7 +122,7 @@ function readTakeoff(req, res, filename, cb) {
             cb(err);
           } else {
             console.log("takeoff loaded");
-            db.takeoffSetStatus(takeoff_id, status, function (err) {});
+            db.takeoffSetStatus(takeoff_id, status, function (err) { });
           }
         });
 
@@ -267,7 +267,7 @@ module.exports = function (app) {
           readTakeoff(
             req,
             res,
-            sys.PROJECT_PATH+"/uploads/" + req.file.filename,
+            sys.PROJECT_PATH + "/uploads/" + req.file.filename,
             function (err) {
               if (err) {
                 console.log(err);
@@ -289,7 +289,7 @@ module.exports = function (app) {
   });
 
   app.post("/editTakeoff", mid.isAuth, function (req, res) {
-     console.log("editing", req.body.takeoff_id);
+    console.log("editing", req.body.takeoff_id);
 
     db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
       if (err) {
@@ -355,10 +355,10 @@ module.exports = function (app) {
         if (err) {
           console.log(err);
         } else {
-          if (valid){
+          if (valid) {
             res.send(valid);
           }
-          
+
         }
       }
     );
@@ -374,180 +374,180 @@ module.exports = function (app) {
 
   /* this funciton should be split into two functions one POST /settings to render the settings page. The settings page with then pull the 
   settings from the server so we will need a second function that res.send the settings to the client */
-  
+
   app.post("/settings", mid.isAuth, function (req, res) {
-    
+
     /* since this page is accessed through clicking the settings button in the navbar while editing a takeoff, 
     we can assume that the rendering of this page must also reference some takeoff-specific data  
     therefore, we should pass a takeoff_id (from the post request) to the settings page
     retrived by either querystring or stored in cookie or session storage OR convert this into a post request
     */
-  db.getAllSystemSettings(function (err, settings) {
-    if (err) {
-      console.log(err);
-      res.status(500).send("Failed to retrieve settings");
-    } else {
-      console.log(settings);
-
-      res.render("userSettings.html", { settings: settings, takeoff_id: req.body.takeoff_id });
-    }
-  });
-});
-
-app.get('/getSettings', mid.isAuth, function (req, res) {
     db.getAllSystemSettings(function (err, settings) {
-        if (err) {
-            console.error('Error retrieving settings:', err);
-            res.status(500).send({ success: false, error: 'Failed to retrieve settings' });
-        } else {
-            res.send(settings.map(setting => ({
-                setting_id: setting.setting_id,
-                setting_name: setting.setting_name,
-                setting_value: setting.setting_value,
-            })));
-        }
-    });
-});
-
-app.post('/updateSettings', mid.isAuth, function (req, res) {
-    const settings = req.body;
-    const updatePromises = Object.entries(settings).map(([setting_name, setting_value]) => {
-        return new Promise((resolve, reject) => {
-            db.getSystemSettingByName(setting_name, (err, [setting]) => {
-                if (err || !setting) {
-                    console.error(`Setting not found: ${setting_name}`); 
-                    reject(err || 'Setting not found');
-                } else {
-                    db.updateSystemSetting(setting.setting_id, setting_value, (updateErr) => {
-                        if (updateErr) {
-                            console.error(`Error updating setting: ${setting_name}`); // Debugging statement
-                            reject(updateErr);
-                        } else {
-                            resolve();
-                        }
-                    });
-                }
-            });
-        });
-    });
-
-    Promise.all(updatePromises)
-        .then(() => res.send({ success: true }))
-        .catch(err => {
-            console.error('Error updating settings:', err);
-            res.status(500).send({ success: false, error: 'Failed to update settings' });
-        });
-});
-
-
-app.post("/generateEstimate", function (req, res) {
-  // priority: this function should check to see if an estimate has been generated, if yes, send to client, if no, generate
-  var takeoff_id = req.body.takeoff_id;
-  console.log("Generating estimate for takeoff", takeoff_id);
-
-    // Fetch the ChatGPT prompt dynamically from the database
-  db.getSystemSettingByName("chatgpt_prompt", function (err, prompt) {
-    if (err || !prompt) {
-      console.error("Error fetching ChatGPT prompt, using default.");
-      prompt = sys.PROMPT; // Fallback prompt
-    }
-
-  db.takeoffSetStatus(takeoff_id, 2, function (err) {
-    if (err) {
-      // Handle the error if necessary
-      
-    }
-
-    db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
       if (err) {
         console.log(err);
-        res.status(500).send("Error generating estimate");
+        res.status(500).send("Failed to retrieve settings");
       } else {
-        console.log(takeoff_info[0].estimate_id)
-        if (takeoff_info[0].estimate_id == null) {
-          // Build the prompt
+        console.log(settings);
 
-
-           prompt = prompt[0].setting_value;
-
-          console.log("Prompt:", prompt);
-          for (var i = 0; i < estimate.length; i++) {
-            prompt += " subject={ " + estimate[i].material_name;
-            prompt +=
-              " measurement: " +
-              estimate[i].measurement +
-              estimate[i].measurement_unit;
-            " " + estimate[i].measurement_unit;
-            if (estimate[i].selected_materials != null) {
-              for (var j = 0; j < estimate[i].selected_materials.length; j++) {
-                //console.log(estimate[i].selected_materials[j]);
-                prompt +=
-                  " name: " + estimate[i].selected_materials[j].name + "'";
-                prompt +=
-                  " desc: " + estimate[i].selected_materials[j].description;
-              }
-            }
-            prompt += "}";
-          }
-
-          // call to  async function callChatGPT with the response as the return value and saves the it to the database
-          let response = "";
-          chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
-            response = subres;
-            //console.log("Response:", response);
-
-            // process response for render
-            // split into two vars called includes, and exclusions
-            let inclusions = response.split("</br>")[0];
-            let exclusions = response.split("</br>")[1];
-
-            // check if the response has been split correctly
-              console.log("Includes:", inclusions.substring(0, 20) + "...");
-              console.log("Exclusions:", exclusions.substring(0, 20) + "...");
-            //nul checking for inclusions and exclusions
-            if (inclusions == null) {
-              // set the inclusions to the response
-              inclusions = response;
-            }
-            if (exclusions == null) {
-              // set the exclusions to the response
-              exclusions = "";
-            }
-            db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
-              res.render("viewEstimate.html", {
-                inclusions: inclusions,
-                exclusions: exclusions,
-                takeoff_id: takeoff_id,
-                estimate: estimate,
-                takeoff: takeoff_info,
-              });
-            });
-          });
-
-        } else {
-          console.log("No estimate generated, just retrieved");
-
-          // get the inclusions and exclusions from the database
-          db.getEstimateData(takeoff_id, function (err, estimate, takeoff_info) {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log(estimate);
-              res.render("viewEstimate.html", {
-                estimate: estimate,
-                takeoff: takeoff_info,
-                takeoff_id: takeoff_id,
-              });
-            }
-          });
-
-        }
+        res.render("userSettings.html", { settings: settings, takeoff_id: req.body.takeoff_id });
       }
     });
   });
-});
-});
-  
+
+  app.get('/getSettings', mid.isAuth, function (req, res) {
+    db.getAllSystemSettings(function (err, settings) {
+      if (err) {
+        console.error('Error retrieving settings:', err);
+        res.status(500).send({ success: false, error: 'Failed to retrieve settings' });
+      } else {
+        res.send(settings.map(setting => ({
+          setting_id: setting.setting_id,
+          setting_name: setting.setting_name,
+          setting_value: setting.setting_value,
+        })));
+      }
+    });
+  });
+
+  app.post('/updateSettings', mid.isAuth, function (req, res) {
+    const settings = req.body;
+    const updatePromises = Object.entries(settings).map(([setting_name, setting_value]) => {
+      return new Promise((resolve, reject) => {
+        db.getSystemSettingByName(setting_name, (err, [setting]) => {
+          if (err || !setting) {
+            console.error(`Setting not found: ${setting_name}`);
+            reject(err || 'Setting not found');
+          } else {
+            db.updateSystemSetting(setting.setting_id, setting_value, (updateErr) => {
+              if (updateErr) {
+                console.error(`Error updating setting: ${setting_name}`); // Debugging statement
+                reject(updateErr);
+              } else {
+                resolve();
+              }
+            });
+          }
+        });
+      });
+    });
+
+    Promise.all(updatePromises)
+      .then(() => res.send({ success: true }))
+      .catch(err => {
+        console.error('Error updating settings:', err);
+        res.status(500).send({ success: false, error: 'Failed to update settings' });
+      });
+  });
+
+
+  app.post("/generateEstimate", function (req, res) {
+    // priority: this function should check to see if an estimate has been generated, if yes, send to client, if no, generate
+    var takeoff_id = req.body.takeoff_id;
+    console.log("Generating estimate for takeoff", takeoff_id);
+
+    // Fetch the ChatGPT prompt dynamically from the database
+    db.getSystemSettingByName("chatgpt_prompt", function (err, prompt) {
+      if (err || !prompt) {
+        console.error("Error fetching ChatGPT prompt, using default.");
+        prompt = sys.PROMPT; // Fallback prompt
+      }
+
+      db.takeoffSetStatus(takeoff_id, 2, function (err) {
+        if (err) {
+          // Handle the error if necessary
+
+        }
+
+        db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
+          if (err) {
+            console.log(err);
+            res.status(500).send("Error generating estimate");
+          } else {
+            console.log(takeoff_info[0].estimate_id)
+            if (takeoff_info[0].estimate_id == null) {
+              // Build the prompt
+
+
+              prompt = prompt[0].setting_value;
+
+              console.log("Prompt:", prompt);
+              for (var i = 0; i < estimate.length; i++) {
+                prompt += " subject={ " + estimate[i].material_name;
+                prompt +=
+                  " measurement: " +
+                  estimate[i].measurement +
+                  estimate[i].measurement_unit;
+                " " + estimate[i].measurement_unit;
+                if (estimate[i].selected_materials != null) {
+                  for (var j = 0; j < estimate[i].selected_materials.length; j++) {
+                    //console.log(estimate[i].selected_materials[j]);
+                    prompt +=
+                      " name: " + estimate[i].selected_materials[j].name + "'";
+                    prompt +=
+                      " desc: " + estimate[i].selected_materials[j].description;
+                  }
+                }
+                prompt += "}";
+              }
+
+              // call to  async function callChatGPT with the response as the return value and saves the it to the database
+              let response = "";
+              chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
+                response = subres;
+                //console.log("Response:", response);
+
+                // process response for render
+                // split into two vars called includes, and exclusions
+                let inclusions = response.split("</br>")[0];
+                let exclusions = response.split("</br>")[1];
+
+                // check if the response has been split correctly
+                console.log("Includes:", inclusions.substring(0, 20) + "...");
+                console.log("Exclusions:", exclusions.substring(0, 20) + "...");
+                //nul checking for inclusions and exclusions
+                if (inclusions == null) {
+                  // set the inclusions to the response
+                  inclusions = response;
+                }
+                if (exclusions == null) {
+                  // set the exclusions to the response
+                  exclusions = "";
+                }
+                db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
+                  res.render("viewEstimate.html", {
+                    inclusions: inclusions,
+                    exclusions: exclusions,
+                    takeoff_id: takeoff_id,
+                    estimate: estimate,
+                    takeoff: takeoff_info,
+                  });
+                });
+              });
+
+            } else {
+              console.log("No estimate generated, just retrieved");
+
+              // get the inclusions and exclusions from the database
+              db.getEstimateData(takeoff_id, function (err, estimate, takeoff_info) {
+                if (err) {
+                  console.log(err);
+                } else {
+                  console.log(estimate);
+                  res.render("viewEstimate.html", {
+                    estimate: estimate,
+                    takeoff: takeoff_info,
+                    takeoff_id: takeoff_id,
+                  });
+                }
+              });
+
+            }
+          }
+        });
+      });
+    });
+  });
+
 
   app.post("/viewEstimate", mid.isAuth, function (req, res) {
     console.log("estimate view");
@@ -705,14 +705,14 @@ app.post("/generateEstimate", function (req, res) {
     // get the takeoff_id
     let takeoff_id = req.body.takeoff_id;
 
-    let subject  = {
+    let subject = {
       name: req.body.subject_name,
       measurement: req.body.measurement,
       measurement_unit: req.body.measurement_unit,
       labor_cost: req.body.labor_cost
     }
     // // get the subject object
-   
+
     db.createSubject(takeoff_id, subject, function (err) {
       if (err) {
         console.log(err);
@@ -774,7 +774,7 @@ app.post("/generateEstimate", function (req, res) {
         console.log("updated");
       }
     });
-  }); 
+  });
 
   app.post("/update-takeoff-invoice-email", mid.isAuth, function (req, res) {
     console.log("updating takeoff invoice email ", req.body);
@@ -795,20 +795,20 @@ app.post("/generateEstimate", function (req, res) {
     console.log("Cost Delta:", req.body.cost_delta);
 
     db.addOption(
-        req.body.takeoff_id,
-        req.body.description,
-        req.body.cost_delta,
-        function (err, new_row_id) {
-            if (err) {
-                console.error("Error adding option:", err);
-                return res.status(500).send({ error: "Failed to add option" });
-            } else {
-                console.log("Added successfully");
-                res.send({ new_row_id: new_row_id });
-            }
+      req.body.takeoff_id,
+      req.body.description,
+      req.body.cost_delta,
+      function (err, new_row_id) {
+        if (err) {
+          console.error("Error adding option:", err);
+          return res.status(500).send({ error: "Failed to add option" });
+        } else {
+          console.log("Added successfully");
+          res.send({ new_row_id: new_row_id });
         }
+      }
     );
-});
+  });
 
 
   app.post("/loadOptions", function (req, res) {
@@ -817,7 +817,7 @@ app.post("/generateEstimate", function (req, res) {
       if (err) {
         console.log(err);
       }
-      res.send({options:options, mutable:mutable});
+      res.send({ options: options, mutable: mutable });
     });
   });
 
@@ -865,7 +865,7 @@ app.post("/generateEstimate", function (req, res) {
 
           }
 
-     
+
         }
       }
     );
@@ -906,7 +906,7 @@ app.post("/generateEstimate", function (req, res) {
     console.log("sending email to client ", req.body.takeoff_id);
     if (req.body.takeoff_id) {
       console.log("sending email ");
-      emailer.sendEstimateEmail(req.body.takeoff_id, function (err, response){
+      emailer.sendEstimateEmail(req.body.takeoff_id, function (err, response) {
         if (err) {
           console.log(err);
           res.send("email failed");
@@ -922,15 +922,56 @@ app.post("/generateEstimate", function (req, res) {
           );
         }
       }); // how do we get the response from this function
-     
+
     } else {
-      console.log(""); 
+      console.log("");
+    }
+  });
+
+  app.post("/shareSelf", mid.isAuth, function (req, res) {
+    console.log("sending email to self ", req.user.local.email);
+    console.log()
+    if (req.body.takeoff_id) {
+      console.log("sending email ");
+      emailer.sendEstimateEmailInternally(req.body.takeoff_id, req.user.local.email, function (err, response) {
+        if (err) {
+          console.log(err);
+          res.send("email failed");
+        } else {
+          console.log(response);
+          db.takeoffSetStatus(req.body.takeoff_id, 3, function (err) {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("email sent to self");
+            }
+          }
+          );
+        }
+      }); // how do we get the response from this function
+
+    } else {
+      console.log("");
     }
   });
 
   app.post('/checkMeout/:takeoff_id', function (req, res) {
     console.log("/checkMeout/");
     const takeoff_id = req.params.takeoff_id;
+    const method = req.body.method;
+
+    if (method == null || !['card', 'us_bank_account'].includes(method)) {
+      console.log('')
+    } else {
+      db.updatePaymentMethod(takeoff_id, method, function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("updated");
+        }
+      });
+    }
+
     if (takeoff_id == null) {
       console.log("takeoff_id is null");
       res.redirect("/");
@@ -945,265 +986,300 @@ app.post("/generateEstimate", function (req, res) {
         // get the price_id
         // render the checkout page
         //takeoff = takeoff[0];
-      //cnvert rows into json object
- 
+        //cnvert rows into json object
 
-      // if (total == null) {
-      //   console.log('total is null');
-      //   total = 50.00;
-      // }
 
-      // create a stripe price_id
-      const price = stripe.prices.create({
-        unit_amount: Math.floor(total*100),
-        currency: 'usd',
-        product_data: {
-          name: takeoffName +' Estimate'
-        },
+        // if (total == null) {
+        //   console.log('total is null');
+        //   total = 50.00;
+        // }
 
-      });
+        // create a stripe price_id
+        const price = stripe.prices.create({
+          unit_amount: Math.floor(total * 100),
+          currency: 'usd',
+          product_data: {
+            name: takeoffName + ' Estimate'
+          },
+
+        });
         //console.log(price.id);
-        
-       // console.log("takeoff is ", takeoff);
+
+        // console.log("takeoff is ", takeoff);
         res.render("checkout.html", {
           takeoff_id: takeoff_id,
           priceId: price.id
         });
       }
     }
-  );
-});
-app.get('/checkMeout/:takeoff_id', function (req, res) {
-  console.log("/checkMeout/");
-  const takeoff_id = req.params.takeoff_id;
-  if (takeoff_id == null) {
-    console.log("takeoff_id is null");
-    res.redirect("/");
-  }
-  // get takeoff
-  db.getTakeoffTotal(takeoff_id, function (err, takeoffName, total) {
-    console.log(takeoffName + " has a total of " + total);
-    if (err) {
-      console.log(err);
-    } else {
-
-    // add 3% and 30 cents
-    total *= 0.0288;
-    total += 30;
-    console.log("total is ",  Math.floor(total*100.0));
-    // create a stripe price_id
-    const price = stripe.prices.create({
-      unit_amount: Math.floor(total*100.0),
-      currency: 'usd',
-      product_data: {
-        name: takeoffName +' Estimate'
-      },
-
-    });
-      //console.log(price.id);
-      
-     // console.log("takeoff is ", takeoff);
-      res.render("checkout.html", {
-        takeoff_id: takeoff_id,
-        priceId: price.id
-      });
+    );
+  });
+  app.get('/checkMeout/:takeoff_id', function (req, res) {
+    console.log("/checkMeout/");
+    const takeoff_id = req.params.takeoff_id;
+    if (takeoff_id == null) {
+      console.log("takeoff_id is null");
+      res.redirect("/");
     }
-  }
-);
-});
-   
+    // get takeoff
+    db.getTakeoffTotal(takeoff_id, function (err, takeoffName, total) {
+      console.log(takeoffName + " has a total of " + total);
+      if (err) {
+        console.log(err);
+      } else {
 
-app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
-  // create a price_id
-  // get whole takeoff
-  const takeoff_id = req.params.takeoff_id;
-  console.log(req.params);
-  if (req.params.takeoff_id == null || req.params.takeoff_id == undefined) {
-    console.log("takeoff_id is null");
-    res.redirect("/");
-  }
-  
-  db.getTakeoffTotalForStripe(req.params.takeoff_id, async function (err, takeoffName, total) {
-    if (err) {
-      console.log(err);
-      res.status(500).send("Error retrieving takeoff");
-    } else {
+        db.getPaymentMethod(takeoff_id, function (err) {
+          if (err) { console.log(err); }
 
-   
-      if ( total == null) {
-        console.log("total is null");
-       total = 13000.00 * 100;
+      
+          console.log("total is ", Math.floor(total * 100.0));
+          // create a stripe price_id
+          const price = stripe.prices.create({
+            unit_amount: Math.floor(total * 100.0),
+            currency: 'usd',
+            product_data: {
+              name: takeoffName + ' Estimate'
+            },
+
+          });
+          //console.log(price.id);
+
+          // console.log("takeoff is ", takeoff);
+          res.render("checkout.html", {
+            takeoff_id: takeoff_id,
+            priceId: price.id
+          });
+
+        });
       }
-      // determine the total
-      console.log("total  is ", total);
+    });
+  });
 
-      // create a product
-      const product = await stripe.products.create({
-        name: takeoffName + " Estimate",
-       // unit_amount: takeoff.total,
+
+
+  app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
+    // create a price_id
+    // get whole takeoff
+    const takeoff_id = req.params.takeoff_id;
+    console.log(req.params);
+    if (req.params.takeoff_id == null || req.params.takeoff_id == undefined) {
+      console.log("takeoff_id is null");
+      res.redirect("/");
+    }
+
+    db.getTakeoffTotalForStripe(req.params.takeoff_id, async function (err, takeoffName, total) { // this applies tax
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving takeoff");
+      } else {
+
+        db.getPaymentMethod(takeoff_id, async function (err, method) {
+          if (err) {
+            console.log(err);
+          } else {
+
+            console.log("The method is =", method);
+
+
+            try {
+              if (total == null) {
+                console.log("total is null");
+                total = 13000.00 * 100;
+              }
+              // determine the total
+              console.log("total  is ", total);
+
+              // create a product
+              const product = await stripe.products.create({
+                name: takeoffName + " Estimate",
+                // unit_amount: takeoff.total,
+              });
+
+              
+
+              if (method == 'card') {
+                total = cardOffset(total);
+              }
+
+              if (method == 'us_bank_account') {
+                total = bankOffset(total);
+              }
+
+              const price = await stripe.prices.create({
+                unit_amount: Math.floor(total * 100),
+                currency: 'usd',
+                product: product.id,
+              });
+
+              const session = await stripe.checkout.sessions.create({
+                ui_mode: 'embedded',
+                line_items: [
+                  {
+                    // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+                    price: price.id,
+                    quantity: 1,
+                  },
+                ],
+                mode: 'payment',
+                return_url: creds.domain + `/return.html?session_id={CHECKOUT_SESSION_ID}`,
+                payment_method_types: [method],
+              });
+
+              res.send({ clientSecret: session.client_secret });
+            } catch (error) {
+              console.log(error);
+              res.status(500).send("Error creating checkout session");
+            }
+          }
+        });
+      }
+    });
+  });
+
+    app.get('/session-status', async (req, res) => {
+      const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+      console.log("session id: " + req.query.session_id);
+      console.log("session status: " + session.status);
+      console.log("customer email: " + session.customer_details.email);
+      console.log("status: " + session.status);
+      console.log("amount_total: " + session.amount_total);
+
+      // compute the raw amount. subtract 3%
+      let raw_amount = session.amount_total - Math.floor((session.amount_tota) * 0.0288);
+      console.log("Amount Recieved from stripe" + raw_amount);
+
+
+      // take this information and insert it into the data base
+
+      // send confirmation email to the customer with the invoice
+      res.send({
+        status: session.status,
+        customer_email: session.customer_details.email
       });
-     
-      total *= 1.0288; // add 2.88%
-      total += 0.30; // add 30 cents
+    });
 
+    // app.post('/sessionComplete', async (req, res) => {
+    //   // get the session object
+    // //  const session = await stripe.checkout.sessions.retrieve(req.body.session_id);
+    // //  const session = await stripe.checkout.sessions.retrieve(req.body.sessionId);
+    //   console.log("session id:" + req.body.sessionId);
 
-      
-      const price = await stripe.prices.create({
-        unit_amount:Math.floor(total*100),
-        currency: 'usd',
-        product: product.id,
+    //   res.send({ success: true });
+    // });
+
+    app.post("/viewPaymentHistory", mid.isAuth, function (req, res) {
+      const takeoff_id = req.body.takeoff_id;
+      console.log("viewing payment history");
+      res.render("viewPaymentHistory.html", { takeoff_id: takeoff_id });
+    });
+
+    app.post("/retrievePaymentHistory", mid.isAuth, function (req, res) {
+      console.log("retrieving payment history");
+      db.getPaymentHistory(req.body.takeoff_id, function (err, payments) {
+        if (err) {
+          console.log(err);
+        }
+        res.send(payments);
       });
+    });
 
-      const session = await stripe.checkout.sessions.create({
-        ui_mode: 'embedded',
-        line_items: [
-          {
-            // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-            price: price.id,
-            quantity: 1,
-          },
-        ],
-        mode: 'payment',
-        return_url: creds.domain + `/return.html?session_id={CHECKOUT_SESSION_ID}`,
+
+
+
+    app.post('/invoiceCreator', mid.isAuth, function (req, res) {
+      console.log("creating invoice for", req.body);
+
+      db.getTakeoffById(req.body.takeoff_id, function (err, takeoff) {
+        console.log(takeoff);
+        // is the estimate not signed?
+        if (takeoff[0].status != 4) {
+          console.log("estimate not signed");
+          res.send("estimate not signed");
+        } else {
+          res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_email: req.body.invoice_email, takeoff: takeoff });
+        }
       });
+    });
 
-      res.send({ clientSecret: session.client_secret});
-    }
-  });
-});
+    app.post('/create-invoice', mid.isAuth, function (req, res) {
+      const takeoff_id = req.body.takeoff_id;
+      const customerName = req.body.customer_name;
+      const email = req.body.email;
+      const invoiceDate = req.body.invoice_date;// the date the invoice is to be sent
+      const paymentAmount = req.body.payment_amount;
+      const customAmount = req.body.custom_amount;
+      const amountToInvoice = customAmount ? customAmount : paymentAmount;
 
-app.get('/session-status', async (req, res) => {
-  const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
- console.log("session id: " + req.query.session_id);
- console.log("session status: " + session.status);
- console.log("customer email: " + session.customer_details.email);
- console.log("status: " + session.status);
- console.log("amount_total: " + session.amount_total);
+      console.log("generating invoice for", req.body);
 
- // compute the raw amount. subtract 3%
-  let raw_amount = session.amount_total - Math.floor((session.amount_tota) * 0.0288);
-  console.log("Amount Recieved from stripe"+ raw_amount);
-
-
-// take this information and insert it into the data base
-
-// send confirmation email to the customer with the invoice
-  res.send({
-    status: session.status,
-    customer_email: session.customer_details.email
-  });
-});
-
-// app.post('/sessionComplete', async (req, res) => {
-//   // get the session object
-// //  const session = await stripe.checkout.sessions.retrieve(req.body.session_id);
-// //  const session = await stripe.checkout.sessions.retrieve(req.body.sessionId);
-//   console.log("session id:" + req.body.sessionId);
-
-//   res.send({ success: true });
-// });
-
-app.post("/viewPaymentHistory", mid.isAuth, function (req, res) {
-  const takeoff_id = req.body.takeoff_id;
-  console.log("viewing payment history");
-  res.render("viewPaymentHistory.html", { takeoff_id: takeoff_id });
-});
-
-app.post("/retrievePaymentHistory", mid.isAuth, function (req, res) {
-  console.log("retrieving payment history");
-  db.getPaymentHistory(req.body.takeoff_id, function (err, payments) {
-    if (err) {
-      console.log(err);
-    }
-    res.send(payments);
-  });
-});
+      // print them all in an english sentence
+      console.log("Customer " + customerName + " with email " + email + " will be invoiced on " + invoiceDate + " for " + paymentAmount + " with an amount of " + amountToInvoice);
+      db.generateInvoice(req.body.takeoff_id, function (err, takeoff, estimate, options, payments) {
+        if (err) {
+          console.log(err);
+          res.send("error generating invoice");
+        } else {
+          res.send({ takeoff: takeoff, estimate: estimate, options: options, payments: payments });
+        }
+      });
+    });
 
 
 
 
-app.post('/invoiceCreator', mid.isAuth, function (req, res) {
-  console.log("creating invoice for", req.body);  
 
-  db.getTakeoffById(req.body.takeoff_id, function (err, takeoff) {
-    console.log(takeoff);
-    // is the estimate not signed?
-    if (takeoff[0].status != 4) {
-      console.log("estimate not signed");
-      res.send("estimate not signed");
-    } else {
-      res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_email: req.body.invoice_email, takeoff: takeoff });
-    }
-  });
-});
+    // ending perentheses do not delete (for the module.exports thing)
+  };
 
-app.post('/create-invoice', mid.isAuth, function (req, res) {
-  const takeoff_id = req.body.takeoff_id;
-  const customerName = req.body.customer_name;
-  const email = req.body.email;
-  const invoiceDate = req.body.invoice_date;// the date the invoice is to be sent
-  const paymentAmount = req.body.payment_amount;
-  const customAmount = req.body.custom_amount;
-  const amountToInvoice = customAmount ? customAmount : paymentAmount;
-  
-  console.log("generating invoice for", req.body);
-
-  // print them all in an english sentence
-  console.log("Customer " + customerName + " with email " + email + " will be invoiced on " + invoiceDate + " for " + paymentAmount + " with an amount of " + amountToInvoice);
-  db.generateInvoice(req.body.takeoff_id, function (err, takeoff, estimate, options, payments) {
-    if (err) {
-      console.log(err);
-      res.send("error generating invoice");
-    } else {
-      res.send({ takeoff: takeoff, estimate: estimate, options: options, payments: payments });
-    }
-  });
-});
-
-
-   
-
-
-  // ending perentheses do not delete (for the module.exports thing)
-};
-
-function arrayToCSV(objArray) {
-  const array = typeof objArray !== "object" ? JSON.parse(objArray) : objArray;
-  let str =
-    `${Object.keys(array[0])
-      .map((value) => `"${value}"`)
-      .join(",")}` + "\r\n";
-
-  return array.reduce((str, next) => {
-    str +=
-      `${Object.values(next)
+  function arrayToCSV(objArray) {
+    const array = typeof objArray !== "object" ? JSON.parse(objArray) : objArray;
+    let str =
+      `${Object.keys(array[0])
         .map((value) => `"${value}"`)
         .join(",")}` + "\r\n";
-    return str;
-  }, str);
-}
 
-function defaultRender(req) {
-  if (req.isAuthenticated() && req.user && req.user.local) {
-    // basic render object for fully authenticated user
-    return {
-      inDevMode: sys.DEV_MODE,
-      auth: {
-        isAuthenticated: true,
-        userIsAdmin: req.user.local.isAdmin,
-        message: "Hello,  " + req.user.name.givenName + "!",
-      },
-      defaults: {
-        sysName: sys.SYSTEM_NAME,
-      },
-    };
-  } else {
-    // default welcome message for unauthenticated user
-    return {
-      inDevMode: sys.inDevMode,
-      auth: {
-        message: "Welcome! Please log in.",
-      },
-    };
+    return array.reduce((str, next) => {
+      str +=
+        `${Object.values(next)
+          .map((value) => `"${value}"`)
+          .join(",")}` + "\r\n";
+      return str;
+    }, str);
   }
-}
+
+  function defaultRender(req) {
+    if (req.isAuthenticated() && req.user && req.user.local) {
+      // basic render object for fully authenticated user
+      return {
+        inDevMode: sys.DEV_MODE,
+        auth: {
+          isAuthenticated: true,
+          userIsAdmin: req.user.local.isAdmin,
+          message: "Hello,  " + req.user.name.givenName + "!",
+        },
+        defaults: {
+          sysName: sys.SYSTEM_NAME,
+        },
+      };
+    } else {
+      // default welcome message for unauthenticated user
+      return {
+        inDevMode: sys.inDevMode,
+        auth: {
+          message: "Welcome! Please log in.",
+        },
+      };
+    }
+  }
+
+  function bankOffset(total){
+    return total + (15);
+
+  }
+
+  function cardOffset(total){
+       
+
+        return total*1.0288 + 0.3;
+
+  }

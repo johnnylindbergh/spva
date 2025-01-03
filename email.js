@@ -53,6 +53,52 @@ async function sendEstimateEmail(takeoff_id, callback) {
   });
 }
 
+// same as sendEstimateEmail but email is always system.
+async function sendEstimateEmailInternally(takeoff_id, targetEmail, callback) {
+
+  db.getTakeoffById(takeoff_id, (err, takeoff) => {
+    if (err) {
+      console.log(err);
+      callback("big error", null);
+    } else {
+      console.log(takeoff);
+      if (targetEmail && takeoff[0].passcode) {
+
+        // display the email the same way as the owner for consistency.
+        const mailOptions = {
+          from: credentials.serverEmail,
+          to: takeoff[0].owner_email,
+          subject: "Your Estimate from Sun Painting",
+          html: `
+            <h3>Hello, ${takeoff[0].owner},</h3>
+            <h3>Your estimate is ready.</h3>
+            <p>Please click the link below to view it:</p>
+            <a href="${credentials.domain}/share/${takeoff[0]?.passcode}">View Estimate</a></br>
+            <img style="margin:20px;width:140px;"src="${credentials.domain}/SWAM_LOGO.jpg" alt="Swam Logo"></br>
+            <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
+          `,
+        };
+        
+        const info = transporter.sendMail(mailOptions, (err, info) => {
+          if (err) {
+            console.log(err);
+            callback(err, null);
+          } else {
+            console.log("Email sent: " + info.response);
+            callback(null, info.response);
+          }
+        });
+      } else {
+        console.log("Some info is missing from this takeoff takeoff.owner, takeoff.owner_email, or takeoff.passcode");
+        callback("Some info is missing from this takeoff takeoff.owner, takeoff.owner_email, or takeoff.passcode", null);
+      }
+    }
+  });
+}
+
+
+
 module.exports = {
   sendEstimateEmail,
+  sendEstimateEmailInternally
 };

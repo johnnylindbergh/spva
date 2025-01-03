@@ -376,3 +376,17 @@ input[type="text"]:focus, input[type="date"]:focus {
         top: 0; /* Keep the header on top while scrolling */
         z-index: 1;
     }
+    /* the button to pay with credit Card */
+
+    #pay-now-button {
+   
+    background-color: #0893A1;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    margin: 6px 4px;
+    cursor: pointer;
+    
+    }

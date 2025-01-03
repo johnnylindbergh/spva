@@ -171,22 +171,27 @@ function handleSignatureChange() {
         });
 }
 
-function createPaymentIntent() {
-    const takeoff_id = parseInt($('#takeoff_id').val());
-    
-    const data = { takeoff_id: takeoff_id };
-    const url = '/checkMeout/' + takeoff_id;
+function createPaymentIntent(method) {
+    // if the method is defined and is one of ['card','ACH']
+    if (method && ['card','us_bank_account'].includes(method)) { 
+        
+        const takeoff_id = parseInt($('#takeoff_id').val());
+        
+        const data = { takeoff_id: takeoff_id, method: method };
+        const url = '/checkMeout/' + takeoff_id;
 
-    $.post(url, data)
-        .done(function(response) {
-            console.log('Success:', response);
-            if (response) {
-                window.location.href = '/checkMeout/' + takeoff_id;
-            }
-        })
-        .fail(function(error) {
-            console.error('Error:', error);
-        });
+        $.post(url, data)
+            .done(function(response) {
+                console.log('Success:', response);
+                if (response) {
+                    window.location.href = '/checkMeout/' + takeoff_id;
+                }
+            })
+            .fail(function(error) {
+                console.error('Error:', error);
+            });
+    
+        }
 }
 
 function numberWithCommas(x) {
@@ -218,5 +223,5 @@ $(document).ready(function() {
         updateTotals();
         
     });
-    addEditableListeners();
+   // addEditableListeners();
 });
