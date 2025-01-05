@@ -640,6 +640,39 @@ module.exports = {
     
   },
 
+  deleteOption: function (option_id, callback) {
+    con.query("SELECT * FROM options WHERE id = ?;", [option_id], function (err, option) {
+      if (err) return callback(err);
+      if (option.length == 0) {
+        return callback("Option not found");
+      }
+
+      // check the status of the takeoff
+      con.query('SELECT status FROM takeoffs WHERE id = ?;', [option[0].takeoff_id], function(err, status){
+        if (err) return callback(err);
+        if (status[0].status == 4) {
+          return callback("Cannot delete option for signed takeoff");
+        } else {
+          con.query("DELETE FROM options WHERE id = ?;", [option_id], function (err) {
+            if (err) return callback(err);
+            callback(null);
+          });
+        }
+      }
+      );
+    }
+    );
+  },
+
+
+
+
+
+
+
+
+
+
   getMaterialTypes: function (callback) {
     con.query("SELECT * FROM material_archetypes;", function (err, types) {
       if (err) return callback(err);

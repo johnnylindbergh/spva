@@ -61,7 +61,7 @@ async function sendEstimateEmail(req, res, takeoff_id, callback) {
 }
 
 // same as sendEstimateEmail but email is passed as parameter
-async function sendEstimateEmailInternally(takeoff_id, targetEmail, callback) {
+async function sendEstimateEmailInternally(req, res, takeoff_id, targetEmail, callback) {
 
   db.getTakeoffById(takeoff_id, (err, takeoff) => {
     if (err) {
@@ -74,7 +74,7 @@ async function sendEstimateEmailInternally(takeoff_id, targetEmail, callback) {
         // display the email the same way as the owner for consistency.
         const mailOptions = {
           from: credentials.serverEmail,
-          to: takeoff[0].owner_email,
+          to: targetEmail,
           subject: "Your Estimate from Sun Painting",
           html: `
             <h3>Hello, ${takeoff[0].owner},</h3>

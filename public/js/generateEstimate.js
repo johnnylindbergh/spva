@@ -103,14 +103,20 @@ function populateOptions(takeoff_id) {
             // delete cell with a fontawesome trashcan
             const deleteCell = $('<td>').html('<i class="fa fa-trash"></i>');
 
+            deleteCell.on('click', function() {
+                deleteOption(data[i].id);
+            });
+
+                // 
+
             // "<i class='fa fa-trash' onclick='removeMaterial(" +
             // row.id 
             // edit cell with a fontawesome pencil
-            const editCell = $('<td>').html('<i class="fa fa-pencil"></i>');
+            // const editCell = $('<td>').html('<i class="fa fa-pencil"></i>');
 
             // make the edit cell 15px wide
 
-            editCell.css('width', '5px');
+            // editCell.css('width', '5px');
 
             deleteCell.css('width', '5px');
 
@@ -120,7 +126,7 @@ function populateOptions(takeoff_id) {
 
 
             newRow.append(deleteCell);
-            newRow.append(editCell);
+            // newRow.append(editCell);
             newRow.append(descriptionCell);
             newRow.append(amountCell);
             table.append(newRow);
@@ -223,9 +229,21 @@ function shareSelf(){
         if(value == "ok"){
 
             $.post('/shareSelf', {takeoff_id: takeoff_id}, function(data) {
-                console.log(data);
+                console.log("twas the email sent?",data);
+                if (data == "email sent") {
+                    XSAlert({
+                        title: 'Email Sent',
+                        message: 'The estimate has been sent to your email.',
+                        icon: 'success',
+                    });
+                } else {
+                    XSAlert({
+                        title: 'Error',
+                        message: "The estimate could not be sent. Please update server email credentials.",
+                        icon: 'error',
+                    });
+                }
             });
-
         }
     });
 }
@@ -300,7 +318,21 @@ function toggleTranslateMenu() {
     translateElement.style.display = translateElement.style.display === "none" ? "block" : "none";
 }
 
-
+function deleteOption(id){
+    console.log("deleting option with id: ", id);
+    $.post('/deleteOption', {option_id: id}, function(data) {
+        console.log(data);
+        populateOptions($('#takeoff_id').val());
+    })
+    .fail(function(error) {
+        console.error('Error deleting option:', error);
+        XSAlert({
+            title: 'Error',
+            message: 'Failed to remove the option of a signed estimate.',
+            icon: 'error',
+        });
+    });
+}
 
 
    

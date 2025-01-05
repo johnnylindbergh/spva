@@ -458,6 +458,7 @@ module.exports = function (app) {
   app.post("/generateEstimate", function (req, res) {
     // priority: this function should check to see if an estimate has been generated, if yes, send to client, if no, generate
     var takeoff_id = req.body.takeoff_id;
+    console.log("your email is: ", req.user.local.email);
     console.log("Generating estimate for takeoff", takeoff_id);
 
     // Fetch the ChatGPT prompt dynamically from the database
@@ -535,6 +536,7 @@ module.exports = function (app) {
                     takeoff_id: takeoff_id,
                     estimate: estimate,
                     takeoff: takeoff_info,
+                    email:req.user.local.email,
                   });
                 });
               });
@@ -552,6 +554,7 @@ module.exports = function (app) {
                     estimate: estimate,
                     takeoff: takeoff_info,
                     takeoff_id: takeoff_id,
+                    email:req.user.local.email,
                   });
                 }
               });
@@ -574,6 +577,7 @@ module.exports = function (app) {
         res.render("viewEstimate.html", {
           estimate: estimate,
           takeoff: takeoff,
+          email:req.user.local.email,
         });
       }
     });
@@ -836,6 +840,19 @@ module.exports = function (app) {
     });
   });
 
+  app.post("/deleteOption", mid.isAuth, function (req, res) {
+    console.log("deleting option ", req.body.option_id);
+    db.deleteOption(req.body.option_id, function (err) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Failed to delete option");
+      } else {
+        console.log("deleted");
+        res.end();
+      }
+    });
+  });
+
   app.post("/getEstimateData", function (req, res) {
     console.log("just viewing takeoff id: ", req.body.takeoff_id);
     db.getEstimateData(req.body.takeoff_id, function (err, estimate, takeoff) {
@@ -948,7 +965,9 @@ module.exports = function (app) {
     console.log()
     if (req.body.takeoff_id) {
       console.log("sending email ");
-      emailer.sendEstimateEmailInternally(req, res,req.body.takeoff_id, req.user.local.email, function (err, response) {
+
+
+      emailer.sendEstimateEmailInternally(req, res, req.body.takeoff_id, req.user.local.email, function (err, response) {
         if (err) {
           console.log(err);
           res.send("email failed");
@@ -958,13 +977,12 @@ module.exports = function (app) {
             if (err) {
               console.log(err);
             } else {
-              res.send("email sent to self");
+              res.send("email sent");
             }
           }
           );
         }
-      }); // how do we get the response from this function
-
+      }); 
     } else {
       console.log("");
     }
@@ -1271,6 +1289,7 @@ module.exports = function (app) {
           isAuthenticated: true,
           userIsAdmin: req.user.local.isAdmin,
           message: "Hello,  " + req.user.name.givenName + "!",
+          email: req.user.local.email
         },
         defaults: {
           sysName: sys.SYSTEM_NAME,
