@@ -87,9 +87,12 @@ CREATE TABLE takeoffs (
   end_date DATETIME,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  last_updated_by INT,
+
 
   FOREIGN KEY (creator_id) REFERENCES users(id),
   FOREIGN KEY (estimate_id) REFERENCES estimate(id),
+  FOREIGN KEY (last_edit_by) REFERENCES users(id),
   PRIMARY KEY (id)
 );
 

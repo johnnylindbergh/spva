@@ -368,5 +368,6 @@ $(document).ready(function() {
     // Add listeners to toggle number 
 
     $('.toggle-btn').click(toggleNumbers);
+    addEditableListeners();
 
 });

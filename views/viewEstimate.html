@@ -70,6 +70,7 @@
         Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{owner_billing_address}}'></br></br>
         Owner Email Address: <input type= 'text' class="hiddenInput" id= 'owner_email_address' onchange='updateTakeoffOwnerEmailAddress()' value='{{owner_email}}'></br></br>
         Invoice Email Address: <input type= 'text' class="hiddenInput" id= 'invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email}}'></br>
+        last updated {{updated_at}} </br> by {{last_updated_by}} </br>
 
        <input type='hidden' id='takeoff_total' value='{{takeoff_info.total}}'>
          <input type='hidden' id='takeoff_tax' value='{{takeoff_info.tax}}'>

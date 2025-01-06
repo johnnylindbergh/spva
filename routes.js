@@ -549,6 +549,7 @@ module.exports = function (app) {
                 if (err) {
                   console.log(err);
                 } else {
+
                   console.log(estimate);
                   res.render("viewEstimate.html", {
                     estimate: estimate,
@@ -778,6 +779,12 @@ module.exports = function (app) {
         console.log(err);
       } else {
         console.log("updated");
+        db.updateTakeoffLastUpdatedBy(req.body.id, req.user.local.id, function (err) {
+          if (err) {
+            console.log(err);
+          }
+        } );
+
       }
     });
   });
@@ -823,6 +830,11 @@ module.exports = function (app) {
           return res.status(500).send({ error: "Failed to add option" });
         } else {
           console.log("Added successfully");
+          db.updateTakeoffLastUpdatedBy(req.body.takeoff_id, req.user.local.id, function (err) {
+            if (err) {
+              console.log(err);
+            }
+          });
           res.send({ new_row_id: new_row_id });
         }
       }
@@ -847,6 +859,11 @@ module.exports = function (app) {
         console.log(err);
         res.status(500).send("Failed to delete option");
       } else {
+        db.updateTakeoffLastUpdatedBy(req.body.takeoff_id, req.user.local.id, function (err) {
+          if (err) {
+            console.log(err);
+          }
+        });
         console.log("deleted");
         res.end();
       }

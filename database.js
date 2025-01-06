@@ -535,6 +535,21 @@ module.exports = {
     }
   },
 
+  updateTakeoffLastUpdatedBy: function (takeoff_id, user_id, callback) {
+    if (!takeoff_id || !user_id) {
+      return callback("Missing required parameters");
+    } else {
+      con.query(
+        "UPDATE takeoffs SET last_updated_by = ? WHERE id = ?;",
+        [user_id, takeoff_id],
+        function (err) {
+          if (err) return callback(err);
+          callback(null);
+        }
+      );
+    }
+  },
+
 
   
   logEmailSent: function (takeoff_id, sender_id, recipient_email, type, response, callback) {
@@ -713,7 +728,16 @@ module.exports = {
                 if (err) return callback(err);
 
 
-                  callback(null, estimate, takeoff, salesTax[0].setting_value);
+                  // get the user name of the last person to update the takeoff
+                  con.query("SELECT name FROM users WHERE id = ?;", [takeoff[0].last_updated_by], function(err, user){
+                    // append the user name to the takeoff object
+                    if (user.length > 0) { 
+                      takeoff[0].last_updated_by = user[0].name;
+                    }
+
+                    callback(null, estimate, takeoff, salesTax[0].setting_value);
+
+                  });
                 }
             );
           }
