@@ -47,6 +47,7 @@ INSERT INTO system_settings (setting_name, setting_value) VALUES ('sales_tax', '
 CREATE TABLE estimate (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT,
+  signed_total DECIMAL(10,2),
   isArchived TINYINT(1) DEFAULT 0,
   date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   inclusions TEXT,

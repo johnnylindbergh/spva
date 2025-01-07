@@ -5,125 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+    <!-- navbar.css -->
+    <link rel="stylesheet" type="text/css" href="/css/navbar.css">
+    <!-- invoice.css -->
+    <link rel="stylesheet" type="text/css" href="/css/invoice.css">
     <script src="/js/invoice.js"></script>
     <title>Invoice Creator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .form-container {
-            width: 30%;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-container label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        .form-container input,
-        .form-container select,
-        .form-container button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: white;
-        }
-
-        .form-container button {
-            background-color: #0893A1;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        .form-container button:hover {
-            background-color: #056b74;
-        }
-
-        .invoice-container {
-            width: 60%;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .invoice-info {
-            margin-bottom: 20px;
-        }
-
-        .invoice-info p {
-            margin: 5px 0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        table, th, td {
-            border:
-            border: 1px solid #ddd;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f4f4f4;
-        }
-
-        .timeline {
-            margin-top: 30px;
-        }
-
-        .timeline ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .timeline ul li {
-            padding: 10px 20px;
-            border-left: 3px solid #007bff;
-            margin-bottom: 10px;
-            position: relative;
-        }
-
-        .timeline ul li:before {
-            content: '';
-            width: 12px;
-            height: 12px;
-            background: #007bff;
-            border-radius: 50%;
-            position: absolute;
-            left: -8px;
-            top: 10px;
-        }
-
-        .timeline ul li span {
-            font-weight: bold;
-        }
-
-        .timeline ul li p {
-            margin: 0;
-        }
-    </style>
+  
     <script>
      document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('form');
@@ -169,55 +58,41 @@
                 custom_amount: customAmount,
                 takeoff_id: takeoffId,
             }),
-            success: function (data) {
+            success: function (invoice) {
                 const invoiceContainer = document.querySelector('.invoice-container');
 
                 // show the invoice
                 invoiceContainer.style.display = 'inline-block';
 
-                invoiceContainer.innerHTML = `
-                    <h1>Invoice</h1>
-                    <div class="invoice-info">
-                        <p><strong>Owner Name:</strong> ${customerName}</p>
-                        <p><strong>Invoice Amount:</strong> $${data.total}</p>
-                        <p><strong>Total Amount Due:</strong> $${data.total}</p>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Payment Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.payments
-                                .map(
-                                    (payment) => `
-                                <tr>
-                                    <td>${new Date(payment.date).toLocaleDateString()}</td>
-                                    <td>$${payment.amount}</td>
-                                </tr>
-                            `
-                                )
-                                .join('')}
-                        </tbody>
-                    </table>
-                    <div class="timeline">
-                        <h2>Payment Timeline</h2>
-                        <ul>
-                            ${data.timeline
-                                .map(
-                                    (event) => `
-                                <li>
-                                    <span>${new Date(event.date).toLocaleDateString()}</span> - <span>${event.label}</span>
-                                    <p>Amount: $${event.amount}</p>
-                                </li>
-                            `
-                                )
-                                .join('')}
-                        </ul>
-                    </div>
+                // hide the form-container
+                document.querySelector('.form-container').style.display = 'none';
+
+                console.log("invoice", invoice);
+
+                // append the invoice_number to the invoice-info
+                const invoiceInfo = document.querySelector('.invoice-info');
+                
+                // created_at: "2025-01-07T01:22:16.000Z"
+                // hash: null
+                // id: 26
+                // invoice_number: "1-26"
+                // timeline: [{date: "2025-01-07T01:22:16.000Z", label: "Invoice Created", amount: "200.00"}] (1)
+                // total: "200.00"
+                // view_count: 0
+                const invoiceHtml = `
+                    <p>Invoice Number: ${invoice.invoice_number}</p>
+                    <p>Total: ${invoice.total}</p>
+                    <p>Created At: ${moment(invoice.created_at).format('MMMM Do YYYY, h:mm:ss a')}</p>
+                    <h3>Timeline:</h3>
+                    <ul>
+                        ${invoice.timeline.map(event => `
+                            <li>${moment(event.date).format('MMMM Do YYYY, h:mm:ss a')} - ${event.label}: ${event.amount}</li>
+                        `).join('')}
+                    </ul>
                 `;
+                invoiceInfo.innerHTML = invoiceHtml;
+
+
             },
             error: function (error) {
                 XSAlert.alert('Failed to create invoice. Please try again.');
@@ -238,6 +113,21 @@
     </script>
 </head>
 <body>
+
+    <!-- navbar here -->
+    <div class="navbar">
+        <ul> 
+          <li><a href="javascript:history.back()">Back</a></li>
+          <li><a href="/">{{defaults.sysName}}</a></li>
+          <div style="float:right">
+            <li><a href="/auth/google">Log In</a></li>
+            <li><a href="/logout">Log Out</a></li>
+          </div>
+        
+      
+        </ul>
+    </div>
+
     <div class="form-container">
         <h2>Create Invoice</h2>
         <form action="/createInvoice" method="POST">
@@ -257,6 +147,7 @@
             <label for="payment-amount">Payment Amount</label>
             <select id="payment-amount" name="payment_amount" required>
                 <option value="20%">20% of Estimate</option>
+                <option value="50%">50% of Estimate</option>
                 <option value="100%">Full Estimate</option>
                 <option value="custom">Custom Amount</option>
             </select>
@@ -274,27 +165,7 @@
         <h1>Invoice</h1>
 
         <div class="invoice-info">
-            <!-- invoice number -->
-            <p><strong>Invoice Number:</strong> {{invoice.id}} - {{invoice.subid}}</p>
-            <p><strong>Owner Name:</strong> John Doe</p>
-            <!-- billing address -->
-             <p><strong>Billing Address</strong>{{takeoff.owner_billing_address}}</p>
-        </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Payment Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{{invoice.date_created}}</td>
-                    <td>{{invoice.}}</td>
-                </tr>
-            </tbody>
-        </table>
+        
 
        
     </div>

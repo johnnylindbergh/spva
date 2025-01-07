@@ -384,7 +384,15 @@ module.exports = function (app) {
           console.log(err);
         } else {
           if (valid) {
-            res.send(valid);
+            // update the estimate's signed total field 
+            db.updateSignedTotal(req.body.takeoff_id, req.body.total, function (err) {
+              if (err) {
+                console.log(err);
+              } else {
+                res.send(valid);
+              }
+            });
+
           }
 
         }
@@ -947,7 +955,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/share/updateOptionsSelection", function (req, res) {
+  app.post("/updateOptionsSelection", function (req, res) {
     console.log("updating options selection ", req.body);
     db.updateOptionSelection(
       req.body.takeoff_id,
@@ -1295,72 +1303,71 @@ module.exports = function (app) {
       takeoff_id
     } = req.body;
 
-    // Validate required fields
-    if (!payment_amount || !takeoff_id) {
-      return res.status(400).json({ error: 'Missing required fields.' });
-    }
+    let computedAmount = 0;
 
-    // Calculate total
-    let total = 0;
-    if (payment_amount === '20%') {
-      total = 200; // Example: Replace with logic to calculate 20% of the estimate.
-    } else if (payment_amount === '100%') {
-      total = 1000; // Example: Replace with logic to calculate the full estimate.
-    } else if (payment_amount === 'custom') {
-      if (!custom_amount || isNaN(custom_amount)) {
-        return res.status(400).json({ error: 'Custom amount is invalid.' });
-      }
-      total = parseFloat(custom_amount);
-    } else {
-      return res.status(400).json({ error: 'Invalid payment amount.' });
-    }
-
-    // query the db and get the count of the invoices with takeoff_id
-    db.getInvoiceCount(takeoff_id, (err, count) => {
+    db.getInvoicableTotal(takeoff_id, (err, total) => {
       if (err) {
-        console.error('Error fetching invoice count:', err);
-        return res.status(500).json({ error: 'Failed to fetch invoice count.' });
+        console.error('Error fetching total:', err);
+        return res.status(500).json({ error: 'Failed to fetch total.' });
       }
 
-      // Generate invoice number
-      const invoiceNumber = `${takeoff_id}-${count + 1}`;
+      console.log("getInvoicableTotal", total);
+      console.log("payment_amount is ", payment_amount);
 
-      // Insert into database
-      const query = `INSERT INTO invoices (takeoff_id, total, invoice_number) VALUES (?, ?, ?)`;
-      const values = [takeoff_id, total, invoiceNumber];
+      if (payment_amount == "20%"){
+        computedAmount = total * 0.2;
+      } else if (payment_amount == "50%"){
+        computedAmount = total * 0.5;
+      } else if (payment_amount == "100%"){
+        computedAmount = total;
+      } else {
+        computedAmount = total;
+      }
 
-      db.query(query, values, (results) => {
-        // Fetch the created invoice
-        const fetchQuery = `SELECT * FROM invoices WHERE id = ?`;
-        db.query(fetchQuery, [results.insertId], (rows) => {
-          if (rows.length === 0) {
-            console.error('Error fetching created invoice:', err);
-            return res.status(500).json({ error: 'Failed to fetch created invoice.' });
-          }
+      // query the db and get the count of the invoices with takeoff_id
+      db.getInvoiceCount(takeoff_id, (err, count) => {
+        if (err) {
+          console.error('Error fetching invoice count:', err);
+          return res.status(500).json({ error: 'Failed to fetch invoice count.' });
+        }
 
-          const createdInvoice = rows[0];
+        // Generate invoice number
+        const invoiceNumber = `${String(takeoff_id).padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
 
-          // Add default values for undefined fields in the database
-          // createdInvoice.payments = [];
+        // Insert into database
+        const query = `INSERT INTO invoices (takeoff_id, total, invoice_number) VALUES (?, ?, ?)`;
+        const values = [takeoff_id, custom_amount, invoiceNumber];
 
-          // get the payment history
-          db.getPaymentHistory(takeoff_id, (err, payments) => {
-            if (err) {
-              console.error('Error fetching payment history:', err);
-              return res.status(500).json({ error: 'Failed to fetch payment history.' });
-            } else {
+        db.query(query, values, (results) => {
+          // Fetch the created invoice
+          console.log(results);
+          const fetchQuery = `SELECT * FROM invoices WHERE id = ?`;
+          db.query(fetchQuery, [results.insertId], (rows) => {
+            if (rows.length === 0) {
+              console.error('Error fetching created invoice:', err);
+              return res.status(500).json({ error: 'Failed to fetch created invoice.' });
+            }
+
+            const createdInvoice = rows[0];
+
+            // Add default values for undefined fields in the database
+            // createdInvoice.payments = [];
+
+            // get the payment history
+            db.getPaymentHistory(takeoff_id, (err, payments) => {
+              if (err) {
+                console.error('Error fetching payment history:', err);
+                return res.status(500).json({ error: 'Failed to fetch payment history.' });
+              }
+
               createdInvoice.payments = payments;
               createdInvoice.timeline = [
                 { date: createdInvoice.created_at, label: 'Invoice Created', amount: createdInvoice.total }
               ];
-  
 
               console.log('Invoice created:', createdInvoice);
               res.status(201).json(createdInvoice);
-
-            }
-
-          
+            });
           });
         });
       });

@@ -561,6 +561,20 @@ module.exports = {
     });
   },
 
+  getInvoicableTotal: function (takeoff_id, callback) {
+    con.query("SELECT SUM(amount) as total FROM payment_history WHERE takeoff_id = ?;", [takeoff_id], function (err, total) {
+      if (err) return callback(err);
+
+      // get takeoff and join the estimate_id to get the signed_total
+      con.query("SELECT * FROM takeoffs join estimate on takeoffs.estimate_id = estimate.id WHERE takeoffs.id = ?;", [takeoff_id], function (err, estimateTakeoffObject) {
+        if (err) return callback(err);
+
+        callback(null, (parseFloat(estimateTakeoffObject[0].signed_total) - parseFloat(total[0].total)).toFixed(2));
+      });
+
+    });
+  },
+
   updateTakeoffLastUpdatedBy: function (takeoff_id, user_id, callback) {
     if (!takeoff_id || !user_id) {
       return callback("Missing required parameters");

@@ -75,7 +75,7 @@ function populateOptions(takeoff_id) {
             includeCheckbox.on('change', function() {
                 const state = $(this).is(':checked');
 
-                $.post('updateOptionsSelection', {
+                $.post('/updateOptionsSelection', {
                     takeoff_id: takeoff_id,
                     option_id: data[i].id,
                     applied: state
@@ -154,7 +154,8 @@ function handleSignatureChange() {
     const data = {
         takeoff_id: parseInt($('#takeoff_id').val()),
         signature: signatureInput,
-        date: dateInput
+        date: dateInput,
+        total: total
     };
 
     $.post('/update-signature', data)
