@@ -165,6 +165,18 @@ module.exports = function (app) {
     res.render("addTakeoff.html", render);
   });
 
+  app.post("/deleteTakeoff", mid.isAuth, (req, res) => {
+    db.deleteTakeoff(req.body.takeoff_id, req.user.local.id, function (err) {
+      if (err) {
+        console.log(err);
+        res.end();
+      } else {
+        res.redirect("/");
+      }
+    });
+  });
+
+
   //updateTakeoff POST
   app.post("/update-takeoff-name", mid.isAuth, (req, res) => {
     console.log("updating takeoff name");
@@ -265,7 +277,8 @@ module.exports = function (app) {
 
   // Route for handling file uploads
   app.post("/uploadTakeoff", mid.isAuth, function (req, res) {
-    console.log("uploading ");
+    console.log("uploading takeoff...");
+    console.log(req.body);
     // Use Multer middleware to handle file upload
     upload(req, res, function (err) {
       if (err) {
@@ -889,7 +902,7 @@ module.exports = function (app) {
     db.getSharedEstimate(
       req.params.hash,
       function (err, estimate, takeoff, options) {
-        if (err) {
+        if (err || estimate.length == 0) {
           console.log(err);
           res.redirect("/");
         } else {
@@ -1244,36 +1257,115 @@ module.exports = function (app) {
         // is the estimate not signed?
         if (takeoff[0].status <= 3) { // at least the estimate is signed
           console.log("estimate not signed");
-          //res.send("estimate not signed");
+          res.send("estimate not signed");
         } else {
           res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_email: req.body.invoice_email, takeoff: takeoff[0] });
         }
       });
     });
+    // deprecated
+    // app.post('/create-invoice', mid.isAuth, function (req, res) {
+    //   const takeoff_id = req.body.takeoff_id;
+    //   const customerName = req.body.customer_name;
+    //   const email = req.body.email;
+    //   const invoiceDate = req.body.invoice_date;// the date the invoice is to be sent
+    //   const paymentAmount = req.body.payment_amount;
+    //   const customAmount = req.body.custom_amount;
+    //   const amountToInvoice = customAmount ? customAmount : paymentAmount;
 
-    app.post('/create-invoice', mid.isAuth, function (req, res) {
-      const takeoff_id = req.body.takeoff_id;
-      const customerName = req.body.customer_name;
-      const email = req.body.email;
-      const invoiceDate = req.body.invoice_date;// the date the invoice is to be sent
-      const paymentAmount = req.body.payment_amount;
-      const customAmount = req.body.custom_amount;
-      const amountToInvoice = customAmount ? customAmount : paymentAmount;
+    //   console.log("generating invoice for", req.body);
 
-      console.log("generating invoice for", req.body);
+    //   // print them all in an english sentence
+    //   console.log("Customer " + customerName + " with email " + email + " will be invoiced on " + invoiceDate + " for " + paymentAmount + " with an amount of " + amountToInvoice);
+    //   db.generateInvoice(req.body.takeoff_id, function (err, takeoff, estimate, options, payments) {
+    //     if (err) {
+    //       console.log(err);
+    //       res.send("error generating invoice");
+    //     } else {
+    //       res.send({ takeoff: takeoff, estimate: estimate, options: options, payments: payments });
+    //     }
+    //   });
+    // });
 
-      // print them all in an english sentence
-      console.log("Customer " + customerName + " with email " + email + " will be invoiced on " + invoiceDate + " for " + paymentAmount + " with an amount of " + amountToInvoice);
-      db.generateInvoice(req.body.takeoff_id, function (err, takeoff, estimate, options, payments) {
-        if (err) {
-          console.log(err);
-          res.send("error generating invoice");
-        } else {
-          res.send({ takeoff: takeoff, estimate: estimate, options: options, payments: payments });
-        }
+    // POST /create-invoice
+  app.post('/create-invoice', (req, res) => {
+    const {
+      payment_amount,
+      custom_amount,
+      takeoff_id
+    } = req.body;
+
+    // Validate required fields
+    if (!payment_amount || !takeoff_id) {
+      return res.status(400).json({ error: 'Missing required fields.' });
+    }
+
+    // Calculate total
+    let total = 0;
+    if (payment_amount === '20%') {
+      total = 200; // Example: Replace with logic to calculate 20% of the estimate.
+    } else if (payment_amount === '100%') {
+      total = 1000; // Example: Replace with logic to calculate the full estimate.
+    } else if (payment_amount === 'custom') {
+      if (!custom_amount || isNaN(custom_amount)) {
+        return res.status(400).json({ error: 'Custom amount is invalid.' });
+      }
+      total = parseFloat(custom_amount);
+    } else {
+      return res.status(400).json({ error: 'Invalid payment amount.' });
+    }
+
+    // query the db and get the count of the invoices with takeoff_id
+    db.getInvoiceCount(takeoff_id, (err, count) => {
+      if (err) {
+        console.error('Error fetching invoice count:', err);
+        return res.status(500).json({ error: 'Failed to fetch invoice count.' });
+      }
+
+      // Generate invoice number
+      const invoiceNumber = `${takeoff_id}-${count + 1}`;
+
+      // Insert into database
+      const query = `INSERT INTO invoices (takeoff_id, total, invoice_number) VALUES (?, ?, ?)`;
+      const values = [takeoff_id, total, invoiceNumber];
+
+      db.query(query, values, (results) => {
+        // Fetch the created invoice
+        const fetchQuery = `SELECT * FROM invoices WHERE id = ?`;
+        db.query(fetchQuery, [results.insertId], (rows) => {
+          if (rows.length === 0) {
+            console.error('Error fetching created invoice:', err);
+            return res.status(500).json({ error: 'Failed to fetch created invoice.' });
+          }
+
+          const createdInvoice = rows[0];
+
+          // Add default values for undefined fields in the database
+          // createdInvoice.payments = [];
+
+          // get the payment history
+          db.getPaymentHistory(takeoff_id, (err, payments) => {
+            if (err) {
+              console.error('Error fetching payment history:', err);
+              return res.status(500).json({ error: 'Failed to fetch payment history.' });
+            } else {
+              createdInvoice.payments = payments;
+              createdInvoice.timeline = [
+                { date: createdInvoice.created_at, label: 'Invoice Created', amount: createdInvoice.total }
+              ];
+  
+
+              console.log('Invoice created:', createdInvoice);
+              res.status(201).json(createdInvoice);
+
+            }
+
+          
+          });
+        });
       });
     });
-
+  });
 
 
 

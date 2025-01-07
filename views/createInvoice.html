@@ -3,173 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="/js/invoice.js"></script>
-
-
-    <title>Create Invoice</title>
+    <title>Invoice Creator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
         }
+
         .form-container {
-            float:left;
-            max-width: 30%;
-            margin: auto;
-            border: 1px solid #ddd;
+            width: 30%;
             padding: 20px;
+            border: 1px solid #ddd;
             border-radius: 8px;
             background-color: #f9f9f9;
-            z-index: 1;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         .form-container label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
         }
+
         .form-container input,
         .form-container select,
         .form-container button {
-            background-color: white;
-            width: 80%;
+            width: 100%;
             padding: 10px;
             margin-bottom: 15px;
-            border: 1px solid #f9f9f9;
+            border: 1px solid #ddd;
             border-radius: 4px;
+            background-color: white;
         }
+
         .form-container button {
             background-color: #0893A1;
             color: white;
             border: none;
             cursor: pointer;
         }
+
         .form-container button:hover {
-            background-color:  #056b74;
+            background-color: #056b74;
         }
-        .custom-amount-container {
-            display: none;
+
+        .invoice-container {
+            width: 60%;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .invoice-info {
+            margin-bottom: 20px;
+        }
+
+        .invoice-info p {
+            margin: 5px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border:
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .timeline {
+            margin-top: 30px;
+        }
+
+        .timeline ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .timeline ul li {
+            padding: 10px 20px;
+            border-left: 3px solid #007bff;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .timeline ul li:before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #007bff;
+            border-radius: 50%;
+            position: absolute;
+            left: -8px;
+            top: 10px;
+        }
+
+        .timeline ul li span {
+            font-weight: bold;
+        }
+
+        .timeline ul li p {
+            margin: 0;
         }
     </style>
-   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Form submission event listener
-        const form = document.querySelector('form');
+    <script>
+     document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form');
 
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
+    // hide the invoce initially
+    document.querySelector('.invoice-container').style.display = 'none';
 
-            // Gather form data
-            const customerName = document.getElementById('customer-name').value;
-            const email = document.getElementById('email').value;
-            const invoiceDate = document.getElementById('invoice-date').value;
-            const paymentAmount = document.getElementById('payment-amount').value;
-            const customAmount = document.getElementById('custom-amount').value;
-            const takeoffId = document.getElementById('takeoff_id').value;
 
-            // Validate form fields
-            if (!customerName || !email || !invoiceDate || !paymentAmount) {
-                XSAlert.alert('Please fill out all required fields');
-                return;
-            }
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
 
-            if (paymentAmount === 'custom' && !customAmount) {
-                XSAlert.alert('Please enter a custom amount');
-                return;
-            }
+        const customerName = document.getElementById('customer-name').value;
+        const email = document.getElementById('email').value;
+        const invoiceDate = document.getElementById('invoice-date').value;
+        const paymentAmount = document.getElementById('payment-amount').value;
+        const customAmount = document.getElementById('custom-amount').value;
+        const takeoffId = document.getElementById('takeoff_id').value;
 
-            if (!takeoffId) {
-                XSAlert.alert('Takeoff ID not defined');
-                return;
-            }
+        if (!customerName || !email || !invoiceDate || !paymentAmount) {
+            XSAlert.alert('Please fill out all required fields');
+            return;
+        }
 
-            console.log('Submitting takeoff_id:', takeoffId);
+        if (paymentAmount === 'custom' && !customAmount) {
+            XSAlert.alert('Please enter a custom amount');
+            return;
+        }
 
-            // Send data using AJAX
-            $.ajax({
-                url: '/create-invoice',
-                method: 'POST',
-                data: {
-                    customer_name: customerName,
-                    email: email,
-                    invoice_date: invoiceDate,
-                    payment_amount: paymentAmount,
-                    custom_amount: customAmount,
-                    takeoff_id: takeoffId
-                },
-                success: function(data) {
-                    // Clear and update the form container with the response
-                   // const invoiceContainer = document.querySelector('.invoice-container');
+        if (!takeoffId) {
+            XSAlert.alert('Takeoff ID not defined');
+            return;
+        }
 
-                    let invoiceContainer = $('#invoice-container');
+        $.ajax({
+            url: '/create-invoice',
+            method: 'POST',
+            contentType: 'application/json', // Set content type
+            data: JSON.stringify({
+                customer_name: customerName,
+                email: email,
+                invoice_date: invoiceDate,
+                payment_amount: paymentAmount,
+                custom_amount: customAmount,
+                takeoff_id: takeoffId,
+            }),
+            success: function (data) {
+                const invoiceContainer = document.querySelector('.invoice-container');
 
-                    invoiceContainer.empty();
-                    invoiceContainer.text(JSON.stringify(data, null, 2));
-                    console.log(data)
-                    // stringify the data
-                    const dataString = JSON.stringify(data, null, 2);
-                    invoiceContainer.innerHTML = `<pre>${dataString}</pre>`;
-                    
-                },
-                error: function(error) {
-                    XSAlert.alert('Failed to create invoice. Please try again.');
-                    console.error('Error:', error);
-                }
-            });
+                // show the invoice
+                invoiceContainer.style.display = 'inline-block';
+
+                invoiceContainer.innerHTML = `
+                    <h1>Invoice</h1>
+                    <div class="invoice-info">
+                        <p><strong>Owner Name:</strong> ${customerName}</p>
+                        <p><strong>Invoice Amount:</strong> $${data.total}</p>
+                        <p><strong>Total Amount Due:</strong> $${data.total}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Payment Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.payments
+                                .map(
+                                    (payment) => `
+                                <tr>
+                                    <td>${new Date(payment.date).toLocaleDateString()}</td>
+                                    <td>$${payment.amount}</td>
+                                </tr>
+                            `
+                                )
+                                .join('')}
+                        </tbody>
+                    </table>
+                    <div class="timeline">
+                        <h2>Payment Timeline</h2>
+                        <ul>
+                            ${data.timeline
+                                .map(
+                                    (event) => `
+                                <li>
+                                    <span>${new Date(event.date).toLocaleDateString()}</span> - <span>${event.label}</span>
+                                    <p>Amount: $${event.amount}</p>
+                                </li>
+                            `
+                                )
+                                .join('')}
+                        </ul>
+                    </div>
+                `;
+            },
+            error: function (error) {
+                XSAlert.alert('Failed to create invoice. Please try again.');
+            },
         });
     });
-</script>
 
+    document.getElementById('payment-amount').addEventListener('change', function () {
+        const customAmountContainer = document.getElementById('custom-amount-container');
+        if (this.value === 'custom') {
+            customAmountContainer.style.display = 'block';
+        } else {
+            customAmountContainer.style.display = 'none';
+        }
+    });
+});
+
+    </script>
 </head>
 <body>
+    <div class="form-container">
+        <h2>Create Invoice</h2>
+        <form action="/createInvoice" method="POST">
+            <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
+            <label for="customer-name">Customer Name</label>
+            <input type="text" id="customer-name" name="customer_name" value="{{takeoff.owner}}" required>
 
-<div class="form-container">
-    <h2>Create Invoice</h2>
+            <label for="email">Invoice Email</label>
+            <input type="email" id="email" name="invoice_email" value="{{takeoff.invoice_email}}" required>
 
-    
-    <form action="/createInvoice" method="POST">
-            <!-- hidden fields -->
-        <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
-        <!-- Customer Name -->
-        <label for="customer-name">Customer Name</label>
-        <input type="text" id="customer-name" name="customer_name" value="{{takeoff.owner}}" required>
+            <label for="invoice-date">Invoice Date</label>
+            <input type="date" id="invoice-date" name="invoice_date" value="2024-11-26" required>
 
-        <!-- Email -->
-        <label for="email">Invoice Email</label>
-        <input type="email" id="email" name="invoice_email" value="{{takeoff.invoice_email}}" required>
+            <label for="time">Time</label>
+            <input type="time" id="time" name="time" value="13:00">
 
-        <!-- Invoice Date -->
-        <label for="invoice-date">Invoice Date</label>
-        <input type="date" id="invoice-date" name="invoice_date" value="2024-11-26" required>
+            <label for="payment-amount">Payment Amount</label>
+            <select id="payment-amount" name="payment_amount" required>
+                <option value="20%">20% of Estimate</option>
+                <option value="100%">Full Estimate</option>
+                <option value="custom">Custom Amount</option>
+            </select>
 
-        <!-- time input -->
-        <label for="time">Time</label>
-        <input type="time" id="time" name="time" value="13:00" >
+            <div id="custom-amount-container" style="display:none;">
+                <label for="custom-amount">Enter Custom Amount</label>
+                <input type="number" id="custom-amount" name="custom_amount" placeholder="Enter custom amount" min="0">
+            </div>
 
-        <!-- Payment Amount -->
-        <label for="payment-amount">Payment Amount</label>
-        <select id="payment-amount" name="payment_amount" onchange="toggleCustomAmount()" required>
-            <option value="20%">20% of Estimate</option>
-            <option value="100%">Full Estimate</option>
-            <option value="custom">Custom Amount</option>
-        </select>
+            <button type="submit">Create Invoice</button>
+        </form>
+    </div>
 
-        <!-- Custom Amount Input -->
-        <div id="custom-amount-container" class="custom-amount-container">
-            <label for="custom-amount">Enter Custom Amount</label>
-            <input type="number" id="custom-amount" name="custom_amount" placeholder="Enter custom amount" min="0">
+    <div class="invoice-container">
+        <h1>Invoice</h1>
+
+        <div class="invoice-info">
+            <!-- invoice number -->
+            <p><strong>Invoice Number:</strong> {{invoice.id}} - {{invoice.subid}}</p>
+            <p><strong>Owner Name:</strong> John Doe</p>
+            <!-- billing address -->
+             <p><strong>Billing Address</strong>{{takeoff.owner_billing_address}}</p>
         </div>
 
-        <!-- Submit Button -->
-        <button type="submit">Create Invoice</button>
-    </form>
-</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Payment Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{invoice.date_created}}</td>
+                    <td>{{invoice.}}</td>
+                </tr>
+            </tbody>
+        </table>
 
-<div class="invoice-container"></div>
-
-
+       
+    </div>
 </body>
 </html>

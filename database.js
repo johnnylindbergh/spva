@@ -21,7 +21,7 @@ const con = mysql.createPool({
   multipleStatements: true,
 });
 
-function generatePasscode() {
+function generateHash() {
   return crypto
     .randomBytes(24)
     .toString("base64")
@@ -207,8 +207,8 @@ module.exports = {
 
   createNewTakeoff: function (req, res, cb) {
     con.query(
-      "INSERT INTO takeoffs (creator_id, name, passcode) VALUES (?, ?, ?); SELECT LAST_INSERT_ID() as last;",
-      [req.user.local.id, req.body.takeoffName, generatePasscode().toString()],
+      "INSERT INTO takeoffs (creator_id, name, hash) VALUES (?, ?, ?); SELECT LAST_INSERT_ID() as last;",
+      [req.user.local.id, req.body.takeoffName, generateHash().toString()],
       function (err, result) {
         if (err) {
           return cb(err);
@@ -217,7 +217,24 @@ module.exports = {
         cb(null, result[1][0].last);
       }
     );
-  },                 
+  }, 
+  
+  deleteTakeoff: function (takeoff_id, deletedBy, callback) {
+    // first check if the takeoff.created_by matches the deletedBy user_id
+    con.query("SELECT creator_id FROM takeoffs WHERE id = ?;", [takeoff_id], function (err, results) {
+      if (err) return callback(err);
+      if (results.length === 0) return callback("Takeoff not found");
+
+      if (results[0].creator_id !== deletedBy) {
+        return callback("Unauthorized: You can only delete takeoffs you created");
+      }
+
+      con.query("DELETE FROM takeoffs WHERE id = ?;", [takeoff_id], function (err) {
+        if (err) return callback(err);
+        callback(null);
+      });
+    });
+  },
 
   createSubject: function (takeoff_id, subject, callback) {
     console.log("subject: ", subject);
@@ -535,6 +552,15 @@ module.exports = {
     }
   },
 
+  // invoice 
+
+  getInvoiceCount: function (takeoff_id, callback) {
+    con.query("SELECT COUNT(*) as count FROM invoices WHERE takeoff_id = ?;", [takeoff_id], function (err, count) {
+      if (err) return callback(err);
+      callback(null, count[0].count);
+    });
+  },
+
   updateTakeoffLastUpdatedBy: function (takeoff_id, user_id, callback) {
     if (!takeoff_id || !user_id) {
       return callback("Missing required parameters");
@@ -749,14 +775,14 @@ module.exports = {
 
   getSharedEstimate: function (hash, callback) {
     con.query(
-      "SELECT * FROM takeoffs WHERE passcode = ?;",
+      "SELECT * FROM takeoffs WHERE hash = ?;",
       [hash],
       function (err, takeoffResults) {
         if (err) return callback(err);
         if (!takeoffResults || takeoffResults.length === 0) {
           console.log("non-existent hash: ", hash);
           return callback(
-            new Error("No takeoff found for the provided passcode")
+            new Error("No takeoff found for the provided hash")
           );
         }
 
@@ -787,7 +813,7 @@ module.exports = {
 
     // update the view_count for the takeoff
     con.query(
-      "UPDATE takeoffs SET view_count = view_count + 1 WHERE passcode = ?;",
+      "UPDATE takeoffs SET view_count = view_count + 1 WHERE hash = ?;",
       [hash],
       function (err) {
         if (err) {

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Settings | {{defaults.sysName}}</title>
   <link rel="stylesheet" type="text/css" href="css/reset.css">
@@ -15,66 +16,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="/js/userSettings.js" type="text/javascript"></script>
 </head>
+
 <body>
   <div class="navbar">
     <ul>
       <!-- back button that posts to editTakeoff -->
 
       <li><a href="javascript:history.back()">Back</a></li>
-       
+
       <li><a href="/">{{defaults.sysName}}</a></li>
-      {{#isAdmin}} <li><a href="/admin">Admin</a></li> {{/isAdmin}} 
+      {{#isAdmin}} <li><a href="/admin">Admin</a></li> {{/isAdmin}}
       <li><a href="/dashboard">Dashboard</a></li>
       <div style="float:right">
         <li><a href="/auth/google">Log In</a></li>
         <li><a href="/logout">Log Out</a></li>
       </div>
 
-     
+
 
       <div>
         <form action="/editTakeoff" method="POST" style="display:inline;">
           <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
           <button type="submit" id="editTakeoff">Edit Takeoff</button>
         </form>
-      </div>      
+      </div>
     </ul>
   </div>
   <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
+
+
 
   <div class="container">
     <h1>System Settings</h1>
 
     <h2>Global Settings</h2>
     <form id="settings_form">
-        <table id="global_settings">
-            <tr>
-                <td><label for="chatgpt_prompt">ChatGPT Prompt:</label></td>
-                <td>
-                    <textarea id="chatgpt_prompt" name="chatgpt_prompt" rows="5" cols="50"></textarea>
-                </td>
-            </tr>
-            <tr>
-                <td><label for="default_labor_cost">Default Labor Cost:</label></td>
-                <td>
-                    <input type="text" id="default_labor_cost" name="default_labor_cost">
-                </td>
-            </tr>
-            <tr>
-                <td><label for="levens_threshold">Levenshtein Threshold:</label></td>
-                <td>
-                    <input type="text" id="levens_threshold" name="levens_threshold">
-                </td>
-            </tr>
-            <tr>
-                <td><label for="sales_tax">Sales Tax (%):</label></td>
-                <td>
-                    <input type="text" id="sales_tax" name="sales_tax">
-                </td>
-            </tr>
-        </table>
-        <button type="submit">Save Settings</button>
+      <table id="global_settings">
+        <tr>
+          <td><label for="chatgpt_prompt">ChatGPT Prompt:</label></td>
+          <td>
+            <textarea id="chatgpt_prompt" name="chatgpt_prompt" rows="5" cols="50"></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td><label for="default_labor_cost">Default Labor Cost:</label></td>
+          <td>
+            <input type="text" id="default_labor_cost" name="default_labor_cost">
+          </td>
+        </tr>
+        <tr>
+          <td><label for="levens_threshold">Levenshtein Threshold:</label></td>
+          <td>
+            <input type="text" id="levens_threshold" name="levens_threshold">
+          </td>
+        </tr>
+        <tr>
+          <td><label for="sales_tax">Sales Tax (%):</label></td>
+          <td>
+            <input type="text" id="sales_tax" name="sales_tax">
+          </td>
+        </tr>
+      </table>
+      <button type="submit">Save Settings</button>
     </form>
+
+
 
     <h2>Add/Edit Material</h2>
     <form id="add_material_form">
@@ -88,6 +94,17 @@
       </select>
       <button type="button" onclick="addMaterial()">Add Material</button>
     </form>
+
+
+    </br>
+
+    <h2>Danger Zone</h2>
+    <!-- delete takeoff button -->
+    <form action="/deleteTakeoff" method="POST" style="display:inline;">
+      <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+      <button type="submit" style="background-color: red;"id="deleteTakeoff">Delete Takeoff</button>
+    </form>
+
   </div>
 
   <script>
@@ -120,13 +137,14 @@
       })
         .then((response) => response.json())
         .then((data) => {
-          
-            alert("Material added successfully!");
-       
-          
+
+          alert("Material added successfully!");
+
+
         });
-      
+
     }
   </script>
 </body>
+
 </html>

@@ -77,7 +77,7 @@ CREATE TABLE takeoffs (
   file_path_of_plans VARCHAR(255),
   estimate_id INT UNIQUE,
   status TINYINT(1) DEFAULT 0,
-  passcode VARCHAR(64),
+  hash VARCHAR(64),
   view_count INT DEFAULT 0,
   total DECIMAL(10,2),
   tax DECIMAL(10,2) DEFAULT 5.3,
@@ -92,7 +92,7 @@ CREATE TABLE takeoffs (
 
   FOREIGN KEY (creator_id) REFERENCES users(id),
   FOREIGN KEY (estimate_id) REFERENCES estimate(id),
-  FOREIGN KEY (last_edit_by) REFERENCES users(id),
+  FOREIGN KEY (last_updated_by) REFERENCES users(id),
   PRIMARY KEY (id)
 );
 
@@ -125,6 +125,8 @@ CREATE TABLE statements (
 -- a list of invoices that HAVE been shared with the customer
 CREATE TABLE invoices (
   id INT NOT NULL AUTO_INCREMENT,
+  invoice_number VARCHAR(64),
+  hash varchar(64),
   takeoff_id INT,
   total DECIMAL(10,2),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
