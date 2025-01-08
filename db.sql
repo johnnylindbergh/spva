@@ -98,15 +98,56 @@ CREATE TABLE takeoffs (
 );
 
 
--- seperate owner table
-CREATE TABLE owners (
-  id INT NOT NULL AUTO_INCREMENT,
-  name VARCHAR(64),
-  billing_address VARCHAR(64),
-  email VARCHAR(64),
-  phone_number VARCHAR(12),
-  PRIMARY KEY (id)
+-- seperate customers table
+-- a customer is a qb entity that wil be associated with an estimate. 
+
+CREATE TABLE customers (
+    id INT, -- not auto increment, this is the qb id
+    Taxable BOOLEAN NOT NULL,
+    BillAddr_Id INT,
+    BillAddr_Line1 VARCHAR(255),
+    BillAddr_City VARCHAR(100),
+    BillAddr_CountrySubDivisionCode CHAR(2),
+    BillAddr_Country VARCHAR(100),
+    BillAddr_PostalCode VARCHAR(20),
+    BillAddr_Lat VARCHAR(50),
+    BillAddr_Long VARCHAR(50),
+    ShipAddr_Id INT,
+    ShipAddr_Line1 VARCHAR(255),
+    ShipAddr_City VARCHAR(100),
+    ShipAddr_CountrySubDivisionCode CHAR(2),
+    ShipAddr_Country VARCHAR(100),
+    ShipAddr_PostalCode VARCHAR(20),
+    ShipAddr_Lat VARCHAR(50),
+    ShipAddr_Long VARCHAR(50),
+    Job BOOLEAN NOT NULL,
+    BillWithParent BOOLEAN NOT NULL,
+    ParentRef_Value INT,
+    Level INT,
+    Balance DECIMAL(10, 2) NOT NULL,
+    BalanceWithJobs DECIMAL(10, 2) NOT NULL,
+    CurrencyRef_Value CHAR(3),
+    CurrencyRef_Name VARCHAR(100),
+    PreferredDeliveryMethod VARCHAR(50),
+    Domain VARCHAR(50),
+    Sparse BOOLEAN NOT NULL,
+    SyncToken VARCHAR(50),
+    MetaData_CreateTime DATETIME,
+    MetaData_LastUpdatedTime DATETIME,
+    GivenName VARCHAR(100),
+    MiddleName VARCHAR(100),
+    FamilyName VARCHAR(100),
+    FullyQualifiedName VARCHAR(255),
+    CompanyName VARCHAR(255),
+    DisplayName VARCHAR(255),
+    PrintOnCheckName VARCHAR(255),
+    Active BOOLEAN NOT NULL,
+    PrimaryPhone_FreeFormNumber VARCHAR(50),
+    Mobile_FreeFormNumber VARCHAR(50),
+    PrimaryEmailAddr_Address VARCHAR(255),
+    WebAddr_URI VARCHAR(255)
 );
+
 
 -- statements table
 -- statement are a static list of statements that HAVE been shared with the customer

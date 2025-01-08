@@ -21,6 +21,20 @@ const con = mysql.createPool({
   multipleStatements: true,
 });
 
+function getLevenshteinDistanceSetting() {
+  con.query(
+    "SELECT setting_value FROM system_settings WHERE setting_name = 'levenshtein_distance';",
+    function (err, distance) {
+      if (err) {
+        console.log(err);
+        return 2;
+      }
+      return parseInt(distance[0].setting_value);
+    }
+  );
+}
+
+
 function generateHash() {
   return crypto
     .randomBytes(24)
@@ -28,6 +42,135 @@ function generateHash() {
     .replace(/\+/g, "0")
     .replace(/\//g, "0")
     .slice(0, 32);
+}
+
+function applySubjectNamingRules(takeoff_id, callback) {
+  // if any of the subjects contain "remove from {{some_subject}}" where some subject is a wildcard, remove the subject from the applied_materials table and subtract its value from cooresponding subject
+  con.query(
+    "SELECT * FROM applied_materials WHERE takeoff_id = ?;", [takeoff_id], function (err, subjects) {
+    if (err) {
+      console.log(err);
+      return callback(err);
+    }
+    for (var i = 0; i < subjects.length; i++) {
+      if (subjects[i].subject.toLowerCase().includes("remove from") || subjects[i].subject.toLowerCase().includes("remove")) { 
+        var removeSubject = subjects[i].subject.split("remove")[1];
+        // if the subject still starts with "from" after the split, remove it
+        if (removeSubject.startsWith("from")) {
+          removeSubject = removeSubject.split("from")[1];
+        }
+        // remove any leading or trailing whitespace
+        removeSubject = removeSubject.trim();
+
+        // find the removeSubject in the applied_materials table and subtract subject[i].measurement from its measurement
+        // use the minimum levenstein distance to find the subject
+        console.log("REMOVE SUBJECT: ", removeSubject);
+
+        if (removeSubject.length > 0){
+          // get the takeoffs applied_meterials
+          let minSubjectId;
+          let minDistance = 100;
+          // loop through the applied_materials and find the subject that matches the removeSubject
+          for (var j = 0; j < subjects.length; j++) { // n^2 but only sometimes
+            let distance = levenshtein.get(subjects[j].subject, removeSubject);
+            if (distance < minDistance) {
+              minDistance = distance;
+              minSubjectId = subjects[j].id;
+            }
+          }
+
+          // 
+          console.log(`System will subtract ${subjects[minSubjectId].measurement} ${subjects[minSubjectId].measurement_unit} from ${subjects[i].subject}`);
+
+          // subtract the measurement from the subject
+          con.query("UPDATE applied_materials SET measurement = measurement - ? WHERE id = ?;", [subjects[minSubjectId].measurement, subjects[i].id], function(err){
+            if (err) {
+              console.log(err);
+            }
+          });
+          
+          // remove the subject from the applied_materials table
+          con.query("DELETE FROM applied_materials WHERE id = ?;", [minSubjectId], function(err){
+            if (err) {
+              console.log(err);
+            }
+          });
+        }
+      }
+    }
+  });
+}
+
+
+function matchSubjectStrings(currentSubjectId, takeoff_id) {
+  // get the current subject
+  con.query("SELECT * FROM subjects WHERE id = ?;", [currentSubjectId], function (err, currentSubjects) {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    const currentSubject = currentSubjects[0].name;
+
+    console.log("Matching subject strings.");
+    // First, get the frequency of materials applied to a given subject in the applied_materials table
+    con.query(
+      "SELECT material_id, name, COUNT(*) as count FROM applied_materials WHERE name = ? AND material_id IS NOT NULL GROUP BY material_id ORDER BY count DESC LIMIT 1;",
+      [currentSubject],
+      function (err, materials) {
+        if (err) {
+          console.log(err);
+        }
+
+        // Assign these materials to the applied_materials table
+        console.log("Frequent materials for " + currentSubject + ":" + materials);
+
+        if (materials != null && materials.length > 0) {
+          //very important to match to takeoff_id or else this query would update all the takeoffs in the table
+          con.query(
+            "UPDATE applied_materials SET material_id = ? WHERE name = ? AND takeoff_id = ?;",
+            [materials[0].material_id, currentSubject, takeoff_id],
+            function (err) {
+              if (err) {
+                console.log(err);
+              }
+            }
+          );
+        } else {
+          console.log("No predicted materials found");
+
+          // Find the closest match in the materials table using Levenshtein distance
+          con.query("SELECT * FROM materials;", function (err, allMaterials) {
+            if (err) {
+              console.log(err);
+            }
+
+            var minDistance = 100;
+            var min_id = 0;
+            for (var j = 0; j < allMaterials.length; j++) {
+              var distance = levenshtein.get(allMaterials[j].name, currentSubject);
+              if (distance < minDistance) {
+                minDistance = distance;
+                min_id = allMaterials[j].id;
+              }
+            }
+
+            if (minDistance < 2) {
+              con.query(
+                "UPDATE applied_materials SET material_id = ? WHERE name = ? AND takeoff_id = ?;",
+                [min_id, currentSubject, takeoff_id],
+                function (err) {
+                  if (err) {
+                    console.log(err);
+                  }
+                  console.log("found a close match: ", currentSubject, min_id);
+                }
+              );
+            }
+          });
+        }
+      }
+    );
+  });
 }
 
 // unused function
@@ -168,8 +311,9 @@ module.exports = {
 
       var measurement = results[i][14];
 
-      if (parseFloat(results[i][9]) !== 0) {
+      if (parseFloat(results[i][9]) !== 0) { // if the wall area is not zero, use the wall area and wall area unit
         measurement = parseFloat(results[i][9]);
+        measurementUnit = results[i][10];
       }
       //console.log("measurement: ", measurement);
 
@@ -254,6 +398,37 @@ module.exports = {
           callback(null);
         }
       );
+    }
+  },
+
+  getCustomers: function (callback) {
+    con.query("SELECT * FROM customers;", function (err, customers) {
+      if (err) return callback(err);
+      // if the data is not null, return the data
+      callback(err, customers);
+    });
+  },
+  
+
+  updateTakeoffCustomer: function (takeoff_id, customer, project, callback) {
+    console.log("Updating takeoff Customer: ", takeoff_id, customer, project);
+ // customer string become the owner name
+ // and the project name becomes appended to the takeoff name
+     if (!takeoff_id || !customer) {
+      console.log("updateTakeoffCustomer got null value");
+      console.log(takeoff_id, customer, project);
+    } else {
+      con.query(
+        "UPDATE takeoffs SET owner = ?, name = ? WHERE id = ?;",
+        [customer, project, takeoff_id],
+        function (err) {
+          if (err) {
+            console.log(err);
+            callback(err);
+          }
+          callback(null);
+        }
+      );  
     }
   },
     
@@ -927,6 +1102,13 @@ module.exports = {
             for (var i = 0; i < subjects.length; i++) {
               // Insert into applied_materials
               let currentSubject = subjects[i].subject;
+              let currentSubjectId = subjects[i].id;
+
+              // if the current subject contains "notes" or note, skip it
+              if (currentSubject.toLowerCase().includes("note")) {
+                continue;
+              } 
+                console.log("Inserted subject: ", currentSubject);
                 con.query(
                 "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost) VALUES (?, ?, ?, ?, ?);",
                 [
@@ -940,74 +1122,26 @@ module.exports = {
                   if (err) {
                   console.log(err);
                   } else {
-                  console.log("Matching subject strings.");
-                  // First, get the frequency of materials applied to a given subject in the applied_materials table
-                  con.query(
-                    "SELECT material_id, name, COUNT(*) as count FROM applied_materials WHERE name = ? AND material_id IS NOT NULL GROUP BY material_id ORDER BY count DESC LIMIT 1;",
-                    [currentSubject],
-                    function (err, materials) {
-                    if (err) {
-                      console.log(err);
-                    }
-                    
-                    // Assign these materials to the applied_materials table
-                    console.log("Frequent materials for " + currentSubject + ":" + materials);
-          
-                    if (materials != null && materials.length > 0) {
-                      //very important to match to takeoff_id or else this query would update all the takeoffs in the table
-                      con.query(
-                      "UPDATE applied_materials SET material_id = ? WHERE name = ? AND takeoff_id = ?;", 
-                      [materials[0].material_id, currentSubject, takeoff_id],
-                      function (err) {
-                        if (err) {
-                        console.log(err);
-                        }
-                      }
-                      );
-                    } else {
-                      console.log("No predicted materials found");
-          
-                      // Find the closest match in the materials table using Levenshtein distance
-                      con.query("SELECT * FROM materials;", function (err, allMaterials) {
-                      if (err) {
-                        console.log(err);
-                      }
-          
-                      var minDistance = 100;
-                      var min_id = 0;
-                      for (var j = 0; j < allMaterials.length; j++) {
-                        var distance = levenshtein.get(allMaterials[j].name, currentSubject);
-                        if (distance < minDistance) {
-                        minDistance = distance;
-                        min_id = allMaterials[j].id;
-                        }
-                      }
-          
-                      if (minDistance < 3) {
-                        con.query(
-                        "UPDATE applied_materials SET material_id = ? WHERE subject = ?;",
-                        [min_id, subjects[i].subject],
-                        function (err) {
-                          if (err) {
-                          console.log(err);
-                          }
-                        }
-                        );
-                      }
-                      });
-                    }
-                    }
-                  );
+                  //  matchSubjectStrings(currentSubjectId, takeoff_id);
                   }
                 }
                 );
             }
-            callback(null);
+            applySubjectNamingRules(takeoff_id);
+            // sleep for 1 second to allow the database to update
+            setTimeout(function () {
+              callback(null);
+            }, 1000);
           }
+
         );
       }
     );
   },
+
+
+
+
   removeMaterialSubject: function (material_id, subject_id, callback) {
     // First, get the subject and the applied materials
     con.query(
@@ -1378,7 +1512,6 @@ module.exports = {
         console.error("Error fetching takeoffs:", err);
         return callback(err);
       }
-      console.log("Fetched takeoffs with estimates:", takeoffs);
       callback(null, takeoffs);
     });
   },

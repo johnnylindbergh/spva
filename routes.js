@@ -77,12 +77,11 @@ const upload = multer({
 
 // csv parsing stuff
 
-function readTakeoff(req, res, filename, cb) {
+function readTakeoff(req, res, takeoff_id, filename, cb) {
   console.log("parsing ", filename);
   var results = [];
   var headers = [];
 
-  db.createNewTakeoff(req, res, function (err, takeoff_id) {
     console.log("takeoff id is ", takeoff_id);
     fs.createReadStream(filename)
 
@@ -119,27 +118,25 @@ function readTakeoff(req, res, filename, cb) {
       .on("end", function () {
         db.loadTakeoffData(takeoff_id, results, headers, function (err) {
           if (err) {
-            cb(err);
+            console.log(err);
           } else {
             console.log("takeoff loaded");
-            db.takeoffSetStatus(takeoff_id, status, function (err) { });
           }
         });
 
         db.generateTakeoffMaterials(takeoff_id, function (err) {
           if (err) {
             console.log(err);
+            cb(err);
           } else {
             console.log("materials generated");
           }
         });
-        res.redirect("/");
       })
       .on("error", function (error) {
         console.log(error.message);
         cb(error);
       });
-  });
 }
 
 // main page stuff
@@ -239,6 +236,17 @@ module.exports = function (app) {
     });
   });
 
+  app.get('/getCustomers', mid.isAuth, function (req, res) {
+    db.getCustomers(function (err, customers) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(customers);
+      }
+    });
+  } );
+  
+
   app.get("/getTakeoffs", mid.isAuth, (req, res) => {
     db.getTakeoffs(function (err, takeoffs) {
       if (err) {
@@ -278,7 +286,6 @@ module.exports = function (app) {
   // Route for handling file uploads
   app.post("/uploadTakeoff", mid.isAuth, function (req, res) {
     console.log("uploading takeoff...");
-    console.log(req.body);
     // Use Multer middleware to handle file upload
     upload(req, res, function (err) {
       if (err) {
@@ -286,32 +293,43 @@ module.exports = function (app) {
         console.log(err);
         res.send(err);
       } else {
-        // Success message after a successful upload
+        db.createNewTakeoff(req, res, function (err, takeoff_id) { // the first time takeoff_id is issued
+          if (err) {
+            console.log(err);
+          } 
+          // Success message after a successful upload
 
-        //call the readTakeoff function to parse the csv file
-        if (req.file) {
-          console.log("about to read ", req.file.filename);
-          req.body.takeoff_id;
-          readTakeoff(
-            req,
-            res,
-            sys.PROJECT_PATH + "/uploads/" + req.file.filename,
-            function (err) {
-              if (err) {
-                console.log(err);
-              } else {
-                console.log(
-                  "takeoff read. time to generate estimate for takeoff_id :",
-                  req.body.takeoff_id
-                );
+          //call the readTakeoff function to parse the csv file
+          if (req.file) {
+            console.log("about to read ", req.file.filename);
+            // handle the customer and project fields
+              console.log(req.body);
+              readTakeoff(
+                req,
+                res,
+                takeoff_id,
+                sys.PROJECT_PATH + "/uploads/" + req.file.filename,
+                function (err) {
+                  if (err) {
+                    console.log(err);
+                  } else {
+                    console.log("takeoff loaded");
+                    db.takeoffSetStatus(takeoff_id, 1, function (err) { });
+                  }
+                }
+              );
+
+              // update the customer and project fields
+              console.log("about to update customer and project");
+              db.updateTakeoffCustomer(takeoff_id, req.body.customer, req.body.project, function (err) {
                 res.redirect("/");
-              }
-            }
-          );
-        } else {
-          console.log("no file uploaded");
-          res.send("no file uploaded");
-        }
+              });
+        
+          } else {
+            console.log("no file uploaded");
+            res.send("no file uploaded");
+          }
+        });
       }
     });
   });
@@ -1305,23 +1323,26 @@ module.exports = function (app) {
 
     let computedAmount = 0;
 
-    db.getInvoicableTotal(takeoff_id, (err, total) => {
+    db.getInvoicableTotal(takeoff_id, (err, invoiceableTotal) => {
       if (err) {
         console.error('Error fetching total:', err);
         return res.status(500).json({ error: 'Failed to fetch total.' });
       }
 
-      console.log("getInvoicableTotal", total);
-      console.log("payment_amount is ", payment_amount);
+      console.log("getInvoicableTotal", invoiceableTotal);
+      // console.log("payment_amount is ", payment_amount);
 
       if (payment_amount == "20%"){
-        computedAmount = total * 0.2;
+        console.log("20% selected");
+        computedAmount = invoiceableTotal * 0.2;
       } else if (payment_amount == "50%"){
-        computedAmount = total * 0.5;
+        console.log("50% selected");
+        computedAmount = invoiceableTotal * 0.5;
       } else if (payment_amount == "100%"){
-        computedAmount = total;
+        console.log("100% selected");
+        computedAmount = invoiceableTotal;
       } else {
-        computedAmount = total;
+        computedAmount = invoiceableTotal;
       }
 
       // query the db and get the count of the invoices with takeoff_id
@@ -1336,7 +1357,7 @@ module.exports = function (app) {
 
         // Insert into database
         const query = `INSERT INTO invoices (takeoff_id, total, invoice_number) VALUES (?, ?, ?)`;
-        const values = [takeoff_id, custom_amount, invoiceNumber];
+        const values = [takeoff_id, computedAmount, invoiceNumber];
 
         db.query(query, values, (results) => {
           // Fetch the created invoice
