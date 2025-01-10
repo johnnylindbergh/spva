@@ -76,25 +76,25 @@ const quickbooks = require('./quickbooks.js')(app);
 // unhandled routes redirect to home
 app.get('*', (req, res) => { res.redirect('/'); });
 
- if (!sys.inDevMode) {
-         var lex = require('greenlock-express')
-         lex.init({
-           packageRoot: __dirname,
-           configDir: "./greenlock.d",
- 
-           // contact for security and critical bug notices
-           maintainerEmail: "lindberghjohnny@gmail.com",
- 
+// if (!sys.inDevMode) {
+ //        var lex = require('greenlock-express')
+//         lex.init({
+//           packageRoot: __dirname,
+//           configDir: "./greenlock.d",
+// 
+ //          // contact for security and critical bug notices
+//          maintainerEmail: "lindberghjohnny@gmail.com",
+ //
            // whether or not to run at cloudscale
-           cluster: false
+//           cluster: false
 
-         }).serve(app);
+//         }).serve(app);
 
        
- }
+// }
 
 
 // start server listening for dev mode 
-//var server = app.listen(sys.PORT, () => {
-//  console.log(sys.SYSTEM_NAME + ' server listening on port %d', server.address().port);
-//});
+var server = app.listen(sys.PORT, () => {
+  console.log(sys.SYSTEM_NAME + ' server listening on port %d', server.address().port);
+});

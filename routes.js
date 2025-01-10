@@ -257,13 +257,20 @@ module.exports = function (app) {
     });
   });
 
-  // post request to https://estimate.sunpaintingva.com/viewTakeoff with body param takeoff_id
-
   app.post("/alButton", mid.isAuth, function (req, res) {
     console.log("alButton");
     // if the user name is al, res.send "Hello AL!" otherwise, say you are not al
     if (req.user.local.name == "AL" || req.user.local.name == "Johnny") {
-      res.send("Hello AL!");
+      // create a blank Takeoff
+      db.createNewBlankTakeoff(req, res, function (err, takeoff_id) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("takeoff created");
+          res.redirect("/");
+        }
+      });
+
     } else {
       res.send("You are not AL");
     }

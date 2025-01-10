@@ -374,6 +374,21 @@ module.exports = {
       }
     );
   }, 
+
+
+  createNewBlankTakeoff: function (req, res, cb) {
+    con.query(
+      "INSERT INTO takeoffs (creator_id, name, hash) VALUES (?, ?, ?); SELECT LAST_INSERT_ID() as last;",
+      [req.user.local.id, "New Blank Takeoff",req.body.takeoffName, generateHash().toString()],
+      function (err, result) {
+        if (err) {
+          return cb(err);
+        }
+        console.log("created takeoff", result[1][0].last);
+        cb(null, result[1][0].last);
+      }
+    );
+  }, 
   
   deleteTakeoff: function (takeoff_id, deletedBy, callback) {
     // first check if the takeoff.created_by matches the deletedBy user_id
