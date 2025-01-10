@@ -165,6 +165,8 @@ function handleSignatureChange() {
                 $('.signature-success').toggle();
                 $('.signature').toggle();
                 $('#options-table').find('input').prop('disabled', true);
+
+                $('#initial-payment-alert').toggle();
             }
         })
         .fail(function(error) {
@@ -222,7 +224,17 @@ $(document).ready(function() {
         $('#total').text("Total: $"+numberWithCommas(taxedTotal.toFixed(2)));
 
         updateTotals();
-        
+
+        // if the data.takeoff[0].status >=4, toggle the $("#initial-payment-alert").toggle();
+        if (data.takeoff[0].status == 4) {
+            $("#initial-payment-alert").toggle();
+        }
+
     });
+
+
+
+    const alert = $('#initial-payment-alert');
+
    // addEditableListeners();
 });

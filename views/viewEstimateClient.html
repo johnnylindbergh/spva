@@ -90,7 +90,6 @@
 
         </div>
     </br>
-    <div class="input-group">
        
   
         Phone Number: <input type="tel" id="phone" class="input-field" placeholder="123-456-7890" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
@@ -100,7 +99,6 @@
         <br>
 
         Preferred Start Date: <input type="date" class="input-field"><br>
-    </div>
 
     
 
@@ -139,26 +137,23 @@
 
             <!-- input box labeled 'Amount to pay' that, when user enters a number, it calulates the percentage of the total and the remaining amount -->
 
-        
+        <div id = "initial-payment-alert" class = "modal">
+            <div class = "modal-content">
+                Would you like to pay the 20% deposit now?</br></br>
+               
+               <button class="pay-now-button" onclick="createPaymentIntent('card')">Pay With Card</button> 
+               <button class="pay-now-button" onclick="createPaymentIntent('us_bank_account')">Pay With ACH</button> 
+            
+                <button class="pay-now-button" onclick="$('#initial-payment-alert').toggle();">Pay Later</button>
+            </div>
 
-        <div id = "payment-buttons" style = "text-align: center;">
+        </div>
+
+        <!-- <div id = "payment-buttons" style = "text-align: center;">
             <button id="pay-now-button" onclick="createPaymentIntent('card')">Pay With Card</button> 
             <button id="pay-now-button" onclick="createPaymentIntent('us_bank_account')">Pay With ACH</button>
-        </div>
-      
-</body>
-<script>
-    // calculate the percentage of the total and the remaining amount
-    function calculatePayment() {
-        const amount = document.getElementById('amount').value;
-        const estimateTotal = $('#total').text().replace('$', '');
-        const percent = (amount / estimateTotal) * 100;
-        const remaining = estimateTotal - amount;
-        document.getElementById('percent').innerText = percent + '%';
-        document.getElementById('remaining').innerText = 'Remaining: $' + remaining;
-    }
-</script>
-</html>
+        </div> -->
+
 
         <p>Thank you for allowing us to work with you!</p>
         <p>This Proposal must be signed and dated by the contracting authority for the project and must be received by Sun Painting within 30 days following the listed Proposal Date to be considered formally approved. Proposals received by Sun Painting after 30 Days may require re-pricing.</p>

@@ -6,7 +6,7 @@ body {
 }
 
 .container {
-    width: 80%;
+    width: 90%;
     margin: auto;
     padding: 20px;
     background-color: #ffffff;
@@ -339,6 +339,7 @@ input[type="text"]:focus, input[type="date"]:focus {
     cursor: pointer;
   }
 
+
   .input-group {
     /* style for text input boxes */
     margin-bottom: 10px;
@@ -349,7 +350,17 @@ input[type="text"]:focus, input[type="date"]:focus {
 
   .input-group input {
     display:block;
-    width: 360px;
+    width:100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+  }
+
+
+  .input-field {
+    display: block;
+    width: 50%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
@@ -376,15 +387,68 @@ input[type="text"]:focus, input[type="date"]:focus {
     }
     /* the button to pay with credit Card */
 
-    #pay-now-button {
+    .pay-now-button {
    
     background-color: #0893A1;
     border: none;
     border-radius: 5px;
     color: white;
-    padding: 8px 16px;
+    padding: 10px 17px;
     text-decoration: none;
     margin: 6px 4px;
     cursor: pointer;
     
+    }
+
+    .modal {
+        text-align: center;
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fff;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        animation: modalFadeIn 0.3s ease-out;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* Modal fade-in animation */
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }

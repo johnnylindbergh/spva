@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .invoice {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: auto;
+        }
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .invoice-details {
+            margin-bottom: 10px;
+        }
+        .invoice-details span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    {{#invoice}}
+    <div id="invoice-container" class="invoice">
+        <h1 class="invoice-header">Invoice</h1>
+        <div class="invoice-details">
+            <!-- link to original estimate using /share/hash -->
+            <p>Invoice Number: {{invoice_number}}</p>
+            <p>Estimate Number: <a href="/share/{{estimate_hash}}">{{estimate_number}}</a></p>
+            <p>Total: ${{invoiceTotal}}</p>
+            <p>Tax: ${{tax}}</p>
+            <p>Owner: {{owner}}</p>
+            <p>Billing Address: {{owner_billing_address}}</p>
+            <p>Email: {{owner_email}}</p>
+            <p>Created At: {{created_at}}</p>
+            <p>Updated At: {{updated_at}}</p>
+        </div>
+    </div>
+    {{/invoice}}
+    {{^invoice}}
+    <div id="invoice-container" class="invoice">
+        <h1 class="invoice-header">Invoice</h1>
+        <div class="invoice-details">
+            <p>No invoice found</p>
+        </div>
+    </div>
+    {{/invoice}}
+
+
+</body>
+</html>

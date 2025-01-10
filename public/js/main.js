@@ -7,6 +7,7 @@ $(document).ready(function () {
       { code: 2, label: "Estimate Generated" },
       { code: 3, label: "Estimate Published" },
       { code: 4, label: "Estimate Approved" },
+      { code: 4, label: "Invoiced" },
     ];
 
     // Find the index of the current status

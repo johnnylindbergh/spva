@@ -403,11 +403,11 @@ module.exports = function (app) {
         } else {
           if (valid) {
             // update the estimate's signed total field 
-            db.updateSignedTotal(req.body.takeoff_id, req.body.total, function (err) {
+            db.updateSignedTotal(req.body.takeoff_id, parseFloat(req.body.total).toFixed(2), function (err) {
               if (err) {
-                console.log(err);
+              console.log(err);
               } else {
-                res.send(valid);
+              res.send(valid);
               }
             });
 
@@ -909,7 +909,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/getEstimateData", function (req, res) {
+  app.post("/getEstimateData",  function (req, res) {
     console.log("just viewing takeoff id: ", req.body.takeoff_id);
     db.getEstimateData(req.body.takeoff_id, function (err, estimate, takeoff) {
       if (err) {
@@ -920,7 +920,7 @@ module.exports = function (app) {
     });
   });
 
-  app.get("/share/:hash", function (req, res) {
+  app.get("/share/:hash", mid.isAuth, function (req, res) {
     console.log("sharing takeoff ", req.params.hash);
     if (req.params.hash.length != 32) {
       res.redirect("/");
@@ -1044,7 +1044,7 @@ module.exports = function (app) {
     }
   });
 
-  app.post('/checkMeout/:takeoff_id', function (req, res) {
+  app.get('/checkMeout/:takeoff_id', function (req, res) {
     console.log("/checkMeout/");
     const takeoff_id = req.params.takeoff_id;
     const method = req.body.method;
@@ -1103,46 +1103,46 @@ module.exports = function (app) {
     }
     );
   });
-  app.get('/checkMeout/:takeoff_id', function (req, res) {
-    console.log("/checkMeout/");
-    const takeoff_id = req.params.takeoff_id;
-    if (takeoff_id == null) {
-      console.log("takeoff_id is null");
-      res.redirect("/");
-    }
-    // get takeoff
-    db.getTakeoffTotal(takeoff_id, function (err, takeoffName, total) {
-      console.log(takeoffName + " has a total of " + total);
-      if (err) {
-        console.log(err);
-      } else {
+  // app.get('/checkMeout/:takeoff_id', function (req, res) {
+  //   console.log("/checkMeout/");
+  //   const takeoff_id = req.params.takeoff_id;
+  //   if (takeoff_id == null) {
+  //     console.log("takeoff_id is null");
+  //     res.redirect("/");
+  //   }
+  //   // get takeoff
+  //   db.getTakeoffTotalForStripe(takeoff_id, function (err, takeoffName, total) {
+  //     console.log(takeoffName + " has a total of " + total);
+  //     if (err) {
+  //       console.log(err);
+  //     } else {
 
-        db.getPaymentMethod(takeoff_id, function (err) {
-          if (err) { console.log(err); }
+  //       db.getPaymentMethod(takeoff_id, function (err) {
+  //         if (err) { console.log(err); }
 
       
-          console.log("total is ", Math.floor(total * 100.0));
-          // create a stripe price_id
-          const price = stripe.prices.create({
-            unit_amount: Math.floor(total * 100.0),
-            currency: 'usd',
-            product_data: {
-              name: takeoffName + ' Estimate'
-            },
+  //         console.log("total is ", Math.floor(total * 100.0));
+  //         // create a stripe price_id
+  //         const price = stripe.prices.create({
+  //           unit_amount: Math.floor(total * 100.0),
+  //           currency: 'usd',
+  //           product_data: {
+  //             name: takeoffName + ' Estimate'
+  //           },
 
-          });
-          //console.log(price.id);
+  //         });
+  //         //console.log(price.id);
 
-          // console.log("takeoff is ", takeoff);
-          res.render("checkout.html", {
-            takeoff_id: takeoff_id,
-            priceId: price.id
-          });
+  //         // console.log("takeoff is ", takeoff);
+  //         res.render("checkout.html", {
+  //           takeoff_id: takeoff_id,
+  //           priceId: price.id
+  //         });
 
-        });
-      }
-    });
-  });
+  //       });
+  //     }
+  //   });
+  // });
 
 
 
@@ -1171,10 +1171,7 @@ module.exports = function (app) {
 
 
             try {
-              if (total == null) {
-                console.log("total is null");
-                total = 13000.00 * 100;
-              }
+             
               // determine the total
               console.log("total  is ", total);
 
@@ -1185,14 +1182,6 @@ module.exports = function (app) {
               });
 
               
-
-              if (method == 'card') {
-                total = cardOffset(total);
-              }
-
-              if (method == 'us_bank_account') {
-                total = bankOffset(total);
-              }
 
               const price = await stripe.prices.create({
                 unit_amount: Math.floor(total * 100),
@@ -1272,6 +1261,25 @@ module.exports = function (app) {
       });
     });
 
+    app.get("/payment", function (req, res) {
+      // landing page for the payment system 
+      console.log("paymentPage Accessed");
+      res.render("payment.html");
+    });
+
+
+    app.post("/payment", function (req, res){
+      console.log(req.body);
+      db.getInvoiceByNumber(req.body.invoice_number, function (err, invoice) {
+        if (err) {
+          console.log(err);
+          res.send("error retrieving invoice");
+        } else {
+          console.log(invoice);
+          res.render("invoice.html", { invoice: invoice[0] });
+        }
+      });  
+    });
 
 
 
@@ -1315,6 +1323,7 @@ module.exports = function (app) {
 
     // POST /create-invoice
   app.post('/create-invoice', (req, res) => {
+    console.log("/create-invoice recieved", req.body)
     const {
       payment_amount,
       custom_amount,
@@ -1331,7 +1340,7 @@ module.exports = function (app) {
 
       console.log("getInvoicableTotal", invoiceableTotal);
       // console.log("payment_amount is ", payment_amount);
-
+      // payment amount should probably be changed to payment_percent
       if (payment_amount == "20%"){
         console.log("20% selected");
         computedAmount = invoiceableTotal * 0.2;
@@ -1352,8 +1361,24 @@ module.exports = function (app) {
           return res.status(500).json({ error: 'Failed to fetch invoice count.' });
         }
 
+        if (count == 1) { // this is the first invoice
+          console.log("first invoice");
+          // update takeoff status to invoiced (5)
+          db.takeoffSetStatus(takeoff_id, 5, function (err) {
+            if (err) {
+              console.log(err);
+            }
+          });
+
+        }
+
         // Generate invoice number
         const invoiceNumber = `${String(takeoff_id).padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
+
+        if (custom_amount) {
+          computedAmount = custom_amount;
+        }
+
 
         // Insert into database
         const query = `INSERT INTO invoices (takeoff_id, total, invoice_number) VALUES (?, ?, ?)`;

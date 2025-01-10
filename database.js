@@ -34,6 +34,18 @@ function getLevenshteinDistanceSetting() {
   );
 }
 
+function bankOffset(total){
+  return total + (15);
+
+}
+
+function cardOffset(total){
+     
+  return total*1.0288 + 0.3;
+
+}
+
+
 
 function generateHash() {
   return crypto
@@ -418,17 +430,33 @@ module.exports = {
       console.log("updateTakeoffCustomer got null value");
       console.log(takeoff_id, customer, project);
     } else {
-      con.query(
-        "UPDATE takeoffs SET owner = ?, name = ? WHERE id = ?;",
-        [customer, project, takeoff_id],
-        function (err) {
-          if (err) {
-            console.log(err);
-            callback(err);
-          }
-          callback(null);
+
+      // query the customer table for the customer name
+
+      con.query("SELECT * FROM customers WHERE FullyQualifiedName = ?;", [customer], function (err, customerInfo) {
+        if (err){
+          console.log(err);
+          return callback(err);
+        } else {
+          console.log("Customer Info: ", customerInfo[0]);
+          console.log("Customer name: ", customerInfo[0].GivenName +" "+ customerInfo[0].FamilyName);
+          console.log("Customer billing address: "+ customerInfo[0].BillAddr_Line1 + ", " + customerInfo[0].BillAddr_City + ", " + customerInfo[0].BillAddr_CountrySubDivisionCode);
+          console.log("Customer email address:", customerInfo[0].PrimaryEmailAddr_Address)
+          let billing_address = customerInfo[0].BillAddr_Line1 + ", " + customerInfo[0].BillAddr_City + ", " + customerInfo[0].BillAddr_CountrySubDivisionCode
+          // use this info to update the takeoff's owner
+          con.query(
+            "UPDATE takeoffs SET owner = ?, name = ?, owner_billing_address = ?, owner_email = ? WHERE id = ?;",
+            [customerInfo[0].GivenName +" "+ customerInfo[0].FamilyName, project, billing_address, customerInfo[0].PrimaryEmailAddr_Address, takeoff_id],
+            function (err) {
+              if (err) {
+                console.log(err);
+                return callback(err);
+              }
+              callback(null);
+            }
+          );
         }
-      );  
+      });
     }
   },
     
@@ -729,6 +757,24 @@ module.exports = {
 
   // invoice 
 
+  getInvoiceByNumber: function (invoice_number, callback) {
+    if (invoice_number == null) {
+      console.log("getInvoiceByNumber got null value");
+    } else {
+      con.query(
+        "SELECT takeoffs.hash, takeoffs.id, takeoffs.total as estimateTotal, invoices.total as invoiceTotal FROM invoices INNER JOIN takeoffs ON invoices.takeoff_id = takeoffs.id WHERE invoices.invoice_number = ?",
+        [invoice_number],
+        function (err, invoice) {
+          if (err) {
+            console.log(err);
+            return callback(err);
+          }
+          callback(null, invoice);
+        }
+      );
+    }
+  },
+
   getInvoiceCount: function (takeoff_id, callback) {
     con.query("SELECT COUNT(*) as count FROM invoices WHERE takeoff_id = ?;", [takeoff_id], function (err, count) {
       if (err) return callback(err);
@@ -739,11 +785,18 @@ module.exports = {
   getInvoicableTotal: function (takeoff_id, callback) {
     con.query("SELECT SUM(amount) as total FROM payment_history WHERE takeoff_id = ?;", [takeoff_id], function (err, total) {
       if (err) return callback(err);
+      if (total == null){
+        total = 0;
+        console.log("customer has not made any payments");
+      }
 
       // get takeoff and join the estimate_id to get the signed_total
       con.query("SELECT * FROM takeoffs join estimate on takeoffs.estimate_id = estimate.id WHERE takeoffs.id = ?;", [takeoff_id], function (err, estimateTakeoffObject) {
         if (err) return callback(err);
-
+        if (!estimateTakeoffObject || estimateTakeoffObject.length === 0 || !total || total.length === 0) {
+          return callback(new Error("Invalid data retrieved"));
+        }
+        console.log("got signed_total: ", (parseFloat(estimateTakeoffObject[0].signed_total) - parseFloat(total[0].total)).toFixed(2));
         callback(null, (parseFloat(estimateTakeoffObject[0].signed_total) - parseFloat(total[0].total)).toFixed(2));
       });
 
@@ -1081,6 +1134,25 @@ module.exports = {
           callback(false, null);
         }
       }
+    );
+  },
+
+  updateSignedTotal: (takeoff_id, total, callback) => {
+    // first get the estimate id from the takeoff_id
+    con.query( "SELECT estimate_id FROM takeoffs WHERE id = ?;", [takeoff_id], function(err, estimate_id){
+      if (err) return callback(err);
+      if (estimate_id[0].estimate_id == null) {
+        console.log("No estimate_id found for takeoff_id: ", takeoff_id);
+      }
+      con.query(
+        "UPDATE estimate SET signed_total = ? WHERE id = ?;",
+        [total, estimate_id[0].estimate_id],
+        function (err) {
+          if (err) return callback(err);
+          callback(null);
+        }
+      );
+    }
     );
   },
 
@@ -1571,40 +1643,107 @@ module.exports = {
     );
   },
 
-  // get the raw toatal + options + tax
-  getTakeoffTotalForStripe: function (takeoff_id, callback) {
+getTakeoffTotalForStripe: function (takeoff_id, callback) {
+  console.log("getting total for stripe");
     con.query(
-      "SELECT total, name, tax FROM takeoffs WHERE id = ?;",
+      "SELECT  signed_total, name, tax, payment_method FROM estimate join takeoffs ON takeoffs.estimate_id = estimate.id WHERE takeoffs.id = ?;",
       [takeoff_id],
       function (err, rows) {
+        console.log(rows);
         if (err) return callback(err);
-        if (rows[0] != null && rows[0].total != null && rows[0].name != null) {
+        if (rows[0] != null && rows[0].signed_total != null && rows[0].name != null) {
+
+          // get the option total
+          con
 
           console.log(rows[0]);
-          let total = rows[0].total;
-          let takeoffName = rows[0].name;
           let tax = parseFloat(rows[0].tax);
+          let estimateTotal = parseFloat(rows[0].signed_total);
+          let method = rows[0].payment_method;
 
+          console.log("estimateTotal: ", estimateTotal);
+          console.log("tax: ", tax);
+          console.log("method: ", method);
+
+          // apply offsets for the stripe total
+          let total = parseFloat(estimateTotal);
+          console.log("total: ", total);
 
           // get the optiontotal
-          con.query(
-            "SELECT SUM(cost) as total FROM options WHERE takeoff_id = ? AND applied = 1;",
-            [takeoff_id],
-            function (err, options) {
-              if (err) return callback(err);
-              let total = parseFloat(rows[0].total) + (parseFloat(options[0].total) || 0); // if no options, set to 0
-              let takeoffName = rows[0].name;
-              callback(null, takeoffName, total*(tax/100.0 + 1.0));
+          if (method == "card") {
+            total = cardOffset(total);
+          }
+          if (method == "us-bank-account") {
+            total = bankOffset(total);
+          }
 
-            }
-          );
-         
-        } else {
+          console.log("total after offset: ", total);
+
+          // get 20% of the total for the deposit
+          let deposit = total * 0.2;
+
+          // return the total
+          callback(null, rows[0].name, deposit);
+        }
+
+        else {
           callback(err);
         }
       }
     );
   },
+
+
+          // 
+
+          //deprecated
+  // // get the raw toatal + options + tax
+  // getTakeoffTotalForStripe: function (takeoff_id, callback) {
+  //   con.query(
+  //     "SELECT total, name, tax FROM takeoffs join estimate WHERE takeoffs.id = ?;",
+  //     [takeoff_id],
+  //     function (err, rows) {
+  //       console.log(rows);
+  //       if (err) return callback(err);
+  //       if (rows[0] != null && rows[0].total != null && rows[0].name != null) {
+
+  //         console.log(rows[0]);
+  //         let total = rows[0].total;
+  //         let takeoffName = rows[0].name;
+  //         let tax = parseFloat(rows[0].tax);
+
+
+  //         // get the optiontotal
+  //         con.query(
+  //           "SELECT SUM(cost) as total FROM options WHERE takeoff_id = ? AND applied = 1;",
+  //           [takeoff_id],
+  //           function (err, options) {
+  //             if (err) return callback(err);
+  //             if (total == null) {
+  //               total = 0;
+  //             }
+
+  //             if (options[0].total == null) {
+  //               options[0].total = 0;
+  //             }
+
+  //             if (tax == null) {
+  //               tax = 5.3;
+  //             }
+
+  //             let total = parseFloat(rows[0].total) + (parseFloat(options[0].total) || 0); // if no options, set to 0
+  //             let takeoffName = rows[0].name;
+  //             callback(null, takeoffName, total*(tax/100.0 + 1.0));
+
+  //           }
+  //         );
+         
+  //       } else {
+  //         callback(err);
+  //       }
+  //     }
+  //   );
+  // },
 
   takeoffSetStatus: function (takeoff_id, status, cb) {
     con.query(

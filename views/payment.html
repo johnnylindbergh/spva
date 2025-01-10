@@ -4,8 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Landing Page</title>
+    <!-- import styles -->
+    <link rel="stylesheet" href="css/defaults.css">
+    <link rel="stylesheet" href="css/invoice.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            background-color: #fff;
+        }
+    </style>
 </head>
 <body>
-    <h1>Payment Landing Page</h1>
+    <div class="container">
+        <div id="invoice-container">
+            <!-- ask the invoice number -->
+            <div id="invoice-number">
+                <h1>Enter Invoice Number</h1>
+                <form action="payment" method="POST">
+                    <input type="text" name="invoice_number" id="invoice_number" required>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+            <!-- display the invoice -->
+        </div>
+    </div>
 </body>
 </html>
