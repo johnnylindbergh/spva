@@ -35,6 +35,7 @@ function getLevenshteinDistanceSetting() {
 }
 
 function bankOffset(total){
+  console.log("applying bank offset");
   return total + (15);
 
 }
@@ -379,7 +380,7 @@ module.exports = {
   createNewBlankTakeoff: function (req, res, cb) {
     con.query(
       "INSERT INTO takeoffs (creator_id, name, hash) VALUES (?, ?, ?); SELECT LAST_INSERT_ID() as last;",
-      [req.user.local.id, "New Blank Takeoff",req.body.takeoffName, generateHash().toString()],
+      [req.user.local.id, "Al's Takeoff", generateHash().toString()],
       function (err, result) {
         if (err) {
           return cb(err);
@@ -1684,21 +1685,23 @@ getTakeoffTotalForStripe: function (takeoff_id, callback) {
           let total = parseFloat(estimateTotal);
           console.log("total: ", total);
 
+          // get 20% of the total for the deposit
+          total = total * 0.2; // hard coded 20% deposit lol
+
           // get the optiontotal
           if (method == "card") {
             total = cardOffset(total);
           }
-          if (method == "us-bank-account") {
+          if (method == "us_bank_account") {
             total = bankOffset(total);
           }
 
           console.log("total after offset: ", total);
 
-          // get 20% of the total for the deposit
-          let deposit = total * 0.2;
+       
 
-          // return the total
-          callback(null, rows[0].name, deposit);
+          // return the total 
+          callback(null, rows[0].name, total);
         }
 
         else {

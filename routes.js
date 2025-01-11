@@ -563,28 +563,38 @@ module.exports = function (app) {
                 let inclusions = response.split("</br>")[0];
                 let exclusions = response.split("</br>")[1];
 
-                // check if the response has been split correctly
-                console.log("Includes:", inclusions.substring(0, 20) + "...");
-                console.log("Exclusions:", exclusions.substring(0, 20) + "...");
-                //nul checking for inclusions and exclusions
-                if (inclusions == null) {
-                  // set the inclusions to the response
-                  inclusions = response;
-                }
-                if (exclusions == null) {
-                  // set the exclusions to the response
-                  exclusions = "";
-                }
-                db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
-                  res.render("viewEstimate.html", {
-                    inclusions: inclusions,
-                    exclusions: exclusions,
-                    takeoff_id: takeoff_id,
-                    estimate: estimate,
-                    takeoff: takeoff_info,
-                    email:req.user.local.email,
+                if (inclusions == null || exclusions == null) {
+                  // throw an error
+                  console.log("Error splitting response");
+                  res.send("Error generating estimate. Please try again with assigned materials.");
+
+                } else {
+
+                  // check if the response has been split correctly
+                  console.log("Includes:", inclusions.substring(0, 20) + "...");
+                  console.log("Exclusions:", exclusions.substring(0, 20) + "...");
+                  //nul checking for inclusions and exclusions
+                  if (inclusions == null) {
+                    // set the inclusions to the response
+                    inclusions = response;
+                  }
+                  if (exclusions == null) {
+                    // set the exclusions to the response
+                    exclusions = "";
+                  }
+                  db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
+                    res.render("viewEstimate.html", {
+                      inclusions: inclusions,
+                      exclusions: exclusions,
+                      takeoff_id: takeoff_id,
+                      estimate: estimate,
+                      takeoff: takeoff_info,
+                      email:req.user.local.email,
+                    });
                   });
-                });
+
+                }
+
               });
 
             } else {
@@ -1051,13 +1061,73 @@ module.exports = function (app) {
     }
   });
 
-  app.get('/checkMeout/:takeoff_id', function (req, res) {
+  app.post('/checkMeout/:takeoff_id', function (req, res) {
     console.log("/checkMeout/");
     const takeoff_id = req.params.takeoff_id;
     const method = req.body.method;
 
     if (method == null || !['card', 'us_bank_account'].includes(method)) {
       console.log('')
+    } else {
+      db.updatePaymentMethod(takeoff_id, method, function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("updated");
+        }
+      });
+    }
+
+    if (takeoff_id == null) {
+      console.log("takeoff_id is null");
+      res.redirect("/");
+    }
+    // get takeoff
+    db.getTakeoffTotalForStripe(takeoff_id, function (err, takeoffName, total) {
+      console.log(takeoffName + " has a total of " + total);
+      if (err) {
+        console.log(err);
+      } else {
+        // post to /v1/prices to create a price_id
+        // get the price_id
+        // render the checkout page
+        //takeoff = takeoff[0];
+        //cnvert rows into json object
+
+
+        // if (total == null) {
+        //   console.log('total is null');
+        //   total = 50.00;
+        // }
+
+        // create a stripe price_id
+        const price = stripe.prices.create({
+          unit_amount: Math.floor(total * 100),
+          currency: 'usd',
+          product_data: {
+            name: takeoffName + ' Deposit'
+          },
+
+        });
+        //console.log(price.id);
+
+        // console.log("takeoff is ", takeoff);
+        res.render("checkout.html", {
+          takeoff_id: takeoff_id,
+          priceId: price.id
+        });
+      }
+    }
+    );
+  });
+
+  app.get('/checkMeout/:takeoff_id', function (req, res) {
+    console.log("/checkMeout/");
+    const takeoff_id = req.params.takeoff_id;
+    const method = req.body.method;
+
+    if (method == null || !['card', 'us_bank_account'].includes(method)) {
+      console.log('invalid payment method');
     } else {
       db.updatePaymentMethod(takeoff_id, method, function (err) {
         if (err) {
