@@ -392,7 +392,7 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
       } else {
-        console.log("updated");
+        console.log("updated takeoff total");
         res.end();
       }
     });
@@ -756,7 +756,7 @@ module.exports = function (app) {
         if (err) {
           console.log(err);
         } else {
-          console.log("updated");
+          console.log("updated material price");
           res.end();
         }
       }
@@ -769,7 +769,7 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
       } else {
-        console.log("updated");
+        console.log("updated labor price");
         res.end();
       }
     });
@@ -806,7 +806,7 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
       } else {
-        console.log("updated");
+        console.log("updated measurement");
       }
     });
   });
@@ -817,7 +817,7 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
       } else {
-        console.log("updated");
+        console.log("updated measurement unit");
       }
     });
   });
@@ -834,7 +834,7 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
       } else {
-        console.log("updated");
+        console.log("updated estimate inclusions/ exclusions");
         db.updateTakeoffLastUpdatedBy(req.body.id, req.user.local.id, function (err) {
           if (err) {
             console.log(err);
@@ -853,7 +853,7 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
       } else {
-        console.log("updated");
+        console.log("updated owner email");
       }
     });
   });
@@ -866,7 +866,7 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
       } else {
-        console.log("updated");
+        console.log("updated invoice email");
       }
     });
   });
@@ -1073,7 +1073,7 @@ module.exports = function (app) {
         if (err) {
           console.log(err);
         } else {
-          console.log("updated");
+          console.log("updated payment method");
         }
       });
     }
@@ -1134,7 +1134,7 @@ module.exports = function (app) {
         if (err) {
           console.log(err);
         } else {
-          console.log("updated");
+          console.log("updated payment method");
         }
       });
     }
@@ -1237,7 +1237,7 @@ module.exports = function (app) {
         if (err) {
           console.log(err);
         } else {
-          console.log("updated");
+          console.log("updated payment method");
         }
       });
     }

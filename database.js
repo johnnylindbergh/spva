@@ -688,6 +688,7 @@ module.exports = {
                     row.material_id,
                     row.secondary_material_id,
                     row.tertiary_material_id,
+                    row.quaternary_material_id,
                   ],
                   function (err, materials) {
                     if (err) return reject(err);
@@ -778,7 +779,7 @@ module.exports = {
       console.log("getInvoiceByNumber got null value");
     } else {
       con.query(
-        "SELECT takeoffs.hash, takeoffs.id AS takeoff_id, invoices.id AS invoice_id, takeoffs.total as estimateTotal, invoices.total as invoiceTotal, invoices.invoice_number FROM invoices INNER JOIN takeoffs ON invoices.takeoff_id = takeoffs.id WHERE invoices.invoice_number = ?",
+        "SELECT takeoffs.hash, takeoffs.owner, takeoffs.owner_billing_address, takeoffs.tax, takeoffs.id AS takeoff_id, invoices.id AS invoice_id, takeoffs.total as estimateTotal, invoices.total as invoiceTotal, invoices.invoice_number FROM invoices INNER JOIN takeoffs ON invoices.takeoff_id = takeoffs.id WHERE invoices.invoice_number = ?",
         [invoice_number],
         function (err, invoice) {
           if (err) {
@@ -1483,92 +1484,95 @@ module.exports = {
       function (err, material) {
         if (err) {
           console.log(err);
+          return callback(err);
+        }
+        if (!material || material.length === 0) {
+          console.log("Subject ID not found");
+          return callback("Subject ID not found");
+        }
+        if (material[0].material_id == null) {
+          console.log("updating primary material");
+          con.query(
+            "UPDATE applied_materials SET material_id = ? WHERE id = ?;",
+            [material_id, subject_id],
+            function (err) {
+              if (err) {
+                console.log(err);
+                return callback(err);
+              }
+              // set the primary_cost_delta to zero
+              con.query("UPDATE applied_materials SET primary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
+                if (err) {
+                  console.log(err);
+                  return callback(err);
+                }
+                callback(null);
+              });
+            }
+          );
+        } else if (material[0].secondary_material_id == null) {
+          console.log("updating secondary material");
+          con.query(
+            "UPDATE applied_materials SET secondary_material_id = ? WHERE id = ?;",
+            [material_id, subject_id],
+            function (err) {
+              if (err) {
+                console.log(err);
+                return callback(err);
+              }
+              // set the secondary_cost_delta to zero
+              con.query("UPDATE applied_materials SET secondary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
+                if (err) {
+                  console.log(err);
+                  return callback(err);
+                }
+                callback(null);
+              });
+            }
+          );
+        } else if (material[0].tertiary_material_id == null) {
+          console.log("updating tertiary material");
+          con.query(
+            "UPDATE applied_materials SET tertiary_material_id = ? WHERE id = ?;",
+            [material_id, subject_id],
+            function (err) {
+              if (err) {
+                console.log(err);
+                return callback(err);
+              }
+              // set the tertiary_cost_delta to zero
+              con.query("UPDATE applied_materials SET tertiary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
+                if (err) {
+                  console.log(err);
+                  return callback(err);
+                }
+                callback(null);
+              });
+            }
+          );
+        } else if (material[0].quartary_material_id == null) {
+          con.query(
+            "UPDATE applied_materials SET quartary_material_id = ? WHERE id = ?;",
+            [material_id, subject_id],
+            function (err) {
+              if (err) {
+                console.log(err);
+                return callback(err);
+              }
+              callback(null);
+            }
+          );
         } else {
-          if (material[0].material_id == null) {
-            console.log("updating primary material");
-            con.query(
-              "UPDATE applied_materials SET material_id = ? WHERE id = ?;",
-              [material_id, subject_id],
-              function (err) {
-                if (err) {
-                  console.log(err);
-                  callback(err);
-                } else {
-                  // set the primary_cost_delta to zero
-                  con.query("UPDATE applied_materials SET primary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
-                    if (err) {
-                      console.log(err);
-                        callback(err);
-                    } else {
-                      callback(err);
-                    }
-                  });
+          console.log("all material slots are filled");
 
-                }
-              }
-            );
-          } else if (material[0].secondary_material_id == null) {
-            console.log("updating secondary material");
-            con.query(
-              "UPDATE applied_materials SET secondary_material_id = ? WHERE id = ?;",
-              [material_id, subject_id],
-              function (err) {
-                if (err) {
-                  console.log(err);
-                  callback(err);
-                } else {
-                  // set the secondary_cost_delta to zero
-                  con.query("UPDATE applied_materials SET secondary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
-                    if (err) {
-                      console.log(err);
-                        callback(err);
-                    } else {
-                      callback(err);
-                    }
-                  });                  
-                }
-              }
-            );
-          } else if (material[0].tertiary_material_id == null) {
-            console.log("updating tertiary material");
-            con.query(
-              "UPDATE applied_materials SET tertiary_material_id = ? WHERE id = ?;",
-              [material_id, subject_id],
-              function (err) {
-                if (err) {
-                  console.log(err);
-                  callback(err);
-            
-                } else {
-                  // set the tertiary_cost_delta to zero
-                  con.query("UPDATE applied_materials SET tertiary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
-                    if (err) {
-                      console.log(err);
-                        callback(err);
-                    } else {
-                      callback(err);
-                    }
-                  });
-                }
-              }
-            );
-          } else if (material[0].quartary_material_id == null) {
-            con.query(
-              "UPDATE applied_materials SET quartary_material_id = ? WHERE id = ?;",
-              [material_id, subject_id],
-              function (err) {
-                if (err) {
-                  console.log(err);
-                  callback(err);
-                } else {
-                  callback(err);
-                }
-              }
-            );
-          } else {
-            console.log("all material slots are filled");
-            callback(err);
-          }
+          // replace the primary with the new material
+          con.query("UPDATE applied_materials SET material_id = ? WHERE id = ?;", [material_id, subject_id], function(err){
+            if (err) {
+              console.log(err);
+              return callback(err);
+            }
+            callback(null);
+          });
         }
       }
     );

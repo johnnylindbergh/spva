@@ -51,14 +51,11 @@
             <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
             <!-- link to original estimate using /share/hash -->
             <p>Invoice Number: {{invoice_number}}</p>
-            <p>Estimate Number: <a href='/share/{{hash}}'>{{estimate_number}}</a></p>
+            <p>Estimate Number: <a href='/share/{{hash}}'>Original Estimate</a></p>
             <p>Total: ${{invoiceTotal}}</p>
-            <p>Tax: ${{tax}}</p>
+            <p>Tax: %{{tax}}</p>
             <p>Owner: {{owner}}</p>
             <p>Billing Address: {{owner_billing_address}}</p>
-            <p>Email: {{owner_email}}</p>
-            <p>Created At: {{created_at}}</p>
-            <p>Updated At: {{updated_at}}</p>
         </div>
         <div class = "payment-details">
 

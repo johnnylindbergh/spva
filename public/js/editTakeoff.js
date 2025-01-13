@@ -436,6 +436,22 @@ function loadTakeoffMaterials(id) {
                     "'>"
                 );
                 materialsCell.append(materialPrice);
+              } else if (material.id == row.quartary_material_id) {
+                let quartaryCostDelta =
+                  parseFloat(row.quartary_cost_delta) || 0;
+                newCost += quartaryCostDelta;
+
+                let materialPrice = $(
+                  "<input type='number' id='material_price_" +
+                    material.id +
+                    "' value='" +
+                    newCost.toFixed(2) +
+                    "' step='any' min='0' onchange='priceChange(" +
+                    material.id +
+                    ")'><br>"
+                );
+
+                materialCell.append(materialPrice);
               }
 
               let adjustedMeasurement = measurement;
@@ -513,6 +529,7 @@ function loadTakeoffMaterials(id) {
             subsum = 0; // Reset subsum to 0 if invalid
           }
           sum += subsum;
+          sum += laborsum;
         } else {
           newRow.append("<td>No Materials Applied</td>");
           newRow.attr("style", "background-color: #f2f2f2; opacity: 0.5;");
