@@ -168,6 +168,7 @@ CREATE TABLE statements (
 CREATE TABLE invoices (
   id INT NOT NULL AUTO_INCREMENT,
   invoice_number VARCHAR(64),
+  invoice_name VARCHAR(64),
   hash varchar(64),
   takeoff_id INT,
   total DECIMAL(10,2),

@@ -1,8 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/css/invoice.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <title>Invoice</title>
+</head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- add invoice.js used by both invoice.hmtl and invoice creator -->
+    <script src="/js/invoice.js"></script>
     <title>Invoice Display</title>
     <style>
         body {
@@ -31,11 +43,15 @@
 <body>
     {{#invoice}}
     <div id="invoice-container" class="invoice">
-        <h1 class="invoice-header">Invoice</h1>
+        <h1 class="invoice-header">{{invoice_name}}</h1>
         <div class="invoice-details">
+            <!-- hidden input with the invoice_id -->
+            <!-- takeoff_id hidden input -->
+             <input type="hidden" id="invoice_id" value="{{invoice_id}}">
+            <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
             <!-- link to original estimate using /share/hash -->
             <p>Invoice Number: {{invoice_number}}</p>
-            <p>Estimate Number: <a href="/share/{{estimate_hash}}">{{estimate_number}}</a></p>
+            <p>Estimate Number: <a href='/share/{{hash}}'>{{estimate_number}}</a></p>
             <p>Total: ${{invoiceTotal}}</p>
             <p>Tax: ${{tax}}</p>
             <p>Owner: {{owner}}</p>
@@ -44,6 +60,14 @@
             <p>Created At: {{created_at}}</p>
             <p>Updated At: {{updated_at}}</p>
         </div>
+        <div class = "payment-details">
+
+            <!-- pay with card button that calls createPaymentIntent("card") -->
+            <button id="pay-with-card" onclick="createPaymentIntentInvoice('card')">Pay with Card</button>
+            <!-- pay with bank button that calls createPaymentIntent("us_bank_account") -->
+            <button id="pay-with-bank" onclick="createPaymentIntentInvoice('us_bank_account')">Pay with Bank</button>
+
+             
     </div>
     {{/invoice}}
     {{^invoice}}

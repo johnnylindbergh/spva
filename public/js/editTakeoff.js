@@ -203,8 +203,10 @@ function loadTakeoffMaterials(id) {
       headerRow.append("<th>Name</th>");
       headerRow.append("<th>Measurement</th>");
       headerRow.append("<th>Labor Cost</th>");
-      headerRow.append("<th>Materials</th>");
+      headerRow.append("<th>....</th>");
+      headerRow.append("<th>....</th>");
       headerRow.append("<th>Subtotal</th>");
+      headerRow.append("<th>Labor Cost</th>");
       $("#takeoff_materials_table").append(headerRow);
 
       let sum = 0;
@@ -324,6 +326,8 @@ function loadTakeoffMaterials(id) {
         let subsum = 0;
         let laborsum = 0;
 
+        laborsum = row.labor_cost * parseFloat(row.measurement);
+
         if (row.applied != 0) {
           if (row.selected_materials && row.selected_materials.length > 0) {
             row.selected_materials.forEach((material) => {
@@ -442,8 +446,7 @@ function loadTakeoffMaterials(id) {
                 adjustedMeasurement = 0;
               }
 
-              // calculate labor cost 
-              laborsum += adjustedMeasurement * row.labor_cost;
+             
 
 
               if (row.measurement_unit === "sf") {
@@ -489,7 +492,6 @@ function loadTakeoffMaterials(id) {
             // }
 
 
-               subsum = subsum + laborsum;
 
             });
           }
@@ -518,6 +520,7 @@ function loadTakeoffMaterials(id) {
 
         // Append subsum to the row
         newRow.append("<td>$" + subsum.toFixed(2) + "</td>");
+        newRow.append("<td>$" + laborsum.toFixed(2) + "</td>");
 
         $("#takeoff_materials_table").append(newRow);
       });

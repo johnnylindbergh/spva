@@ -142,7 +142,7 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
 // main page stuff
 module.exports = function (app) {
   // GET requests
-  app.get("/", mid.isAuth, (req, res) => {
+  app.get("/", mid.isAdmin, (req, res) => {
     var render = defaultRender(req);
     db.summaryAllTakeoffs(function (err, takeoffs) {
       if (err) {
@@ -155,14 +155,14 @@ module.exports = function (app) {
     });
   });
 
-  app.get("/addTakeoff", mid.isAuth, (req, res) => {
+  app.get("/addTakeoff", mid.isAdmin, (req, res) => {
     var render = defaultRender(req);
     // db
 
     res.render("addTakeoff.html", render);
   });
 
-  app.post("/deleteTakeoff", mid.isAuth, (req, res) => {
+  app.post("/deleteTakeoff", mid.isAdmin, (req, res) => {
     db.deleteTakeoff(req.body.takeoff_id, req.user.local.id, function (err) {
       if (err) {
         console.log(err);
@@ -175,7 +175,7 @@ module.exports = function (app) {
 
 
   //updateTakeoff POST
-  app.post("/update-takeoff-name", mid.isAuth, (req, res) => {
+  app.post("/update-takeoff-name", mid.isAdmin, (req, res) => {
     console.log("updating takeoff name");
     let takeoff_name = req.body.name;
     let takeoff_id = req.body.takeoff_id;
@@ -191,7 +191,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/update-takeoff-owner-name", mid.isAuth, (req, res) => {
+  app.post("/update-takeoff-owner-name", mid.isAdmin, (req, res) => {
     console.log("updating takeoff name");
     let owner_name = req.body.owner;
     let takeoff_id = req.body.takeoff_id;
@@ -206,7 +206,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/update-takeoff-owner-billing", mid.isAuth, (req, res) => {
+  app.post("/update-takeoff-owner-billing", mid.isAdmin, (req, res) => {
     console.log("updating takeoff name");
     let address = req.body.owner_billing_address;
     let takeoff_id = req.body.takeoff_id;
@@ -221,7 +221,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/update-takeoff-invoice-email", mid.isAuth, (req, res) => {
+  app.post("/update-takeoff-invoice-email", mid.isAdmin, (req, res) => {
     console.log("updating takeoff name");
     let email = req.body.invoice_email_address;
     let takeoff_id = req.body.takeoff_id;
@@ -236,7 +236,7 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/getCustomers', mid.isAuth, function (req, res) {
+  app.get('/getCustomers', mid.isAdmin, function (req, res) {
     db.getCustomers(function (err, customers) {
       if (err) {
         console.log(err);
@@ -247,7 +247,7 @@ module.exports = function (app) {
   } );
   
 
-  app.get("/getTakeoffs", mid.isAuth, (req, res) => {
+  app.get("/getTakeoffs", mid.isAdmin, (req, res) => {
     db.getTakeoffs(function (err, takeoffs) {
       if (err) {
         console.log(err);
@@ -257,7 +257,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/alButton", mid.isAuth, function (req, res) {
+  app.post("/alButton", mid.isAdmin, function (req, res) {
     console.log("alButton");
     // if the user name is al, res.send "Hello AL!" otherwise, say you are not al
     if (req.user.local.name == "AL" || req.user.local.name == "Johnny") {
@@ -276,7 +276,7 @@ module.exports = function (app) {
     }
   });
 
-  app.post("/viewTakeoff", mid.isAuth, function (req, res) {
+  app.post("/viewTakeoff", mid.isAdmin, function (req, res) {
     let render = defaultRender(req);
     console.log("viewing", req.body.takeoff_id);
     res.send("viewing takeoff");
@@ -291,7 +291,7 @@ module.exports = function (app) {
   });
 
   // Route for handling file uploads
-  app.post("/uploadTakeoff", mid.isAuth, function (req, res) {
+  app.post("/uploadTakeoff", mid.isAdmin, function (req, res) {
     console.log("uploading takeoff...");
     // Use Multer middleware to handle file upload
     upload(req, res, function (err) {
@@ -341,7 +341,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/editTakeoff", mid.isAuth, function (req, res) {
+  app.post("/editTakeoff", mid.isAdmin, function (req, res) {
     console.log("editing", req.body.takeoff_id);
 
     db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
@@ -363,7 +363,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/loadTakeoffMaterials", mid.isAuth, function (req, res) {
+  app.post("/loadTakeoffMaterials", mid.isAdmin, function (req, res) {
     //console.log("editing", req.body.takeoff_id);
 
     db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
@@ -386,7 +386,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/updateTakeoffTotal", mid.isAuth, function (req, res) {
+  app.post("/updateTakeoffTotal", mid.isAdmin, function (req, res) {
     console.log("updating takeoff total ", req.body);
     db.updateTakeoffTotal(req.body.takeoff_id, req.body.total, function (err) {
       if (err) {
@@ -436,7 +436,7 @@ module.exports = function (app) {
   /* this funciton should be split into two functions one POST /settings to render the settings page. The settings page with then pull the 
   settings from the server so we will need a second function that res.send the settings to the client */
 
-  app.post("/settings", mid.isAuth, function (req, res) {
+  app.post("/settings", mid.isAdmin, function (req, res) {
 
     /* since this page is accessed through clicking the settings button in the navbar while editing a takeoff, 
     we can assume that the rendering of this page must also reference some takeoff-specific data  
@@ -455,7 +455,7 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/getSettings', mid.isAuth, function (req, res) {
+  app.get('/getSettings', mid.isAdmin, function (req, res) {
     db.getAllSystemSettings(function (err, settings) {
       if (err) {
         console.error('Error retrieving settings:', err);
@@ -470,7 +470,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post('/updateSettings', mid.isAuth, function (req, res) {
+  app.post('/updateSettings', mid.isAdmin, function (req, res) {
     const settings = req.body;
     const updatePromises = Object.entries(settings).map(([setting_name, setting_value]) => {
       return new Promise((resolve, reject) => {
@@ -624,7 +624,7 @@ module.exports = function (app) {
   });
 
 
-  app.post("/viewEstimate", mid.isAuth, function (req, res) {
+  app.post("/viewEstimate", mid.isAdmin, function (req, res) {
     console.log("estimate view");
     db.getEstimateData(req.body.id, function (err, estimate, takeoff, tax) {
       if (err) {
@@ -640,7 +640,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/toggle-material", mid.isAuth, function (req, res) {
+  app.post("/toggle-material", mid.isAdmin, function (req, res) {
     console.log("toggling ", req.body.material_id);
     let material_id = req.body.material_id;
     if (material_id) {
@@ -654,7 +654,7 @@ module.exports = function (app) {
     }
   });
 
-  app.post("/separate-line-item", mid.isAuth, function (req, res) {
+  app.post("/separate-line-item", mid.isAdmin, function (req, res) {
     console.log("separating ", req.body.material_id);
     let material_id = req.body.material_id;
     if (material_id) {
@@ -672,7 +672,7 @@ module.exports = function (app) {
 
   //add-material-subject POST
 
-  app.post("/add-material-subject", mid.isAuth, function (req, res) {
+  app.post("/add-material-subject", mid.isAdmin, function (req, res) {
     console.log("adding material subject ", req.body);
     db.addMaterialSubject(
       req.body.material_id,
@@ -687,7 +687,7 @@ module.exports = function (app) {
     );
   });
 
-  app.post("/remove-material-subject", mid.isAuth, function (req, res) {
+  app.post("/remove-material-subject", mid.isAdmin, function (req, res) {
     console.log("remove-material-subject ", req.body.material_id);
     if (req.body.subject_id && req.body.material_id) {
       db.removeMaterialSubject(
@@ -706,11 +706,11 @@ module.exports = function (app) {
 
   // material settings page
 
-  app.get("/materialSettings", mid.isAuth, function (req, res) {
+  app.get("/materialSettings", mid.isAdmin, function (req, res) {
     res.render("materialSettings.html", defaultRender(req));
   });
 
-  app.get("/getMaterialTypes", mid.isAuth, function (req, res) {
+  app.get("/getMaterialTypes", mid.isAdmin, function (req, res) {
     db.getMaterialTypes(function (err, types) {
       if (err) {
         console.log(err);
@@ -721,7 +721,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/newMaterial", mid.isAuth, function (req, res) {
+  app.post("/newMaterial", mid.isAdmin, function (req, res) {
     console.log("adding new material ", req.body);
 
     // must process the material type
@@ -747,7 +747,7 @@ module.exports = function (app) {
     );
   });
 
-  app.post("/change-material-price", mid.isAuth, function (req, res) {
+  app.post("/change-material-price", mid.isAdmin, function (req, res) {
     console.log("changing material price ", req.body);
     db.changeMaterialPrice(
       req.body.material_id,
@@ -763,7 +763,7 @@ module.exports = function (app) {
     );
   });
 
-  app.post("/change-labor-price", mid.isAuth, function (req, res) {
+  app.post("/change-labor-price", mid.isAdmin, function (req, res) {
     console.log("changing labor price ", req.body);
     db.changeLaborPrice(req.body.subject, req.body.price, function (err) {
       if (err) {
@@ -775,7 +775,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post('/create-subject', mid.isAuth, function (req, res) {
+  app.post('/create-subject', mid.isAdmin, function (req, res) {
     console.log("creating subject ", req.body);
     // CREATE THE SUBJECT OBJECT
     // get the takeoff_id
@@ -800,7 +800,7 @@ module.exports = function (app) {
 
   });
 
-  app.post("/update-measurement", mid.isAuth, function (req, res) {
+  app.post("/update-measurement", mid.isAdmin, function (req, res) {
     console.log("updating measurement ", req.body);
     db.updateMeasurement(req.body.id, req.body.measurement, function (err) {
       if (err) {
@@ -811,7 +811,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/update-measurement-unit", mid.isAuth, function (req, res) {
+  app.post("/update-measurement-unit", mid.isAdmin, function (req, res) {
     console.log("updating measurement unit ", req.body);
     db.updateMeasurementUnit(req.body.id, req.body.unit, function (err) {
       if (err) {
@@ -823,7 +823,7 @@ module.exports = function (app) {
   });
 
 
-  app.post("/update-content", mid.isAuth, function (req, res) {
+  app.post("/update-content", mid.isAdmin, function (req, res) {
     console.log("updating content ", req.body);
     if (req.body.id == null) {
       res.send("no id posted to update-content");
@@ -845,7 +845,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/update-takeoff-owner-email", mid.isAuth, function (req, res) {
+  app.post("/update-takeoff-owner-email", mid.isAdmin, function (req, res) {
     console.log("updating takeoff owner email ", req.body);
     db.updateTakeoffOwnerEmail(req.body.takeoff_id, req.body.owner_email_address, function (
       err
@@ -858,7 +858,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/update-takeoff-invoice-email", mid.isAuth, function (req, res) {
+  app.post("/update-takeoff-invoice-email", mid.isAdmin, function (req, res) {
     console.log("updating takeoff invoice email ", req.body);
     db.updateTakeoffInvoiceEmail(req.body.takeoff_id, req.body.invoice_email_address, function (
       err
@@ -871,7 +871,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/addOption", mid.isAuth, function (req, res) {
+  app.post("/addOption", mid.isAdmin, function (req, res) {
     console.log("Adding row to takeoff", req.body.takeoff_id);
     console.log("Getting option:", req.body.description);
     console.log("Cost Delta:", req.body.cost_delta);
@@ -908,7 +908,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/deleteOption", mid.isAuth, function (req, res) {
+  app.post("/deleteOption", mid.isAdmin, function (req, res) {
     console.log("deleting option ", req.body.option_id);
     db.deleteOption(req.body.option_id, function (err) {
       if (err) {
@@ -990,7 +990,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/updateOptionsSelection", function (req, res) {
+  app.post("/updateOptionsSelection", mid.isAuth, function (req, res) {
     console.log("updating options selection ", req.body);
     db.updateOptionSelection(
       req.body.takeoff_id,
@@ -1007,7 +1007,7 @@ module.exports = function (app) {
     );
   });
 
-  app.post("/shareClient", mid.isAuth, function (req, res) {
+  app.post("/shareClient", mid.isAdmin, function (req, res) {
     console.log("sending email to client ", req.body.takeoff_id);
     if (req.body.takeoff_id) {
       console.log("sending email ");
@@ -1033,7 +1033,7 @@ module.exports = function (app) {
     }
   });
 
-  app.post("/shareSelf", mid.isAuth, function (req, res) {
+  app.post("/shareSelf", mid.isAdmin, function (req, res) {
     console.log("sending email to self ", req.user.local.email);
     console.log()
     if (req.body.takeoff_id) {
@@ -1061,7 +1061,7 @@ module.exports = function (app) {
     }
   });
 
-  app.post('/checkMeout/:takeoff_id', function (req, res) {
+  app.post('/checkMeout/:takeoff_id', mid.isAuth, function (req, res) {
     console.log("/checkMeout/");
     const takeoff_id = req.params.takeoff_id;
     const method = req.body.method;
@@ -1083,7 +1083,7 @@ module.exports = function (app) {
       res.redirect("/");
     }
     // get takeoff
-    db.getTakeoffTotalForStripe(takeoff_id, function (err, takeoffName, total) {
+    db.getTakeoffTotalForDeposit(takeoff_id, function (err, takeoffName, total) {
       console.log(takeoffName + " has a total of " + total);
       if (err) {
         console.log(err);
@@ -1121,7 +1121,8 @@ module.exports = function (app) {
     );
   });
 
-  app.get('/checkMeout/:takeoff_id', function (req, res) {
+  app.get('/checkMeout/:takeoff_id', mid.isAuth, function (req, res) {
+    console.log("/checkMeout/ rendered as estimate via get");
     console.log("/checkMeout/");
     const takeoff_id = req.params.takeoff_id;
     const method = req.body.method;
@@ -1143,7 +1144,7 @@ module.exports = function (app) {
       res.redirect("/");
     }
     // get takeoff
-    db.getTakeoffTotalForStripe(takeoff_id, function (err, takeoffName, total) {
+    db.getTakeoffTotalForDeposit(takeoff_id, function (err, takeoffName, total) {
       console.log(takeoffName + " has a total of " + total);
       if (err) {
         console.log(err);
@@ -1221,9 +1222,126 @@ module.exports = function (app) {
   //   });
   // });
 
+  app.post('/payInvoice/:takeoff_id', mid.isAuth, function (req, res) {
+    console.log("/payInvoice/ post");
+    const takeoff_id = req.params.takeoff_id;
+    const invoice_id = req.body.invoice_id;
+    const method = req.body.method;
+
+    console.log(invoice_id + " " + method + " " + takeoff_id + " " + req.body); // check if the method is valid
+
+    if (method == null || !['card', 'us_bank_account'].includes(method)) {
+      console.log('')
+    } else {
+      db.updatePaymentMethod(takeoff_id, method, function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("updated");
+        }
+      });
+    }
+
+    if (takeoff_id == null) {
+      console.log("takeoff_id is null");
+      res.redirect("/");
+    }
+    // get takeoff
+    db.getInvoiceById(invoice_id, null, function (err, invoice) {
+     // console.log(invoice.invoice_name + " has a total of " + total);
+      if (err) {
+        console.log(err);
+      } else {
+        // post to /v1/prices to create a price_id
+        // get the price_id
+        // render the checkout page
+        //takeoff = takeoff[0];
+        //cnvert rows into json object
 
 
-  app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
+        // if (total == null) {
+        //   console.log('total is null');
+        //   total = 50.00;
+        // }
+
+        // create a stripe price_id
+        console.log("invoice is ", invoice);
+        const price = stripe.prices.create({
+          unit_amount: Math.floor(invoice.invoiceTotal),
+          currency: 'usd',
+          product_data: {
+            name: (invoice.invoice_name | invoice.takeoffName | "Invoice")
+          },
+
+        });
+        //console.log(price.id);
+
+        // console.log("takeoff is ", takeoff);
+        res.render("checkoutInvoice.html", {
+          invoice_id: invoice_id,
+          takeoff_id: invoice.takeoff_id,
+          priceId: price.id
+        });
+      }
+    }
+    );
+  });
+
+  app.get('/payInvoice/:invoice_id', mid.isAuth, function (req, res) {
+    console.log("/payInvoice/ GET");
+    console.log(req.params);
+    const invoice_id = req.params.invoice_id;
+    const method = req.body.method;
+
+    console.log(invoice_id + " " + method + " " + invoice_id + " " + req.body); // check if the method is valid
+
+    if (method == null || !['card', 'us_bank_account'].includes(method)) {
+      console.log('')
+    }
+
+  
+    // get takeoff
+    db.getInvoiceById(invoice_id, null, function (err, invoice) {
+     // console.log(invoice.invoice_name + " has a total of " + total);
+      if (err) {
+        console.log(err);
+      } else {
+        // post to /v1/prices to create a price_id
+        // get the price_id
+        // render the checkout page
+        //takeoff = takeoff[0];
+        //cnvert rows into json object
+
+
+        // if (total == null) {
+        //   console.log('total is null');
+        //   total = 50.00;
+        // }
+
+        // create a stripe price_id
+        console.log("invoice is ", invoice);
+        const price = stripe.prices.create({
+          unit_amount: Math.floor(invoice.invoiceTotal),
+          currency: 'usd',
+          product_data: {
+            name: (invoice.invoice_name | invoice.takeoffName | "Invoice")
+          },
+
+        });
+        //console.log(price.id);
+
+        // console.log("takeoff is ", takeoff);
+        res.render("checkoutInvoice.html", {
+          invoice_id: invoice_id,
+          takeoff_id: invoice.takeoff_id,
+          priceId: price.id
+        });
+      }
+    }
+    );
+  });
+
+  app.post('/create-checkout-session/:takeoff_id', mid.isAuth, async (req, res) => {
     // create a price_id
     // get whole takeoff
     const takeoff_id = req.params.takeoff_id;
@@ -1233,7 +1351,7 @@ module.exports = function (app) {
       res.redirect("/");
     }
 
-    db.getTakeoffTotalForStripe(req.params.takeoff_id, async function (err, takeoffName, total) { // this applies tax
+    db.getTakeoffTotalForDeposit(req.params.takeoff_id, async function (err, takeoffName, total) { // this applies tax
       if (err) {
         console.log(err);
         res.status(500).send("Error retrieving takeoff");
@@ -1291,7 +1409,78 @@ module.exports = function (app) {
     });
   });
 
-    app.get('/session-status', async (req, res) => {
+
+//  create-checkout-invoice-session
+
+  app.post('/create-checkout-invoice-session/:invoice_id', mid.isAuth, async (req, res) => {
+    // create a price_id
+    // get whole takeoff
+    const invoice_id = req.params.invoice_id;
+    console.log(req.params);
+    if (req.params.invoice_id == null || req.params.invoice_id == undefined) {
+      console.log("invoice_id is null");
+      res.redirect("/");
+    }
+
+    db.getInvoiceById(req.params.invoice_id, null, function (err, invoice) { // this applies tax
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving takeoff");
+      } else {
+
+        db.getPaymentMethod(invoice.takeoff_id, async function (err, method) {
+          if (err) {
+            console.log(err);
+          } else {
+
+            console.log("The method is =", method);
+
+
+            try {
+             
+              // determine the total
+              console.log("total  is ", invoice.invoiceTotal);
+
+              // create a product
+              const product = await stripe.products.create({
+                name: (invoice.invoice_name | invoice.takeoffName | "Invoice"),
+                // unit_amount: takeoff.total,
+              });
+
+              
+
+              const price = await stripe.prices.create({
+                unit_amount: Math.floor(invoice.invoiceTotal * 100),
+                currency: 'usd',
+                product: product.id,
+              });
+
+              const session = await stripe.checkout.sessions.create({
+                ui_mode: 'embedded',
+                line_items: [
+                  {
+                    // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+                    price: price.id,
+                    quantity: 1,
+                  },
+                ],
+                mode: 'payment',
+                return_url: creds.domain + `/return.html?session_id={CHECKOUT_SESSION_ID}`,
+                payment_method_types: [method],
+              });
+
+              res.send({ clientSecret: session.client_secret });
+            } catch (error) {
+              console.log(error);
+              res.status(500).send("Error creating checkout session");
+            }
+          }
+        });
+      }
+    });
+  });
+
+    app.get('/session-status', mid.isAuth, async (req, res) => {
       const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
       console.log("session id: " + req.query.session_id);
       console.log("session status: " + session.status);
@@ -1322,30 +1511,45 @@ module.exports = function (app) {
     //   res.send({ success: true });
     // });
 
-    app.post("/viewPaymentHistory", mid.isAuth, function (req, res) {
+    app.post("/viewPaymentHistory", mid.isAdmin, function (req, res) {
       const takeoff_id = req.body.takeoff_id;
       console.log("viewing payment history");
       res.render("viewPaymentHistory.html", { takeoff_id: takeoff_id });
     });
 
-    app.post("/retrievePaymentHistory", mid.isAuth, function (req, res) {
-      console.log("retrieving payment history");
+    app.post("/retrievePaymentHistory", mid.isAdmin, function (req, res) {
+      console.log("retrieving payment history for ", req.body.takeoff_id);
       db.getPaymentHistory(req.body.takeoff_id, function (err, payments) {
         if (err) {
           console.log(err);
         }
-        res.send(payments);
+
+        db.getTakeoffById(req.body.takeoff_id, function (err, takeoff) {
+          if (err) {
+            console.log(err);
+          }
+
+          db.getInvoicesByTakeoffId(req.body.takeoff_id, function (err, invoices) {
+            if (err) {
+              console.log(err);
+            }
+
+            res.send({ payments: payments, takeoff: takeoff[0], invoices: invoices });
+          });
+        });
+    
+ 
       });
     });
 
-    app.get("/payment", function (req, res) {
+    app.get("/payment", mid.isAuth, function (req, res) {
       // landing page for the payment system 
       console.log("paymentPage Accessed");
       res.render("payment.html");
     });
 
 
-    app.post("/payment", function (req, res){
+    app.post("/payment", mid.isAuth, function (req, res){
       console.log(req.body);
       db.getInvoiceByNumber(req.body.invoice_number, function (err, invoice) {
         if (err) {
@@ -1360,7 +1564,7 @@ module.exports = function (app) {
 
 
 
-    app.post('/invoiceCreator', mid.isAuth, function (req, res) {
+    app.post('/invoiceCreator', mid.isAdmin, function (req, res) {
       console.log("creating invoice for", req.body);
 
       db.getTakeoffById(req.body.takeoff_id, function (err, takeoff) {
@@ -1370,12 +1574,12 @@ module.exports = function (app) {
           console.log("estimate not signed");
           res.send("estimate not signed");
         } else {
-          res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_email: req.body.invoice_email, takeoff: takeoff[0] });
+          res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_name: "Invoice", invoice_email: req.body.invoice_email, takeoff: takeoff[0] });
         }
       });
     });
     // deprecated
-    // app.post('/create-invoice', mid.isAuth, function (req, res) {
+    // app.post('/create-invoice', mid.isAdmin, function (req, res) {
     //   const takeoff_id = req.body.takeoff_id;
     //   const customerName = req.body.customer_name;
     //   const email = req.body.email;
@@ -1399,13 +1603,29 @@ module.exports = function (app) {
     // });
 
     // POST /create-invoice
-  app.post('/create-invoice', (req, res) => {
+  app.post('/create-invoice', mid.isAdmin, (req, res) => {
     console.log("/create-invoice recieved", req.body)
     const {
       payment_amount,
       custom_amount,
       takeoff_id
     } = req.body;
+
+    // mutable corrected to takeoff name if null
+    let invoice_name = req.body.invoice_name;
+
+
+    if (invoice_name == null || invoice_name == "") {
+      db.getTakeoffById( takeoff_id, (err, rows) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: 'Failed to fetch takeoff.' });
+        }
+
+        invoice_name = `Invoice for ${rows[0].name}`;
+      }
+      );
+    }
 
     let computedAmount = 0;
 
@@ -1458,8 +1678,8 @@ module.exports = function (app) {
 
 
         // Insert into database
-        const query = `INSERT INTO invoices (takeoff_id, total, invoice_number) VALUES (?, ?, ?)`;
-        const values = [takeoff_id, computedAmount, invoiceNumber];
+        const query = `INSERT INTO invoices (takeoff_id, total, invoice_number, invoice_name) VALUES (?, ?, ?, ?)`;
+        const values = [takeoff_id, computedAmount, invoiceNumber, invoice_name];
 
         db.query(query, values, (results) => {
           // Fetch the created invoice

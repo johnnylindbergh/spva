@@ -12,7 +12,7 @@ function checkRole(pred) {
     if (req.isAuthenticated() && req.user.local && pred(req.user.local.role)) {
       return next();
     } else {
-      res.err({
+      res.status(403).json({
         fr: "You are unable to access this resource.", 
         li: "/auth/google?returnTo=" + querystring.escape(req.url),
         ti: "Authenticate as a different user"
@@ -55,36 +55,50 @@ module.exports = {
     }
   },
 
-   isAdminGET: (req, res, next)=> {
-    // if authenticated
-    if (req.isAuthenticated()) {
-      // if system session data exists and user is admin
-      if (req.user && req.user.local) {
-        // if admin, let request through
-        if (req.user.local.isAdmin) {
-          return next();
-        } else {
-          // render error page with link to /
-          res.render('error.html', {
-            message: "You must be an administrator to access this page.",
-            link: { href: '/', text: 'Return to homepage' }
-          });
-        }
-
-      // if authentication failed
-      } else if (req.user && req.user.showAuthFailureMessage) {
-        // render auth failure page to notify them & allow to re-auth
-        module.exports.renderAuthFailure(req, res);
-
-      // if just not authenticated, sent them to auth screen
-      } else {
-        res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
-      }
+  isAdmin: (req, res, next) => {
+    if (req.isAuthenticated() && req.user.local.user_type == 1) {
+      return next();
     } else {
-      // send to auth screen to log in
-      res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
+      res.render("error.html", {
+        friendly: "You are unable to access this resource.", 
+        link: "/auth/google?returnTo=" + querystring.escape(req.url),
+        title: "Authenticate as a different user"
+      });
     }
   }
+
+  //  isAdmin: (req, res, next)=> {
+  //   // if authenticated
+  //   if (req.isAuthenticated()) {
+  //     // if system session data exists and user is admin
+  //     if (req.user && req.user.local) {
+  //       // if admin, let request through
+  //       if (req.user.local.isAdmin) {
+  //         return next();
+  //       } else {
+  //         // render error page with link to /
+  //         res.render('error.html', {
+  //           message: "You must be an administrator to access this page.",
+  //           link: { href: '/', text: 'Return to homepage' }
+  //         });
+  //       }
+
+  //     // if authentication failed
+  //     } else if (req.user && req.user.showAuthFailureMessage) {
+  //       // render auth failure page to notify them & allow to re-auth
+  //       module.exports.renderAuthFailure(req, res);
+
+  //     // if just not authenticated, sent them to auth screen
+  //     } else {
+  //       res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
+  //     }
+  //   } else {
+  //     // send to auth screen to log in
+  //     res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
+  //   }
+  // },
+
+  // isAdmin: checkRole((role) => { return role >= 2 }),  
 
   /*
 
@@ -107,5 +121,7 @@ module.exports = {
     *************************************************************************************
 
   */
+
+  
 
 }

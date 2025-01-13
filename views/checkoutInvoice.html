@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title> Payment | {{defaults.sysName}}</title>
+    <meta name="description" content="A demo of a payment on Stripe" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="/css/defaults.css" />
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="/js/checkoutInvoice.js" defer></script>
+  
+  </head>
+  <body>
+    <input type="hidden" id="takeoff_id" value="{{takeoff_id}}" />
+    <input type="hidden" id="invoice_id" value="{{invoice_id}}" />
+    <!-- Display a payment form -->
+      <div id="checkout">
+        <!-- Checkout will insert the payment form here -->
+      </div>
+  </body>
+</html>

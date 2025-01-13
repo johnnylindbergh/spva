@@ -129,8 +129,10 @@
     </div>
 
     <div class="form-container">
-        <h2>Create Invoice</h2>
         <form action="/createInvoice" method="POST">
+
+            <input type="input" id="hidden-input" name="invoice_name" value="{{invoice_name}}">
+
             <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
             <label for="customer-name">Customer Name</label>
             <input type="text" id="customer-name" name="customer_name" value="{{takeoff.owner}}" required>

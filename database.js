@@ -230,9 +230,9 @@ module.exports = {
   /*  Add a new system user account, given the user's Google info.
       Callback on profile of created user. */
   addUserFromGoogle: (user, cb) => {
-    // make insert and retrieve inserted profile data (assumes default role is 1)
+    // make insert and retrieve inserted profile data (assumes default role is 2)
     con.query(
-      "INSERT INTO users (email, name, user_type) VALUES (?, ?, 1); SELECT * FROM users WHERE uid = LAST_INSERT_ID();",
+      "INSERT INTO users (email, name, user_type) VALUES (?, ?, 2); SELECT * FROM users WHERE uid = LAST_INSERT_ID();",
       [user._json.email, user._json.name],
       (err, rows) => {
         if (
@@ -778,7 +778,7 @@ module.exports = {
       console.log("getInvoiceByNumber got null value");
     } else {
       con.query(
-        "SELECT takeoffs.hash, takeoffs.id, takeoffs.total as estimateTotal, invoices.total as invoiceTotal FROM invoices INNER JOIN takeoffs ON invoices.takeoff_id = takeoffs.id WHERE invoices.invoice_number = ?",
+        "SELECT takeoffs.hash, takeoffs.id AS takeoff_id, invoices.id AS invoice_id, takeoffs.total as estimateTotal, invoices.total as invoiceTotal, invoices.invoice_number FROM invoices INNER JOIN takeoffs ON invoices.takeoff_id = takeoffs.id WHERE invoices.invoice_number = ?",
         [invoice_number],
         function (err, invoice) {
           if (err) {
@@ -1378,40 +1378,35 @@ module.exports = {
   },
 
   separateLineItem: function (applied_material_id, callback) {
-    // update the this.separateLineItem value in the applied_materials table
-    con.query(
-      "SELECT separate_line_item FROM applied_materials WHERE id = ?;",
-      [applied_material_id],
-      function (err, material) {
-        if (err || material.length == 0) {
-          console.log(err);
-        }
-        let separate_line_item = !material[0].separate_line_item;
-        console.log("new state", separate_line_item);
-        con.query(
-          "UPDATE applied_materials SET separate_line_item = ? WHERE id = ?;",
-          [separate_line_item, applied_material_id],
-          function (err) {
-            if (err) {
-              console.log(err);
-              // finally, set applied to false
-              con.query(
-                "UPDATE applied_materials SET applied = 0 WHERE id = ?;",
-                [applied_material_id],
-                function (err) {
-                  if (err) {
-                    console.log(err);
-                    return callback(err);
-                  }
-                  callback(err);
-                }
-              );
-            }
-          }
-        );
+   // get the applied_materials row
+   // insert the name into the options table with a default cost of 0
+    // set the applied_material_id to null
+    con.query("SELECT * FROM applied_materials WHERE id = ?;", [applied_material_id], function(err, material){
+      if (err) {
+        console.log(err);
+        return callback(err);
       }
+      if (material.length == 0) {
+        console.log("Material not found");
+        return callback("Material not found");
+      }
+      con.query("INSERT INTO options (takeoff_id, description, cost) VALUES (?,?,?); SELECT LAST_INSERT_ID() as last;", [material[0].takeoff_id, material[0].name, 0], function(err, last){
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
+        con.query("UPDATE applied_materials SET name = NULL WHERE id = ?;", [applied_material_id], function(err){
+          if (err) {
+            console.log(err);
+            return callback(err);
+          }
+          callback(null, last[1][0].last);
+        });
+      });
+    }
     );
   },
+  
     
 
   changeLaborPrice: function (subject, price, callback) {
@@ -1557,9 +1552,9 @@ module.exports = {
                 }
               }
             );
-          } else if (material[0].tertiary_material_id == null) {
+          } else if (material[0].quartary_material_id == null) {
             con.query(
-              "UPDATE applied_materials SET tertiary_material_id = ? WHERE id = ?;",
+              "UPDATE applied_materials SET quartary_material_id = ? WHERE id = ?;",
               [material_id, subject_id],
               function (err) {
                 if (err) {
@@ -1659,7 +1654,7 @@ module.exports = {
     );
   },
 
-getTakeoffTotalForStripe: function (takeoff_id, callback) {
+getTakeoffTotalForDeposit: function (takeoff_id, callback) {
   console.log("getting total for stripe");
     con.query(
       "SELECT  signed_total, name, tax, payment_method FROM estimate join takeoffs ON takeoffs.estimate_id = estimate.id WHERE takeoffs.id = ?;",
@@ -1698,8 +1693,8 @@ getTakeoffTotalForStripe: function (takeoff_id, callback) {
 
           console.log("total after offset: ", total);
 
-       
-
+          // get the total to 2 decimal places
+          total = total.toFixed(2);
           // return the total 
           callback(null, rows[0].name, total);
         }
@@ -1711,6 +1706,29 @@ getTakeoffTotalForStripe: function (takeoff_id, callback) {
     );
   },
 
+
+  getInvoiceById: function (invoice_id, takeoff_id, callback) {
+    con.query(
+      "SELECT invoices.total AS invoiceTotal, takeoffs.name as takeoffName, takeoffs.id AS takeoff_id FROM invoices join takeoffs ON takeoffs.id = invoices.takeoff_id WHERE invoices.id = ?;",
+      [invoice_id],
+      function (err, invoice) {
+        if (err) return callback(err);
+        callback(null, invoice[0]);
+      }
+    );
+  },
+
+
+  getInvoicesByTakeoffId: function (takeoff_id, callback) {
+    con.query( "SELECT * FROM invoices WHERE takeoff_id = ?;", [takeoff_id], function(err, invoices){
+      if (err) {
+        console.log(err);
+        return callback(err);
+      }
+      callback(null, invoices);
+    }
+    );
+  },
 
           // 
 
