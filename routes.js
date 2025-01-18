@@ -89,6 +89,7 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
       .on("headers", (headersInOrder) => {
         // console.log(`First header: ${headersInOrder}`);
         headers = headersInOrder;
+        console.log(headers);
         //convert to snake case
         headers = headers.map(function (header) {
           return header.replace(/\s+/g, "_").toLowerCase();
@@ -108,7 +109,7 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
         });
 
         //print the headers
-        //console.log("headers are ", headers);
+        console.log("headers are ", headers);
       })
 
       .on("data", function (row) {
@@ -121,6 +122,7 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
             console.log(err);
           } else {
             console.log("takeoff loaded");
+            console.log("csv recieved: ", results);
           }
         });
 
@@ -130,6 +132,13 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
             cb(err);
           } else {
             console.log("materials generated");
+            db.applySubjectNamingRules(takeoff_id, function(err){
+              if (err) {
+                console.log(err);
+                cb(err);
+              }
+              cb(null);
+            });
           }
         });
       })
@@ -321,16 +330,32 @@ module.exports = function (app) {
                     console.log(err);
                   } else {
                     console.log("takeoff loaded");
-                    db.takeoffSetStatus(takeoff_id, 1, function (err) { });
+                    db.takeoffSetStatus(takeoff_id, 1, function (err) { 
+                      if (err) {
+                        console.log(err);
+                      }
+                      console.log("takeoff status set to 1");
+
+                       // update the customer and project fields
+                      console.log("about to update customer and project");
+                      console.log(req.body)
+                      db.updateTakeoffCustomer(takeoff_id, req.body.customer_id, function (err) {
+                        if (err) {
+                          console.log(err);
+                        } else {
+                          console.log("updated customer and project");
+                        }
+                      });
+
+                     // res.redirect("/");
+
+                    });
+                    
                   }
                 }
               );
 
-              // update the customer and project fields
-              console.log("about to update customer and project");
-              db.updateTakeoffCustomer(takeoff_id, req.body.customer, req.body.project, function (err) {
-                res.redirect("/");
-              });
+              res.redirect("/");
         
           } else {
             console.log("no file uploaded");
@@ -342,6 +367,7 @@ module.exports = function (app) {
   });
 
   app.post("/editTakeoff", mid.isAdmin, function (req, res) {
+    var render = defaultRender(req);
     console.log("editing", req.body.takeoff_id);
 
     db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
@@ -353,6 +379,7 @@ module.exports = function (app) {
           console.log(err);
         } else {
           res.render("editTakeoff.html", {
+            sys:render.sys,
             takeoff: takeoff,
             subjects: materials,
             materials: allMaterials,
@@ -1222,7 +1249,7 @@ module.exports = function (app) {
   //   });
   // });
 
-  app.post('/payInvoice/:takeoff_id', mid.isAuth, function (req, res) {
+  app.post('/payInvoice/:takeoff_id', function (req, res) {
     console.log("/payInvoice/ post");
     const takeoff_id = req.params.takeoff_id;
     const invoice_id = req.body.invoice_id;
@@ -1287,7 +1314,7 @@ module.exports = function (app) {
     );
   });
 
-  app.get('/payInvoice/:invoice_id', mid.isAuth, function (req, res) {
+  app.get('/payInvoice/:invoice_id', function (req, res) {
     console.log("/payInvoice/ GET");
     console.log(req.params);
     const invoice_id = req.params.invoice_id;
@@ -1341,7 +1368,7 @@ module.exports = function (app) {
     );
   });
 
-  app.post('/create-checkout-session/:takeoff_id', mid.isAuth, async (req, res) => {
+  app.post('/create-checkout-session/:takeoff_id', async (req, res) => {
     // create a price_id
     // get whole takeoff
     const takeoff_id = req.params.takeoff_id;
@@ -1412,7 +1439,7 @@ module.exports = function (app) {
 
 //  create-checkout-invoice-session
 
-  app.post('/create-checkout-invoice-session/:invoice_id', mid.isAuth, async (req, res) => {
+  app.post('/create-checkout-invoice-session/:invoice_id', async (req, res) => {
     // create a price_id
     // get whole takeoff
     const invoice_id = req.params.invoice_id;
@@ -1480,7 +1507,7 @@ module.exports = function (app) {
     });
   });
 
-    app.get('/session-status', mid.isAuth, async (req, res) => {
+    app.get('/session-status', async (req, res) => {
       const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
       console.log("session id: " + req.query.session_id);
       console.log("session status: " + session.status);
@@ -1542,14 +1569,14 @@ module.exports = function (app) {
       });
     });
 
-    app.get("/payment", mid.isAuth, function (req, res) {
+    app.get("/payment", function (req, res) {
       // landing page for the payment system 
       console.log("paymentPage Accessed");
       res.render("payment.html");
     });
 
 
-    app.post("/payment", mid.isAuth, function (req, res){
+    app.post("/payment", function (req, res){
       console.log(req.body);
       db.getInvoiceByNumber(req.body.invoice_number, function (err, invoice) {
         if (err) {
@@ -1670,6 +1697,9 @@ module.exports = function (app) {
         }
 
         // Generate invoice number
+        // prepend a 7 digit random number to takeoff_id 
+        const long_id = Math.floor(Math.random() * 10000000);
+        takeoff_id = String(Math.floor(Math.random() * 10000000)) + String(takeoff_id);
         const invoiceNumber = `${String(takeoff_id).padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
 
         if (custom_amount) {

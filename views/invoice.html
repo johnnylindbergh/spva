@@ -18,6 +18,10 @@
     <title>Invoice Display</title>
     <style>
         body {
+            background-image: url('/home-image.jpg');
+            background-size: cover;
+        }
+        body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
@@ -27,6 +31,8 @@
             border-radius: 10px;
             max-width: 600px;
             margin: auto;
+            background-color: azure;
+            opacity: 0.75;
         }
         .invoice-header {
             text-align: center;
@@ -38,6 +44,8 @@
         .invoice-details span {
             font-weight: bold;
         }
+      
+
     </style>
 </head>
 <body>
@@ -50,12 +58,11 @@
              <input type="hidden" id="invoice_id" value="{{invoice_id}}">
             <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
             <!-- link to original estimate using /share/hash -->
+            <!-- <p><a href='/share/{{hash}}'>View Estimate</a></p> -->
             <p>Invoice Number: {{invoice_number}}</p>
-            <p>Estimate Number: <a href='/share/{{hash}}'>Original Estimate</a></p>
             <p>Total: ${{invoiceTotal}}</p>
-            <p>Tax: %{{tax}}</p>
-            <p>Owner: {{owner}}</p>
-            <p>Billing Address: {{owner_billing_address}}</p>
+            <!-- <p>Owner: {{owner}}</p> -->
+            <!-- <p>Billing Address: {{owner_billing_address}}</p> -->
         </div>
         <div class = "payment-details">
 

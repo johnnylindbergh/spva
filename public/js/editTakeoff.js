@@ -329,6 +329,7 @@ function loadTakeoffMaterials(id) {
         laborsum = row.labor_cost * parseFloat(row.measurement);
 
         if (row.applied != 0) {
+          console.log(row.selected_materials);
           if (row.selected_materials && row.selected_materials.length > 0) {
             row.selected_materials.forEach((material) => {
               materialsCell.append(
@@ -510,6 +511,8 @@ function loadTakeoffMaterials(id) {
 
 
             });
+          } else {
+            console.log("No materials applied or selected_materials are nnull for some reason");
           }
 
           newRow.append(materialsCell);

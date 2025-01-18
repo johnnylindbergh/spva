@@ -59,11 +59,12 @@ module.exports = {
     if (req.isAuthenticated() && req.user.local.user_type == 1) {
       return next();
     } else {
-      res.render("error.html", {
-        friendly: "You are unable to access this resource.", 
-        link: "/auth/google?returnTo=" + querystring.escape(req.url),
-        title: "Authenticate as a different user"
-      });
+      // res.render("error.html", {
+      //   friendly: "You are unable to access this resource", 
+      //   link: "/auth/google?returnTo=" + querystring.escape(req.url),
+      //   title: "Authenticate as a different user"
+      // });
+      res.redirect("https://www.sunpaintingva.com");
     }
   }
 

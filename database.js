@@ -58,61 +58,89 @@ function generateHash() {
 }
 
 function applySubjectNamingRules(takeoff_id, callback) {
-  // if any of the subjects contain "remove from {{some_subject}}" where some subject is a wildcard, remove the subject from the applied_materials table and subtract its value from cooresponding subject
-  con.query(
-    "SELECT * FROM applied_materials WHERE takeoff_id = ?;", [takeoff_id], function (err, subjects) {
+  // Fetch subjects based on the given takeoff_id
+  con.query("SELECT * FROM applied_materials WHERE takeoff_id = ?;", [takeoff_id], function (err, subjects) {
     if (err) {
-      console.log(err);
+      console.error("Error fetching subjects:", err);
       return callback(err);
     }
-    for (var i = 0; i < subjects.length; i++) {
-      if (subjects[i].subject.toLowerCase().includes("remove from") || subjects[i].subject.toLowerCase().includes("remove")) { 
-        var removeSubject = subjects[i].subject.split("remove")[1];
-        // if the subject still starts with "from" after the split, remove it
-        if (removeSubject.startsWith("from")) {
-          removeSubject = removeSubject.split("from")[1];
+
+    if (!subjects.length) {
+      console.log("No subjects found for the given takeoff_id.");
+      return callback(null);
+    }
+
+    let pendingQueries = 0;
+    let completed = false;
+
+    function checkPendingQueries() {
+      if (pendingQueries === 0 && !completed) {
+        completed = true; // Ensure callback is called only once
+        callback(null);
+      }
+    }
+
+    for (let i = 0; i < subjects.length; i++) {
+      const subject = subjects[i];
+      console.log("Processing subject:", subject);
+
+      if (subject.name.toLowerCase().includes("remove from") || subject.name.toLowerCase().includes("remove")) {
+        let removeSubject = subject.name.split("remove")[1]?.trim();
+
+        if (removeSubject?.startsWith("from")) {
+          removeSubject = removeSubject.split("from")[1]?.trim();
         }
-        // remove any leading or trailing whitespace
-        removeSubject = removeSubject.trim();
 
-        // find the removeSubject in the applied_materials table and subtract subject[i].measurement from its measurement
-        // use the minimum levenstein distance to find the subject
-        console.log("REMOVE SUBJECT: ", removeSubject);
+        if (removeSubject?.length) {
+          let minSubjectId = null;
+          let minDistance = Infinity;
 
-        if (removeSubject.length > 0){
-          // get the takeoffs applied_meterials
-          let minSubjectId;
-          let minDistance = 100;
-          // loop through the applied_materials and find the subject that matches the removeSubject
-          for (var j = 0; j < subjects.length; j++) { // n^2 but only sometimes
-            let distance = levenshtein.get(subjects[j].subject, removeSubject);
+          for (let j = 0; j < subjects.length; j++) {
+            const distance = levenshtein.get(subjects[j].name, removeSubject);
             if (distance < minDistance) {
               minDistance = distance;
-              minSubjectId = subjects[j].id;
+              minSubjectId = j;
             }
           }
 
-          // 
-          console.log(`System will subtract ${subjects[minSubjectId].measurement} ${subjects[minSubjectId].measurement_unit} from ${subjects[i].subject}`);
+          if (minSubjectId == null || minDistance > 2) {
+            console.log(`No matching subject found to remove from for "${removeSubject}".`);
+          } else {
+            const targetSubject = subjects[minSubjectId];
+            console.log(`Subtracting ${subject.measurement} from ${targetSubject.measurement} (ID: ${targetSubject.id}).`);
 
-          // subtract the measurement from the subject
-          con.query("UPDATE applied_materials SET measurement = measurement - ? WHERE id = ?;", [subjects[minSubjectId].measurement, subjects[i].id], function(err){
-            if (err) {
-              console.log(err);
-            }
-          });
-          
-          // remove the subject from the applied_materials table
-          con.query("DELETE FROM applied_materials WHERE id = ?;", [minSubjectId], function(err){
-            if (err) {
-              console.log(err);
-            }
-          });
+            pendingQueries++;
+            con.query("UPDATE applied_materials SET measurement = measurement - ? WHERE id = ?;", 
+              [subject.measurement, targetSubject.id], function (err) {
+              if (err) {
+                console.error("Error updating measurement:", err);
+              } else {
+                console.log("Successfully updated measurement.");
+              }
+              pendingQueries--;
+              checkPendingQueries();
+            });
+
+            pendingQueries++;
+            con.query("DELETE FROM applied_materials WHERE id = ?;", [subject.id], function (err) {
+              if (err) {
+                console.error("Error deleting subject:", err);
+              } else {
+                console.log("Successfully removed subject.");
+              }
+              pendingQueries--;
+              checkPendingQueries();
+            });
+          }
         }
       }
     }
+
+    // Ensure callback is called if no pending queries were added
+    checkPendingQueries();
   });
 }
+
 
 
 function matchSubjectStrings(currentSubjectId, takeoff_id) {
@@ -186,34 +214,10 @@ function matchSubjectStrings(currentSubjectId, takeoff_id) {
   });
 }
 
-// unused function
-function getFrequentMaterials(subject, callback) {
-  con.query('SELECT material_id, COUNT(*) as count FROM applied_materials WHERE name = ? GROUP BY material_id ORDER BY count DESC LIMIT 1;', [subject], function(err, materials){
-    if (err) {
-      console.log(err);
-      return callback(err);
-    }
-    // do the same for the secondary material_id
-    con.query('SELECT secondary_material_id, COUNT(*) as count FROM applied_materials WHERE name = ? GROUP BY secondary_material_id ORDER BY count DESC LIMIT 1;', [subject], function(err, secondaryMaterials){
-      if (err) {
-        console.log(err);
-        return callback(err);
-      }
-      // do the same for the tertiary material_id
-      con.query('SELECT tertiary_material_id, COUNT(*) as count FROM applied_materials WHERE name = ? GROUP BY tertiary_material_id ORDER BY count DESC LIMIT 1;', [subject], function(err, tertiaryMaterials){
-        if (err) {
-          console.log(err);
-          return callback(err);
-        }
-        // return the most frequent materials
-        callback(null, [materials[0], secondaryMaterials[0], tertiaryMaterials[0]]);
-      });
-    });
-  });
-}
 
 module.exports = {
   connection: con,
+  applySubjectNamingRules: applySubjectNamingRules,
 
   lookUpUser: (email, cb) => {
     // retrieve user information associated with this email
@@ -279,6 +283,8 @@ module.exports = {
       "sf",
     ];
 
+
+    console.log(headers);
     for (var i = 1; i < results.length; i++) {
       // format all values in the row and set blank values to zero
       for (var j = 0; j < results[i].length; j++) {
@@ -341,7 +347,7 @@ module.exports = {
       //   measurement_unit VARCHAR(64),
 
       con.query(
-        "INSERT INTO subjects (takeoff_id, subject, page_label, layer, color, measurement, measurement_unit) VALUES (?,?,?,?,?,?,?);",
+        "INSERT INTO subjects (takeoff_id, subject, page_label, layer, color, measurement, measurement_unit, top_coat, primer) VALUES (?,?,?,?,?,?,?);",
         [
           takeoff_id,
           results[i][0],
@@ -350,6 +356,8 @@ module.exports = {
           results[i][4],
           parseFloat(measurement),
           results[i][15],
+          results[i][16],
+          results[i][17],
         ],
         function (err) {
           if (err) {
@@ -363,6 +371,7 @@ module.exports = {
   },
 
   createNewTakeoff: function (req, res, cb) {
+    let lastInsertId;
     con.query(
       "INSERT INTO takeoffs (creator_id, name, hash) VALUES (?, ?, ?); SELECT LAST_INSERT_ID() as last;",
       [req.user.local.id, req.body.takeoffName, generateHash().toString()],
@@ -371,7 +380,25 @@ module.exports = {
           return cb(err);
         }
         console.log("created takeoff", result[1][0].last);
-        cb(null, result[1][0].last);
+        lastInsertId = result[1][0].last;
+        // customer info 
+        if (req.body.customer_id){
+          // insert the customer_id into the customer_takeoffs table
+          con.query(
+            "INSERT INTO customer_takeoffs (customer_id, takeoff_id) VALUES (?, ?);",
+            [req.body.customer_id, result[1][0].last],
+            function (err) {
+              if (err) {
+                console.log(err);
+                cb(null,  lastInsertId);
+              }
+            }
+          );
+        } else {
+          // no customer info
+          cb(null, lastInsertId);
+        }
+
       }
     );
   }, 
@@ -438,43 +465,64 @@ module.exports = {
   },
   
 
-  updateTakeoffCustomer: function (takeoff_id, customer, project, callback) {
-    console.log("Updating takeoff Customer: ", takeoff_id, customer, project);
- // customer string become the owner name
- // and the project name becomes appended to the takeoff name
-     if (!takeoff_id || !customer) {
-      console.log("updateTakeoffCustomer got null value");
-      console.log(takeoff_id, customer, project);
+  updateTakeoffCustomer: function (takeoff_id, customer_id, callback) {
+    if (!takeoff_id || !customer_id) {
+       callback("Missing required parameters");
     } else {
-
-      // query the customer table for the customer name
-
-      con.query("SELECT * FROM customers WHERE FullyQualifiedName = ?;", [customer], function (err, customerInfo) {
-        if (err){
-          console.log(err);
-          return callback(err);
-        } else {
-          console.log("Customer Info: ", customerInfo[0]);
-          console.log("Customer name: ", customerInfo[0].GivenName +" "+ customerInfo[0].FamilyName);
-          console.log("Customer billing address: "+ customerInfo[0].BillAddr_Line1 + ", " + customerInfo[0].BillAddr_City + ", " + customerInfo[0].BillAddr_CountrySubDivisionCode);
-          console.log("Customer email address:", customerInfo[0].PrimaryEmailAddr_Address)
-          let billing_address = customerInfo[0].BillAddr_Line1 + ", " + customerInfo[0].BillAddr_City + ", " + customerInfo[0].BillAddr_CountrySubDivisionCode
-          // use this info to update the takeoff's owner
-          con.query(
-            "UPDATE takeoffs SET owner = ?, name = ?, owner_billing_address = ?, owner_email = ? WHERE id = ?;",
-            [customerInfo[0].GivenName +" "+ customerInfo[0].FamilyName, project, billing_address, customerInfo[0].PrimaryEmailAddr_Address, takeoff_id],
-            function (err) {
-              if (err) {
-                console.log(err);
-                return callback(err);
-              }
-              callback(null);
-            }
-          );
+      con.query(
+        "INSERT INTO customer_takeoffs (customer_id, takeoff_id) VALUES (?, ?);",
+        [customer_id, takeoff_id],
+        function (err) {
+          if (err){
+            console.log(err);
+            callback(err);
+          } else {
+            callback(null);
+          }
         }
-      });
+      );
     }
   },
+
+// deprecated now just make association in the customer_takeoffs table
+//   updateTakeoffCustomer: function (takeoff_id, customer, project, callback) {
+//     console.log("Updating takeoff Customer: ", takeoff_id, customer, project);
+//  // customer string become the owner name
+//  // and the project name becomes appended to the takeoff name
+//      if (!takeoff_id || !customer) {
+//       console.log("updateTakeoffCustomer got null value");
+//       console.log(takeoff_id, customer, project);
+//       callback("Missing required parameters");
+//     } else {
+
+//       // query the customer table for the customer name
+
+//       con.query("SELECT * FROM customers WHERE FullyQualifiedName = ?;", [customer], function (err, customerInfo) {
+//         if (err){
+//           console.log(err);
+//           return callback(err);
+//         } else {
+//           console.log("Customer Info: ", customerInfo[0]);
+//           console.log("Customer name: ", customerInfo[0].GivenName +" "+ customerInfo[0].FamilyName);
+//           console.log("Customer billing address: "+ customerInfo[0].BillAddr_Line1 + ", " + customerInfo[0].BillAddr_City + ", " + customerInfo[0].BillAddr_CountrySubDivisionCode);
+//           console.log("Customer email address:", customerInfo[0].PrimaryEmailAddr_Address)
+//           let billing_address = customerInfo[0].BillAddr_Line1 + ", " + customerInfo[0].BillAddr_City + ", " + customerInfo[0].BillAddr_CountrySubDivisionCode
+//           // use this info to update the takeoff's owner
+//           con.query(
+//             "UPDATE takeoffs SET owner = ?, name = ?, owner_billing_address = ?, owner_email = ? WHERE id = ?;",
+//             [customerInfo[0].GivenName +" "+ customerInfo[0].FamilyName, project, billing_address, customerInfo[0].PrimaryEmailAddr_Address, takeoff_id],
+//             function (err) {
+//               if (err) {
+//                 console.log(err);
+//                 return callback(err);
+//               }
+//               callback(null);
+//             }
+//           );
+//         }
+//       });
+//     }
+//   },
     
   updateTakeoffName: function (takeoff_id, name, callback) {
     if (!takeoff_id || !name) {
@@ -495,14 +543,23 @@ module.exports = {
     if (!takeoff_id || !owner_name) {
       return callback("Missing required parameters");
     } else {
-      con.query(
-        "UPDATE takeoffs SET owner = ? WHERE id = ?;",
-        [owner_name, takeoff_id],
-        function (err) {
-          if (err) return callback(err);
-          callback(null);
+      // get the customer id from the takeoff_id useing the customer_takeoffs table
+
+      con.query("SELECT * FROM customer_takeoffs WHERE takeoff_id = ?;", [takeoff_id], function (err, customerInfo) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        } else {
+          con.query(
+            "UPDATE customers SET givenName = ? WHERE id = ?;",
+            [owner_name, customerInfo[0].customer_id],
+            function (err) {
+              if (err) return callback(err);
+              callback(null);
+            }
+          );
         }
-      );
+      });
     }
   },
 
@@ -540,11 +597,12 @@ module.exports = {
             if (row && row.material_id) {
               return new Promise((resolve, reject) => {
                 con.query(
-                  "SELECT * FROM materials WHERE id IN (?, ?, ?);",
+                  "SELECT * FROM materials WHERE id IN (?, ?, ?, ?);",
                   [
                     row.material_id,
                     row.secondary_material_id,
                     row.tertiary_material_id,
+                    row.quartary_material_id
                   ],
                   function (err, materials) {
                     if (err) return reject(err);
@@ -650,7 +708,7 @@ module.exports = {
 
         if (estimate_id[0].estimate_id == null) {
           con.query(
-            "INSERT INTO estimate (takeoff_id) VALUES (?); SELECT LAST_INSERT_ID() as last;",
+            "INSERT INTO estimates (takeoff_id) VALUES (?); SELECT LAST_INSERT_ID() as last;",
             [takeoff_id],
             function (err, result) {
               if (err) {
@@ -683,7 +741,7 @@ module.exports = {
             if (row && row.material_id) {
               return new Promise((resolve, reject) => {
                 con.query(
-                  "SELECT * FROM materials WHERE id IN (?, ?, ?);",
+                  "SELECT * FROM materials WHERE id IN (?, ?, ?, ?);",
                   [
                     row.material_id,
                     row.secondary_material_id,
@@ -730,7 +788,7 @@ module.exports = {
     // console.log("exclusions: ", exclusions);
 
     con.query(
-      "UPDATE estimate SET inclusions = ?, exclusions = ? WHERE id = ?;",
+      "UPDATE estimates SET inclusions = ?, exclusions = ? WHERE id = ?;",
       [inclusions, exclusions, id],
       function (err) {
         if (err){
@@ -808,7 +866,7 @@ module.exports = {
       }
 
       // get takeoff and join the estimate_id to get the signed_total
-      con.query("SELECT * FROM takeoffs join estimate on takeoffs.estimate_id = estimate.id WHERE takeoffs.id = ?;", [takeoff_id], function (err, estimateTakeoffObject) {
+      con.query("SELECT * FROM takeoffs join estimates on takeoffs.estimate_id = estimates.id WHERE takeoffs.id = ?;", [takeoff_id], function (err, estimateTakeoffObject) {
         if (err) return callback(err);
         if (!estimateTakeoffObject || estimateTakeoffObject.length === 0 || !total || total.length === 0) {
           return callback(new Error("Invalid data retrieved"));
@@ -862,7 +920,7 @@ module.exports = {
         } else {
           takeoff_id = last[0].last;
           con.query(
-            "INSERT INTO estimate (takeoff_id, inclusions, exclusions) VALUES (?,?,?);",
+            "INSERT INTO estimates (takeoff_id, inclusions, exclusions) VALUES (?,?,?);",
             [takeoff_id, inclusions, exclusions],
             function (err) {
               if (err) {
@@ -883,7 +941,7 @@ module.exports = {
         }
         
         con.query(
-          "UPDATE estimate SET inclusions = COALESCE(inclusions, ?), exclusions = COALESCE(exclusions, ?) WHERE id = ?;",
+          "UPDATE estimates SET inclusions = COALESCE(inclusions, ?), exclusions = COALESCE(exclusions, ?) WHERE id = ?;",
           [inclusions, exclusions, estimate_id],
           function (err) {
             if (err) {
@@ -997,7 +1055,7 @@ module.exports = {
   // the get request for the viewEstimate page
   getEstimateData: function (takeoff_id, callback) {
     con.query(
-      "SELECT * FROM estimate WHERE takeoff_id = ? LIMIT 1;",
+      "SELECT * FROM estimates WHERE takeoff_id = ? LIMIT 1;",
       [takeoff_id],
       function (err, estimate) {
         if (err) return callback(err);
@@ -1162,7 +1220,7 @@ module.exports = {
         console.log("No estimate_id found for takeoff_id: ", takeoff_id);
       }
       con.query(
-        "UPDATE estimate SET signed_total = ? WHERE id = ?;",
+        "UPDATE estimates SET signed_total = ? WHERE id = ?;",
         [total, estimate_id[0].estimate_id],
         function (err) {
           if (err) return callback(err);
@@ -1216,7 +1274,11 @@ module.exports = {
                 }
                 );
             }
-            applySubjectNamingRules(takeoff_id);
+            applySubjectNamingRules(takeoff_id, function(err){
+              if (err) return callback(err);
+              callback(null);
+            });
+          
             // sleep for 1 second to allow the database to update
             setTimeout(function () {
               callback(null);
@@ -1252,6 +1314,7 @@ module.exports = {
                 "material_id",
                 "secondary_material_id",
                 "tertiary_material_id",
+                "quartary_material_id"
             ];
             let fieldToUpdate = null;
 
@@ -1438,7 +1501,7 @@ module.exports = {
         for (var i = 0; i < materials.length; i++) {
           if (materials[i].material_id == material_id) {
             con.query(
-              "UPDATE applied_materials SET primary_cost_delta = ? WHERE material_id = ?;",
+              "UPDATE applied_materials SET cost_delta = ? WHERE material_id = ?;",
               [price, material_id],
               function (err) {
                 if (err) {
@@ -1476,7 +1539,6 @@ module.exports = {
   },
 
   addMaterialSubject: function (material_id, subject_id, callback) {
-    // first select from applied_materials and check if the primary or secondary id is null;
 
     con.query(
       "SELECT * from applied_materials WHERE id = ?;",
@@ -1501,79 +1563,20 @@ module.exports = {
                 return callback(err);
               }
               // set the primary_cost_delta to zero
-              con.query("UPDATE applied_materials SET primary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
+              con.query("UPDATE applied_materials SET cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
                 if (err) {
                   console.log(err);
                   return callback(err);
                 }
                 callback(null);
               });
-            }
-          );
-        } else if (material[0].secondary_material_id == null) {
-          console.log("updating secondary material");
-          con.query(
-            "UPDATE applied_materials SET secondary_material_id = ? WHERE id = ?;",
-            [material_id, subject_id],
-            function (err) {
-              if (err) {
-                console.log(err);
-                return callback(err);
-              }
-              // set the secondary_cost_delta to zero
-              con.query("UPDATE applied_materials SET secondary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
-                if (err) {
-                  console.log(err);
-                  return callback(err);
-                }
-                callback(null);
-              });
-            }
-          );
-        } else if (material[0].tertiary_material_id == null) {
-          console.log("updating tertiary material");
-          con.query(
-            "UPDATE applied_materials SET tertiary_material_id = ? WHERE id = ?;",
-            [material_id, subject_id],
-            function (err) {
-              if (err) {
-                console.log(err);
-                return callback(err);
-              }
-              // set the tertiary_cost_delta to zero
-              con.query("UPDATE applied_materials SET tertiary_cost_delta = 0 WHERE id = ?;", [subject_id], function(err){
-                if (err) {
-                  console.log(err);
-                  return callback(err);
-                }
-                callback(null);
-              });
-            }
-          );
-        } else if (material[0].quartary_material_id == null) {
-          con.query(
-            "UPDATE applied_materials SET quartary_material_id = ? WHERE id = ?;",
-            [material_id, subject_id],
-            function (err) {
-              if (err) {
-                console.log(err);
-                return callback(err);
-              }
-              callback(null);
             }
           );
         } else {
-          console.log("all material slots are filled");
-
-          // replace the primary with the new material
-          con.query("UPDATE applied_materials SET material_id = ? WHERE id = ?;", [material_id, subject_id], function(err){
-            if (err) {
-              console.log(err);
-              return callback(err);
-            }
-            callback(null);
-          });
+          console.log("material ID is already set");
+          callback(null);
         }
+
       }
     );
   },
@@ -1584,14 +1587,14 @@ module.exports = {
         takeoffs.id,
         takeoffs.name,
         takeoffs.status,
-        estimate.date_created,
+        estimates.date_created,
         takeoffs.created_at AS takeoff_created_at
       FROM 
         takeoffs
       LEFT JOIN 
-        estimate
+        estimates
       ON 
-        takeoffs.estimate_id = estimate.id;
+        takeoffs.estimate_id = estimates.id;
     `;
 
     con.query(query, function (err, takeoffs) {
@@ -1661,7 +1664,7 @@ module.exports = {
 getTakeoffTotalForDeposit: function (takeoff_id, callback) {
   console.log("getting total for stripe");
     con.query(
-      "SELECT  signed_total, name, tax, payment_method FROM estimate join takeoffs ON takeoffs.estimate_id = estimate.id WHERE takeoffs.id = ?;",
+      "SELECT  signed_total, name, tax, payment_method FROM estimates join takeoffs ON takeoffs.estimate_id = estimates.id WHERE takeoffs.id = ?;",
       [takeoff_id],
       function (err, rows) {
         console.log(rows);
@@ -1824,7 +1827,7 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
         if (err) return callback(err);
 
         con.query(
-          "SELECT * FROM estimate WHERE takeoff_id = ?;",
+          "SELECT * FROM estimates WHERE takeoff_id = ?;",
           [takeoff_id],
           function (err, estimate) {
             if (err) return callback(err);

@@ -3,18 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Landing Page</title>
+    <title>Pay Invoice</title>
     <!-- import styles -->
     <link rel="stylesheet" href="css/defaults.css">
     <link rel="stylesheet" href="css/invoice.css">
     <style>
+        body {
+            background-image: url('/home-image.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+        }
         .container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             padding: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             background-color: #fff;
+        }
+        .container .digit {
+            letter-spacing: 8px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 130%;
+            font-weight: bold;
+            height: 30px;
+            padding-left: 20px;
+            padding-right: 20px;
+            width: 350px;
+            border: 0;
+            background-color: transparent;
+            outline: 0;
         }
     </style>
 </head>
@@ -23,9 +41,9 @@
         <div id="invoice-container">
             <!-- ask the invoice number -->
             <div id="invoice-number">
-                <h1>Enter Invoice Number</h1>
-                <form action="payment" method="POST">
-                    <input type="text" name="invoice_number" id="invoice_number" required>
+                <h1 style = "width:80%">Enter Invoice Number</h1>
+                <form class = "invoice-number-form" action="payment" method="POST">
+                    IN:-<input type="text" class="digit" name="invoice_number" id="invoice_number" maxlength="13" placeholder="00000000-0000"required></br>
                     <button type="submit">Submit</button>
                 </form>
             </div>

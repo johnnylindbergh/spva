@@ -61,7 +61,6 @@ INSERT INTO materials (name, description, cost, coverage, material_type) VALUES 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams KemBond ', '', 36.55, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams High Build ', '', 15.47, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams A100- Oil ', '', 35.00, 300.0, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams TOPCOAT – INTERIOR (Sheen )', '', Gallon (Price/gallon), 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Promar Ceiling  (Flat)', '', 17.53, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Painters Edge  (Flat)', '', 12.03, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Promar 200  (Low Gloss Eg-Shel )', '', 17.53, 300.0, 6);
