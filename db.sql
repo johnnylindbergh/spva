@@ -51,8 +51,7 @@ CREATE TABLE customers (
   id INT NOT NULL, -- QB ID
   taxable BOOLEAN NOT NULL DEFAULT 1,
   givenName VARCHAR(100),
-  FullyQualifiedName VARCHAR(255),
-  owner_billing_address VARCHAR(255),
+  billing_address VARCHAR(255),
   CompanyName VARCHAR(255),
   DisplayName VARCHAR(255),
   isArchived TINYINT(1) DEFAULT 0,
@@ -89,7 +88,7 @@ CREATE TABLE takeoffs (
   hash VARCHAR(64),
   view_count INT DEFAULT 0,
   total DECIMAL(10,2),
-  tax DECIMAL(10,2), -- Default value to be set by application logic
+  tax DECIMAL(10,2) DEFAULT 5.3, -- Default value to be set by application logic
   payment_method VARCHAR(64),
   duration_hours INT,
   start_date DATETIME,

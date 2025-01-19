@@ -213,11 +213,16 @@ $(document).ready(function() {
         populateExclusions(data.estimate[0].exclusions);
         populateOptions(parseInt($('#takeoff_id').val()));
 
-        $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].total));
-        $('#subtotal').text("Subtotal $"+numberWithCommas(data.takeoff[0].total));
+        $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].takeoff_total));
+        $('#subtotal').text("Subtotal $"+numberWithCommas(data.takeoff[0].takeoff_total));
 
-        var subtotal = parseFloat(data.takeoff[0].total);
-        tax = (parseFloat(data.takeoff[0].tax)/100)*subtotal; // should be zero if not taxable
+        var subtotal = parseFloat(data.takeoff.total);
+        if (data.takeoff[0].customer_taxable) {
+            tax = (parseFloat(data.takeoff[0].takeoff_tax)/100)*subtotal; // should be zero if not taxable
+        } else {
+            tax = 0; // nop
+        }
+        
         $('#tax').text("Tax: $"+numberWithCommas(tax.toFixed(2)));
 
         var taxedTotal = subtotal + tax;

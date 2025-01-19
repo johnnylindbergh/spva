@@ -346,14 +346,14 @@ $(document).ready(function() {
 
     $.post('/getEstimateData', {takeoff_id: takeoff_id}, function(data) {
         console.log(data)
-        tax = data.takeoff[0].tax; // consider that the tax percentage will be zero if the server returns zero.  
+        tax = data.takeoff[0].takeoff_tax; // consider that the tax percentage will be zero if the server returns zero.  
         estimate_id = data.estimate[0].id;  
         populateProposalIncludes(data.estimate[0].inclusions);
         populateExclusions(data.estimate[0].exclusions);
         populateOptions(takeoff_id);
         console.log(data.takeoff[0].total);
 
-        $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].total));
+        $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].takeoff_total));
  
     });
 

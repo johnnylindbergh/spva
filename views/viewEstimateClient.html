@@ -38,15 +38,15 @@
 
         
          {{#takeoff}}
-       <input type='hidden' id='takeoff_id' value='{{id}}'>
+       <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
 
-       <input type='hidden' id='takeoff_total' value='{{takeoff_info.total}}'>
+       <input type='hidden' id='takeoff_total' value='{{takeoff_total}}'>
 
       <h2 style="text-align:left">{{name}}</h2> </br>
     </br>
    
-      Owner:  {{owner}}</br>
-      Billing Address: {{owner_billing_address}}</br>
+      Owner:  {{customer_givenName}}</br>
+      Billing Address: {{customer_billing_address}}</br>
 
       </br>
     {{/takeoff}}
@@ -95,7 +95,7 @@
         Phone Number: <input type="tel" id="phone" class="input-field" placeholder="123-456-7890" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
              <br>
     
-        Email:<input type="email" id="email" class="input-field" value="{{takeoff.owner_email}}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required> 
+        Email:<input type="email" id="email" class="input-field" value="{{takeoff.customer_primary_email_address}}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required> 
         <br>
 
         Preferred Start Date: <input type="date" class="input-field"><br>

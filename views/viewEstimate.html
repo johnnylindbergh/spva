@@ -64,12 +64,12 @@
          {{#takeoff}}
 
 
-       <input type='hidden' id='takeoff_id' value='{{id}}'>
+       <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
         </br>
-        Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{owner}}'></br></br>
-        Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{owner_billing_address}}'></br></br>
-        Owner Email Address: <input type= 'text' class="hiddenInput" id= 'owner_email_address' onchange='updateTakeoffOwnerEmailAddress()' value='{{owner_email}}'></br></br>
-        Invoice Email Address: <input type= 'text' class="hiddenInput" id= 'invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email}}'></br>
+        Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{customer_givenName}}'></br></br>
+        Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{customer_billing_address}}'></br></br>
+        Owner Email Address: <input type= 'text' class="hiddenInput" id= 'owner_email_address' onchange='updateTakeoffOwnerEmailAddress()' value='{{customer_primary_email_address}}'></br></br>
+        Invoice Email Address: <input type= 'text' class="hiddenInput" id= 'invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{customer_invoice_email_address}}'></br>
         last updated {{updated_at}} </br> by {{last_updated_by}} </br>
 
        <input type='hidden' id='takeoff_total' value='{{takeoff_info.total}}'>

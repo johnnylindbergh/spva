@@ -284,7 +284,7 @@ module.exports = {
     ];
 
 
-    console.log(headers);
+    console.log("the headers of the csv are: ",headers);
     for (var i = 1; i < results.length; i++) {
       // format all values in the row and set blank values to zero
       for (var j = 0; j < results[i].length; j++) {
@@ -347,7 +347,7 @@ module.exports = {
       //   measurement_unit VARCHAR(64),
 
       con.query(
-        "INSERT INTO subjects (takeoff_id, subject, page_label, layer, color, measurement, measurement_unit, top_coat, primer) VALUES (?,?,?,?,?,?,?);",
+        "INSERT INTO subjects (takeoff_id, subject, page_label, layer, color, measurement, measurement_unit, top_coat, primer) VALUES (?,?,?,?,?,?,?,?,?);",
         [
           takeoff_id,
           results[i][0],
@@ -366,8 +366,13 @@ module.exports = {
           }
         }
       );
+     
     }
     //console.log("values", values);
+    setTimeout(() => {
+      cb(null);
+    }, 2000);
+    
   },
 
   createNewTakeoff: function (req, res, cb) {
@@ -382,22 +387,7 @@ module.exports = {
         console.log("created takeoff", result[1][0].last);
         lastInsertId = result[1][0].last;
         // customer info 
-        if (req.body.customer_id){
-          // insert the customer_id into the customer_takeoffs table
-          con.query(
-            "INSERT INTO customer_takeoffs (customer_id, takeoff_id) VALUES (?, ?);",
-            [req.body.customer_id, result[1][0].last],
-            function (err) {
-              if (err) {
-                console.log(err);
-                cb(null,  lastInsertId);
-              }
-            }
-          );
-        } else {
-          // no customer info
-          cb(null, lastInsertId);
-        }
+        cb(null, lastInsertId);
 
       }
     );
@@ -467,20 +457,44 @@ module.exports = {
 
   updateTakeoffCustomer: function (takeoff_id, customer_id, callback) {
     if (!takeoff_id || !customer_id) {
-       callback("Missing required parameters");
+       callback("Missing required parameters in updateTakeoffCustomer");
     } else {
-      con.query(
-        "INSERT INTO customer_takeoffs (customer_id, takeoff_id) VALUES (?, ?);",
-        [customer_id, takeoff_id],
-        function (err) {
-          if (err){
-            console.log(err);
-            callback(err);
-          } else {
-            callback(null);
-          }
+
+      // query the customer table for the customer name
+      con.query("SELECT * FROM customers WHERE id = ?;", [customer_id], function (err, customerInfo) {
+        if (err) {
+          console.log(err);
+          return callback(err);
         }
-      );
+        console.log("Customer Info: ", customerInfo[0]);
+        let customer_id = customerInfo[0].id;
+        con.query(
+          "INSERT INTO customer_takeoffs (customer_id, takeoff_id) VALUES (?, ?);",
+          [customer_id, takeoff_id],
+          function (err) {
+            if (err){
+              console.log(err);
+              callback(err);
+            } else {
+
+              // update the takeoffs table set customer_id = customer_id
+              con.query( 
+                "UPDATE takeoffs SET customer_id = ? WHERE id = ?;",
+                [customer_id, takeoff_id],
+                function (err) {
+                  if (err) {
+                    console.log(err);
+                    return callback(err);
+                  }
+                  callback(null);
+                }
+              );
+
+              callback(null);
+            }
+          }
+        );
+      });
     }
   },
 
@@ -550,6 +564,7 @@ module.exports = {
           console.log(err);
           return callback(err);
         } else {
+          console.log(customerInfo[0]);
           con.query(
             "UPDATE customers SET givenName = ? WHERE id = ?;",
             [owner_name, customerInfo[0].customer_id],
@@ -588,7 +603,10 @@ module.exports = {
       [takeoff_id],
       function (err, takeoff_info) {
         if (err) return callback(err);
-
+        if (takeoff_info.length === 0) {
+          return callback("Takeoff not found");
+        }
+        
         con.query(queries.getTakeoff, [takeoff_id], async function (err, rows) {
           if (err) return callback(err);
 
@@ -597,18 +615,15 @@ module.exports = {
             if (row && row.material_id) {
               return new Promise((resolve, reject) => {
                 con.query(
-                  "SELECT * FROM materials WHERE id IN (?, ?, ?, ?);",
+                  "SELECT * FROM materials WHERE id = ?;",
                   [
-                    row.material_id,
-                    row.secondary_material_id,
-                    row.tertiary_material_id,
-                    row.quartary_material_id
+                    row.material_id
                   ],
-                  function (err, materials) {
+                  function (err, material) {
                     if (err) return reject(err);
 
                     // Add material names to the row
-                    row.selected_materials = materials; // You can customize how you want to store the materials info
+                    row.selected_materials = material; // You can customize how you want to store the materials info
                     resolve(row);
                   }
                 );
@@ -622,7 +637,20 @@ module.exports = {
             const updatedRows = await Promise.all(promises);
             // Once all material info has been fetched, pass the updated rows to the callback
             //console.log(updatedRows);
-            callback(null, takeoff_info, updatedRows);
+
+            // query the customer_id and append the row to the takeoff_info
+            con.query("SELECT * FROM customer_takeoffs join customers on customer_takeoffs.customer_id = customers.id  WHERE takeoff_id = ? LIMIT 1;", [takeoff_id], function (err, customerInfo) {
+              if (err) {
+                console.log(err);
+                return callback(err);
+              } else {
+                Object.assign(takeoff_info[0], customerInfo[0]);
+
+                callback(null, takeoff_info, updatedRows);
+
+              //  givenName, owner_billing_address, FullyQulifiedName vs CompanyName vs displayname, invoice email addres not set 
+              }
+            });
           } catch (queryErr) {
             callback(queryErr);
           }
@@ -728,7 +756,7 @@ module.exports = {
     );
 
     con.query(
-      "SELECT * FROM takeoffs WHERE id = ?;",
+      queries.getCustomerTakeoff,
       [takeoff_id],
       function (err, takeoff_info) {
         if (err) return callback(err);
@@ -819,14 +847,23 @@ module.exports = {
     if (!takeoff_id || !owner_email) {
       return callback("Missing required parameters");
     } else {
-      con.query(
-        "UPDATE takeoffs SET invoice_email = ? WHERE id = ?;",
-        [owner_email, takeoff_id],
-        function (err) {
-          if (err) return callback(err);
-          callback(null);
-        }
-      );
+        // use the takeoffs customer_id to update customers.invoice_email_address
+        con.query("SELECT * FROM customer_takeoffs WHERE takeoff_id = ?;", [takeoff_id], function (err, customerInfo) {
+          if (err) {
+            console.log(err);
+            return callback(err);
+          } else {
+            console.log(customerInfo[0]);
+            con.query(
+              "UPDATE customers SET invoice_email_address = ? WHERE id = ?;",
+              [owner_email, customerInfo[0].customer_id],
+              function (err) {
+                if (err) return callback(err);
+                callback(null);
+              }
+            );
+          }
+        });
     }
   },
 
@@ -1060,7 +1097,7 @@ module.exports = {
       function (err, estimate) {
         if (err) return callback(err);
         con.query(
-          "SELECT * FROM takeoffs WHERE id = ?;",
+         queries.getCustomerTakeoff,
           [takeoff_id],
           function (err, takeoff) {
             if (err) return callback(err);
@@ -1069,19 +1106,9 @@ module.exports = {
               "SELECT setting_value FROM system_settings WHERE setting_name = 'sales_tax';",
               function (err, salesTax) {
                 if (err) return callback(err);
-
-
-                  // get the user name of the last person to update the takeoff
-                  con.query("SELECT name FROM users WHERE id = ?;", [takeoff[0].last_updated_by], function(err, user){
-                    // append the user name to the takeoff object
-                    if (user.length > 0) { 
-                      takeoff[0].last_updated_by = user[0].name;
-                    }
-
-                    callback(null, estimate, takeoff, salesTax[0].setting_value);
-
-                  });
-                }
+                callback(null, estimate, takeoff, salesTax[0].setting_value);
+                
+               }
             );
           }
         );
@@ -1092,7 +1119,7 @@ module.exports = {
 
   getSharedEstimate: function (hash, callback) {
     con.query(
-      "SELECT * FROM takeoffs WHERE hash = ?;",
+      queries.getCustomerTakeoffByHash,
       [hash],
       function (err, takeoffResults) {
         if (err) return callback(err);
@@ -1108,7 +1135,7 @@ module.exports = {
         console.log("getting shared takeoff:", takeoff);
 
         con.query(
-          "SELECT * FROM estimate WHERE id = ?;",
+          "SELECT * FROM estimates WHERE id = ?;",
           [takeoff.estimate_id],
           function (err, estimateResults) {
             if (err) return callback(err);
@@ -1117,7 +1144,7 @@ module.exports = {
             // Query the options table for the estimate_id
             con.query(
               "SELECT * FROM options WHERE takeoff_id = ?;",
-              [takeoff.estimate_id],
+              [takeoff.takeoff_id],
               function (err, optionsResults) {
                 if (err) return callback(err);
                 callback(null, estimateResults, takeoff, optionsResults);

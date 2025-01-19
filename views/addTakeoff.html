@@ -46,20 +46,6 @@
       <option value="" disabled selected>Select a Customer</option>
     </select>
     <br><br>
-    
-    <!-- Searchable dropdown for projects, dynamically updated -->
-    <label for="projectDropdown">Project:</label>
-    <select id="projectDropdown" name="project" class="searchable-dropdown">
-      <option value="" disabled selected>Select a Project</option>
-    </select>
-    <br><br>
-    
-    <!-- Button to create a new project -->
-    <button type="button" id="createNewProjectButton">Create New Project</button>
-    <div id="newProjectDiv" style="display: none; margin-top: 10px;">
-      <label for="newProjectName">New Project Name:</label>
-      <input type="text" id="newProjectName" name="newProjectName" placeholder="Enter project name">
-    </div>
   </div>
   
   <h2></h2>
@@ -96,58 +82,29 @@ $(document).ready(function () {
     .done(function (response) {
       const data = response; // Access the array of customers
       console.log(data);
+      let customers = $('#customerDropdown').data('customers') || {};
       for (let i = 0; i < data.length; i++) {
         const customer = data[i];
-        const customerName = customer.DisplayName || customer.FullyQualifiedName;
-
-        if (customer.Job) {
-          console.log(customer.Job);
-          console.log(customer.ParentRef_Value);
-          if (customer.ParentRef_Value) {
-            const parentCustomer = data.find(c => c.id === customer.ParentRef_Value);
-            const parentName = parentCustomer?.DisplayName || parentCustomer?.FullyQualifiedName;
-            if (parentName) {
-              customers[parentName] = customers[parentName] || [];
-              customers[parentName].push(customerName);
+        const customerName = customer.givenName || customer.CompanyName;
+        
+              // Append customer options to the dropdown
+              $('#customerDropdown').append(
+                $('<option>', {
+                  value: customer.id,
+                  text: customerName
+                })
+              );
             }
-          }
-        } else {
-          customers[customerName] = [];
-        }
-      }
+            // Save customers data to the dropdown for future use
+            $('#customerDropdown').data('customers', customers);
+          })
+          .fail(function (error) {
+            console.error('Error fetching customers:', error);
+          });
+      });
 
-      // Populate the customer dropdown
-      for (const customer in customers) {
-        $('#customerDropdown').append(`<option value="${customer}">${customer}</option>`);
-      }
-      $('#customerDropdown').trigger('change'); // Refresh Select2
-    })
-    .fail(function () {
-      alert('Failed to load customer data. Please authenticate with QuickBooks again.');
-      window.location.href = '/quickbooks';
-    });
+    
 
-  // Update projects dropdown based on selected customer
-  $('#customerDropdown').on('change', function () {
-    const selectedCustomer = $(this).val();
-    const projects = customers[selectedCustomer] || [];
-
-    const projectDropdown = $('#projectDropdown');
-    projectDropdown.empty().append('<option value="" disabled selected>Select a Project</option>');
-    projects.forEach(project => {
-      projectDropdown.append(`<option value="${project}">${project}</option>`);
-    });
-    projectDropdown.trigger('change'); // Refresh Select2
-
-
-  });
-
-  
-  // Show input box for creating a new project
-  // $('#createNewProjectButton').on('click', function () {
-  //   $('#newProjectDiv').toggle();
-  // });
-});
 
 </script>
 

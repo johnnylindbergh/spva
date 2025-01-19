@@ -87,6 +87,7 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
 
       .pipe(parse({ delimiter: "," }))
       .on("headers", (headersInOrder) => {
+        console.log(headersInOrder);
         // console.log(`First header: ${headersInOrder}`);
         headers = headersInOrder;
         console.log(headers);
@@ -123,24 +124,27 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
           } else {
             console.log("takeoff loaded");
             console.log("csv recieved: ", results);
-          }
-        });
 
-        db.generateTakeoffMaterials(takeoff_id, function (err) {
-          if (err) {
-            console.log(err);
-            cb(err);
-          } else {
-            console.log("materials generated");
-            db.applySubjectNamingRules(takeoff_id, function(err){
+            db.generateTakeoffMaterials(takeoff_id, function (err) {
               if (err) {
                 console.log(err);
                 cb(err);
+              } else {
+                console.log("materials generated");
+                db.applySubjectNamingRules(takeoff_id, function(err){
+                  if (err) {
+                    console.log(err);
+                    cb(err);
+                  }
+                  cb(null);
+                });
               }
-              cb(null);
             });
+            
           }
         });
+
+
       })
       .on("error", function (error) {
         console.log(error.message);
@@ -201,7 +205,7 @@ module.exports = function (app) {
   });
 
   app.post("/update-takeoff-owner-name", mid.isAdmin, (req, res) => {
-    console.log("updating takeoff name");
+    console.log("updating takeoff owner name");
     let owner_name = req.body.owner;
     let takeoff_id = req.body.takeoff_id;
     console.log(req.body);
@@ -339,7 +343,7 @@ module.exports = function (app) {
                        // update the customer and project fields
                       console.log("about to update customer and project");
                       console.log(req.body)
-                      db.updateTakeoffCustomer(takeoff_id, req.body.customer_id, function (err) {
+                      db.updateTakeoffCustomer(takeoff_id, req.body.customer, function (err) {
                         if (err) {
                           console.log(err);
                         } else {
@@ -378,6 +382,7 @@ module.exports = function (app) {
         if (err) {
           console.log(err);
         } else {
+          console.log("update the html with these new variable names. ", takeoff);
           res.render("editTakeoff.html", {
             sys:render.sys,
             takeoff: takeoff,
@@ -414,7 +419,7 @@ module.exports = function (app) {
   });
 
   app.post("/updateTakeoffTotal", mid.isAdmin, function (req, res) {
-    console.log("updating takeoff total ", req.body);
+    //console.log("updating takeoff total ", req.body);
     db.updateTakeoffTotal(req.body.takeoff_id, req.body.total, function (err) {
       if (err) {
         console.log(err);
@@ -581,6 +586,7 @@ module.exports = function (app) {
 
               // call to  async function callChatGPT with the response as the return value and saves the it to the database
               let response = "";
+              console.log("prompt",prompt + JSON.stringify(estimate))
               chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
                 response = subres;
                 //console.log("Response:", response);
@@ -634,6 +640,7 @@ module.exports = function (app) {
                 } else {
 
                   console.log(estimate);
+                  console.log(takeoff_info);
                   res.render("viewEstimate.html", {
                     estimate: estimate,
                     takeoff: takeoff_info,

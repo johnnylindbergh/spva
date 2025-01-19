@@ -15,7 +15,91 @@ module.exports = {
     LEFT JOIN
       materials ON applied_materials.material_id = materials.id
     WHERE
-      applied_materials.takeoff_id = ?;`
+      applied_materials.takeoff_id = ?;`,
+
+      getCustomerTakeoff: `SELECT 
+    takeoffs.id AS takeoff_id,
+    takeoffs.name AS takeoff_name,
+    takeoffs.isArchived AS takeoff_isArchived,
+    takeoffs.creator_id,
+    takeoffs.file_path_of_plans,
+    takeoffs.estimate_id,
+    takeoffs.status AS takeoff_status,
+    takeoffs.hash AS takeoff_hash,
+    takeoffs.view_count AS takeoff_view_count,
+    takeoffs.total AS takeoff_total,
+    takeoffs.tax AS takeoff_tax,
+    takeoffs.payment_method AS takeoff_payment_method,
+    takeoffs.duration_hours AS takeoff_duration_hours,
+    takeoffs.start_date AS takeoff_start_date,
+    takeoffs.end_date AS takeoff_end_date,
+    takeoffs.created_at AS takeoff_created_at,
+    takeoffs.updated_at AS takeoff_updated_at,
+    takeoffs.last_updated_by AS takeoff_last_updated_by,
+    takeoffs.customer_id AS takeoff_customer_id,
+    customers.id AS customer_id,
+    customers.taxable AS customer_taxable,
+    customers.givenName AS customer_givenName,
+    customers.billing_address AS customer_billing_address,
+    customers.CompanyName AS customer_CompanyName,
+    customers.DisplayName AS customer_DisplayName,
+    customers.isArchived AS customer_isArchived,
+    customers.phone AS customer_phone,
+    customers.primary_email_address AS customer_primary_email_address,
+    customers.invoice_email_address AS customer_invoice_email_address,
+    customers.created_at AS customer_created_at,
+    customers.updated_at AS customer_updated_at
+FROM 
+    customer_takeoffs
+JOIN 
+    takeoffs ON takeoffs.id = customer_takeoffs.takeoff_id
+JOIN 
+    customers ON customer_takeoffs.customer_id = customers.id
+WHERE 
+    takeoffs.id = ? LIMIT 1;`,
+
+    getCustomerTakeoffByHash: `SELECT 
+    takeoffs.id AS takeoff_id,
+    takeoffs.name AS takeoff_name,
+    takeoffs.isArchived AS takeoff_isArchived,
+    takeoffs.creator_id,
+    takeoffs.file_path_of_plans,
+    takeoffs.estimate_id,
+    takeoffs.status AS takeoff_status,
+    takeoffs.hash AS takeoff_hash,
+    takeoffs.view_count AS takeoff_view_count,
+    takeoffs.total AS takeoff_total,
+    takeoffs.tax AS takeoff_tax,
+    takeoffs.payment_method AS takeoff_payment_method,
+    takeoffs.duration_hours AS takeoff_duration_hours,
+    takeoffs.start_date AS takeoff_start_date,
+    takeoffs.end_date AS takeoff_end_date,
+    takeoffs.created_at AS takeoff_created_at,
+    takeoffs.updated_at AS takeoff_updated_at,
+    takeoffs.last_updated_by AS takeoff_last_updated_by,
+    takeoffs.customer_id AS takeoff_customer_id,
+    customers.id AS customer_id,
+    customers.taxable AS customer_taxable,
+    customers.givenName AS customer_givenName,
+    customers.billing_address AS customer_billing_address,
+    customers.CompanyName AS customer_CompanyName,
+    customers.DisplayName AS customer_DisplayName,
+    customers.isArchived AS customer_isArchived,
+    customers.phone AS customer_phone,
+    customers.primary_email_address AS customer_primary_email_address,
+    customers.invoice_email_address AS customer_invoice_email_address,
+    customers.created_at AS customer_created_at,
+    customers.updated_at AS customer_updated_at
+FROM 
+    customer_takeoffs
+JOIN 
+    takeoffs ON takeoffs.id = customer_takeoffs.takeoff_id
+JOIN 
+    customers ON customer_takeoffs.customer_id = customers.id
+WHERE 
+    takeoffs.hash = ? LIMIT 1;`
+
+
 }
 
 

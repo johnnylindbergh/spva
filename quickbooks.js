@@ -50,20 +50,25 @@ async function syncCustomers() {
     }
 
     const sql = `
-      INSERT INTO customers (id, FullyQualifiedName, primary_email_address, phone, taxable) VALUES ?
+      INSERT INTO customers (id, givenName, CompanyName, primary_email_address, phone, taxable, billing_address) VALUES ?
       ON DUPLICATE KEY UPDATE
-      FullyQualifiedName = VALUES(FullyQualifiedName),
+      givenName = VALUES(givenName),
+      CompanyName = VALUES(CompanyName),
       primary_email_address = VALUES(primary_email_address),
       phone = VALUES(phone),
-      taxable = VALUES(taxable)
+      taxable = VALUES(taxable),
+      billing_address = VALUES(billing_address);
     `;
+    console.log(customers[0]);
 
     const values = customers.map((customer) => [
       customer.Id,
+      customer.GivenName + ' ' + customer.FamilyName,
       customer.DisplayName,
       customer.PrimaryEmailAddr?.Address || null,
       customer.PrimaryPhone?.FreeFormNumber || null,
       customer.Taxable,
+      customer.BillAddr?.Line1 + ', ' + customer.BillAddr?.City + ', ' + customer.BillAddr?.CountrySubDivisionCode + ' ' + customer.BillAddr?.PostalCode,
     ]);
 
     db.query(sql, [values], (err) => {
@@ -144,11 +149,14 @@ module.exports = function (app) {
       });
 
       const customers = response.json.QueryResponse.Customer;
-      const sql = 'INSERT INTO customers (id, FullyQualifiedName, PrimaryEmailAddr_Address, PrimaryPhone_FreeFormNumber, taxable) VALUES ?';
+      console.log('Customers:', customers);
+      const sql = 'INSERT INTO customers (id, givenName, CompanyName, primary_email_address, owner_billing_address, phone, taxable) VALUES ?';
       const values = customers.map((customer) => [
         customer.Id,
+        customer.GivenName + ' ' + customer.FamilyName,
         customer.DisplayName,
         customer.PrimaryEmailAddr?.Address || null,
+        customer.BillAddr?.Line1 || null,
         customer.PrimaryPhone?.FreeFormNumber || null,
         customer.Taxable,
 
