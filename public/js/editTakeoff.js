@@ -203,7 +203,7 @@ function loadTakeoffMaterials(id) {
       headerRow.append("<th>Name</th>");
       headerRow.append("<th>Measurement</th>");
       headerRow.append("<th>Labor Cost</th>");
-      headerRow.append("<th>....</th>");
+      headerRow.append("<th>Materials</th>");
       headerRow.append("<th>....</th>");
       headerRow.append("<th>Subtotal</th>");
       headerRow.append("<th>Labor Cost</th>");
@@ -362,7 +362,7 @@ function loadTakeoffMaterials(id) {
 
               // Adjust cost for primary, secondary, and tertiary materials
               if (material.id == row.material_id) {
-                let primaryCostDelta = parseFloat(row.primary_cost_delta) || 0;
+                let primaryCostDelta = parseFloat(row.cost_delta) || 0;
                 newCost += primaryCostDelta;
                 // if the cost delta is positive color the input red and if negative color it green
                 let materialPrice = $(
@@ -391,69 +391,7 @@ function loadTakeoffMaterials(id) {
                 }
 
                 materialsCell.append(materialPrice);
-              } else if (material.id == row.secondary_material_id) {
-                let secondaryCostDelta =
-                  parseFloat(row.secondary_cost_delta) || 0;
-                newCost += secondaryCostDelta;
-
-                let materialPrice = $(
-                  "<input type='number' id='material_price_" +
-                    material.id +
-                    "' value='" +
-                    newCost.toFixed(2) +
-                    "' step='any' min='0' onchange='priceChange(" +
-                    material.id +
-                    ")'><br>"
-                );
-                materialPrice.addClass("material-price-input");
-                materialPrice.append(
-                  "<input type='hidden' id='raw_material_price_" +
-                    material.id +
-                    "' value='" +
-                    material.cost +
-                    "'>"
-                );
-                materialsCell.append(materialPrice);
-              } else if (material.id == row.tertiary_material_id) {
-                let tertiaryCostDelta =
-                  parseFloat(row.tertiary_cost_delta) || 0;
-                newCost += tertiaryCostDelta;
-
-                let materialPrice = $(
-                  "<input type='number' id='material_price_" +
-                    material.id +
-                    "' value='" +
-                    newCost.toFixed(2) +
-                    "' step='any' min='0' onchange='priceChange(" +
-                    material.id +
-                    ")'><br>"
-                );
-                materialPrice.addClass("material-price-input");
-                materialPrice.append(
-                  "<input type='hidden' id='raw_material_price_" +
-                    material.id +
-                    "' value='" +
-                    material.cost +
-                    "'>"
-                );
-                materialsCell.append(materialPrice);
-              } else if (material.id == row.quartary_material_id) {
-                let quartaryCostDelta =
-                  parseFloat(row.quartary_cost_delta) || 0;
-                newCost += quartaryCostDelta;
-
-                let materialPrice = $(
-                  "<input type='number' id='material_price_" +
-                    material.id +
-                    "' value='" +
-                    newCost.toFixed(2) +
-                    "' step='any' min='0' onchange='priceChange(" +
-                    material.id +
-                    ")'><br>"
-                );
-
-                materialCell.append(materialPrice);
-              }
+              } 
 
               let adjustedMeasurement = measurement;
               if (
@@ -647,7 +585,7 @@ function priceChange(id) {
 
   console.log("New price: " + newPrice);
 
-  $.post("/change-material-price", { material_id: id, delta: delta })
+  $.post("/change-material-price", { material_id: id, delta: delta, takeoff_id: takeoff_id })
     .done(function (response) {
       console.log("Price updated for material: " + id);
     })

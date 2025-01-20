@@ -27,19 +27,15 @@
         const customerName = document.getElementById('customer-name').value;
         const email = document.getElementById('email').value;
         const invoiceDate = document.getElementById('invoice-date').value;
-        const paymentAmount = document.getElementById('payment-amount').value;
         const customAmount = document.getElementById('custom-amount').value;
         const takeoffId = document.getElementById('takeoff_id').value;
 
-        if (!customerName || !email || !invoiceDate || !paymentAmount) {
+        if (!customerName || !email || !invoiceDate) {
             XSAlert.alert('Please fill out all required fields');
             return;
         }
 
-        if (paymentAmount === 'custom' && !customAmount) {
-            XSAlert.alert('Please enter a custom amount');
-            return;
-        }
+        
 
         if (!takeoffId) {
             XSAlert.alert('Takeoff ID not defined');
@@ -54,7 +50,6 @@
                 customer_name: customerName,
                 email: email,
                 invoice_date: invoiceDate,
-                payment_amount: paymentAmount,
                 custom_amount: customAmount,
                 takeoff_id: takeoffId,
             }),
@@ -100,14 +95,6 @@
         });
     });
 
-    document.getElementById('payment-amount').addEventListener('change', function () {
-        const customAmountContainer = document.getElementById('custom-amount-container');
-        if (this.value === 'custom') {
-            customAmountContainer.style.display = 'block';
-        } else {
-            customAmountContainer.style.display = 'none';
-        }
-    });
 });
 
     </script>
@@ -127,15 +114,16 @@
       
         </ul>
     </div>
-
     <div class="form-container">
         <form action="/createInvoice" method="POST">
+            {{#takeoff}}
+
 
             <input type="input" id="hidden-input" name="invoice_name" value="{{invoice_name}}">
 
             <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
             <label for="customer-name">Customer Name</label>
-            <input type="text" id="customer-name" name="customer_name" value="{{takeoff.owner}}" required>
+            <input type="text" id="customer-name" name="customer_name" value="{{customer_givenName}}" required>
 
             <label for="email">Invoice Email</label>
             <input type="email" id="email" name="invoice_email" value="{{takeoff.invoice_email}}" required>
@@ -147,22 +135,13 @@
             <input type="time" id="time" name="time" value="13:00">
 
             <label for="payment-amount">Payment Amount</label>
-            <select id="payment-amount" name="payment_amount" required>
-                <option value="20%">20% of Estimate</option>
-                <option value="50%">50% of Estimate</option>
-                <option value="100%">Full Estimate</option>
-                <option value="custom">Custom Amount</option>
-            </select>
+            <input type="text" id="custom-amount" name="custom_amount" placeholder="Enter custom amount" min="0">
 
-            <div id="custom-amount-container" style="display:none;">
-                <label for="custom-amount">Enter Custom Amount</label>
-                <input type="number" id="custom-amount" name="custom_amount" placeholder="Enter custom amount" min="0">
-            </div>
 
             <button type="submit">Create Invoice</button>
+            {{/takeoff}}
         </form>
     </div>
-
     <div class="invoice-container">
         <h1>Invoice</h1>
 

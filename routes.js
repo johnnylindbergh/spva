@@ -51,6 +51,15 @@ const storage = multer.diskStorage({
   },
 });
 
+const plansStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, sys.PROJECT_PATH + "/uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + "" + fileCounter + ".pdf");
+  },
+});
+
 // Define maximum upload file size (32 MB) it's just a csv
 const maxSize = 1 * 1000 * 1000 * 32;
 
@@ -74,6 +83,27 @@ const upload = multer({
     );
   },
 }).single("takeoff");
+
+// Configure Multer
+const uploadPlans = multer({
+  storage: plansStorage,
+  limits: { fileSize: maxSize },
+  fileFilter: function (req, file, cb) {
+    const filetypes = /pdf/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
+
+    if (mimetype && extname && file.originalname) {
+      return cb(null, true);
+    }
+
+    cb(
+      "Error: File upload only supports the following filetypes - " + filetypes
+    );
+  },
+}).single("plans");
 
 // csv parsing stuff
 
@@ -136,11 +166,17 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
                     console.log(err);
                     cb(err);
                   }
-                  cb(null);
+                  db.applySubjectCoatRules(takeoff_id, function(err){
+                    if (err) {
+                      console.log(err);
+                      cb(err);
+                    }
+                    cb(null);
+                  }); 
                 });
               }
             });
-            
+
           }
         });
 
@@ -370,9 +406,35 @@ module.exports = function (app) {
     });
   });
 
+    app.post("/uploadPlans", mid.isAuth, function (req, res) {
+      console.log("uploading plans...");
+      // Use Multer middleware to handle file upload
+      uploadPlans(req, res, function (err) {
+        if (err) {
+          // Handle errors during file upload
+          console.log(err);
+          res.send(err);
+        } else {
+          db.uploadPlans(req.body.takeoff_id, req.file.filename, function (err) {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log("plans uploaded");
+              res.send("plans uploaded")
+          // Success message after a successful upload
+        }
+      });
+      }
+    });
+  });
+
+  app.get("/plans/:filename", mid.isAuth, function (req, res) {
+    console.log("serving plans ", req.params.filename);
+    res.sendFile(sys.PROJECT_PATH + "/uploads/" + req.params.filename);
+  }
+  );
   app.post("/editTakeoff", mid.isAdmin, function (req, res) {
     var render = defaultRender(req);
-    console.log("editing", req.body.takeoff_id);
 
     db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
       if (err) {
@@ -382,7 +444,6 @@ module.exports = function (app) {
         if (err) {
           console.log(err);
         } else {
-          console.log("update the html with these new variable names. ", takeoff);
           res.render("editTakeoff.html", {
             sys:render.sys,
             takeoff: takeoff,
@@ -424,11 +485,11 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
       } else {
-        console.log("updated takeoff total");
         res.end();
       }
     });
   });
+
 
   app.post("/update-signature", function (req, res) {
     console.log("updating signature ", req.body);
@@ -564,7 +625,6 @@ module.exports = function (app) {
 
               prompt = prompt[0].setting_value;
 
-              console.log("Prompt:", prompt);
               for (var i = 0; i < estimate.length; i++) {
                 prompt += " subject={ " + estimate[i].material_name;
                 prompt +=
@@ -638,9 +698,6 @@ module.exports = function (app) {
                 if (err) {
                   console.log(err);
                 } else {
-
-                  console.log(estimate);
-                  console.log(takeoff_info);
                   res.render("viewEstimate.html", {
                     estimate: estimate,
                     takeoff: takeoff_info,
@@ -784,6 +841,7 @@ module.exports = function (app) {
   app.post("/change-material-price", mid.isAdmin, function (req, res) {
     console.log("changing material price ", req.body);
     db.changeMaterialPrice(
+      req.body.takeoff_id,
       req.body.material_id,
       req.body.delta,
       function (err) {
@@ -1009,6 +1067,19 @@ module.exports = function (app) {
       }
     );
   });
+
+  app.post('/changeStartDate', mid.isAdmin, function (req, res) {
+    console.log("changing start date ", req.body);
+    db.changeStartDate(req.body.takeoff_id, req.body.startDate, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("updated start date");
+      }
+    });
+  }
+  );
+
 
   // renewEstimate POST
 
@@ -1339,6 +1410,7 @@ module.exports = function (app) {
      // console.log(invoice.invoice_name + " has a total of " + total);
       if (err) {
         console.log(err);
+        res.status(500).send("Error retrieving invoice");
       } else {
         // post to /v1/prices to create a price_id
         // get the price_id
@@ -1428,7 +1500,7 @@ module.exports = function (app) {
                   },
                 ],
                 mode: 'payment',
-                return_url: creds.domain + `/return.html?session_id={CHECKOUT_SESSION_ID}`,
+                return_url: creds.domain + `/return?session_id={CHECKOUT_SESSION_ID}`,
                 payment_method_types: [method],
               });
 
@@ -1499,7 +1571,7 @@ module.exports = function (app) {
                   },
                 ],
                 mode: 'payment',
-                return_url: creds.domain + `/return.html?session_id={CHECKOUT_SESSION_ID}`,
+                return_url: creds.domain + `/return?session_id={CHECKOUT_SESSION_ID}`, // different return url for invoices? nah
                 payment_method_types: [method],
               });
 
@@ -1523,7 +1595,8 @@ module.exports = function (app) {
       console.log("amount_total: " + session.amount_total);
 
       // compute the raw amount. subtract 3%
-      let raw_amount = session.amount_total - Math.floor((session.amount_tota) * 0.0288);
+      let raw_amount = session.amount_total - Math.floor((session.amount_total) * 0.0288);
+      console.log("session.amount_total: " + session.amount_total);
       console.log("Amount Recieved from stripe" + raw_amount);
 
 
@@ -1534,6 +1607,12 @@ module.exports = function (app) {
         status: session.status,
         customer_email: session.customer_details.email
       });
+    });
+
+    app.get('/return', async (req, res) => {
+      console.log("returning from stripe");
+      const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+      res.render("return.html");
     });
 
     // app.post('/sessionComplete', async (req, res) => {
@@ -1608,7 +1687,8 @@ module.exports = function (app) {
           console.log("estimate not signed");
           res.send("estimate not signed");
         } else {
-          res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_name: "Invoice", invoice_email: req.body.invoice_email, takeoff: takeoff[0] });
+          console.log(takeoff[0]);
+          res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_name: "Invoice", takeoff: takeoff[0] });
         }
       });
     });
@@ -1640,7 +1720,6 @@ module.exports = function (app) {
   app.post('/create-invoice', mid.isAdmin, (req, res) => {
     console.log("/create-invoice recieved", req.body)
     const {
-      payment_amount,
       custom_amount,
       takeoff_id
     } = req.body;
@@ -1672,17 +1751,8 @@ module.exports = function (app) {
       console.log("getInvoicableTotal", invoiceableTotal);
       // console.log("payment_amount is ", payment_amount);
       // payment amount should probably be changed to payment_percent
-      if (payment_amount == "20%"){
-        console.log("20% selected");
-        computedAmount = invoiceableTotal * 0.2;
-      } else if (payment_amount == "50%"){
-        console.log("50% selected");
-        computedAmount = invoiceableTotal * 0.5;
-      } else if (payment_amount == "100%"){
-        console.log("100% selected");
-        computedAmount = invoiceableTotal;
-      } else {
-        computedAmount = invoiceableTotal;
+      if (custom_amount > invoiceableTotal){
+        console.log("custom amount is greater than total");
       }
 
       // query the db and get the count of the invoices with takeoff_id
@@ -1705,18 +1775,12 @@ module.exports = function (app) {
 
         // Generate invoice number
         // prepend a 7 digit random number to takeoff_id 
-        const long_id = Math.floor(Math.random() * 10000000);
-        takeoff_id = String(Math.floor(Math.random() * 10000000)) + String(takeoff_id);
-        const invoiceNumber = `${String(takeoff_id).padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
-
-        if (custom_amount) {
-          computedAmount = custom_amount;
-        }
-
+        const long_id = String(Math.floor(Math.random() * 10000000)) + String(takeoff_id);
+        const invoiceNumber = `${String(long_id).padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
 
         // Insert into database
         const query = `INSERT INTO invoices (takeoff_id, total, invoice_number, invoice_name) VALUES (?, ?, ?, ?)`;
-        const values = [takeoff_id, computedAmount, invoiceNumber, invoice_name];
+        const values = [takeoff_id, custom_amount, invoiceNumber, invoice_name];
 
         db.query(query, values, (results) => {
           // Fetch the created invoice

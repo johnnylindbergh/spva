@@ -64,7 +64,7 @@ async function syncCustomers() {
     const values = customers.map((customer) => [
       customer.Id,
       customer.GivenName + ' ' + customer.FamilyName,
-      customer.DisplayName,
+      customer.FullyQualifiedName,
       customer.PrimaryEmailAddr?.Address || null,
       customer.PrimaryPhone?.FreeFormNumber || null,
       customer.Taxable,
@@ -154,7 +154,7 @@ module.exports = function (app) {
       const values = customers.map((customer) => [
         customer.Id,
         customer.GivenName + ' ' + customer.FamilyName,
-        customer.DisplayName,
+        customer.FullyQualifiedName,
         customer.PrimaryEmailAddr?.Address || null,
         customer.BillAddr?.Line1 || null,
         customer.PrimaryPhone?.FreeFormNumber || null,
@@ -191,4 +191,11 @@ module.exports = function (app) {
       res.status(500).send('Error refreshing access token');
     }
   });
-};
+
+  app.post('/webhooks', async (req, res) => {
+
+    let payload = req.body;
+    console.log('Webhook payload:', payload);
+  });
+
+}

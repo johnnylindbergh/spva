@@ -71,6 +71,7 @@ app.use((req, res, next) => {
  const auth = require('./auth.js')(app, passport);
 const routes = require('./routes.js')(app);
 const quickbooks = require('./quickbooks.js')(app); 
+const subcontractors = require('./subcontractor.js')(app); 
 
 
 // unhandled routes redirect to home

@@ -20,14 +20,13 @@ function populatePaymentHistoryTable(takeoff_id) {
         let invoices = data.invoices;
         let totalPaid = 0;
         let totalDue = 0;
+        // add the header row
         payments.forEach(payment => {
             const row = table.insertRow();
             const cell1 = row.insertCell(0);
             const cell2 = row.insertCell(1);
-            const cell3 = row.insertCell(2);
-            cell1.textContent = payment.date;
+            cell1.textContent = payment.created_at;
             cell2.textContent = payment.amount;
-            cell3.textContent = payment.create_at;
         });
 
         // Update the total paid and total due
@@ -39,6 +38,15 @@ function populatePaymentHistoryTable(takeoff_id) {
         // populate the invoice table
         const invoiceTable = document.getElementById('invoiceTable');
         invoiceTable.innerHTML = ''; // Clear existing rows
+        // add the headers 
+        const headerRow = invoiceTable.insertRow();
+        const headerCell1 = headerRow.insertCell(0);
+        const headerCell2 = headerRow.insertCell(1);
+        const headerCell3 = headerRow.insertCell(2);
+        headerCell1.textContent = 'Invoice Number';
+        headerCell2.textContent = 'Total';
+        headerCell3.textContent = 'View Count';
+        
         invoices.forEach(invoice => {
             const row = invoiceTable.insertRow();
             const cell1 = row.insertCell(0);

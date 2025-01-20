@@ -1,5 +1,7 @@
 // global vars
+var subtotal = 0;
 var tax = 0;
+var taxRate = 0;
 var total = 0;
 var includesTotal = 0;
 var excludesTotal = 0;
@@ -111,24 +113,32 @@ function populateOptions(takeoff_id) {
     });
 }
 
-function updateTotals() {
-    const subtotalText = $('#subtotal').text().replace(/[^0-9.-]+/g, '');
-    const subtotal = parseFloat(subtotalText) || 0;
+function changeStartDate() {
 
-    const optionsTotalText = $('#options-total').text().replace(/[^0-9.-]+/g, '');
-    optionsTotal = parseFloat(optionsTotalText) || 0;
+    var changeStartDate = $('#startDate').val();
+    var takeoff_id = parseInt($('#takeoff_id').val());
+
+    $.post('/changeStartDate', {takeoff_id: takeoff_id, startDate: changeStartDate}, function(data) {
+        console.log(data);
+    });
+}
+
+function updateTotals() {
+
 
     // Now calculate total using global variables
     // Assuming total = subtotal + optionsTotal + tax
-    total = subtotal + optionsTotal + tax;
+    total = subtotal + optionsTotal;
 
-    $('#subtotal').text("Subtotal: $" + numberWithCommas(subtotal.toFixed(2)));
+    tax = total*(taxRate)
+
+    // $('#subtotal').text("Subtotal: $" + numberWithCommas(subtotal.toFixed(2))); this never changes
     $('#tax').text("Tax: $" + numberWithCommas(tax.toFixed(2)));
-    $('#total').text("Total: $" + numberWithCommas(total.toFixed(2)));
+    $('#total').text("Total: $" + numberWithCommas((tax+total).toFixed(2)));
 
     console.log("Subtotal:", subtotal);
     console.log("Options Total:", optionsTotal);
-    console.log("Total:", total);
+    console.log("Tax:", tax);
 }
 
 function handleSignatureChange() {
@@ -216,9 +226,10 @@ $(document).ready(function() {
         $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].takeoff_total));
         $('#subtotal').text("Subtotal $"+numberWithCommas(data.takeoff[0].takeoff_total));
 
-        var subtotal = parseFloat(data.takeoff.total);
+        subtotal = parseFloat(data.takeoff[0].takeoff_total);
+
         if (data.takeoff[0].customer_taxable) {
-            tax = (parseFloat(data.takeoff[0].takeoff_tax)/100)*subtotal; // should be zero if not taxable
+            taxRate = (parseFloat(data.takeoff[0].takeoff_tax)/100.0); // should be zero if not taxable
         } else {
             tax = 0; // nop
         }
@@ -231,7 +242,7 @@ $(document).ready(function() {
         updateTotals();
 
         // if the data.takeoff[0].status >=4, toggle the $("#initial-payment-alert").toggle();
-        if (data.takeoff[0].status == 4) {
+        if (data.takeoff[0].takeoff_status == 4) {
             $("#initial-payment-alert").toggle();
         }
 
