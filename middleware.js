@@ -66,7 +66,15 @@ module.exports = {
       // });
       res.redirect("https://www.sunpaintingva.com");
     }
-  }
+  },
+  
+  isSubcontractor: (req, res, next) => {
+    if (req.isAuthenticated() && req.user.local.user_type == 3) {
+      return next();
+    } else {
+      res.redirect("https://www.sunpaintingva.com");
+    }
+  },
 
   //  isAdmin: (req, res, next)=> {
   //   // if authenticated

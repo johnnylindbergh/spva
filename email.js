@@ -79,7 +79,7 @@ async function sendEstimateEmailInternally(req, res, takeoff_id, targetEmail, ca
             <h3>Hello, ${takeoff[0].customer_givenName},</h3>
             <h3>Your estimate is ready.</h3>
             <p>Please click the link below to view it:</p>
-            <a href="${credentials.domain}/share/${takeoff[0]?.takeoff_hash}">View Estimate</a></br>
+            <a href="${credentials.domain}/share/?hash=${takeoff[0]?.takeoff_hash}">View Estimate</a></br>
             <img style="margin:20px;width:140px;"src="${credentials.domain}/SWAM_LOGO.jpg" alt="Swam Logo"></br>
             <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
           `,

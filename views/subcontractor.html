@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subcontractor Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        .welcome-message {
+            margin-bottom: 20px;
+        }
+        .form-list {
+            margin-bottom: 20px;
+        }
+        .form-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-item span {
+            flex: 1;
+        }
+        .form-item button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-item button:hover {
+            background-color: #0056b3;
+        }
+        .create-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #28a745;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .create-button:hover {
+            background-color: #218838;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="welcome-message">
+            <h1>Welcome, <span id="userName">{{defaults.name}}</span>!</h1>
+        </div>
+        <div class="form-list">
+           
+            <h2>Completed Forms</h2>
+
+                {{#forms}}
+                <div class="form-item">
+                    <span>{{form_name}} - <small>Submitted on {{created_at}}</small></span>
+                    <button onclick="viewForm({{form_id}})">View</button>
+                </div>
+                {{/forms}} 
+<!-- <div class="form-item">
+                <span>Form A - <small>Submitted on October 3rd</small></span>
+                <button onclick="viewForm(1)">View</button>
+            </div>
+            <div class="form-item">
+                <span>Form B - <small>Submitted on October 1st </small></span>
+                <button onclick="viewForm(2)">View</button>
+            </div>
+            Add more forms as needed -->
+        </div>
+        <button class="create-button" onclick="createNewForm()">Create New</button>
+    </div>
+
+    <script>
+        function viewForm(formId) {
+            // use query parameters ?id=formId and direct to  /subcontractor/viewForm
+            // to view the form
+            
+            let url = `/subcontractor/viewForm?id=${formId}`;
+            window.location = url;
+            
+                 
+        }
+
+        function createNewForm() {
+            // Implement form creation logic here
+            alert('Creating new form');
+        }
+
+    </script>
+</body>
+</html>

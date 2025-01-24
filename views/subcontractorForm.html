@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subcontractor</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Subcontractor Page</h1>
+    </header>
+    <p>Welcome to the subcontractor page.</p>
+    <div class="timesheet-container">
+        <table id="timesheet" class="timesheet">
+            <!-- Header will be dynamically added -->
+        </table>
+        <button id="addRowButton" class="btn btn-primary">Add Row</button>
+    </div>
+    <footer></footer>
+
+    <script>
+        function addRow(timesheet) {
+            const newRow = $('<tr></tr>');
+
+            // Job Name column
+            const jobNameCell = $('<td></td>');
+            const jobNameInput = $('<input type="text" placeholder="Job Name">');
+            jobNameCell.css('width', '200px');
+            jobNameCell.append(jobNameInput);
+            newRow.append(jobNameCell);
+
+            // Input fields for each day of the week
+            for (let i = 0; i < 7; i++) {
+                const timesheetCell = $('<td></td>');
+                const durationInput = $('<input type="number" min="0" placeholder="Hours">');
+                timesheetCell.append(durationInput);
+                newRow.append(timesheetCell);
+            }
+
+            // On change of duration input, calculate total
+            newRow.find('input[type="number"]').change(function () {
+                let total = 0;
+                newRow.find('input[type="number"]').each(function () {
+                    total += parseFloat($(this).val()) || 0;
+                });
+                newRow.find('.total').text(total);
+            });
+
+            timesheet.append(newRow);
+
+            // Append the total cell
+            const totalCell = $('<td class="total"></td>');
+            newRow.append(totalCell);
+
+            // Append the description cell
+            const descriptionCell = $('<td></td>');
+            const descriptionInput = $('<textarea placeholder="Description"></textarea>');
+            descriptionCell.append(descriptionInput);
+            newRow.append(descriptionCell);
+            
+        }
+
+        $(document).ready(function () {
+            const timesheet = $('#timesheet');
+
+            // Add table headers
+            const headers = ['Job Name', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Total', 'Description'];
+            const headerRow = $('<tr></tr>');
+            headers.forEach(header => {
+                const headerCell = $('<th></th>').text(header);
+                headerRow.append(headerCell);
+            });
+            timesheet.append(headerRow);
+
+
+            var initialRows = 5;
+            for (let i = 0; i < initialRows; i++) {
+                addRow(timesheet);
+            }
+            // Add row button functionality
+            $('#addRowButton').click(function () {
+                addRow(timesheet);
+            });
+        });
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+     
+
+         th, .table td {
+            padding: 10px;
+            margin: 20px;
+            text-align: center;
+        }
+         th {
+            background-color: #f2f2f2;
+        }
+        .btn-primary {
+            margin-top: 10px;
+        }
+
+        input[type="number"] {
+            width: 85px;
+            padding:8px;
+            margin:5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .timesheet-container {
+            width: 100%;
+            overflow: scroll;
+            padding: 5%;
+            margin: auto;
+
+        }
+
+    </style>
+</body>
+</html>

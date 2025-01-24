@@ -12,7 +12,7 @@ CREATE TABLE user_types (
 );
 
 -- Pre-populate user roles
-INSERT INTO user_types (title) VALUES ('Admin'), ('User');
+INSERT INTO user_types (title) VALUES ('Admin'), ('User'), ('subcontractor');
 
 -- Users table
 CREATE TABLE users (
@@ -29,6 +29,9 @@ CREATE TABLE users (
   FOREIGN KEY (user_type) REFERENCES user_types(id),
   PRIMARY KEY (id)
 );
+
+-- Default admin user
+INSERT INTO users (user_type, name, email, phone_number) VALUES (3, "Johnny","lindberghjohnny@gmail.com", "+14342491362");
 
 -- System settings table
 CREATE TABLE system_settings (
@@ -48,12 +51,13 @@ VALUES
 
 -- Customers table
 CREATE TABLE customers (
-  id INT NOT NULL, -- QB ID
+  id INT NOT NULL AUTO_INCREMENT, -- QB ID
   taxable BOOLEAN NOT NULL DEFAULT 1,
+  job BOOLEAN NOT NULL DEFAULT 0,
   givenName VARCHAR(100),
   billing_address VARCHAR(255),
   CompanyName VARCHAR(255),
-  isArchived TINYINT(1) DEFAULT 0,
+  isArchived BOOLEAN DEFAULT 0,
   phone VARCHAR(20),
   primary_email_address VARCHAR(255),
   invoice_email_address VARCHAR(255),
@@ -145,7 +149,8 @@ CREATE TABLE invoices (
   hash VARCHAR(64),
   takeoff_id INT NOT NULL,
   total DECIMAL(10,2),
-  paid TINYINT(1) DEFAULT 0,
+  status TINYINT(1) DEFAULT 0,
+  due_date TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_viewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   view_count INT DEFAULT 0,
@@ -187,6 +192,8 @@ CREATE TABLE materials (
   PRIMARY KEY (id),
   FOREIGN KEY (material_type) REFERENCES material_archetypes(id) ON DELETE CASCADE
 );
+
+SOURCE materials.db;
 
 -- Subjects table
 CREATE TABLE subjects (
@@ -246,3 +253,69 @@ CREATE TABLE emails (
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
   FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+-- Forms Table
+CREATE TABLE forms (
+  id INT NOT NULL AUTO_INCREMENT,
+  user_id INT, -- Add user_id directly to relate forms to users
+  form_name VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- example insert
+INSERT INTO forms (user_id, form_name) VALUES (1, 'Form 1');
+
+-- Subcontractor Forms Table
+CREATE TABLE subcontractor_forms (
+  id INT NOT NULL AUTO_INCREMENT,
+  form_id INT NOT NULL,
+  user_id INT NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY (form_id, user_id), -- Prevent duplicate assignments
+  FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- example insert
+INSERT INTO subcontractor_forms (form_id, user_id) VALUES (1, 1);
+
+-- Form Items Table
+CREATE TABLE form_items (
+  id INT NOT NULL AUTO_INCREMENT,
+  form_id INT NOT NULL,
+  job_name VARCHAR(255) NOT NULL, -- Job
+  job_id VARCHAR(64), -- Job ID (made nullable for flexibility)
+  item_description VARCHAR(255), -- Description (made nullable for flexibility)
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
+);
+-- example insert
+INSERT INTO form_items (form_id, job_name, item_description) VALUES (1, 'Job 1', 'Description 1');
+
+-- Form Item Days Table
+CREATE TABLE form_item_days (
+  id INT NOT NULL AUTO_INCREMENT,
+  form_item_id INT NOT NULL,
+  day ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') NOT NULL, -- Use ENUM for days
+  duration DECIMAL(10,3), -- Add duration field to capture time spent, max value of 24 hours
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (form_item_id) REFERENCES form_items(id) ON DELETE CASCADE
+);
+
+-- example inserts for each day of the week
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (1, 'Monday', 8.5);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (1, 'Tuesday', 6.1);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (1, 'Wednesday', 4.5);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (1, 'Thursday', 8.11);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (1, 'Friday', 8.422);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (1, 'Saturday', 2.55);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (1, 'Sunday', 0);
+

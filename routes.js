@@ -23,6 +23,7 @@ const multer = require("multer");
 const chatgpt = require("./chatgpt.js");
 const emailer = require("./email.js");
 const creds = require("./credentials.js");
+const querystring = require("querystring");
 
 // require payment.js
 //const payment = require("./payment.js");
@@ -1029,13 +1030,14 @@ module.exports = function (app) {
     });
   });
 
-  app.get("/share/:hash", mid.isAuth, function (req, res) {
-    console.log("sharing takeoff ", req.params.hash);
-    if (req.params.hash.length != 32) {
+  app.get("/share", mid.isAuth, function (req, res) {
+    const hash = req.query.hash;
+    console.log("sharing takeoff ", hash);
+    if (!hash || hash.length != 32) {
       res.redirect("/");
     }
     db.getSharedEstimate(
-      req.params.hash,
+      hash,
       function (err, estimate, takeoff, options) {
         if (err || estimate.length == 0) {
           console.log(err);

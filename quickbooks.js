@@ -50,24 +50,26 @@ async function syncCustomers() {
     }
 
     const sql = `
-      INSERT INTO customers (id, givenName, CompanyName, primary_email_address, phone, taxable, billing_address) VALUES ?
+      INSERT INTO customers (id, givenName, CompanyName, primary_email_address, phone, taxable, job, billing_address) VALUES ?
       ON DUPLICATE KEY UPDATE
       givenName = VALUES(givenName),
       CompanyName = VALUES(CompanyName),
       primary_email_address = VALUES(primary_email_address),
       phone = VALUES(phone),
       taxable = VALUES(taxable),
+      job = VALUES(job),
       billing_address = VALUES(billing_address);
     `;
     console.log(customers[0]);
 
     const values = customers.map((customer) => [
       customer.Id,
-      customer.GivenName + ' ' + customer.FamilyName,
+      customer.GivenName + ' ' + (customer.FamilyName || ''),
       customer.FullyQualifiedName,
       customer.PrimaryEmailAddr?.Address || null,
       customer.PrimaryPhone?.FreeFormNumber || null,
       customer.Taxable,
+      customer.Job,
       customer.BillAddr?.Line1 + ', ' + customer.BillAddr?.City + ', ' + customer.BillAddr?.CountrySubDivisionCode + ' ' + customer.BillAddr?.PostalCode,
     ]);
 
@@ -192,10 +194,86 @@ module.exports = function (app) {
     }
   });
 
-  app.post('/webhooks', async (req, res) => {
+  app.post('/webhook', async (req, res) => {
 
     let payload = req.body;
     console.log('Webhook payload:', payload);
+
+    // Verify the signature given by creds.quickbooks.webhooksVerifier
+   
+    
+    for (var i = 0; i < payload.eventNotifications.length; i++) {
+      let event = payload.eventNotifications[i];
+      console.log('Event:', event);
+      let realmId = event.realmId;
+      let dataChangeEvent = event.dataChangeEvent;
+      let entities = dataChangeEvent.entities;
+      console.log('Entities:', entities);
+
+      for (var j = 0; j < entities.length; j++) {
+        let entity = entities[j];
+        let operation = entity.operation;
+        let changedFields = entity.changedFields;
+        let entityType = entity.name;
+        console.log('Entity:', entity);
+
+        if (operation === 'Create' || operation === 'Update') {
+          if (entityType === 'Customer') {
+            let customerID = entity.id;
+            let customer = await oauthClient.makeApiCall({
+              url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${realmId}/customer/${customerID}`,
+            });
+            console.log('Customer:', customer.json.Customer);
+          } else if (entityType === 'Invoice') {
+            let invoiceID = entity.id;
+            // first check if the oauthClient is initialized
+            if (!oauthClient) {
+              initializeOAuthClient();
+            }
+            // make the api call to get the invoice
+            let invoice = await oauthClient.makeApiCall({
+              url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${realmId}/invoice/${invoiceID}`,
+            });
+            console.log('Invoice:', invoice.json.Invoice);
+
+
+            // sum the line items to get the total amount
+            let total = 0;
+            for (var k = 0; k < invoice.json.Invoice.Line.length; k++) {
+              total += invoice.json.Invoice.Line[k].Amount;
+            }
+
+            // Sync invoice to database
+            const sql = `
+              INSERT INTO invoices (id, customer_id, total, due_date, invoice_date, status) VALUES ?
+              ON DUPLICATE KEY UPDATE
+              customer_id = VALUES(customer_id),
+              total = VALUES(total),
+              due_date = VALUES(due_date),
+              invoice_date = VALUES(invoice_date),
+              status = VALUES(status);
+            `;
+            const values = [[
+              invoice.json.Invoice.Id,
+              invoice.json.Invoice.CustomerRef.value,
+              total,
+              invoice.json.Invoice.DueDate,
+              invoice.json.Invoice.TxnDate,
+              invoice.json.Invoice.Balance,
+            ]];
+
+            db.query(sql, [values], (err) => {
+              if (err) {
+                console.error('Error inserting invoice into database:', err);
+                return;
+              }
+              console.log('Invoice synced successfully.');
+            });
+
+          }
+        }
+      }
+    }
   });
 
 }

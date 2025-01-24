@@ -79,7 +79,7 @@ INSERT INTO materials (name, description, cost, coverage, material_type) VALUES 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams PI Dryfall (Flat )', '', 16.02, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams PI Dryfall  (Eg-Shel )', '', 18.02, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams PI Dryfall  (Semi-Gloss)', '', 20.02, 300.0, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Topcoat - Trim  (Sheen )', '', Gallon (Price/gallon), 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Topcoat - Trim  (Sheen )', 1.00, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Emerald Urethane  (Satin )', '', 57.33, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Emerald Urethane  (Semi-Gloss)', '', 57.33, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Emerald Urethane  (Gloss)', '', 57.33, 300.0, 6);
