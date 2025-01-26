@@ -13,7 +13,7 @@ function checkRole(pred) {
       return next();
     } else {
       res.status(403).json({
-        fr: "You are unable to access this resource.", 
+        fr: "You are unable to access this resource...", 
         li: "/auth/google?returnTo=" + querystring.escape(req.url),
         ti: "Authenticate as a different user"
       });
@@ -59,12 +59,12 @@ module.exports = {
     if (req.isAuthenticated() && req.user.local.user_type == 1) {
       return next();
     } else {
-      // res.render("error.html", {
-      //   friendly: "You are unable to access this resource", 
-      //   link: "/auth/google?returnTo=" + querystring.escape(req.url),
-      //   title: "Authenticate as a different user"
-      // });
-      res.redirect("https://www.sunpaintingva.com");
+      res.render("error.html", {
+        friendly: "You are unable to access this resource. Admins only", 
+        link: "/subcontractor",
+        linkTitle: "I am a subcontractor"
+      });
+      //res.redirect(sys.DOMAIN);
     }
   },
   
@@ -72,7 +72,11 @@ module.exports = {
     if (req.isAuthenticated() && req.user.local.user_type == 3) {
       return next();
     } else {
-      res.redirect("https://www.sunpaintingva.com");
+      res.render("error.html", {
+        friendly: "You are unable to access this resource. Subcontractors only", 
+        link: "/",
+        linkTitle: "I am an admin"
+      });
     }
   },
 
