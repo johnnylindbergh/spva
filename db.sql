@@ -295,8 +295,21 @@ CREATE TABLE form_items (
   PRIMARY KEY (id),
   FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
 );
+
+CREATE TABLE form__bid (
+  id INT NOT NULL AUTO_INCREMENT,
+  form_id INT NOT NULL,
+  job_name VARCHAR(255) NOT NULL, -- Job
+  bid DECIMAL(10,2),
+  request DECIMAL(10,2),
+  PRIMARY KEY (id),
+  FOREIGN KEY (form_item_id) REFERENCES form_items(id) ON DELETE CASCADE
+);
 -- example insert
 INSERT INTO form_items (form_id, job_name, item_description) VALUES (1, 'Job 1', 'Description 1');
+
+INSERT INTO form_items (form_id, job_name, item_description) VALUES (1, 'Job 2', 'Description 2');
+
 
 -- Form Item Days Table
 CREATE TABLE form_item_days (
@@ -319,3 +332,11 @@ INSERT INTO form_item_days (form_item_id, day, duration) VALUES (1, 'Friday', 8.
 INSERT INTO form_item_days (form_item_id, day, duration) VALUES (1, 'Saturday', 2.55);
 INSERT INTO form_item_days (form_item_id, day, duration) VALUES (1, 'Sunday', 0);
 
+
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Monday', 7.3);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Tuesday', 5.2);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Wednesday', 6.8);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Thursday', 4.9);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Friday', 7.1);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Saturday', 3.6);
+INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Sunday', 1.2);

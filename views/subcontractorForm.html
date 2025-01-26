@@ -14,16 +14,73 @@
         <h1>Subcontractor Page</h1>
     </header>
     <p>Welcome to the subcontractor page.</p>
+    <!-- form name input field -->
+     <input type="text" id="formName" placeholder="My timesheet">
     <div class="timesheet-container">
         <table id="timesheet" class="timesheet">
             <!-- Header will be dynamically added -->
         </table>
-        <button id="addRowButton" class="btn btn-primary">Add Row</button>
     </div>
+    <button id="addTimesheetRowButton" class="btn btn-primary">Add Row</button>
+</br>
+</br>
+<hr />
+</br>
+
+
+
+    <!-- other table to enter job name, bid, requested amount  -->
+    <table class="jobsWithBids">
+        <thead>
+            <tr>
+                <th>Job Name</th>
+                <th>Bid</th>
+                <th>Requested Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" placeholder="Job Name"></td>
+                <td><input type="number" placeholder="Bid"></td>
+                <td><input type="number" placeholder="Requested Amount"></td>
+            </tr>
+        </tbody>
+    </table>
+    <button onclick="addBidRow()" class="btn btn-primary">Add Row</button>
+
+
+    <div class="submit-container">
+
+        <button id="submit" class="btn btn-primary">Submit</button>
+    </div>
+    <hr>
     <footer></footer>
 
     <script>
-        function addRow(timesheet) {
+
+
+
+        function addBidRow() {
+            const newRow = $('<tr></tr>');
+            const jobNameCell = $('<td></td>');
+            const jobNameInput = $('<input type="text" placeholder="Job Name">');
+            jobNameCell.append(jobNameInput);
+            newRow.append(jobNameCell);
+
+            const bidCell = $('<td></td>');
+            const bidInput = $('<input type="number" placeholder="Bid">');
+            bidCell.append(bidInput);
+            newRow.append(bidCell);
+
+            const requestedAmountCell = $('<td></td>');
+            const requestedAmountInput = $('<input type="number" placeholder="Requested Amount">');
+            requestedAmountCell.append(requestedAmountInput);
+            newRow.append(requestedAmountCell);
+
+            $('.jobsWithBids tbody').append(newRow);
+        }
+
+        function addTimesheetRow(timesheet) {
             const newRow = $('<tr></tr>');
 
             // Job Name column
@@ -36,7 +93,7 @@
             // Input fields for each day of the week
             for (let i = 0; i < 7; i++) {
                 const timesheetCell = $('<td></td>');
-                const durationInput = $('<input type="number" min="0" placeholder="Hours">');
+                const durationInput = $('<input id ="duration" type="number" min="0" placeholder="Hours">');
                 timesheetCell.append(durationInput);
                 newRow.append(timesheetCell);
             }
@@ -79,52 +136,113 @@
 
             var initialRows = 5;
             for (let i = 0; i < initialRows; i++) {
-                addRow(timesheet);
+                addTimesheetRow(timesheet);
             }
             // Add row button functionality
-            $('#addRowButton').click(function () {
-                addRow(timesheet);
+            $('#addTimesheetRowButton').click(function () {
+                addTimesheetRow(timesheet);
+            });
+
+
+            $('#submit').click(function () {
+                const data = [];
+                // append the formName
+                const formName = $('#formName').val();
+                timesheet.find('tr').each(function () {
+                    const row = $(this);
+                    if (row.find('input[type="text"]').length > 0) {
+                        const jobName = row.find('input[type="text"]').val();
+                        const days = [];
+                        row.find('input[type="number"]').each(function () {
+                            days.push($(this).val());
+                        });
+                        const total = row.find('.total').text();
+                        const description = row.find('textarea').val();
+                        data.push({
+                            jobName,
+                            days,
+                            total,
+                            description
+                        });
+                    }
+                });
+                console.log(data);
+                $.post('/subcontractor/submit', { data: data, form_name:formName }, function (response) {
+                    console.log(response);
+                });
             });
         });
     </script>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
-     
+    body {
+        font-family: Arial, sans-serif;
+        padding-left: 5%;
+    }
 
-         th, .table td {
-            padding: 10px;
-            margin: 20px;
-            text-align: center;
-        }
-         th {
-            background-color: #f2f2f2;
-        }
-        .btn-primary {
-            margin-top: 10px;
-        }
+    th, .table td {
+        padding: 10px;
+        margin: 20px;
+        text-align: center;
+    }
 
-        input[type="number"] {
-            width: 85px;
-            padding:8px;
-            margin:5px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
+    th {
+        background-color: #f2f2f2;
+    }
 
-        .timesheet-container {
-            width: 100%;
-            overflow: scroll;
-            padding: 5%;
-            margin: auto;
+    .btn-primary {
+        margin-top: 10px;
+        margin-left: 10%;
+        margin-right: 15%;
+    }
 
-        }
+    input[type="number"] {
+        width: 85px;
+        padding: 8px;
+        margin: 5px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
 
-    </style>
+    .timesheet-container {
+        width: 100%;
+        overflow: scroll;
+        padding: 5%;
+        padding-right:5%;
+        margin: auto;
+    }
+
+    .submit-container {
+        text-align: right;
+        margin-top: 20px;
+    }
+
+    .jobsWithBids input[type="text"] {
+        width: 150px;
+        padding: 8px;
+        margin: 5px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    /* Sticky first column */
+    .timesheet th:first-child,
+    .timesheet td:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #fff;
+        z-index: 1;
+        opacity: 0.9;
+    }
+
+   
+
+   
+
+</style>
 </body>
 </html>
