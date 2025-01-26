@@ -44,6 +44,32 @@
         .invoice-details span {
             font-weight: bold;
         }
+
+        #pay-with-card {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #pay-with-card:hover {
+            background-color: #0056b3;
+        }
+
+        #pay-with-bank {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #pay-with-bank:hover {
+            background-color: #0056b3;
+        }
       
 
     </style>
@@ -67,9 +93,9 @@
         <div class = "payment-details">
 
             <!-- pay with card button that calls createPaymentIntent("card") -->
-            <button id="pay-with-card" onclick="createPaymentIntentInvoice('card')">Pay with Card</button>
+            <button id="pay-with-card" onclick="createPaymentIntentInvoice('card')">Pay with Card</br> (+3%)</button>
             <!-- pay with bank button that calls createPaymentIntent("us_bank_account") -->
-            <button id="pay-with-bank" onclick="createPaymentIntentInvoice('us_bank_account')">Pay with Bank</button>
+            <button id="pay-with-bank" onclick="createPaymentIntentInvoice('us_bank_account')">Pay with Bank </br> (+$15)</button>
 
              
     </div>

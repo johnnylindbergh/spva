@@ -26,6 +26,20 @@ function updateTakeoffOwnerEmailAddress(){
       });
   }
 
+    function updateTakeoffBillingAddress(){
+        let address = $("#owner_billing_address").val();
+        let takeoff_id = $("#takeoff_id").val();
+        console.log("Updating takeoff owner billing address: " + address);
+        $.post("/update-takeoff-owner-billing", { takeoff_id: takeoff_id, owner_billing_address: address })
+            .done(function() {
+            console.log("Takeoff owner billing address updated: " + address);
+            })
+            .fail(function() {
+            console.log("Failed to update takeoff owner billing address: " + address);
+            });
+    }
+
+
 // Function to convert markdown-like text to HTML
 function formatTextToHTML(text) {
     if (text == null) {

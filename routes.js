@@ -1083,6 +1083,17 @@ module.exports = function (app) {
   );
 
 
+  app.post('/updateCustomerPhone', mid.isAdmin, function (req, res) {
+    console.log("updating customer phone ", req.body);
+    db.updateCustomerPhone(req.body.takeoff_id, req.body.phone, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("updated customer phone");
+      }
+    });
+  });
+
   // renewEstimate POST
 
   app.post("/renewEstimate", function (req, res) {
@@ -1551,7 +1562,7 @@ module.exports = function (app) {
 
               // create a product
               const product = await stripe.products.create({
-                name: (invoice.invoice_name | invoice.takeoffName | "Invoice"),
+                name: sys.COMPANY_NAME+" Invoice",
                 // unit_amount: takeoff.total,
               });
 
@@ -1671,8 +1682,14 @@ module.exports = function (app) {
           console.log(err);
           res.send("error retrieving invoice");
         } else {
-          console.log(invoice);
-          res.render("invoice.html", { invoice: invoice[0] });
+          if (invoice == null || invoice.length == 0) {
+            console.log("invoice not found");
+            res.render("error.html", { link:'/payment', linkTitle:'enter another invoice number',friendly: "The invoice number you entered was not found. Please check the number and try again." });
+          } else {
+            // remove the hash from the invoice
+            invoice[0].hash = null;
+            res.render("invoice.html", { invoice: invoice[0] });
+          }
         }
       });  
     });
@@ -1722,6 +1739,7 @@ module.exports = function (app) {
   app.post('/create-invoice', mid.isAdmin, (req, res) => {
     console.log("/create-invoice recieved", req.body)
     const {
+      customer_name,
       custom_amount,
       takeoff_id
     } = req.body;
@@ -1736,8 +1754,8 @@ module.exports = function (app) {
           console.log(err);
           return res.status(500).json({ error: 'Failed to fetch takeoff.' });
         }
-
-        invoice_name = `Invoice for ${rows[0].name}`;
+        console.log("No invoice name provided, using customer name");
+        invoice_name = `Invoice for ${customer_name}`;
       }
       );
     }
@@ -1781,8 +1799,8 @@ module.exports = function (app) {
         const invoiceNumber = `${String(long_id).padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
 
         // Insert into database
-        const query = `INSERT INTO invoices (takeoff_id, total, invoice_number, invoice_name) VALUES (?, ?, ?, ?)`;
-        const values = [takeoff_id, custom_amount, invoiceNumber, invoice_name];
+        const query = `INSERT INTO invoices (takeoff_id, total, invoice_number, invoice_name, hash) VALUES (?, ?, ?, ?, ?)`;
+        const values = [takeoff_id, custom_amount, invoiceNumber, invoice_name, db.generateHash()];
 
         db.query(query, values, (results) => {
           // Fetch the created invoice

@@ -296,15 +296,17 @@ CREATE TABLE form_items (
   FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
 );
 
-CREATE TABLE form__bid (
+CREATE TABLE form_bid (
   id INT NOT NULL AUTO_INCREMENT,
   form_id INT NOT NULL,
   job_name VARCHAR(255) NOT NULL, -- Job
   bid DECIMAL(10,2),
   request DECIMAL(10,2),
   PRIMARY KEY (id),
-  FOREIGN KEY (form_item_id) REFERENCES form_items(id) ON DELETE CASCADE
+  FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
 );
+
+INSERT INTO form_bid (form_id, job_name, bid, request) VALUES (1, 'Job 1', 20000.00, 1200.00);
 -- example insert
 INSERT INTO form_items (form_id, job_name, item_description) VALUES (1, 'Job 1', 'Description 1');
 

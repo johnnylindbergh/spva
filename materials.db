@@ -1,3 +1,4 @@
+-- some starter materials to get the ball rolling
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 FL EXTRA', 'Paint 1 Description', 23.98, 200.00, 6); 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 0 EG EXTRA', 'Paint 2 Description', 24.98, 200.00, 6); 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PM 200 0 SG EXTRA', 'Paint 3 Description', 25.98, 200.00, 6); 
@@ -18,7 +19,6 @@ INSERT INTO materials (name, description, cost, coverage, material_type) VALUES 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('PROCL LTX SG EXTRA', 'Other 4 Description', 56.55, 200.00, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('EMRLD UTE SA HHW', 'Other 4 Description', 62.05, 200.00, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('FIRETEX FX5090', 'Other 1 Description', 98.39, 200.00, 6); 
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -WHITE (GAL)', 'Other 1 Description', 29.26, 300.0, 6); 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -WHITE (GAL)', 'Interior flat paint', 29.26, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -WHITE (5GAL)', 'Interior flat paint', 126.50, 1500.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('ULTRA SPEC 500 FLAT -BASE1 (GAL)', 'Interior flat paint base 1', 35.04, 300.0, 6);
@@ -49,11 +49,11 @@ INSERT INTO materials (name, description, cost, coverage, material_type) VALUES 
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Lux (GAL)', 'SW3078', 978.54, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Wood Panel Interior Door', '', 60.54, 1, 1);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Steel Door frame', '', 80.00, 1, 1);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams PVA ', '', 11.88, 300.0, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Quick Dry ', '', 17.85, 300.0, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Promar 200 ', '', 13.73, 300.0, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams ProBlock ', '', 23.77, 300.0, 6);
-INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams PI Block Filler ', '', 10.92, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams PVA', '', 11.88, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Quick Dry', '', 17.85, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Promar 200', '', 13.73, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams ProBlock', '', 23.77, 300.0, 6);
+INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams PI Block Filler', '', 10.92, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Preprite Block Filler ', '', 8.77, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Loxon Masonry Primer ', '', 27.39, 300.0, 6);
 INSERT INTO materials (name, description, cost, coverage, material_type) VALUES ('Sherwin Williams Extreme Block ', '', 25.58, 300.0, 6);

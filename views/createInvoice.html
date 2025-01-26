@@ -26,11 +26,10 @@
 
         const customerName = document.getElementById('customer-name').value;
         const email = document.getElementById('email').value;
-        const invoiceDate = document.getElementById('invoice-date').value;
         const customAmount = document.getElementById('custom-amount').value;
         const takeoffId = document.getElementById('takeoff_id').value;
 
-        if (!customerName || !email || !invoiceDate) {
+        if (!customerName || !email || !customAmount) {
             XSAlert.alert('Please fill out all required fields');
             return;
         }
@@ -49,7 +48,6 @@
             data: JSON.stringify({
                 customer_name: customerName,
                 email: email,
-                invoice_date: invoiceDate,
                 custom_amount: customAmount,
                 takeoff_id: takeoffId,
             }),
@@ -126,13 +124,13 @@
             <input type="text" id="customer-name" name="customer_name" value="{{customer_givenName}}" required>
 
             <label for="email">Invoice Email</label>
-            <input type="email" id="email" name="invoice_email" value="{{takeoff.invoice_email}}" required>
-
+            <input type="email" id="email" name="invoice_email" value="{{takeoff.customer_invoice_email_address}}" required>
+<!-- 
             <label for="invoice-date">Invoice Date</label>
             <input type="date" id="invoice-date" name="invoice_date" value="2024-11-26" required>
 
             <label for="time">Time</label>
-            <input type="time" id="time" name="time" value="13:00">
+            <input type="time" id="time" name="time" value="13:00"> -->
 
             <label for="payment-amount">Payment Amount</label>
             <input type="text" id="custom-amount" name="custom_amount" placeholder="Enter custom amount" min="0">

@@ -15,7 +15,7 @@
             background-color: #f0f0f0;
         }
         .container {
-            background-color: #fff;
+            background-color: #ffffff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -81,18 +81,9 @@
                 {{#forms}}
                 <div class="form-item">
                     <span>{{form_name}} - <small>Submitted on {{created_at}}</small></span>
-                    <button onclick="viewForm({{form_id}})">View</button>
+                    <button onclick="viewForm('{{form_id}}')">View</button>
                 </div>
                 {{/forms}} 
-<!-- <div class="form-item">
-                <span>Form A - <small>Submitted on October 3rd</small></span>
-                <button onclick="viewForm(1)">View</button>
-            </div>
-            <div class="form-item">
-                <span>Form B - <small>Submitted on October 1st </small></span>
-                <button onclick="viewForm(2)">View</button>
-            </div>
-            Add more forms as needed -->
         </div>
         <button class="create-button" onclick="createNewForm()">Create New</button>
     </div>

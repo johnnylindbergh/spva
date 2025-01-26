@@ -31,27 +31,7 @@
       </div>
 
         
-      <!-- as a get request, changed from material settings to settings -->
-      <div>
-        <li>
-          <form action="/settings" method="POST">
-            <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
-            <input type="submit" value="Settings">
-          </form>
-        </li>
-      </div>
-    
-      <div>
-        <form action='/generateEstimate' method='POST' > 
-          <li>
-            <input type='hidden' name='takeoff_id' value='{{takeoff_id}}'>
-
-            <input type="submit" value="Generate Estimate">
-          </li>
-
-        </form>
-        
-      </div>
+   
    
     </ul>
   </div>
@@ -95,6 +75,20 @@
 
      <h1 style=" font-size: 20px;" id = "sum"> </h1> </br>
 
+        <!-- as a get request, changed from material settings to settings -->
+        <div style="display: flex; gap: 10px;">
+            <form action="/settings" method="POST">
+              <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+              <input type="submit" value="Settings">
+            </form>
+
+          <form action='/generateEstimate' method='POST'> 
+              <input type='hidden' name='takeoff_id' value='{{takeoff_id}}'>
+              <input type="submit" value="Generate Estimate" style="float:right; background-color: rgb(31, 193, 31);">  
+          </form>
+        </div>
+  </div>
+
      <div>
         <div class="dropdown" >
 
@@ -136,7 +130,7 @@
 
 <br>
 
-  <div class="container">
+  <div class="container" style="margin: 20px; ">
 <!-- add subject button with add icon -->
  <!-- on click, the form appears  -->
   <button id="add-subject-btn" onclick="createSubjectIntent()">

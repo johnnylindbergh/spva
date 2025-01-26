@@ -248,6 +248,15 @@ $(document).ready(function() {
 
     });
 
+    // add on change listener to id="phone"
+    $('#customerPhone').on('change', function() {
+        var phone = $('#phone').val();
+        var takeoff_id = parseInt($('#takeoff_id').val());
+        $.post('/updateCustomerPhone', {takeoff_id: takeoff_id, phone: phone}, function(data) {
+            console.log(data);
+        });
+    });
+
 
 
     const alert = $('#initial-payment-alert');

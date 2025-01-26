@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,27 +12,27 @@
 
     <script>
         // on document ready
-        $(function() {
+        $(function () {
 
             const decimalPlaces = 1;
             // get the form id from the query string
             const formId = $('#formId').val();
 
             // get the timesheet data
-            $.get(`/subcontractor/getFormData/?id=${formId}`, function(data) {
+            $.get(`/subcontractor/getFormData/?id=${formId}`, function (data) {
                 console.log(data);
 
-                
+
                 // populate the table with the data
                 // data is an array of rows
 
-                    
+
                 // get the table
                 const table = $('#timesheet');
 
 
                 const keys = Object.keys(data);
-                
+
                 for (let i = 0; i < keys.length; i++) {
                     const element = data[keys[i]];
                     console.log(element);
@@ -39,8 +40,8 @@
                     var newRow = $('<tr></tr>');
 
                     var jobNameCell = $('<td></td>');
-                    jobNameCell.text(element[0].job_name); 
-                
+                    jobNameCell.text(element[0].job_name);
+
                     newRow.append(jobNameCell);
 
                     element.forEach(day => {
@@ -49,7 +50,7 @@
                         dayCell.text(parseFloat(day.duration).toFixed(decimalPlaces));
                         newRow.append(dayCell);
 
-                    }); 
+                    });
 
 
                     // calculate the total
@@ -67,44 +68,52 @@
                     descriptionCell.text(element[0].item_description);
                     newRow.append(descriptionCell);
 
-                    
+
                     table.append(newRow);
-                
-                    
+
+
                 }
-                
+
             });
         });
 
     </script>
 
     <style>
-          .timesheet-container {
+        .timesheet-container {
             width: 100%;
             overflow: scroll;
-            padding: 5%;
+            padding: 6%;
             margin: auto;
 
         }
     </style>
-    
+
 </head>
 
 
-<body>  
+<body>
 
-{{#form}}
-<div class="row">
-    <input type="hidden" id="formId" value="{{id}}">
-    <div class="col-md-12">
-    <h1>{{form_name}}</h1>
-    <p>{{created_at}}</p>
+    <div class="container">
+        <div class="well text-center">
+            <h1>Subcontractor Form</h1>
+            {{#form}}
+            <div class="row">
+                <input type="hidden" id="formId" value="{{id}}">
+                <div class="col-md-12">
+                    <h1>{{form_name}}</h1>
+                    <p>{{created_at}}</p>
 
+                </div>
+            </div>
+            {{/form}}
+            <br>
+        </div>
     </div>
-</div>
-{{/form}}   
 
-<!--   {
+
+
+    <!--   {
 id: 7,
 form_id: 1,
 job_name: 'Job 1',
@@ -117,33 +126,34 @@ day: 'Sunday',
 duration: '0.000'
 } -->
 
-<div class="timesheet-container">
-    <div class="col-md-12">
-        <table id="timesheet" class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Job Name</th>
-                    <th>
-                        
-                        Monday</th>
-                    <th>Tuesday</th>
-                    <th>Wednesday</th>
-                    <th>Thursday</th>
-                    <th>Friday</th>
-                    <th>Saturday</th>
-                    <th>Sunday</th>
-                    <th>Total</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                  <!-- dynamically populated -->
-            </tbody>
-        </table>
+    <div class="timesheet-container">
+        <div class="col-md-12">
+            <table id="timesheet" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Job Name</th>
+                        <th>
+
+                            Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
+                        <th>Sunday</th>
+                        <th>Total</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- dynamically populated -->
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
 
 
 </body>
+
 </html>

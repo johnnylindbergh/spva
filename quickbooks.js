@@ -70,7 +70,9 @@ async function syncCustomers() {
       customer.PrimaryPhone?.FreeFormNumber || null,
       customer.Taxable,
       customer.Job,
-      customer.BillAddr?.Line1 + ', ' + customer.BillAddr?.City + ', ' + customer.BillAddr?.CountrySubDivisionCode + ' ' + customer.BillAddr?.PostalCode,
+      customer.BillAddr?.Line1 && customer.BillAddr?.City && customer.BillAddr?.CountrySubDivisionCode && customer.BillAddr?.PostalCode
+      ? `${customer.BillAddr.Line1}, ${customer.BillAddr.City}, ${customer.BillAddr.CountrySubDivisionCode} ${customer.BillAddr.PostalCode}`
+      : 'Unknown Address',
     ]);
 
     db.query(sql, [values], (err) => {

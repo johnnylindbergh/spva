@@ -238,7 +238,7 @@ function loadTakeoffMaterials(id) {
         newRow.append($("<td></td>").append(separateLineCheckbox));
 
         // Material name
-        newRow.append("<td style='width:15px;'>" + row.material_name + "</td>");
+        newRow.append("<td style='width:10px;'>" + row.material_name + "</td>");
 
         // Measurement input
         let measurementInput = $("<input>")

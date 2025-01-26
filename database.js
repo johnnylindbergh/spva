@@ -270,6 +270,7 @@ module.exports = {
   connection: con,
   applySubjectNamingRules: applySubjectNamingRules,
   applySubjectCoatRules: applySubjectCoatRules,
+  generateHash: generateHash,
 
   lookUpUser: (email, cb) => {
     // retrieve user information associated with this email
@@ -650,16 +651,28 @@ module.exports = {
     if (!takeoff_id || !owner_billing_address) {
       return callback("Missing required parameters");
     } else {
-      con.query(
-        "UPDATE takeoffs SET owner_billing_address = ? WHERE id = ?;",
-        [owner_billing_address, takeoff_id],
-        function (err) {
-          if (err) return callback(err);
-          callback(null);
+      con.query("SELECT * FROM takeoffs WHERE id = ?;", [takeoff_id], function (
+        err,
+        takeoffInfo
+      ) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        } else {
+          console.log(takeoffInfo[0]);
+          con.query(
+            "UPDATE customers SET billing_address = ? WHERE id = ?;",
+            [owner_billing_address, takeoffInfo[0].customer_id],
+            function (err) {
+              if (err) return callback(err);
+              callback(null);
+            }
+          );
         }
-      );
+      });
     }
   },
+
 
   getTakeoff: function (takeoff_id, callback) {
     con.query(
@@ -1288,6 +1301,16 @@ module.exports = {
         callback(null);
       }
     );
+  },
+
+  updateCustomerPhone: function (takeoff_id, phone, callback) {
+    con.query('SELECT customer_id FROM takeoffs WHERE id = ?;', [takeoff_id], function(err, customer_id){
+      if (err) return callback(err);
+      con.query("UPDATE customers SET primary_phone = ? WHERE id = ?;", [phone, customer_id], function(err){
+        if (err) return callback(err);
+        callback(null);
+      });
+    });
   },
 
 
