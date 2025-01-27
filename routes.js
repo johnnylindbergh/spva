@@ -1701,6 +1701,11 @@ module.exports = function (app) {
 
       db.getTakeoffById(req.body.takeoff_id, function (err, takeoff) {
         console.log(takeoff);
+        if (err || takeoff.length == 0) {
+          console.log(err);
+          res.send("error fetching takeoff");
+        }
+        
         // is the estimate not signed?
         if (takeoff[0].status <= 3) { // at least the estimate is signed
           console.log("estimate not signed");
@@ -1838,6 +1843,69 @@ module.exports = function (app) {
     });
   });
 
+    app.post('/share-invoice', mid.isAdmin, function (req, res) {
+      console.log("sending email to client ", req.body.takeoff_id);
+      if (req.body.takeoff_id) {
+        console.log("sending email ");
+        emailer.sendInvoiceEmail(req, res, req.body.takeoff_id, req.body.invoice_id, function (err, response) {
+          if (err) {
+            console.log(err);
+            res.send("email failed");
+          } else {
+            console.log(response);
+            db.takeoffSetStatus(req.body.takeoff_id, 5, function (err) {
+              if (err) {
+                console.log(err);
+              } else {
+                res.send("email sent");
+              }
+            }
+            );
+          }
+        });
+      } else {
+        console.log("");
+      }
+    }
+    );
+
+
+    app.get('/shareInvoice', mid.isAdmin, function (req, res) {
+      const hash = req.query.hash;
+      console.log("sharing invoice ", hash);
+      if (!hash || hash.length != 32) {
+        res.redirect("/");
+      }
+      db.getSharedInvoice(
+        hash,
+        function (err, invoice, takeoff) {
+          if (err || invoice == null) {
+            console.log(err);
+            res.redirect("/");
+          } else {
+            console.log(invoice[0])
+            console.log("invoice created at ", invoice.date_created);
+            console.log("invoice expires at ", moment(invoice.date_created).add(30, 'days').format('YYYY-MM-DD HH:mm:ss')); // 30 days from creation
+
+            // if the current date is greater than the expiration date, redirect to the home page
+            if (moment().isAfter(moment(invoice.date_created).add(30, 'days'))) {
+              console.log("expired");
+              res.render("expiredInvoice.html", {
+                takeoff: takeoff,
+                invoice: invoice[0],
+              });
+            } else {
+              res.render("invoice.html", {
+                takeoff: takeoff,
+                invoice: invoice,
+              });
+
+            }
+            
+          }
+        }
+      );
+    });
 
 
 

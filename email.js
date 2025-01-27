@@ -31,7 +31,7 @@ async function sendEstimateEmail(req, res, takeoff_id, callback) {
             <h3>Hello, ${takeoff[0].customer_givenName},</h3>
             <h3>Your estimate is ready.</h3>
             <p>Please click the link below to view it:</p>
-            <a href="${credentials.domain}/share/${takeoff[0]?.takeoff_hash}">View Estimate</a></br>
+            <a href="${credentials.domain}/share/?hash=${takeoff[0]?.takeoff_hash}">View Estimate</a></br>
             <img style="margin:20px;width:140px;"src="${credentials.domain}/SWAM_LOGO.jpg" alt="Swam Logo"></br>
             <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
           `,
@@ -103,8 +103,62 @@ async function sendEstimateEmailInternally(req, res, takeoff_id, targetEmail, ca
 }
 
 
+async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
+  db.getTakeoffById(takeoff_id, (err, takeoff) => {
+    if (err) {
+      console.log(err);
+      callback("big error", null);
+    } else {
+      console.log(takeoff);
+      if (takeoff[0].customer_primary_email_address && takeoff[0].customer_givenName) {
+        db.getInvoiceById(invoice_id, takeoff_id, (err, invoice) => {
+          if (err) {
+            console.log(err);
+            callback("big error", null);
+          } else {
+            console.log(invoice);
+            if (invoice.invoice_hash) {
+              const mailOptions = {
+                from: credentials.serverEmail,
+                to: takeoff[0].customer_primary_email_address,
+                subject: "Your Invoice from Sun Painting",
+                html: `
+                  <h3>Hello, ${takeoff[0].customer_givenName},</h3>
+                  <h3>Your invoice is ready.</h3>
+                  <p>Please click the link below to view it:</p>
+                  <a href="${credentials.domain}/shareInvoice/?hash=${invoice?.invoice_hash}">View Invoice</a></br>
+                  <img style="margin:20px;width:140px;"src="${credentials.domain}/SWAM_LOGO.jpg" alt="Swam Logo"></br>
+                  <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
+                `,
+              };
+              
+              const info = transporter.sendMail(mailOptions, (err, info) => {
+                if (err) {
+                  console.log(err);
+                  callback(err, null);
+                } else {
+                  console.log("Email sent: " + info.response);
+                  callback(null, info.response);
+                }
+              });
+            } else {
+              console.log("Some info is missing from this invoice invoice.hash");
+              callback("Some info is missing from this invoice invoice.hash", null);
+            }
+          }
+        }
+        );
+      }
+    }
+  });
+}
+
+
+
+
 
 module.exports = {
   sendEstimateEmail,
-  sendEstimateEmailInternally
+  sendEstimateEmailInternally,
+  sendInvoiceEmail
 };

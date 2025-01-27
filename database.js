@@ -959,8 +959,22 @@ module.exports = {
       console.log("getInvoiceByNumber got null value");
     } else {
       con.query(
-        "SELECT takeoffs.hash, takeoffs.tax, takeoffs.id AS takeoff_id, invoices.id AS invoice_id, takeoffs.total as estimateTotal, invoices.total as invoiceTotal, invoices.invoice_number FROM invoices INNER JOIN takeoffs ON invoices.takeoff_id = takeoffs.id WHERE invoices.invoice_number = ?",
-        [invoice_number],
+        `SELECT
+          takeoffs.hash, 
+          takeoffs.tax, 
+          takeoffs.id AS takeoff_id, 
+          invoices.id AS invoice_id, 
+          takeoffs.total as estimateTotal, 
+          invoices.total as invoiceTotal, 
+          invoices.invoice_number,
+          invoices.qb_number
+        FROM 
+          invoices 
+        INNER JOIN 
+          takeoffs ON invoices.takeoff_id = takeoffs.id 
+        WHERE 
+          invoices.invoice_number = ? OR invoices.qb_number = ?;`,
+        [invoice_number,invoice_number],
         function (err, invoice) {
           if (err) {
             console.log(err);
@@ -1228,6 +1242,9 @@ module.exports = {
           );
         }
 
+        //format the takeoff_start_date
+        takeoffResults[0].takeoff_start_date = moment(takeoffResults[0].takeoff_start_date).format("YYYY-MM-DD");
+
         const takeoff = takeoffResults[0]; // assuming only one result
 
         console.log("getting shared takeoff:", takeoff);
@@ -1304,9 +1321,10 @@ module.exports = {
   },
 
   updateCustomerPhone: function (takeoff_id, phone, callback) {
-    con.query('SELECT customer_id FROM takeoffs WHERE id = ?;', [takeoff_id], function(err, customer_id){
+    con.query('SELECT customer_id FROM takeoffs WHERE id = ?;', [takeoff_id], function(err, results){
       if (err) return callback(err);
-      con.query("UPDATE customers SET primary_phone = ? WHERE id = ?;", [phone, customer_id], function(err){
+      console.log("updating phone number for customer_id: ", results[0].customer_id); 
+      con.query("UPDATE customers SET phone = ? WHERE id = ?;", [phone, results[0].customer_id], function(err){
         if (err) return callback(err);
         callback(null);
       });
@@ -1866,7 +1884,7 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
 
   getInvoiceById: function (invoice_id, takeoff_id, callback) {
     con.query(
-      "SELECT invoices.total AS invoiceTotal, takeoffs.name as takeoffName, takeoffs.id AS takeoff_id FROM invoices join takeoffs ON takeoffs.id = invoices.takeoff_id WHERE invoices.id = ?;",
+      "SELECT invoices.total AS invoiceTotal, takeoffs.name as takeoffName, takeoffs.customer_id AS customer_id, takeoffs.id AS takeoff_id, invoices.hash AS invoice_hash FROM invoices join takeoffs ON takeoffs.id = invoices.takeoff_id WHERE invoices.id = ?;",
       [invoice_id],
       function (err, invoice) {
         if (err) return callback(err);
@@ -1886,6 +1904,34 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
     }
     );
   },
+
+  getSharedInvoice: function (hash, callback) {
+    con.query(
+      "SELECT * FROM invoices WHERE hash = ?;",
+      [hash],
+      function (err, invoice) {
+        if (err) return callback(err);
+        if (!invoice || invoice.length === 0) {
+          console.log("non-existent hash: ", hash);
+          return callback(new Error("No invoice found for the provided hash"));
+        }
+        callback(null, invoice[0]);
+      }
+    );
+  },
+
+  updateInvoiceWithQBNumber: function (invoice_id, qb_invoice_number, callback) {
+    con.query(
+      "UPDATE invoices SET qb_number = ? WHERE id = ?;",
+      [qb_invoice_number, invoice_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  }
+  ,
+
 
           // 
 

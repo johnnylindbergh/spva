@@ -94,7 +94,7 @@ CREATE TABLE takeoffs (
   tax DECIMAL(10,2) DEFAULT 5.3, -- Default value to be set by application logic
   payment_method VARCHAR(64),
   duration_hours INT,
-  start_date DATETIME,
+  start_date TIMESTAMP,
   end_date DATETIME,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -103,7 +103,7 @@ CREATE TABLE takeoffs (
   FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE SET NULL,
   FOREIGN KEY (last_updated_by) REFERENCES users(id),
-  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
+  FOREIGN KEY (customer_id) REFERENCES customers(id),
   PRIMARY KEY (id)
 );
 
@@ -145,6 +145,7 @@ CREATE TABLE statements (
 CREATE TABLE invoices (
   id INT NOT NULL AUTO_INCREMENT,
   invoice_number VARCHAR(64) NOT NULL,
+  qb_number VARCHAR(64),
   invoice_name VARCHAR(64),
   hash VARCHAR(64),
   takeoff_id INT NOT NULL,

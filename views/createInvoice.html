@@ -14,6 +14,55 @@
     <title>Invoice Creator</title>
   
     <script>
+
+function pushInvoiceToQuickbooks(invoice_id){
+    console.log('push invoice to quickbooks clicked');
+
+    $.ajax({
+        url: '/pushInvoiceToQuickbooks',
+        method: 'POST',
+        contentType: 'application/json', // Set content type
+        data: JSON.stringify({
+            invoice_id: invoice_id,
+            takeoff_id: document.getElementById('takeoff_id').value,
+        }),
+        success: function (response) {
+            XSAlert.alert('Invoice pushed to Quickbooks');
+        },
+        error: function (error) {
+            XSAlert.alert('Failed to push invoice to Quickbooks. Please try again.');
+        },
+    });
+}
+
+function shareInvoiceWithCustomer(invoiceId) {
+    console.log('share with customer clicked');
+
+    const takeoffId = document.getElementById('takeoff_id').value;
+
+    if (!invoiceId || !takeoffId) {
+        XSAlert.alert('Invoice ID or Takeoff ID not defined');
+        return;
+    }
+
+    $.ajax({
+        url: '/share-invoice',
+        method: 'POST',
+        contentType: 'application/json', // Set content type
+        data: JSON.stringify({
+            invoice_id: invoiceId,
+            takeoff_id: takeoffId,
+        }),
+        success: function (response) {
+            XSAlert.alert('Invoice shared with customer');
+        },
+        error: function (error) {
+            XSAlert.alert('Failed to share invoice with customer. Please try again.');
+        },
+    });
+
+}
+
      document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('form');
 
@@ -82,6 +131,13 @@
                             <li>${moment(event.date).format('MMMM Do YYYY, h:mm:ss a')} - ${event.label}: ${event.amount}</li>
                         `).join('')}
                     </ul>
+                    <div id="shareWithCustomer">
+                        <button id="share-with-customer" onclick="shareInvoiceWithCustomer(${invoice.id});">Share with Customer</button>
+                    </div>
+
+                    <div id="pushToQuickbooks">
+                        <button id="push-to-quickbooks" onclick="pushInvoiceToQuickbooks(${invoice.id});">Push to Quickbooks</button>
+                    </div>
                 `;
                 invoiceInfo.innerHTML = invoiceHtml;
 
@@ -91,6 +147,8 @@
                 XSAlert.alert('Failed to create invoice. Please try again.');
             },
         });
+
+  
     });
 
 });

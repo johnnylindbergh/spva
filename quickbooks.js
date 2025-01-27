@@ -87,6 +87,83 @@ async function syncCustomers() {
   }
 }
 
+// function to create an invoice given an invoice_id, takeoff_id, and callback
+async function pushInvoiceToQuickbooks (invoice_id, takeoff_id, callback) {
+  // get the invoice from the database
+  db.getInvoiceById(invoice_id, takeoff_id, async (err, invoice) => {
+    if (err) {
+      console.log(err);
+      callback("big error", null);
+    } else {
+      console.log(invoice);
+      if (invoice.invoice_hash) {
+        // first check if the oauthClient is initialized
+        if (!oauthClient) {
+          initializeOAuthClient();
+        }
+
+        // get the companyID from the token
+        const companyID = oauthClient.getToken().realmId;
+        const url =
+          oauthClient.environment === 'sandbox'
+            ? OAuthClient.environment.sandbox
+            : OAuthClient.environment.production;
+
+        console.log(invoice);
+        // make the api call to create the invoice
+        let response = await oauthClient.makeApiCall({
+          url: `${url}v3/company/${companyID}/invoice?minorversion=75`,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: {
+            "Line": [
+              {
+                "DetailType": "SalesItemLineDetail", 
+                "Amount": invoice.invoiceTotal, 
+                "SalesItemLineDetail": {
+                  "ItemRef": {
+                    "name": "Services rendered to " + invoice.takeoffName, 
+                    "value": "1"
+                  }
+                }
+              }
+            ], 
+            "CustomerRef": {
+              "value": invoice.customer_id
+            }
+          },
+        });
+
+        console.log('Invoice created:', response.json);
+        if (response.json.Invoice && response.json.Invoice.DocNumber) {
+          let qb_invoice_number = response.json.Invoice.DocNumber;
+
+          // update the invoice in the database with the qb_invoice_number
+          db.updateInvoiceWithQBNumber(invoice_id, qb_invoice_number, (err, result) => {
+            if (err) {
+              console.log(err);
+              callback("big error", null);
+            } else {
+              console.log(result);
+              callback(null, response.json);
+            }
+          });
+
+        }
+
+        //callback(null, response.json);
+      } else {
+        console.log("Some info is missing from this invoice invoice.hash");
+       // callback("Some info is missing from this invoice invoice.hash", null);
+
+      }
+    }
+  });
+}
+
+
 module.exports = function (app) {
   const urlencodedParser = bodyParser.urlencoded({ extended: false });
   app.use(bodyParser.json());
@@ -121,6 +198,24 @@ module.exports = function (app) {
       res.status(500).send('Callback error');
     }
   });
+
+  app.post("/pushInvoiceToQuickbooks", async (req, res) => {
+    // query the database for the invoice_id and takeoff_id in the post req
+    let invoice_id = req.body.invoice_id;
+    let takeoff_id = req.body.takeoff_id;
+
+    // call the pushInvoiceToQuickbooks function
+    pushInvoiceToQuickbooks(invoice_id, takeoff_id, (err, response) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error pushing invoice to QuickBooks");
+      }
+      console.log(response);
+      res.send("Invoice pushed to QuickBooks successfully.");
+    }
+    );
+  });
+
 
   app.get('/getCompanyInfo', mid.isAuth, async (req, res) => {
     try {
@@ -277,5 +372,7 @@ module.exports = function (app) {
       }
     }
   });
+
+  
 
 }
