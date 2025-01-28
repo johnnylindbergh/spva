@@ -110,7 +110,7 @@ async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
       callback("big error", null);
     } else {
       console.log(takeoff);
-      if (takeoff[0].customer_primary_email_address && takeoff[0].customer_givenName) {
+      if (takeoff[0].customer_invoice_email_address && takeoff[0].customer_givenName) {
         db.getInvoiceById(invoice_id, takeoff_id, (err, invoice) => {
           if (err) {
             console.log(err);
@@ -120,7 +120,7 @@ async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
             if (invoice.invoice_hash) {
               const mailOptions = {
                 from: credentials.serverEmail,
-                to: takeoff[0].customer_primary_email_address,
+                to: takeoff[0].customer_invoice_email_address,
                 subject: "Your Invoice from Sun Painting",
                 html: `
                   <h3>Hello, ${takeoff[0].customer_givenName},</h3>

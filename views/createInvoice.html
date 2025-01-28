@@ -6,13 +6,16 @@
     <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/themes/light-theme.css">
+
+    <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
     <!-- navbar.css -->
     <link rel="stylesheet" type="text/css" href="/css/navbar.css">
     <!-- invoice.css -->
     <link rel="stylesheet" type="text/css" href="/css/invoice.css">
     <script src="/js/invoice.js"></script>
     <title>Invoice Creator</title>
-  
+
     <script>
 
 function pushInvoiceToQuickbooks(invoice_id){
@@ -27,11 +30,18 @@ function pushInvoiceToQuickbooks(invoice_id){
             takeoff_id: document.getElementById('takeoff_id').value,
         }),
         success: function (response) {
-            XSAlert.alert('Invoice pushed to Quickbooks');
+            XSAlert({
+            title: 'Success',
+            message: 'Invoice pushed to Quickbooks',
+            icon: 'success',
+        }); 
         },
         error: function (error) {
-            XSAlert.alert('Failed to push invoice to Quickbooks. Please try again.');
-        },
+            XSAlert({
+            title: 'Error',
+            message: 'Failed to push invoice to Quickbooks.',
+            icon: 'error',
+        });        },
     });
 }
 
@@ -54,11 +64,17 @@ function shareInvoiceWithCustomer(invoiceId) {
             takeoff_id: takeoffId,
         }),
         success: function (response) {
-            XSAlert.alert('Invoice shared with customer');
-        },
+            XSAlert({
+            title: 'Success',
+            message: 'Email sent to customer',
+            icon: 'success',
+        });        },
         error: function (error) {
-            XSAlert.alert('Failed to share invoice with customer. Please try again.');
-        },
+            XSAlert({
+            title: 'Error',
+            message: 'Failed to send email to customer.',
+            icon: 'error',
+        });        },
     });
 
 }
@@ -131,12 +147,14 @@ function shareInvoiceWithCustomer(invoiceId) {
                             <li>${moment(event.date).format('MMMM Do YYYY, h:mm:ss a')} - ${event.label}: ${event.amount}</li>
                         `).join('')}
                     </ul>
-                    <div id="shareWithCustomer">
-                        <button id="share-with-customer" onclick="shareInvoiceWithCustomer(${invoice.id});">Share with Customer</button>
-                    </div>
+                    <div style="display:flex; gap: 15px;">
+                        <div id="shareWithCustomer">
+                            <button id="share-with-customer" onclick="shareInvoiceWithCustomer(${invoice.id});">Share with Customer</button>
+                        </div>
 
-                    <div id="pushToQuickbooks">
-                        <button id="push-to-quickbooks" onclick="pushInvoiceToQuickbooks(${invoice.id});">Push to Quickbooks</button>
+                        <div id="pushToQuickbooks">
+                            <button id="push-to-quickbooks" onclick="pushInvoiceToQuickbooks(${invoice.id});">Push to Quickbooks</button>
+                        </div>
                     </div>
                 `;
                 invoiceInfo.innerHTML = invoiceHtml;

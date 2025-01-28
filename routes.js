@@ -272,8 +272,8 @@ module.exports = function (app) {
   });
 
   app.post("/update-takeoff-invoice-email", mid.isAdmin, (req, res) => {
-    console.log("updating takeoff name");
-    let email = req.body.invoice_email_address;
+    console.log("updating takeoff invoice email");
+    let email = req.body.owner_invoice_email_address;
     let takeoff_id = req.body.takeoff_id;
     console.log(req.body);
     db.updateTakeoffInvoiceEmail(req.body.takeoff_id, email, function (err) {
@@ -445,6 +445,7 @@ module.exports = function (app) {
         if (err) {
           console.log(err);
         } else {
+          console.log(takeoff);
           res.render("editTakeoff.html", {
             sys:render.sys,
             takeoff: takeoff,
@@ -964,6 +965,18 @@ module.exports = function (app) {
     });
   });
 
+  app.post('/deletePlans', mid.isAdmin, function (req, res) {
+    console.log("deleting plans ", req.body.takeoff_id);
+    db.deletePlans(req.body.takeoff_id, function (err) {
+      if (err) {
+        console.log(err);
+        res.end();
+      } else {
+        res.end();
+      }
+    });
+  });
+
   app.post("/addOption", mid.isAdmin, function (req, res) {
     console.log("Adding row to takeoff", req.body.takeoff_id);
     console.log("Getting option:", req.body.description);
@@ -1030,7 +1043,7 @@ module.exports = function (app) {
     });
   });
 
-  app.get("/share", mid.isAuth, function (req, res) {
+  app.get("/share", function (req, res) {
     const hash = req.query.hash;
     console.log("sharing takeoff ", hash);
     if (!hash || hash.length != 32) {
@@ -1349,8 +1362,10 @@ module.exports = function (app) {
     console.log(invoice_id + " " + method + " " + takeoff_id + " " + req.body); // check if the method is valid
 
     if (method == null || !['card', 'us_bank_account'].includes(method)) {
-      console.log('')
+      console.log('method is null')
     } else {
+
+      console.log("post updating method with", method);
       db.updatePaymentMethod(takeoff_id, method, function (err) {
         if (err) {
           console.log(err);
@@ -1381,6 +1396,13 @@ module.exports = function (app) {
         //   console.log('total is null');
         //   total = 50.00;
         // }
+        if (invoice.payment_method == 'us_bank_account') {
+          invoice.invoiceTotal = invoice.invoiceTotal + (15.00*100);
+        }
+        if (invoice.payment_method == 'card') {
+          invoice.invoiceTotal = invoice.invoiceTotal * 1.03 + 30;
+        }
+
 
         // create a stripe price_id
         console.log("invoice is ", invoice);
@@ -1409,7 +1431,7 @@ module.exports = function (app) {
     console.log("/payInvoice/ GET");
     console.log(req.params);
     const invoice_id = req.params.invoice_id;
-    const method = req.body.method;
+    const method = (req.body.method | 'us_bank_account');
 
     console.log(invoice_id + " " + method + " " + invoice_id + " " + req.body); // check if the method is valid
 
@@ -1438,6 +1460,14 @@ module.exports = function (app) {
         // }
 
         // create a stripe price_id
+
+        // apply offsets according to the payment method
+        if (invoice.payment_method == 'us_bank_account') {
+          invoice.invoiceTotal = invoice.invoiceTotal + 15.00;
+        } else if (invoice.payment_method == 'card'){
+          invoice.invoiceTotal = invoice.invoiceTotal * 1.03 + 30;
+        }
+
         console.log("invoice is ", invoice);
         const price = stripe.prices.create({
           unit_amount: Math.floor(invoice.invoiceTotal),
@@ -1514,7 +1544,7 @@ module.exports = function (app) {
                 ],
                 mode: 'payment',
                 return_url: creds.domain + `/return?session_id={CHECKOUT_SESSION_ID}`,
-                payment_method_types: [method],
+                payment_method_types: ([method]),
               });
 
               res.send({ clientSecret: session.client_secret });
@@ -1566,6 +1596,17 @@ module.exports = function (app) {
                 // unit_amount: takeoff.total,
               });
 
+
+              // apply offsets according to the payment method
+              if (invoice.payment_method == 'us_bank_account') {
+                invoice.invoiceTotal = invoice.invoiceTotal + (15.00*100);
+              } else if (invoice.payment_method == 'card'){
+                invoice.invoiceTotal = invoice.invoiceTotal * 1.03 + 0.30;
+              } else {
+                invoice.invoiceTotal = invoice.invoiceTotal + 15;
+              }
+
+              console.log("invoice offset total is ", invoice.invoiceTotal);
               
 
               const price = await stripe.prices.create({
@@ -1660,6 +1701,7 @@ module.exports = function (app) {
               console.log(err);
             }
 
+            console.log("invoice(s) retrieved: ", invoices);
             res.send({ payments: payments, takeoff: takeoff[0], invoices: invoices });
           });
         });
@@ -1716,6 +1758,7 @@ module.exports = function (app) {
         }
       });
     });
+    
     // deprecated
     // app.post('/create-invoice', mid.isAdmin, function (req, res) {
     //   const takeoff_id = req.body.takeoff_id;
@@ -1746,6 +1789,7 @@ module.exports = function (app) {
     const {
       customer_name,
       custom_amount,
+      invoice_email_address,
       takeoff_id
     } = req.body;
 
@@ -1870,7 +1914,7 @@ module.exports = function (app) {
     );
 
 
-    app.get('/shareInvoice', mid.isAdmin, function (req, res) {
+    app.get('/shareInvoice', function (req, res) {
       const hash = req.query.hash;
       console.log("sharing invoice ", hash);
       if (!hash || hash.length != 32) {
@@ -1895,6 +1939,10 @@ module.exports = function (app) {
                 invoice: invoice[0],
               });
             } else {
+              console.log(invoice);
+              // some renameing to make the invoice object render work
+              invoice.invoice_id = invoice.id;
+              invoice.invoiceTotal = invoice.total;
               res.render("invoice.html", {
                 takeoff: takeoff,
                 invoice: invoice,

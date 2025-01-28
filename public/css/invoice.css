@@ -86,7 +86,7 @@ th {
 
 .timeline ul li {
     padding: 10px 20px;
-    border-left: 3px solid #007bff;
+    border-left: 3px solid #0893A1;
     margin-bottom: 10px;
     position: relative;
 }
@@ -95,7 +95,7 @@ th {
     content: '';
     width: 12px;
     height: 12px;
-    background: #007bff;
+    background: #0893A1;
     border-radius: 50%;
     position: absolute;
     left: -8px;
@@ -108,4 +108,27 @@ th {
 
 .timeline ul li p {
     margin: 0;
+}
+
+#share-with-customer {
+    /* button style blue */
+    background-color: #0893A1;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+
+
+#push-to-quickbooks {
+    /* button style blue */
+    background-color: #0893A1;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+
 }

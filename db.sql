@@ -41,12 +41,20 @@ CREATE TABLE system_settings (
   PRIMARY KEY (setting_id)
 );
 
+CREATE TABLE payment_methods (
+  id INT NOT NULL AUTO_INCREMENT,
+  method VARCHAR(64) NOT NULL UNIQUE,
+  PRIMARY KEY (id)
+);
+
+INSERT INTO payment_methods (method) VALUES ('card'), ('us_bank_account');
+
 -- Default settings
 INSERT INTO system_settings (setting_name, setting_value) 
 VALUES 
   ('default_labor_cost', '0.40'),
   ('levens_threshold', '2'),
-  ('chatgpt_prompt', "Consider the following json object. The output must be two description sections titled 'Proposal Includes' and 'Exclusions and assumptions' separated by a </br> tag. If an object has no selected materials, its name is listed in the 'Exclusions and assumptions' section; otherwise, a one-sentence description in the 'Proposal Includes' section that includes the name. \n. Do not include extra symbols like (* or -)"),
+  ('chatgpt_prompt', "Consider the following json object. The output must be two description sections titled 'Proposal Includes' and 'Exclusions and assumptions' separated by a </br> tag. If an object has no selected materials, its name is stated in the 'Exclusions and assumptions' section; otherwise, a one-sentence description in the 'Proposal Includes' section that includes the name. \n."),
   ('sales_tax', '5.3');
 
 -- Customers table
@@ -150,6 +158,7 @@ CREATE TABLE invoices (
   hash VARCHAR(64),
   takeoff_id INT NOT NULL,
   total DECIMAL(10,2),
+  invoice_payment_method VARCHAR(64),
   status TINYINT(1) DEFAULT 0,
   due_date TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

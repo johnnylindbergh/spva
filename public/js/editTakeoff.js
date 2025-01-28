@@ -187,6 +187,19 @@ function add_material_subject() {
   }
 }
 
+function deletePlans(){
+  console.log("Deleting plans");
+  $.post("/deletePlans", {takeoff_id: takeoff_id})
+    .done(function(){
+      console.log("Plans deleted");
+      // reload the page
+      location.reload();
+    })
+    .fail(function(){
+      console.log("Failed to delete plans");
+    });
+}
+
 // the big one
 function loadTakeoffMaterials(id) {
   takeoff_id = id;

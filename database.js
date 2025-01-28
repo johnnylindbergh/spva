@@ -952,6 +952,17 @@ module.exports = {
     }
   },
 
+  deletePlans: function (takeoff_id, callback) {
+    con.query(
+      "UPDATE takeoffs SET file_path_of_plans = NULL WHERE id = ?;",
+      [takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
   // invoice 
 
   getInvoiceByNumber: function (invoice_number, callback) {
@@ -1884,7 +1895,7 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
 
   getInvoiceById: function (invoice_id, takeoff_id, callback) {
     con.query(
-      "SELECT invoices.total AS invoiceTotal, takeoffs.name as takeoffName, takeoffs.customer_id AS customer_id, takeoffs.id AS takeoff_id, invoices.hash AS invoice_hash FROM invoices join takeoffs ON takeoffs.id = invoices.takeoff_id WHERE invoices.id = ?;",
+      "SELECT invoices.total AS invoiceTotal, takeoffs.name as takeoffName, takeoffs.customer_id AS customer_id, takeoffs.payment_method AS payment_method, takeoffs.id AS takeoff_id, invoices.hash AS invoice_hash FROM invoices join takeoffs ON takeoffs.id = invoices.takeoff_id WHERE invoices.id = ?;",
       [invoice_id],
       function (err, invoice) {
         if (err) return callback(err);

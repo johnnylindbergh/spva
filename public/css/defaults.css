@@ -159,7 +159,7 @@ button,
 input[type="button"],
 input[type="submit"],
 input[type="reset"] {
-  background-color: #01aaff;
+  background-color: #0893A1;
   border: none;
   border-radius: 5px;
   color: white;
@@ -171,7 +171,7 @@ input[type="reset"] {
 
 input[type="button"]:hover,
 input[type="submit"]:hover{
-    background-color: #007bbd; /* Darker shade on hover 
+    background-color: #06747e; /* Darker shade on hover 
     */ transform: scale(1.05); /* 
     Slight zoom effect */
 }
@@ -232,7 +232,33 @@ input:checked + .slider {
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #2196f3;
+  box-shadow: 0 0 1px # #share-with-customer {
+    /* button style blue */
+    background-color: #0893A1;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+#share-with-customer:hover {
+    background-color: #0056b3;
+}
+
+#push-to-quickbooks {
+    /* button style blue */
+    background-color: #0893A1;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+#push-to-quickbooks:hover {
+    background-color: #0893A1;
+};
 }
 
 input:checked + .slider:before {

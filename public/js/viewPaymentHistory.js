@@ -29,11 +29,11 @@ function populatePaymentHistoryTable(takeoff_id) {
             cell2.textContent = payment.amount;
         });
 
-        // Update the total paid and total due
-        const totalPaidElement = document.getElementById('totalPaid');
-        const totalDueElement = document.getElementById('totalDue');
-        totalPaidElement.textContent = numberWithCommas(totalPaid);
-        totalDueElement.textContent = numberWithCommas(totalDue);
+        // // Update the total paid and total due
+        // const totalPaidElement = document.getElementById('totalPaid');
+        // const totalDueElement = document.getElementById('totalDue');
+        // totalPaidElement.textContent = numberWithCommas(totalPaid);
+        // totalDueElement.textContent = numberWithCommas(totalDue);
         
         // populate the invoice table
         const invoiceTable = document.getElementById('invoiceTable');
@@ -59,9 +59,7 @@ function populatePaymentHistoryTable(takeoff_id) {
 
         // Update the total paid and total due
 
-        totalPaidElement.textContent = numberWithCommas(totalPaid);
-        totalDueElement.textContent = numberWithCommas(totalDue);
-
+       
         
     })
     .catch(error => console.error('Error:', error));

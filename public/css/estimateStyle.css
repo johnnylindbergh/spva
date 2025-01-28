@@ -78,7 +78,7 @@ td {
 
 .editable:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: #0893A1;
 }
 
 /* Hover item (tooltip) for totals */
@@ -227,7 +227,7 @@ input[type="text"], input[type="date"] {
 
 input[type="text"]:focus, input[type="date"]:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: #0893A1;
 }
 
 /* Print styles */

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,102 +12,73 @@
 
     <link rel="stylesheet" href="/css/defaults.css">
 </head>
+
 <body>
 
 
+    <div id='container'>
+        <!-- some data about the job -->
+        <h1>{{job_name}}</h1>
 
-    <!-- Action Buttons -->
-    <div id="actionButtons">
-        <!-- <button id="createStatementBtn">Create Statement</button> -->
-        <form id="createInvoiceBtn" action="/invoiceCreator" method="POST">
-            <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
-            <button type="submit">Create Invoice</button>
-        </form>
 
+
+
+        <!-- <h1 id="totalPaid"></h1>
+    <h1 id="totalDue"></h1>
+     -->
+        <!-- Hidden input for takeoff_id -->
+        <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
+
+        <h1>Payment History</h1>
+        <table id="paymentHistoryTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be populated by JavaScript -->
+            </tbody>
+        </table>
+
+        <!-- Action Buttons -->
+        <div id="actionButtons">
+            <!-- <button id="createStatementBtn">Create Statement</button> -->
+            <form id="createInvoiceBtn" action="/invoiceCreator" method="POST">
+                <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
+                <button type="submit">Create Invoice</button>
+            </form>
+            <!-- 
         <form id="change-order-btn" action="/changeOrderCreator" method="POST">
             <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
             <button type="submit">Create Change Order</button>
-        </form>
-        <button id="pushToQuickbooksBtn">Push to QuickBooks</button>
-    </div>
-    </body><br>
+        </form> -->
+        </div>
+        <br>
 
-    <h1 id="totalPaid"></h1>
-    <h1 id="totalDue"></h1>
-    
-    <!-- Hidden input for takeoff_id -->
-    <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
+        <!-- invoices section -->
+        <div id="invoices">
+            <h2>Invoices</h2>
+            <table id="invoiceTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>QuickBooks ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
 
-    <h1>Payment History</h1>
-    <table id="paymentHistoryTable">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Rows will be populated by JavaScript -->
-        </tbody>
-    </table>
-
-
-
-
-    <div id="estimates">
-        <h2>Estimates</h2>
-        <table id="estimatesTable">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <!-- button to create an invoice -->
-                    <th><button id="createInvoiceButton">Create Invoice</button></th>
-                    <!-- button to create statments -->
-                    <th><button id="createStatementButton">Create Statement</button></th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Rows will be populated by JavaScript -->
-            </tbody>
-        </table>
     </div>
 
-    <!-- invoices section -->
-    <div id="invoices">
-        <h2>Invoices</h2>
-        <table id="invoiceTable">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>QuickBooks ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Rows will be populated by JavaScript -->
-            </tbody>
-        </table>
-    </div>
-    <!-- statements Section -->
-    <div id="statements">
-        <h2>Statements</h2>
-        <table id="statementsTable">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>QuickBooks ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Rows will be populated by JavaScript -->
-            </tbody>
-        </table>
 
 </body>
+
 </html>

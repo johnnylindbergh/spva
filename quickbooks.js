@@ -93,7 +93,7 @@ async function pushInvoiceToQuickbooks (invoice_id, takeoff_id, callback) {
   db.getInvoiceById(invoice_id, takeoff_id, async (err, invoice) => {
     if (err) {
       console.log(err);
-      callback("big error", null);
+      return callback("big error", null);
     } else {
       console.log(invoice);
       if (invoice.invoice_hash) {
@@ -111,52 +111,64 @@ async function pushInvoiceToQuickbooks (invoice_id, takeoff_id, callback) {
 
         console.log(invoice);
         // make the api call to create the invoice
-        let response = await oauthClient.makeApiCall({
-          url: `${url}v3/company/${companyID}/invoice?minorversion=75`,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: {
-            "Line": [
-              {
-                "DetailType": "SalesItemLineDetail", 
-                "Amount": invoice.invoiceTotal, 
-                "SalesItemLineDetail": {
-                  "ItemRef": {
-                    "name": "Services rendered to " + invoice.takeoffName, 
-                    "value": "1"
+        let response;
+        try {
+          
+          response = await oauthClient.makeApiCall({
+            url: `${url}v3/company/${companyID}/invoice?minorversion=75`,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: {
+              "Line": [
+                {
+                  "DetailType": "SalesItemLineDetail", 
+                  "Amount": invoice.invoiceTotal, 
+                  "SalesItemLineDetail": {
+                    "ItemRef": {
+                      "name": "Services rendered to " + invoice.takeoffName, 
+                      "value": "1"
+                    }
                   }
                 }
+              ], 
+              "CustomerRef": {
+                "value": invoice.customer_id
               }
-            ], 
-            "CustomerRef": {
-              "value": invoice.customer_id
-            }
-          },
-        });
-
-        console.log('Invoice created:', response.json);
-        if (response.json.Invoice && response.json.Invoice.DocNumber) {
-          let qb_invoice_number = response.json.Invoice.DocNumber;
-
-          // update the invoice in the database with the qb_invoice_number
-          db.updateInvoiceWithQBNumber(invoice_id, qb_invoice_number, (err, result) => {
-            if (err) {
-              console.log(err);
-              callback("big error", null);
-            } else {
-              console.log(result);
-              callback(null, response.json);
-            }
+            },
           });
 
+
+
+          console.log('Invoice created:', response.json);
+          if (response.json.Invoice && response.json.Invoice.DocNumber) {
+            let qb_invoice_number = response.json.Invoice.DocNumber;
+
+            // update the invoice in the database with the qb_invoice_number
+            db.updateInvoiceWithQBNumber(invoice_id, qb_invoice_number, (err, result) => {
+              if (err) {
+                console.log(err);
+              } else {
+                console.log(result);
+                return callback(null, response.json);
+              }
+            });
+
+          }
+
+        } catch (error) {
+          console.error('Error creating invoice:', error);
+          callback("big error", null);
         }
+
+     
+
 
         //callback(null, response.json);
       } else {
         console.log("Some info is missing from this invoice invoice.hash");
-       // callback("Some info is missing from this invoice invoice.hash", null);
+      return callback("Some info is missing from this invoice invoice.hash", null);
 
       }
     }
@@ -209,9 +221,10 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
         res.status(500).send("Error pushing invoice to QuickBooks");
+      } else {
+        console.log(response);
+        res.send(response);
       }
-      console.log(response);
-      res.send("Invoice pushed to QuickBooks successfully.");
     }
     );
   });
