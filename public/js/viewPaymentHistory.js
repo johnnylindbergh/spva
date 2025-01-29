@@ -12,6 +12,11 @@ function populatePaymentHistoryTable(takeoff_id) {
     .then(response => response.json())
     .then(data => {
         console.log(data);
+
+        //use data.takeoff to populate the takeoff details
+        const takeoff_name = document.getElementById('jobName');
+        takeoff_name.textContent = data.takeoff.takeoff_name;
+
         const table = document.getElementById('paymentHistoryTable');
         table.innerHTML = ''; // Clear existing rows
 
@@ -26,7 +31,8 @@ function populatePaymentHistoryTable(takeoff_id) {
             const cell1 = row.insertCell(0);
             const cell2 = row.insertCell(1);
             cell1.textContent = payment.created_at;
-            cell2.textContent = payment.amount;
+            cell2.textContent = "$"+ payment.amount;
+            totalPaid += parseFloat(payment.amount);
         });
 
         // // Update the total paid and total due
@@ -59,24 +65,23 @@ function populatePaymentHistoryTable(takeoff_id) {
             const cell4 = row.insertCell(3);
             const cell5 = row.insertCell(4);
             cell1.textContent = invoice.invoice_number;
-            cell2.textContent = invoice.total;
+            cell2.textContent = "$"+ invoice.total;
             
             if (invoice.status == 0) {
                 // add a yellow ! icon
                 cell3.innerHTML = 'unpaid <i style="color:orange;" class="fa-solid fa-triangle-exclamation"></i>';
-                totalDue += invoice.total;
             }
             else if (invoice.status == 1) {
                // green circle check icon
                 cell3.innerHTML = `Paid <i style="color:green;" class="fas fa-check-circle"></i>`;
 
-                totalPaid += invoice.total;
             } else if (invoice.status == 2) {
                 cell3.textContent = 'Due';
                 // add red exclamation icon
                 cell3.innerHTML = `Due <i style="color:red;" class="fas fa-circle-exclamation"></i>`;
-                totalDue += invoice.total - invoice.amount_paid;
             }
+
+            totalDue += parseFloat(invoice.total);
 
             // allign cell3 to the right
             cell3.style.textAlign = 'right';
@@ -88,6 +93,12 @@ function populatePaymentHistoryTable(takeoff_id) {
         // Update the total paid and total due
 
        
+        const totalPaidElement = document.getElementById('totalPaid');
+        const totalDueElement = document.getElementById('totalDue');
+
+        totalPaidElement.textContent = "Paid: $"+numberWithCommas(totalPaid.toFixed(2));
+        totalDueElement.textContent = "Due: $"+numberWithCommas(totalDue.toFixed(2));
+
         
     })
     .catch(error => console.error('Error:', error));

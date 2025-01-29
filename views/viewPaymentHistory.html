@@ -19,12 +19,19 @@
 
     <div class="container mt-5">
         <!-- some data about the job -->
-        <h1 class="mb-4">{{job_name}}</h1>
+        <h1 id = "jobName"class="mb-4"></h1>
 
         <!-- Hidden input for takeoff_id -->
         <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
 
-        <h2 class="mb-4">Payment History</h2>
+
+        <!-- Payment Information population by js-->
+         <div style="float:right; text-align: right;">
+            <h2 id ="totalPaid" class="mb-4"></h1>
+            <h2 id ="totalDue" class="mb-4"></h1>
+         </div>
+      
+        <h3 class="mb-4">Payment History</h2>
         <table id="paymentHistoryTable" class="table table-striped">
             <thead class="thead-dark">
                 <tr>
@@ -48,7 +55,7 @@
 
         <!-- invoices section -->
         <div id="invoices">
-            <h2 class="mb-4">Invoices</h2>
+            <h3 class="mb-4">Invoices</h2>
             <table id="invoiceTable" class="table table-striped">
                 <thead class="thead-dark">
                     <tr>
