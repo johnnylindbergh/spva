@@ -1904,6 +1904,18 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
     );
   },
 
+  getInvoiceByOnlyId: function (invoice_id, callback) {
+    con.query(
+      "SELECT * FROM invoices WHERE id = ?;",
+      [invoice_id],
+      function (err, invoice) {
+        if (err) return callback(err);
+        callback(null, invoice[0]);
+      }
+    );
+  },
+
+
 
   getInvoicesByTakeoffId: function (takeoff_id, callback) {
     con.query( "SELECT * FROM invoices WHERE takeoff_id = ?;", [takeoff_id], function(err, invoices){
@@ -1953,13 +1965,42 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
     );
   },
 
-  insertPaymentHistory: function (takeoff_id, invoice_id, amount, callback) {
+  invoicePayed: function (takeoff_id, invoice_id, amount, callback) {
+    // get the invoice 
+    // check if the takeoff_id matches
+    // check if the amount matches
+    // check if the invoice is not already payed
+    // update the invoice to payed
+    // insert the payment into the payment_history table
+
     con.query(
-      "INSERT INTO payment_history (takeoff_id, invoice_id, amount) VALUES (?,?,?);",
-      [takeoff_id, invoice_id, amount],
-      function (err) {
+      "SELECT * FROM invoices WHERE id = ?;",
+      [invoice_id],
+      function (err, invoice) {
         if (err) return callback(err);
-        callback(null);
+        if (invoice[0].takeoff_id != takeoff_id) {
+          return callback("Takeoff ID does not match");
+        }
+   
+        if (invoice[0].status == 1) {
+          return callback("Invoice is already payed");
+        }
+
+        con.query(
+          "UPDATE invoices SET status = 1 WHERE id = ?;",
+          [invoice_id],
+          function (err) {
+            if (err) return callback(err);
+            con.query(
+              "INSERT INTO payment_history (takeoff_id, invoice_id, amount) VALUES (?,?,?);",
+              [takeoff_id, invoice_id, amount],
+              function (err) {
+                if (err) return callback(err);
+                callback(null);
+              }
+            );
+          }
+        );
       }
     );
   },

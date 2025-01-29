@@ -44,10 +44,12 @@ function populatePaymentHistoryTable(takeoff_id) {
         const headerCell2 = headerRow.insertCell(1);
         const headerCell3 = headerRow.insertCell(2);
         const headerCell4 = headerRow.insertCell(3);
+        const headerCell5 = headerRow.insertCell(4);
         headerCell1.textContent = 'Invoice Number';
         headerCell2.textContent = 'Total';
-        headerCell3.textContent = 'View Count';
-        headerCell4.textContent = 'View';
+        headerCell3.textContent = 'Status';
+        headerCell4.textContent = 'View Count';
+        headerCell5.textContent = 'View';
         
         invoices.forEach(invoice => {
             const row = invoiceTable.insertRow();
@@ -55,10 +57,31 @@ function populatePaymentHistoryTable(takeoff_id) {
             const cell2 = row.insertCell(1);
             const cell3 = row.insertCell(2);
             const cell4 = row.insertCell(3);
+            const cell5 = row.insertCell(4);
             cell1.textContent = invoice.invoice_number;
             cell2.textContent = invoice.total;
-            cell3.textContent = invoice.view_count;
-            cell4.innerHTML = `<a href="/viewInvoice/?invoice_id=${invoice.id}?takeoff_id=${takeoff_id}">View</a>`;
+            
+            if (invoice.status == 0) {
+                // add a yellow ! icon
+                cell3.innerHTML = 'unpaid <i style="color:orange;" class="fa-solid fa-triangle-exclamation"></i>';
+                totalDue += invoice.total;
+            }
+            else if (invoice.status == 1) {
+               // green circle check icon
+                cell3.innerHTML = `Paid <i style="color:green;" class="fas fa-check-circle"></i>`;
+
+                totalPaid += invoice.total;
+            } else if (invoice.status == 2) {
+                cell3.textContent = 'Due';
+                // add red exclamation icon
+                cell3.innerHTML = `Due <i style="color:red;" class="fas fa-circle-exclamation"></i>`;
+                totalDue += invoice.total - invoice.amount_paid;
+            }
+
+            // allign cell3 to the right
+            cell3.style.textAlign = 'right';
+            cell4.textContent = invoice.view_count;  
+            cell5.innerHTML = `<a href="/viewInvoice/?invoice_id=${invoice.id}?takeoff_id=${takeoff_id}">View</a>`;
 
         });
 

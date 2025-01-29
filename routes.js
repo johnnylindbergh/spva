@@ -1622,6 +1622,7 @@ module.exports = function (app) {
 
               const session = await stripe.checkout.sessions.create({
                 ui_mode: 'embedded',
+                metadata: {invoice_id: invoice_id},
                 line_items: [
                   {
                     // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
@@ -1663,12 +1664,13 @@ module.exports = function (app) {
       // insert into the payment history table (takeoff_id, invoice_id, amount)
 
       // get the takeoff_id from the invoice_id
-      db.getInvoiceById(session.invoice_id, null, function (err, invoice) {
+      db.getInvoiceByOnlyId(session.metadata.invoice_id, function (err, invoice) {
         if (err) {
           console.log(err);
         } else {
           console.log("invoice is ", invoice);
-          db.insertPaymentHistory(invoice.takeoff_id, invoice.id, raw_amount, function (err) {
+          console.log()
+          db.invoicePayed(invoice.takeoff_id, invoice.id, raw_amount, function (err) {
             if (err) {
               console.log(err);
             } else {
@@ -1688,9 +1690,13 @@ module.exports = function (app) {
       });
     });
 
-    app.get('/return', async (req, res) => {
+    app.get('/return', mid.isAdmin, async (req, res) => {
+      console.log("GET /return")
       console.log("returning from stripe");
       const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+      //use session to get the invoice_id
+      let invoice_id = session.metadata.invoice_id;
+      console.log(session)
       res.render("return.html");
     });
 
