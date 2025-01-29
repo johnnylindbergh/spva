@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,126 +19,135 @@
 
     <script>
 
-function pushInvoiceToQuickbooks(invoice_id){
-    console.log('push invoice to quickbooks clicked');
+        function pushInvoiceToQuickbooks(invoice_id) {
+            console.log('push invoice to quickbooks clicked');
 
-    $.ajax({
-        url: '/pushInvoiceToQuickbooks',
-        method: 'POST',
-        contentType: 'application/json', // Set content type
-        data: JSON.stringify({
-            invoice_id: invoice_id,
-            takeoff_id: document.getElementById('takeoff_id').value,
-        }),
-        success: function (response) {
-            XSAlert({
-            title: 'Success',
-            message: 'Invoice pushed to Quickbooks',
-            icon: 'success',
-        }); 
-        },
-        error: function (error) {
-            XSAlert({
-            title: 'Error',
-            message: 'Failed to push invoice to Quickbooks.',
-            icon: 'error',
-        });        },
-    });
-}
+            $.ajax({
+                url: '/pushInvoiceToQuickbooks',
+                method: 'POST',
+                contentType: 'application/json', // Set content type
+                data: JSON.stringify({
+                    invoice_id: invoice_id,
+                    takeoff_id: document.getElementById('takeoff_id').value,
+                }),
+                success: function (response) {
+                    XSAlert({
+                        title: 'Success',
+                        message: 'Invoice pushed to Quickbooks',
+                        icon: 'success',
+                    });
+                },
+                error: function (error) {
+                    XSAlert({
+                        title: 'Error',
+                        message: 'Failed to push invoice to Quickbooks.',
+                        icon: 'error',
+                        hideCancelButton: true
+                    }).then((result) => {
 
-function shareInvoiceWithCustomer(invoiceId) {
-    console.log('share with customer clicked');
-
-    const takeoffId = document.getElementById('takeoff_id').value;
-
-    if (!invoiceId || !takeoffId) {
-        XSAlert.alert('Invoice ID or Takeoff ID not defined');
-        return;
-    }
-
-    $.ajax({
-        url: '/share-invoice',
-        method: 'POST',
-        contentType: 'application/json', // Set content type
-        data: JSON.stringify({
-            invoice_id: invoiceId,
-            takeoff_id: takeoffId,
-        }),
-        success: function (response) {
-            XSAlert({
-            title: 'Success',
-            message: 'Email sent to customer',
-            icon: 'success',
-        });        },
-        error: function (error) {
-            XSAlert({
-            title: 'Error',
-            message: 'Failed to send email to customer.',
-            icon: 'error',
-        });        },
-    });
-
-}
-
-     document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form');
-
-    // hide the invoce initially
-    document.querySelector('.invoice-container').style.display = 'none';
-
-
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        const customerName = document.getElementById('customer-name').value;
-        const email = document.getElementById('email').value;
-        const customAmount = document.getElementById('custom-amount').value;
-        const takeoffId = document.getElementById('takeoff_id').value;
-
-        if (!customerName || !email || !customAmount) {
-            XSAlert.alert('Please fill out all required fields');
-            return;
+                        console.log('clicked');
+                        window.location.href = '/quickbooks';
+                    });
+                    //window.location.href = '/quickbooks';
+                },
+            });
         }
 
-        
+        function shareInvoiceWithCustomer(invoiceId) {
+            console.log('share with customer clicked');
 
-        if (!takeoffId) {
-            XSAlert.alert('Takeoff ID not defined');
-            return;
+            const takeoffId = document.getElementById('takeoff_id').value;
+
+            if (!invoiceId || !takeoffId) {
+                XSAlert.alert('Invoice ID or Takeoff ID not defined');
+                return;
+            }
+
+            $.ajax({
+                url: '/share-invoice',
+                method: 'POST',
+                contentType: 'application/json', // Set content type
+                data: JSON.stringify({
+                    invoice_id: invoiceId,
+                    takeoff_id: takeoffId,
+                }),
+                success: function (response) {
+                    XSAlert({
+                        title: 'Success',
+                        message: 'Email sent to customer',
+                        icon: 'success',
+                    });
+                },
+                error: function (error) {
+                    XSAlert({
+                        title: 'Error',
+                        message: 'Failed to send email to customer.',
+                        icon: 'error',
+                    });
+                },
+            });
+
         }
 
-        $.ajax({
-            url: '/create-invoice',
-            method: 'POST',
-            contentType: 'application/json', // Set content type
-            data: JSON.stringify({
-                customer_name: customerName,
-                email: email,
-                custom_amount: customAmount,
-                takeoff_id: takeoffId,
-            }),
-            success: function (invoice) {
-                const invoiceContainer = document.querySelector('.invoice-container');
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form');
 
-                // show the invoice
-                invoiceContainer.style.display = 'inline-block';
+            // hide the invoce initially
+            document.querySelector('.invoice-container').style.display = 'none';
 
-                // hide the form-container
-                document.querySelector('.form-container').style.display = 'none';
 
-                console.log("invoice", invoice);
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
 
-                // append the invoice_number to the invoice-info
-                const invoiceInfo = document.querySelector('.invoice-info');
-                
-                // created_at: "2025-01-07T01:22:16.000Z"
-                // hash: null
-                // id: 26
-                // invoice_number: "1-26"
-                // timeline: [{date: "2025-01-07T01:22:16.000Z", label: "Invoice Created", amount: "200.00"}] (1)
-                // total: "200.00"
-                // view_count: 0
-                const invoiceHtml = `
+                const customerName = document.getElementById('customer-name').value;
+                const email = document.getElementById('email').value;
+                const customAmount = document.getElementById('custom-amount').value;
+                const takeoffId = document.getElementById('takeoff_id').value;
+
+                if (!customerName || !email || !customAmount) {
+                    XSAlert.alert('Please fill out all required fields');
+                    return;
+                }
+
+
+
+                if (!takeoffId) {
+                    XSAlert.alert('Takeoff ID not defined');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/create-invoice',
+                    method: 'POST',
+                    contentType: 'application/json', // Set content type
+                    data: JSON.stringify({
+                        customer_name: customerName,
+                        email: email,
+                        custom_amount: customAmount,
+                        takeoff_id: takeoffId,
+                    }),
+                    success: function (invoice) {
+                        const invoiceContainer = document.querySelector('.invoice-container');
+
+                        // show the invoice
+                        invoiceContainer.style.display = 'inline-block';
+
+                        // hide the form-container
+                        document.querySelector('.form-container').style.display = 'none';
+
+                        console.log("invoice", invoice);
+
+                        // append the invoice_number to the invoice-info
+                        const invoiceInfo = document.querySelector('.invoice-info');
+
+                        // created_at: "2025-01-07T01:22:16.000Z"
+                        // hash: null
+                        // id: 26
+                        // invoice_number: "1-26"
+                        // timeline: [{date: "2025-01-07T01:22:16.000Z", label: "Invoice Created", amount: "200.00"}] (1)
+                        // total: "200.00"
+                        // view_count: 0
+                        const invoiceHtml = `
                     <p>Invoice Number: ${invoice.invoice_number}</p>
                     <p>Total: ${invoice.total}</p>
                     <p>Created At: ${moment(invoice.created_at).format('MMMM Do YYYY, h:mm:ss a')}</p>
@@ -158,35 +168,36 @@ function shareInvoiceWithCustomer(invoiceId) {
                         {{/invoice.qb_number}}
                     </div>
                 `;
-                invoiceInfo.innerHTML = invoiceHtml;
+                        invoiceInfo.innerHTML = invoiceHtml;
 
 
-            },
-            error: function (error) {
-                XSAlert.alert('Failed to create invoice. Please try again.');
-            },
+                    },
+                    error: function (error) {
+                        XSAlert.alert('Failed to create invoice. Please try again.');
+                    },
+                });
+
+
+            });
+
         });
-
-  
-    });
-
-});
 
     </script>
 </head>
+
 <body>
 
     <!-- navbar here -->
     <div class="navbar">
-        <ul> 
-          <li><a href="javascript:history.back()">Back</a></li>
-          <li><a href="/">{{defaults.sysName}}</a></li>
-          <div style="float:right">
-            <li><a href="/auth/google">Log In</a></li>
-            <li><a href="/logout">Log Out</a></li>
-          </div>
-        
-      
+        <ul>
+            <li><a href="javascript:history.back()">Back</a></li>
+            <li><a href="/">{{defaults.sysName}}</a></li>
+            <div style="float:right">
+                <li><a href="/auth/google">Log In</a></li>
+                <li><a href="/logout">Log Out</a></li>
+            </div>
+
+
         </ul>
     </div>
     <div class="form-container">
@@ -201,8 +212,9 @@ function shareInvoiceWithCustomer(invoiceId) {
             <input type="text" id="customer-name" name="customer_name" value="{{customer_givenName}}" required>
 
             <label for="email">Invoice Email</label>
-            <input type="email" id="email" name="invoice_email" value="{{takeoff.customer_invoice_email_address}}" required>
-<!-- 
+            <input type="email" id="email" name="invoice_email" value="{{takeoff.customer_invoice_email_address}}"
+                required>
+            <!-- 
             <label for="invoice-date">Invoice Date</label>
             <input type="date" id="invoice-date" name="invoice_date" value="2024-11-26" required>
 
@@ -221,9 +233,10 @@ function shareInvoiceWithCustomer(invoiceId) {
         <h1>Invoice</h1>
 
         <div class="invoice-info">
-        
 
-       
-    </div>
+
+
+        </div>
 </body>
+
 </html>

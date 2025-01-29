@@ -145,7 +145,7 @@ async function pushInvoiceToQuickbooks (invoice_id, takeoff_id, callback) {
 
 
 
-          console.log('Invoice created:', response.json);
+          console.log('response from qb:', response.json);
           if (response.json.Invoice && response.json.Invoice.DocNumber) {
             let qb_invoice_number = response.json.Invoice.DocNumber;
 
@@ -159,11 +159,14 @@ async function pushInvoiceToQuickbooks (invoice_id, takeoff_id, callback) {
               }
             });
 
+          } else {
+            console.log("Error creating invoice");
+            callback(err, null);
           }
 
         } catch (error) {
-         // console.error('Error creating invoice:', error);
-          callback(err, null);
+          console.error('Error creating invoice:');
+          return callback(error, null);
         }
 
      
@@ -239,9 +242,9 @@ module.exports = function (app) {
     // call the pushInvoiceToQuickbooks function
     pushInvoiceToQuickbooks(invoice_id, takeoff_id, (err, response) => {
       if (err) {
-        console.log(err);
-        res.redirect('/quickbooks');
-      } else {
+        console.log("qb error:",err);
+        res.status(500).send(err);
+            } else {
         console.log(response);
         res.send(response);
       }
