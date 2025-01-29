@@ -448,18 +448,40 @@ module.exports = {
 
 
   createNewBlankTakeoff: function (req, res, cb) {
+
+    // insert new blank customer into the customers table
     con.query(
-      "INSERT INTO takeoffs (creator_id, name, hash) VALUES (?, ?, ?); SELECT LAST_INSERT_ID() as last;",
-      [req.user.local.id, "Al's Takeoff", generateHash().toString()],
+      "INSERT INTO customers (givenName) VALUES (?); SELECT LAST_INSERT_ID() as last;",
+      ["New Customer"],
       function (err, result) {
         if (err) {
           return cb(err);
         }
-        console.log("created takeoff", result[1][0].last);
-        cb(null, result[1][0].last);
+        console.log("created customer", result[1][0].last);
+        let lastInsertId = result[1][0].last;
+        // insert new blank takeoff into the takeoffs table
+        con.query(
+          "INSERT INTO takeoffs (creator_id, name, hash, customer_id) VALUES (?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;",
+          [req.user.local.id, "New Takeoff", generateHash().toString(), result[1][0].last],
+          function (err, result) {
+            if (err) {
+              return cb(err);
+            }
+            console.log("created takeoff", result[1][0].last);
+            con.query("INSERT INTO customer_takeoffs (customer_id, takeoff_id) VALUES (?, ?);", [lastInsertId, result[1][0].last], function (err) {
+              if (err) {
+                console.log(err);
+                return cb(err);
+              }
+
+              cb(null, result[1][0].last);
+            });
+          }
+        );
       }
     );
-  }, 
+  },
+ 
   
   deleteTakeoff: function (takeoff_id, deletedBy, callback) {
     // first check if the takeoff.created_by matches the deletedBy user_id
