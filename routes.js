@@ -446,6 +446,7 @@ module.exports = function (app) {
           console.log(err);
         } else {
           console.log(takeoff);
+          console.log(allMaterials);
           res.render("editTakeoff.html", {
             sys:render.sys,
             takeoff: takeoff,
@@ -1359,6 +1360,10 @@ module.exports = function (app) {
     const invoice_id = req.body.invoice_id;
     const method = req.body.method;
 
+    // attach the invoice_id to the session
+    req.session.invoice_id = invoice_id;
+
+
     console.log(invoice_id + " " + method + " " + takeoff_id + " " + req.body); // check if the method is valid
 
     if (method == null || !['card', 'us_bank_account'].includes(method)) {
@@ -1366,7 +1371,7 @@ module.exports = function (app) {
     } else {
 
       console.log("post updating method with", method);
-      db.updatePaymentMethod(takeoff_id, method, function (err) {
+      db.updateInvoicePaymentMethod(invoice_id, method, function (err) {
         if (err) {
           console.log(err);
         } else {
@@ -1396,10 +1401,10 @@ module.exports = function (app) {
         //   console.log('total is null');
         //   total = 50.00;
         // }
-        if (invoice.payment_method == 'us_bank_account') {
+        if (invoice.invoice_payment_method == 'us_bank_account') {
           invoice.invoiceTotal = invoice.invoiceTotal + (15.00*100);
         }
-        if (invoice.payment_method == 'card') {
+        if (invoice.invoice_payment_method == 'card') {
           invoice.invoiceTotal = invoice.invoiceTotal * 1.03 + 30;
         }
 
@@ -1464,7 +1469,7 @@ module.exports = function (app) {
         // apply offsets according to the payment method
         if (invoice.payment_method == 'us_bank_account') {
           invoice.invoiceTotal = invoice.invoiceTotal + 15.00;
-        } else if (invoice.payment_method == 'card'){
+        } else if (invoice.invoice_payment_method == 'card'){
           invoice.invoiceTotal = invoice.invoiceTotal * 1.03 + 30;
         }
 
@@ -1598,9 +1603,9 @@ module.exports = function (app) {
 
 
               // apply offsets according to the payment method
-              if (invoice.payment_method == 'us_bank_account') {
+              if (invoice.invoice_payment_method == 'us_bank_account') {
                 invoice.invoiceTotal = invoice.invoiceTotal + (15.00*100);
-              } else if (invoice.payment_method == 'card'){
+              } else if (invoice.invoice_payment_method == 'card'){
                 invoice.invoiceTotal = invoice.invoiceTotal * 1.03 + 0.30;
               } else {
                 invoice.invoiceTotal = invoice.invoiceTotal + 15;
@@ -1626,7 +1631,7 @@ module.exports = function (app) {
                 ],
                 mode: 'payment',
                 return_url: creds.domain + `/return?session_id={CHECKOUT_SESSION_ID}`, // different return url for invoices? nah
-                payment_method_types: [method],
+                payment_method_types: [invoice.invoice_payment_method],
               });
 
               res.send({ clientSecret: session.client_secret });
@@ -1652,6 +1657,26 @@ module.exports = function (app) {
       let raw_amount = session.amount_total - Math.floor((session.amount_total) * 0.0288);
       console.log("session.amount_total: " + session.amount_total);
       console.log("Amount Recieved from stripe" + raw_amount);
+
+      console.log("session:", session);
+
+      // insert into the payment history table (takeoff_id, invoice_id, amount)
+
+      // get the takeoff_id from the invoice_id
+      db.getInvoiceById(session.invoice_id, null, function (err, invoice) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("invoice is ", invoice);
+          db.insertPaymentHistory(invoice.takeoff_id, invoice.id, raw_amount, function (err) {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log("payment history inserted");
+            }
+          });
+        }
+      });
 
 
       // take this information and insert it into the data base
@@ -1691,6 +1716,11 @@ module.exports = function (app) {
           console.log(err);
         }
 
+
+        // format the dates of the payments
+        for (let i = 0; i < payments.length; i++) {
+            payments[i].created_at = moment(payments[i].created_at).format('MMMM Do YYYY, h:mm:ss a');
+        }
         db.getTakeoffById(req.body.takeoff_id, function (err, takeoff) {
           if (err) {
             console.log(err);
@@ -1718,6 +1748,7 @@ module.exports = function (app) {
 
 
     app.post("/payment", function (req, res){
+      console.log("POST /payment");
       console.log(req.body);
       db.getInvoiceByNumber(req.body.invoice_number, function (err, invoice) {
         if (err) {
@@ -1782,6 +1813,24 @@ module.exports = function (app) {
     //     }
     //   });
     // });
+
+    app.get('/viewInvoice', mid.isAdmin, function (req, res) {
+      const invoice_id = req.query.invoice_id;
+      const takeoff_id = req.query.takeoff_id;
+
+      console.log("viewing invoice ", invoice_id);
+      db.getInvoiceById(invoice_id, takeoff_id,
+        function (err, invoice) {
+          if (err) {
+            console.log(err);
+            res.send("error retrieving invoice");
+          } else {
+            console.log(invoice);
+            res.render("viewInvoice.html", { invoice: invoice[0] });
+          }
+        });
+    });
+
 
     // POST /create-invoice
   app.post('/create-invoice', mid.isAdmin, (req, res) => {

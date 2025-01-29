@@ -43,18 +43,23 @@ function populatePaymentHistoryTable(takeoff_id) {
         const headerCell1 = headerRow.insertCell(0);
         const headerCell2 = headerRow.insertCell(1);
         const headerCell3 = headerRow.insertCell(2);
+        const headerCell4 = headerRow.insertCell(3);
         headerCell1.textContent = 'Invoice Number';
         headerCell2.textContent = 'Total';
         headerCell3.textContent = 'View Count';
+        headerCell4.textContent = 'View';
         
         invoices.forEach(invoice => {
             const row = invoiceTable.insertRow();
             const cell1 = row.insertCell(0);
             const cell2 = row.insertCell(1);
             const cell3 = row.insertCell(2);
+            const cell4 = row.insertCell(3);
             cell1.textContent = invoice.invoice_number;
             cell2.textContent = invoice.total;
             cell3.textContent = invoice.view_count;
+            cell4.innerHTML = `<a href="/viewInvoice/?invoice_id=${invoice.id}?takeoff_id=${takeoff_id}">View</a>`;
+
         });
 
         // Update the total paid and total due

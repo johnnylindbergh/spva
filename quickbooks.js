@@ -11,9 +11,13 @@ const mid = require('./middleware.js');
 const creds = require('./credentials');
 const db = require('./database.js');
 require('dotenv').config();
+var Quickbooks = require('node-quickbooks');
+
+
 
 let oauth2_token_json = null;
 let oauthClient = null;
+var qbo = null;
 
 /**
  * Initialize OAuth Client
@@ -158,8 +162,8 @@ async function pushInvoiceToQuickbooks (invoice_id, takeoff_id, callback) {
           }
 
         } catch (error) {
-          console.error('Error creating invoice:', error);
-          callback("big error", null);
+         // console.error('Error creating invoice:', error);
+          callback(err, null);
         }
 
      
@@ -204,6 +208,22 @@ module.exports = function (app) {
 
       // Start syncing customers after authentication
       await syncCustomers();
+
+      qbo = new QuickBooks(consumerKey,
+        creds.quickbooks.consumerSecret,
+        oauthClient.getToken().accessToken,
+        false, // no token secret for oAuth 2.0
+        oauthClient.getToken().realmId,
+        true, // use the sandbox?
+        true, // enable debugging?
+        null, // set minorversion, or null for the latest version
+        '2.0', //oAuth version
+        refreshToken);
+
+        qbo.getBillPayment('42', function(err, billPayment) {
+          console.log(billPayment)
+        })
+
       res.send('Callback success. Customers syncing...');
     } catch (error) {
       console.error('Error during callback:', error);
@@ -220,7 +240,7 @@ module.exports = function (app) {
     pushInvoiceToQuickbooks(invoice_id, takeoff_id, (err, response) => {
       if (err) {
         console.log(err);
-        res.status(500).send("Error pushing invoice to QuickBooks");
+        res.redirect('/quickbooks');
       } else {
         console.log(response);
         res.send(response);

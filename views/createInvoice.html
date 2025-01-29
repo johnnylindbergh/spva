@@ -151,10 +151,11 @@ function shareInvoiceWithCustomer(invoiceId) {
                         <div id="shareWithCustomer">
                             <button id="share-with-customer" onclick="shareInvoiceWithCustomer(${invoice.id});">Share with Customer</button>
                         </div>
-
+                        {{^invoice.qb_number}}
                         <div id="pushToQuickbooks">
                             <button id="push-to-quickbooks" onclick="pushInvoiceToQuickbooks(${invoice.id});">Push to Quickbooks</button>
                         </div>
+                        {{/invoice.qb_number}}
                     </div>
                 `;
                 invoiceInfo.innerHTML = invoiceHtml;

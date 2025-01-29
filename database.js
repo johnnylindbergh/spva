@@ -1916,6 +1916,17 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
     );
   },
 
+  updateInvoicePaymentMethod: function (invoice_id, payment_method, callback) {
+    con.query(
+      "UPDATE invoices SET invoice_payment_method = ? WHERE id = ?;",
+      [payment_method, invoice_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
   getSharedInvoice: function (hash, callback) {
     con.query(
       "SELECT * FROM invoices WHERE hash = ?;",
@@ -1940,8 +1951,18 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
         callback(null);
       }
     );
-  }
-  ,
+  },
+
+  insertPaymentHistory: function (takeoff_id, invoice_id, amount, callback) {
+    con.query(
+      "INSERT INTO payment_history (takeoff_id, invoice_id, amount) VALUES (?,?,?);",
+      [takeoff_id, invoice_id, amount],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
 
 
           // 
