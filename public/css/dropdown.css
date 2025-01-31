@@ -1,65 +1,83 @@
-Dropdown Button
+/* Dropdown button */
 .dropbtn {
-  color:black;
-
+  color: black;
   border: none;
   cursor: pointer;
+  background-color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
 }
 
 /* Dropdown button on hover & focus */
 .dropbtn:hover, .dropbtn:focus {
-  background-color:#f48847;
+  background-color: #f48847;
+  color: white;
 }
 
 /* The search field */
 #myInput {
   box-sizing: border-box;
   background-image: url('/searchicon.png');
-   background-size: 18px;
+  background-size: 18px;
   background-position: 14px 12px;
   background-repeat: no-repeat;
   font-size: 16px;
   padding: 14px 20px 12px 45px;
-  border: none;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: border-color 0.3s ease;
 }
 
-
-
 /* The search field when it gets focus/clicked on */
-#myInput:focus {outline: 3px solid #ddd;}
+#myInput:focus {
+  outline: none;
+  border-color: #f48847;
+}
 
 /* The container <div> - needed to position the dropdown content */
 .dropdown {
-  position: absolute;
+  position: relative;
   display: inline-block;
-  float: right;
-
+  float:right;
+  margin-right: 12px;
+  background-color: white;
+  min-width: 330px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1;
 }
 
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
   height: 400px;
   overflow-y: scroll;
-  display: none;
   position: absolute;
-  /* background-color:whitesmoke; */
-  background-color:white;
-  /* min-width: 230px; */
+  margin-right:12px;
+  background-color: white;
+  min-width: 330px;
   border: 1px solid #ddd;
-  /* z-index: 1; */
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1;
 }
 
 /* Links inside the dropdown */
 .dropdown-content a {
-
   padding: 12px 16px;
   text-decoration: none;
   display: block;
+  color: #136e7a;
+  transition: background-color 0.3s ease;
 }
 
 /* Change color of dropdown links on hover */
-.dropdown-content a:hover {background-color: rgb(220, 220, 220)}
+.dropdown-content a:hover {
+  background-color: rgb(220, 220, 220);
+}
 
 /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
-.show {display:block;}
+.show {
+  display: block;
+}

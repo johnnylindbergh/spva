@@ -1,6 +1,11 @@
+// some global variables
 let subject_id = 0;
 let material_id = 0;
 let takeoff_id = 0;
+let laborTotal = 0;
+let materialTotal = 0;
+
+
 
 function toggleMaterial(materialId, checkbox) {
   console.log("Material toggled: " + materialId);
@@ -112,29 +117,25 @@ function updateTakeoffInvoiceEmailAddress() {
     });
 }
 
-function add_subject(id, material_name) {
+function add_subject(id) {
   subject_id = id;
-  console.log("Adding material for subject: " + material_name);
+  // scroll to top of page
+  //window.scrollTo(0, 0);
+  console.log("Adding material for subject: " + id);
   // $("#selected_subject").text("Selected subject: " + material_name);
-  document.getElementById("myDropdown").classList.toggle("show");
   // move the dropdown to the position of the button that was clicked the row id is the subject id
   let button = $("#add_material_button_" + id);
   let dropdown = $("#myDropdown");
+ // dropdown.css("display", "block");
   // get the coordinates of the button
-  let offset = button.offset();
 
-  if (offset) {
-    dropdown.css("left", offset.left - 380 + "px");
-    dropdown.css("top", offset.top - 250 + "px");
-  } else {
-    console.log("Button not found for subject id: " + id);
-  }
+
 }
 
 function add_material(id) {
   console.log("Added material_id " + id + " for subject " + subject_id);
   material_id = id;
-  document.getElementById("myDropdown").classList.toggle("show");
+ // document.getElementById("myDropdown").classList.toggle("show");
 
   if (material_id != null && subject_id != null) {
     add_material_subject();
@@ -200,9 +201,24 @@ function deletePlans(){
     });
 }
 
+function updateSliderValue(value) {
+  document.getElementById('sliderValue').innerText = "$"+ value + "/hr";
+  console.log(laborTotal)
+
+  let labor_rate = parseFloat(value);
+  let labor_adjusted = laborTotal / labor_rate;
+  $('#laborAdjusted').text(labor_adjusted.toFixed(2) + " hours");
+  console.log(labor_adjusted)
+}
+
 // the big one
 function loadTakeoffMaterials(id) {
   takeoff_id = id;
+
+  
+  laborTotal = 0;
+  materialTotal = 0;
+
   console.log("Loading takeoff materials");
 
   $.post("/loadTakeoffMaterials", { takeoff_id: takeoff_id })
@@ -211,6 +227,7 @@ function loadTakeoffMaterials(id) {
       $("#takeoff_materials_table").empty();
 
       let headerRow = $("<tr></tr>");
+      headerRow.append("<th></th>");
       headerRow.append("<th>Applied</th>");
       headerRow.append("<th>Separate <br> Line item</th>");
       headerRow.append("<th>Name</th>");
@@ -222,12 +239,17 @@ function loadTakeoffMaterials(id) {
       headerRow.append("<th>Labor Cost</th>");
       $("#takeoff_materials_table").append(headerRow);
 
-      let sum = 0;
+    
 
       data.subjects.forEach((row) => {
         console.log(row);
         let newRow = $("<tr></tr>");
 
+        let colorIndicator = $("<span class='fa fa-circle'></span>");
+        colorIndicator.css("color", row.color);
+        newRow.append($("<td></td>").append(colorIndicator));
+
+        console.log(row.color);
         // Checkbox for toggling material
         let checkbox = $(
           "<input type='checkbox' onclick='toggleMaterial(" +
@@ -251,7 +273,7 @@ function loadTakeoffMaterials(id) {
         newRow.append($("<td></td>").append(separateLineCheckbox));
 
         // Material name
-        newRow.append("<td style='width:10px;'>" + row.material_name + "</td>");
+        newRow.append("<td >" + row.material_name + "</td>");
 
         // Measurement input
         let measurementInput = $("<input>")
@@ -340,7 +362,7 @@ function loadTakeoffMaterials(id) {
         let laborsum = 0;
 
         laborsum = row.labor_cost * parseFloat(row.measurement);
-
+        laborTotal += laborsum;
         if (row.applied != 0) {
           console.log(row.selected_materials);
           if (row.selected_materials && row.selected_materials.length > 0) {
@@ -482,8 +504,8 @@ function loadTakeoffMaterials(id) {
             console.log("subsum is NaN or Infinite");
             subsum = 0; // Reset subsum to 0 if invalid
           }
-          sum += subsum;
-          sum += laborsum;
+          materialTotal += subsum;
+          
         } else {
           newRow.append("<td>No Materials Applied</td>");
           newRow.attr("style", "background-color: #f2f2f2; opacity: 0.5;");
@@ -497,12 +519,18 @@ function loadTakeoffMaterials(id) {
       });
 
       // Update total sum
-      $("#sum").text("Total Cost: $" + numberWithCommas(sum.toFixed(2)));
+      $("#sum").text("Total Cost: $" + numberWithCommas((laborTotal + materialTotal).toFixed(2)));
 
-      //now post the new sum to /updateTakeoffTotal
+      // Update labor total
+      $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotal.toFixed(2)));
+      $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialTotal.toFixed(2)));
+
+      //now post the new sums to /updateTakeoffTotal
       $.post("/updateTakeoffTotal", {
         takeoff_id: takeoff_id,
-        total: sum.toFixed(2),
+        total: (laborTotal + materialTotal).toFixed(2),
+        laborTotal: laborTotal.toFixed(2),
+        materialTotal: materialTotal.toFixed(2),
       })
         .done(function () {
           console.log("Total updated for takeoff: " + takeoff_id);
@@ -598,7 +626,7 @@ function priceChange(id) {
 
   console.log("New price: " + newPrice);
 
-  $.post("/change-material-price", { material_id: id, delta: delta, takeoff_id: takeoff_id })
+  $.post("/change-material-price", { material_id: id, delta: delta.toFixed(2), takeoff_id: takeoff_id })
     .done(function (response) {
       console.log("Price updated for material: " + id);
     })
@@ -620,7 +648,7 @@ function createSubjectIntent() {
   $("#add-subject-button").hide();
 
     // scroll the page down 500px
-    window.scrollBy(0, 100);
+    //window.scrollBy(0, 100);
 
   let name = $("#new_subject_name").val();
   console.log("Creating new subject: " + name);
@@ -675,6 +703,10 @@ $(document).ready(function () {
   takeoff_id = $("#takeoff_id").val();
   console.log("Takeoff ID: " + takeoff_id);
   loadTakeoffMaterials(takeoff_id); // better
+  setTimeout(function () {
+    updateSliderValue(21);
+
+  }, 500);
 
   // call load takeoff materials every 5 seconds
   // setInterval(function () {

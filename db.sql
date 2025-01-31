@@ -99,6 +99,8 @@ CREATE TABLE takeoffs (
   hash VARCHAR(64),
   view_count INT DEFAULT 0,
   total DECIMAL(10,2),
+  material_cost DECIMAL(10,2),
+  labor_cost DECIMAL(10,2),
   tax DECIMAL(10,2) DEFAULT 5.3, -- Default value to be set by application logic
   payment_method VARCHAR(64),
   duration_hours INT,
@@ -166,6 +168,17 @@ CREATE TABLE invoices (
   view_count INT DEFAULT 0,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+);
+
+CREATE TABLE invoice_items (
+  id INT NOT NULL AUTO_INCREMENT,
+  invoice_id INT NOT NULL,
+  description VARCHAR(255),
+  cost DECIMAL(10,2),
+  quantity INT,
+  description VARCHAR(64),
+  PRIMARY KEY (id),
+  FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
 );
 
 -- Payment history table
@@ -237,6 +250,7 @@ CREATE TABLE applied_materials (
   name VARCHAR(64) NOT NULL,
   measurement DECIMAL(10,2),
   measurement_unit VARCHAR(64),
+  color VARCHAR(64),
   top_coat INT NOT NULL,
   primer INT,
   cost_delta DECIMAL(10,2) DEFAULT 0,

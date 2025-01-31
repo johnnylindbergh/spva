@@ -71,18 +71,16 @@ function applySubjectCoatRules(takeoff_id, callback) {
     }
     for (let i = 0; i < subjects.length; i++) {
       const subject = subjects[i];
-      console.log("Processing subject:", subject);
+      //console.log("Processing subject:", subject);
       if (subject.top_coat > 0) {
         for (let n = 1; n <= subject.top_coat; n++) {
           con.query(
-            "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?);",
-            [takeoff_id, subject.name + " top coat " + n, subject.measurement, subject.measurement_unit, 0, 0, 0],
+            "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+            [takeoff_id, subject.name + " top coat " + n, subject.measurement, subject.measurement_unit, subject.color, 0, 0, 0],
             function (err) {
               if (err) {
                 console.error("Error inserting top coat:", err);
-              } else {
-                console.log("Successfully inserted top coat.");
-              }
+              } 
             }
           );
         }
@@ -90,14 +88,12 @@ function applySubjectCoatRules(takeoff_id, callback) {
       if (subject.primer > 0) {
         for (let n = 1; n <= subject.primer; n++) {
           con.query(
-            "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?);",
-            [takeoff_id, subject.name + " primer " + n, subject.measurement, subject.measurement_unit, 0, 0, 0],
+            "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+            [takeoff_id, subject.name + " primer " + n, subject.measurement, subject.measurement_unit,subject.color, 0, 0, 0],
             function (err) {
               if (err) {
                 console.error("Error inserting primer:", err);
-              } else {
-                console.log("Successfully inserted primer.");
-              }
+              } 
             }
           );
         }
@@ -133,7 +129,7 @@ function applySubjectNamingRules(takeoff_id, callback) {
 
     for (let i = 0; i < subjects.length; i++) {
       const subject = subjects[i];
-      console.log("Processing subject:", subject);
+      //console.log("Processing subject:", subject);
 
       if (subject.name.toLowerCase().includes("remove from") || subject.name.toLowerCase().includes("remove")) {
         let removeSubject = subject.name.split("remove")[1]?.trim();
@@ -158,7 +154,7 @@ function applySubjectNamingRules(takeoff_id, callback) {
             console.log(`No matching subject found to remove from for "${removeSubject}".`);
           } else {
             const targetSubject = subjects[minSubjectId];
-            console.log(`Subtracting ${subject.measurement} from ${targetSubject.measurement} (ID: ${targetSubject.id}).`);
+            //console.log(`Subtracting ${subject.measurement} from ${targetSubject.measurement} (ID: ${targetSubject.id}).`);
 
             pendingQueries++;
             con.query("UPDATE applied_materials SET measurement = measurement - ? WHERE id = ?;", 
@@ -166,7 +162,7 @@ function applySubjectNamingRules(takeoff_id, callback) {
               if (err) {
                 console.error("Error updating measurement:", err);
               } else {
-                console.log("Successfully updated measurement.");
+                //console.log("Successfully updated measurement.");
               }
               pendingQueries--;
               checkPendingQueries();
@@ -203,7 +199,7 @@ function matchSubjectStrings(currentSubjectId, takeoff_id) {
     }
     const currentSubject = currentSubjects[0].name;
 
-    console.log("Matching subject strings.");
+    //console.log("Matching subject strings.");
     // First, get the frequency of materials applied to a given subject in the applied_materials table
     con.query(
       "SELECT material_id, name, COUNT(*) as count FROM applied_materials WHERE name = ? AND material_id IS NOT NULL GROUP BY material_id ORDER BY count DESC LIMIT 1;",
@@ -214,7 +210,7 @@ function matchSubjectStrings(currentSubjectId, takeoff_id) {
         }
 
         // Assign these materials to the applied_materials table
-        console.log("Frequent materials for " + currentSubject + ":" + materials);
+        //console.log("Frequent materials for " + currentSubject + ":" + materials);
 
         if (materials != null && materials.length > 0) {
           //very important to match to takeoff_id or else this query would update all the takeoffs in the table
@@ -254,7 +250,7 @@ function matchSubjectStrings(currentSubjectId, takeoff_id) {
                   if (err) {
                     console.log(err);
                   }
-                  console.log("found a close match: ", currentSubject, min_id);
+                  //console.log("found a close match: ", currentSubject, min_id);
                 }
               );
             }
@@ -317,27 +313,30 @@ module.exports = {
   // loads results with is an array with the headers into the table subjects in the database
 
   loadTakeoffData: function (takeoff_id, results, headers, cb) {
+
+    
     [
-      "Take out of walls",
-      "A-201 - EXTERIOR ELEVATIONS",
-      "9/13/2024 8:37",
-      "",
-      "#80FFFF",
-      "59.76",
-      `ft' in"`,
-      "223.2",
-      "sf",
-      "507.96",
-      "sf",
-      "8.5",
-      `ft' in"`,
-      "0",
-      "223.2",
-      "sf",
+      'Group',
+      'I-002 - FINISH LEGEND / SCHEDULE',
+      '9/11/2024 10:59',
+      0,
+      '#FF0000',
+      '0',
+      0,
+      '0',
+      0,
+      '0',
+      0,
+      0,
+      0,
+      '0',
+      '1',
+      'Count',
+      '2',
+      '1'
     ];
 
-
-    console.log("the headers of the csv are: ",headers);
+    //console.log("the headers of the csv are: ",headers);
     for (var i = 1; i < results.length; i++) {
       // format all values in the row and set blank values to zero
       for (var j = 0; j < results[i].length; j++) {
@@ -357,7 +356,7 @@ module.exports = {
       if (dateIndex === -1) {
         dateIndex = headers.indexOf("date");
       } else {
-        results[i][dateIndex] = date(results[i][2]).format("YYYY-MM-DD HH:mm:ss");
+        results[i][dateIndex] = moment(results[i][2]).format("YYYY-MM-DD HH:mm:ss");
 
       }
 
@@ -381,11 +380,42 @@ module.exports = {
       // console.log("measurement: " ,results[i][14]);
       // console.log("measurement_unit: " ,results[i][15]);
 
-      var measurement = results[i][14];
 
-      if (parseFloat(results[i][9]) !== 0) { // if the wall area is not zero, use the wall area and wall area unit
+      var mesurementIndex = headers.indexOf("Measurement");
+      if (mesurementIndex === -1) { 
+        mesurementIndex = headers.indexOf("measurement");
+      }
+
+      var measurementUnitIndex = headers.indexOf("Measurement Unit");
+      if (measurementUnitIndex === -1) {
+        measurementUnitIndex = headers.indexOf("measurement unit");
+      }
+
+      var wallAreaIndex = headers.indexOf("Wall Area");
+      if (wallAreaIndex === -1) {
+        wallAreaIndex = headers.indexOf("wall area");
+      }
+
+      var wallAreaUnitIndex = headers.indexOf("Wall Area Unit");
+      if (wallAreaUnitIndex === -1) {
+        wallAreaUnitIndex = headers.indexOf("wall area unit");  
+      }
+
+      var measurement = parseFloat(results[i][mesurementIndex]);
+      var measurementUnit = results[i][measurementUnitIndex];
+
+      var wallArea = parseFloat(results[i][wallAreaIndex]);
+      var wallAreaUnit = parseFloat(results[i][wallAreaUnitIndex]);
+
+      if (parseFloat(wallArea) !== 0) { // if the wall area is not zero, use the wall area and wall area unit
         measurement = parseFloat(results[i][9]);
         measurementUnit = results[i][10];
+
+        // if also linear ft, warn the user that the measurement is in linear ft
+        if (measurementUnit === "ft' in") {
+          console.log("the original measurement unit is ")
+          measurementUnit = "sqft";
+        }
       }
       //console.log("measurement: ", measurement);
 
@@ -408,7 +438,7 @@ module.exports = {
           results[i][3],
           results[i][4],
           parseFloat(measurement),
-          results[i][15],
+          measurementUnit,
           results[i][16],
           results[i][17],
         ],
@@ -757,10 +787,10 @@ module.exports = {
     );
   },
 
-  updateTakeoffTotal: function (takeoff_id, total, callback) {
+  updateTakeoffTotal: function (takeoff_id, total, materialTotal, laborTotal, callback) {
     con.query(
-      "UPDATE takeoffs SET total = ? WHERE id = ?;",
-      [total, takeoff_id],
+      "UPDATE takeoffs SET total = ?, material_cost = ?, labor_cost = ? WHERE id = ?;",
+      [total, materialTotal, laborTotal, takeoff_id],
       function (err) {
         if (err) return callback(err);
         callback(null);
@@ -1401,6 +1431,26 @@ module.exports = {
                 //callback(true, null);
               }
             );
+
+            // create an invoice for 20% of the total
+            con.query(
+              "SELECT * FROM takeoffs WHERE id = ?;",
+              [takeoff_id],
+              function (err, takeoff) {
+                if (err) return callback(err);
+                let invoiceTotal = parseFloat(takeoff[0].total) * 0.2;
+                let invoiceNumber = Math.floor(Math.random() * 1000000000);
+                con.query(
+                  "INSERT INTO invoices (takeoff_id, total, invoice_number) VALUES (?,?,?);",
+                  [takeoff_id, invoiceTotal, invoiceNumber],
+                  function (err) {
+                    if (err) return callback(err);
+                    //callback(true, null);
+                  }
+                );
+              }
+            );
+            
           } else {
             console.log(
               "signature does not match owner_name or owner_name is null"
@@ -1457,12 +1507,13 @@ module.exports = {
               } 
                 console.log("Inserted subject: ", currentSubject);
                 con.query(
-                "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?);",
+                "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
                 [
                   takeoff_id,
                   subjects[i].subject,
                   subjects[i].total_measurement,
                   subjects[i].measurement_unit,
+                  subjects[i].color,
                   default_labor_cost[0].setting_value,
                   subjects[i].top_coat||0,
                   subjects[i].primer||0,

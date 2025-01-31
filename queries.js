@@ -9,13 +9,16 @@ module.exports = {
       applied_materials.labor_cost AS labor_cost,
       applied_materials.measurement AS measurement,
       applied_materials.measurement_unit AS measurement_unit,
+      applied_materials.color AS color,
       materials.name AS material_name_from_materials
     FROM
       applied_materials
     LEFT JOIN
       materials ON applied_materials.material_id = materials.id
     WHERE
-      applied_materials.takeoff_id = ?;`,
+      applied_materials.takeoff_id = ?
+    ORDER BY applied_materials.name ASC;
+      `,
 
       getCustomerTakeoff: `SELECT 
     takeoffs.id AS takeoff_id,
@@ -28,6 +31,8 @@ module.exports = {
     takeoffs.hash AS takeoff_hash,
     takeoffs.view_count AS takeoff_view_count,
     takeoffs.total AS takeoff_total,
+    takeoffs.material_cost AS material_total,
+    takeoffs.labor_cost AS labor_total,
     takeoffs.tax AS takeoff_tax,
     takeoffs.payment_method AS takeoff_payment_method,
     takeoffs.duration_hours AS takeoff_duration_hours,

@@ -2,7 +2,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sun Painting Estimate</title>
-        <!-- Include the Google Translate scripts -->
+    <!-- Include the Google Translate scripts -->
     <!-- <script type="text/javascript">
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
@@ -28,105 +28,117 @@
     <link rel="stylesheet" href="css/navbar.css">
     <script src="/js/generateEstimate.js"></script>
 </head>
+
 <body>
-<body>
-  <div class="navbar">
-    <ul>
-      <li><a href="javascript:history.back()">Back</a></li>
-      <li><a href="/">{{defaults.sysName}}</a></li>
-      {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
-      <div style="float:right">
-        <li><a href="/auth/google">Log In</a></li>
-        <li><a href="/logout">Log Out</a></li>
-      </div>
-    </ul>
-  </div>
-<nav class="bottom-navbar">
-    <input type="button" value="send to my email: {{email}}" onclick="shareSelf()" class="img-button-client">
-    <input type="button" value="Share With Client" onclick="shareClient()" class="img-button-client">
-    <input type="button" value="Toggle Numbers" onclick="toggleNumbers()" class="img-button-client">
-    <!-- Add Google Translate Widget -->
-    <input type="button" value="Select Language" onclick="toggleTranslateMenu()" class="img-button-client">
-    <div id="google_translate_element" style="display: none;"></div>
-</nav>
 
-    <div class="container">
-
-         <div class="image-container">
-            <img src="sunpainting_logo_blue.png" alt="Sun Painting Logo">
+    <body>
+        <div class="navbar">
+            <ul>
+                <li><a href="javascript:history.back()">Back</a></li>
+                <li><a href="/">{{defaults.sysName}}</a></li>
+                {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}}
+                <div style="float:right">
+                    <li><a href="/auth/google">Log In</a></li>
+                    <li><a href="/logout">Log Out</a></li>
+                </div>
+            </ul>
         </div>
-    </br>
-        <p>1819 Broadway St, Charlottesville, VA 22902 US</p> </br>
-        <p>Phone: +1 434-207-2025 | Email: <a href="mailto:sales@sunpaintingva.com" style="color:#000000;">sales@sunpaintingva.com</a></p>
-        <p>Website: <a href="http://www.sunpaintingva.com" style="color:#000000;">www.sunpaintingva.com</a></p>
+        <nav class="bottom-navbar">
+            <input type="button" value="send to my email: {{email}}" onclick="shareSelf()" class="img-button-client">
+            <input type="button" value="Share With Client" onclick="shareClient()" class="img-button-client">
+            <input type="button" value="Toggle Numbers" onclick="toggleNumbers()" class="img-button-client">
+            <!-- Add Google Translate Widget -->
+            <input type="button" value="Select Language" onclick="toggleTranslateMenu()" class="img-button-client">
+            <div id="google_translate_element" style="display: none;"></div>
+        </nav>
 
-        
-         {{#takeoff}}
+        <div class="container">
 
-
-       <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
-        </br>
-        Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{customer_givenName}}'></br></br>
-        Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{customer_billing_address}}'></br></br>
-        Owner Email Address: <input type= 'text' class="hiddenInput" id= 'owner_email_address' onchange='updateTakeoffOwnerEmailAddress()' value='{{customer_primary_email_address}}'></br></br>
-        Invoice Email Address: <input type= 'text' class="hiddenInput" id= 'invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{customer_invoice_email_address}}'></br>
-        last updated {{updated_at}} </br> by {{last_updated_by}} </br>
-
-       <input type='hidden' id='takeoff_total' value='{{takeoff_info.total}}'>
-         <input type='hidden' id='takeoff_tax' value='{{takeoff_info.tax}}'>
-
-      </br>
-    {{/takeoff}}
-
-    <p> {{response}}</p>
-
-    <div class="subcontainer">
-        <table id="estimate-table">
-            <tr>
-                <th>Description</th>
-                <th>Amount</th>
-            </tr>
-            <tr>
-                <td contenteditable="true" class="editable" id="proposal-includes">
-                    <ul id="includes-list"></ul>
-                </td>
-                <td id="includes-total" class="amount-column">{{includes_total}}</td>
-            </tr>
-            <tr>
-                <td contenteditable="true" class="editable" id="exclusions">
-                    <ul id="exclusions-list"></ul>
-                </td>
-                <td id="excludes-total" class="amount-column">${{exclude_total}}</td>
-            </tr>
-        </table>
-
-         </br>
-
-        <table id="options-table">
-
-        </table>
+            <div class="image-container">
+                <img src="sunpainting_logo_blue.png" alt="Sun Painting Logo">
+            </div>
+            </br>
+            <p>1819 Broadway St, Charlottesville, VA 22902 US</p> </br>
+            <p>Phone: +1 434-207-2025 | Email: <a href="mailto:sales@sunpaintingva.com"
+                    style="color:#000000;">sales@sunpaintingva.com</a></p>
+            <p>Website: <a href="http://www.sunpaintingva.com" style="color:#000000;">www.sunpaintingva.com</a></p>
 
 
-        </div>
+            {{#takeoff}}
 
 
-    <div class="options-container">
-        <div class="addOption">
-            <form id="addOptionForm" onsubmit="postToAddOption(event)">
-                <label for="description">Description:</label>
-                <input type="text" id="description" name="description" required>
-                <label for="optionPrice">Option Price:</label>
-                <input type="text" id="cost_delta" name="cost_delta" required>
-                <input type="hidden" id="takeoff_id" name="takeoff_id" value="1234">
-                <input type="submit" value="Add Option">
-            </form>
-        </div>
-    </div>
-    
-        
-        
+            <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
+            </br>
+            Owner: <input type='text' class="hiddenInput" id='takeoff_owner_name' onchange='updateTakeoffOwnerName()'
+                value='{{customer_givenName}}'></br></br>
+            Billing Address: <input type='text' class="hiddenInput" id='owner_billing_address'
+                onchange='updateTakeoffBillingAddress()' value='{{customer_billing_address}}'></br></br>
+            Owner Email Address: <input type='text' class="hiddenInput" id='owner_email_address'
+                onchange='updateTakeoffOwnerEmailAddress()' value='{{customer_primary_email_address}}'></br></br>
+            Invoice Email Address: <input type='text' class="hiddenInput" id='invoice_email_address'
+                onchange='updateTakeoffInvoiceEmailAddress()' value='{{customer_invoice_email_address}}'></br>
+            last updated {{takeoff_updated_at}} </br> by {{takeoff_last_updated_by}} </br>
+
+
+            </br>
+            {{/takeoff}}
+
+            <p> {{response}}</p>
+
+            <div class="subcontainer">
+                <table id="estimate-table">
+                    <tr>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                    <tr>
+                        <td contenteditable="true" class="editable" id="proposal-includes">
+                            <ul id="includes-list"></ul>
+                        </td>
+                        <td id="includes-total" class="amount-column">{{includes_total}}</td>
+                    </tr>
+                    <tr>
+                        <td contenteditable="true" class="editable" id="exclusions">
+                            <ul id="exclusions-list"></ul>
+                        </td>
+                        <td id="excludes-total" class="amount-column">${{exclude_total}}</td>
+                    </tr>
+                </table>
+
+                </br>
+
+                <table id="options-table">
+
+                </table>
+            </br>
+                <div class="totals-container" style="text-align: right;">
+                    {{#takeoff}}
+                    <h1 class="display-4" style="margin: 0;">${{takeoff_total}}</h1> </br>
+                    <h2 class="h5" style="margin: 0; text-align: right;"> Labor Cost: ${{labor_total}}</h2>
+                    <h2 class="h5" style="margin: 0; text-align: right;"> Material Cost: ${{material_total}}</h2>
+                    <h2 class="h5" style="margin: 0; text-align: right;">%{{takeoff_tax}}</h2>
+                    {{/takeoff}}
+                </div>
+            </div>
+
+
+            <div class="options-container">
+                <div class="addOption">
+                    <form id="addOptionForm" onsubmit="postToAddOption(event)">
+                        <label for="description">Description:</label>
+                        <input type="text" id="description" name="description" required>
+                        <label for="optionPrice">Option Price:</label>
+                        <input type="text" id="cost_delta" name="cost_delta" required>
+                        <input type="hidden" id="takeoff_id" name="takeoff_id" value="1234">
+                        <input type="submit" value="Add Option">
+                    </form>
+                </div>
+            </div>
+
+
+
             <!-- Signature section with IDs for signature input -->
-        <!-- <div class="signature">
+            <!-- <div class="signature">
             <p><em>This budget estimate is not a contract until signed and returned to Sun Painting.</em></p> </br>
             <p>
                 <strong>Authorized Signature:</strong> 
@@ -135,55 +147,83 @@
                 <input type="date">
             </p>
         </div> -->
-    </div>
-
-
-    <div id="checkout">
-        <!-- Checkout will insert the payment form here -->
-    </div>
-
-
-
-</body>
-</html>
-
-        <div class="notice">
-            <p>Thank you for allowing us to work with you!</p>
-            <p>This Proposal must be signed and dated by the contracting authority for the project and must be received by Sun Painting within 30 days following the listed Proposal Date to be considered formally approved.</p>
-            <p>Proposals received by Sun Painting after 30 Days may require re-pricing.</p>
         </div>
 
-        <!-- Restored Terms and Conditions Section -->
-        <div class="terms-section">
-            <h4> Terms and Conditions - Updated 2/28/24 </h4>
 
-            <p><strong>General Terms:</strong> Sun Painting, LLC proposes to furnish all necessary equipment and perform the labor in a first-class, workmanlike manner according to the terms indicated in this estimate. Before starting, a deposit may be required, with the remaining due upon completion. The client agrees to pay for expenses related to collecting unpaid contract balances and agreed-upon changes.</p>
-
-            <p>This budget proposal is a contract once signed and returned to Sun Painting. The project's contracting authority must sign and date this proposal, and it must be received by Sun Painting within 30 days following the listed Proposal Date to be considered formally approved. Proposals received by Sun Painting after 30 Days may require re-pricing.</p>
-
-            <p>This proposal is strictly limited to the scope of work and inclusions defined within and is based solely on the supplied drawings dated as indicated in the proposal. Please contact our office to submit updated drawings or specifications for a revised estimate. This Proposal assumes reasonable site access and regular working hours (Monday through Friday, 7:00 AM to 5:00 PM). The customer has a 72-hour right to rescind after the date of acceptance.</p>
-
-            <p><strong>Included Warranty Period:</strong> Sun Painting, LLC warrants labor and materials for a period of 1 year. Responsibility is limited to the supply of labor and materials to correct the defective condition. This warranty expressly excludes damages caused by accident/abuse, weather conditions such as temperature changes or excessive moisture, defective building materials or faulty workmanship by others. This warranty does not include adhesion failure of previously applied coatings to the surface below it.</p>
-
-            <p><strong>Change Orders:</strong> Work crews are not authorized to complete work beyond the detailed specifications of this proposal without a written and signed contract change order. Please contact our office for an estimate on any additional work.</p>
-
-            <p><strong>Payment and Invoicing:</strong> A 20% deposit on all approved proposals is required within three (3) business days of the signed contract. (Effective October 1, 2022) Invoices are payable upon receipt and due in full within 30 days of the Invoice Date. A finance charge of 1.5% per month is assessed on all amounts if payment is not received within 30 days of the Invoice Date. Sun Painting, LLC accepts Check, ACH Transfer, or Credit Card payments. - A 3% Convenience Fee will apply to the Invoice Total for Credit Card or ACH payments.</p>
-
-            <ul>
-                <li>Lead Paint Abatement/RRP is excluded unless explicitly stated otherwise.</li>
-                <li>Asbestos Containing Material is excluded unless explicitly stated otherwise.</li>
-                <li>Mold Remediation is excluded unless explicitly stated otherwise.</li>
-                <li>Multi-color-surface paint schemes are excluded unless explicitly stated otherwise.</li>
-                <li>Concrete grinding or other surface preparation is excluded unless explicitly stated otherwise.</li>
-                <li>Assumes no more than five (5) paint colors and/or finishes unless otherwise stated within the proposal estimate.</li>
-                <li>Drywall repairs and undue surface preparation (Assumes minimum Level 4 Drywall finish clean and free of dirt/debris.)</li>
-                <li>Paint samples are limited to five (5) total samples (each color and each finish are considered a sample). Additional sample trips will be charged as time and material and will be in addition to any estimate or proposed costs.</li>
-                <li>Changes to selections (paint color, finishes, materials, etc.) made after the material is purchased will be subject to a 25% restocking fee.</li>
-            </ul>
+        <div id="checkout">
+            <!-- Checkout will insert the payment form here -->
         </div>
+
+
+
+    </body>
+
+    </html>
+
+    <div class="notice">
+        <p>Thank you for allowing us to work with you!</p>
+        <p>This Proposal must be signed and dated by the contracting authority for the project and must be received by
+            Sun Painting within 30 days following the listed Proposal Date to be considered formally approved.</p>
+        <p>Proposals received by Sun Painting after 30 Days may require re-pricing.</p>
+    </div>
+
+    <!-- Restored Terms and Conditions Section -->
+    <div class="terms-section">
+        <h4> Terms and Conditions - Updated 2/28/24 </h4>
+
+        <p><strong>General Terms:</strong> Sun Painting, LLC proposes to furnish all necessary equipment and perform the
+            labor in a first-class, workmanlike manner according to the terms indicated in this estimate. Before
+            starting, a deposit may be required, with the remaining due upon completion. The client agrees to pay for
+            expenses related to collecting unpaid contract balances and agreed-upon changes.</p>
+
+        <p>This budget proposal is a contract once signed and returned to Sun Painting. The project's contracting
+            authority must sign and date this proposal, and it must be received by Sun Painting within 30 days following
+            the listed Proposal Date to be considered formally approved. Proposals received by Sun Painting after 30
+            Days may require re-pricing.</p>
+
+        <p>This proposal is strictly limited to the scope of work and inclusions defined within and is based solely on
+            the supplied drawings dated as indicated in the proposal. Please contact our office to submit updated
+            drawings or specifications for a revised estimate. This Proposal assumes reasonable site access and regular
+            working hours (Monday through Friday, 7:00 AM to 5:00 PM). The customer has a 72-hour right to rescind after
+            the date of acceptance.</p>
+
+        <p><strong>Included Warranty Period:</strong> Sun Painting, LLC warrants labor and materials for a period of 1
+            year. Responsibility is limited to the supply of labor and materials to correct the defective condition.
+            This warranty expressly excludes damages caused by accident/abuse, weather conditions such as temperature
+            changes or excessive moisture, defective building materials or faulty workmanship by others. This warranty
+            does not include adhesion failure of previously applied coatings to the surface below it.</p>
+
+        <p><strong>Change Orders:</strong> Work crews are not authorized to complete work beyond the detailed
+            specifications of this proposal without a written and signed contract change order. Please contact our
+            office for an estimate on any additional work.</p>
+
+        <p><strong>Payment and Invoicing:</strong> A 20% deposit on all approved proposals is required within three (3)
+            business days of the signed contract. (Effective October 1, 2022) Invoices are payable upon receipt and due
+            in full within 30 days of the Invoice Date. A finance charge of 1.5% per month is assessed on all amounts if
+            payment is not received within 30 days of the Invoice Date. Sun Painting, LLC accepts Check, ACH Transfer,
+            or Credit Card payments. - A 3% Convenience Fee will apply to the Invoice Total for Credit Card or ACH
+            payments.</p>
+
+        <ul>
+            <li>Lead Paint Abatement/RRP is excluded unless explicitly stated otherwise.</li>
+            <li>Asbestos Containing Material is excluded unless explicitly stated otherwise.</li>
+            <li>Mold Remediation is excluded unless explicitly stated otherwise.</li>
+            <li>Multi-color-surface paint schemes are excluded unless explicitly stated otherwise.</li>
+            <li>Concrete grinding or other surface preparation is excluded unless explicitly stated otherwise.</li>
+            <li>Assumes no more than five (5) paint colors and/or finishes unless otherwise stated within the proposal
+                estimate.</li>
+            <li>Drywall repairs and undue surface preparation (Assumes minimum Level 4 Drywall finish clean and free of
+                dirt/debris.)</li>
+            <li>Paint samples are limited to five (5) total samples (each color and each finish are considered a
+                sample). Additional sample trips will be charged as time and material and will be in addition to any
+                estimate or proposed costs.</li>
+            <li>Changes to selections (paint color, finishes, materials, etc.) made after the material is purchased will
+                be subject to a 25% restocking fee.</li>
+        </ul>
+    </div>
     </div>
     <br>
     <!-- <script src="scripts.js"></script> -->
 </body>
-</html>
 
+</html>

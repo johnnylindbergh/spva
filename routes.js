@@ -117,44 +117,19 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
     fs.createReadStream(filename)
 
       .pipe(parse({ delimiter: "," }))
-      .on("headers", (headersInOrder) => {
-        console.log(headersInOrder);
-        // console.log(`First header: ${headersInOrder}`);
-        headers = headersInOrder;
-        console.log(headers);
-        //convert to snake case
-        headers = headers.map(function (header) {
-          return header.replace(/\s+/g, "_").toLowerCase();
-        });
-
-        // replace second space if it exists
-        headers = headers.map(function (header) {
-          return header.replace(/\s+/g, "_");
-        });
-
-        // header should not start with an underscore
-        headers = headers.map(function (header) {
-          if (header.startsWith("_")) {
-            return header.substring(1);
-          }
-          return header;
-        });
-
-        //print the headers
-        console.log("headers are ", headers);
-      })
-
       .on("data", function (row) {
         //console.log(row);
         results.push(row);
       })
       .on("end", function () {
-        db.loadTakeoffData(takeoff_id, results, headers, function (err) {
+        console.log("results[0]", results[0]);
+        db.loadTakeoffData(takeoff_id, results, results[0], function (err) {
           if (err) {
             console.log(err);
+            cb(err);
           } else {
             console.log("takeoff loaded");
-            console.log("csv recieved: ", results);
+            //console.log("csv recieved: ", results);
 
             db.generateTakeoffMaterials(takeoff_id, function (err) {
               if (err) {
@@ -199,7 +174,7 @@ module.exports = function (app) {
         console.log(err);
       } else {
         render.takeoffs = takeoffs;
-        console.log("User: " + "Testing User");
+        console.log("User: " + " " + req.user.local.name + " " + "is viewing the main page");
         res.render("main.html", render);
       }
     });
@@ -369,6 +344,7 @@ module.exports = function (app) {
                 function (err) {
                   if (err) {
                     console.log(err);
+                    res.send(err);
                   } else {
                     console.log("takeoff loaded");
                     db.takeoffSetStatus(takeoff_id, 1, function (err) { 
@@ -446,7 +422,7 @@ module.exports = function (app) {
           console.log(err);
         } else {
           console.log(takeoff);
-          console.log(allMaterials);
+          //console.log(allMaterials);
           res.render("editTakeoff.html", {
             sys:render.sys,
             takeoff: takeoff,
@@ -484,7 +460,7 @@ module.exports = function (app) {
 
   app.post("/updateTakeoffTotal", mid.isAdmin, function (req, res) {
     //console.log("updating takeoff total ", req.body);
-    db.updateTakeoffTotal(req.body.takeoff_id, req.body.total, function (err) {
+    db.updateTakeoffTotal(req.body.takeoff_id, req.body.total, req.body.materialTotal, req.body.laborTotal, function (err) {
       if (err) {
         console.log(err);
       } else {
@@ -701,6 +677,7 @@ module.exports = function (app) {
                 if (err) {
                   console.log(err);
                 } else {
+                  console.log(takeoff_info);
                   res.render("viewEstimate.html", {
                     estimate: estimate,
                     takeoff: takeoff_info,
@@ -846,7 +823,7 @@ module.exports = function (app) {
     db.changeMaterialPrice(
       req.body.takeoff_id,
       req.body.material_id,
-      req.body.delta,
+      parseFloat(req.body.delta).toFixed(2),
       function (err) {
         if (err) {
           console.log(err);
