@@ -5,6 +5,12 @@ let takeoff_id = 0;
 let laborTotal = 0;
 let materialTotal = 0;
 
+let labor_rate = 0;
+let labor_markup = 0;
+let laborTotalAdjusted = 0;
+let material_markup = 0;
+let supervisor_markup = 0;
+
 
 
 function toggleMaterial(materialId, checkbox) {
@@ -125,8 +131,8 @@ function add_subject(id) {
   // $("#selected_subject").text("Selected subject: " + material_name);
   // move the dropdown to the position of the button that was clicked the row id is the subject id
   let button = $("#add_material_button_" + id);
-  let dropdown = $("#myDropdown");
- // dropdown.css("display", "block");
+  let dropdown = $("#materialLibrary");
+      dropdown.toggle();
   // get the coordinates of the button
 
 
@@ -135,7 +141,8 @@ function add_subject(id) {
 function add_material(id) {
   console.log("Added material_id " + id + " for subject " + subject_id);
   material_id = id;
- // document.getElementById("myDropdown").classList.toggle("show");
+  let dropdown = $("#materialLibrary");
+  dropdown.toggle();
 
   if (material_id != null && subject_id != null) {
     add_material_subject();
@@ -201,21 +208,82 @@ function deletePlans(){
     });
 }
 
-function updateSliderValue(value) {
-  document.getElementById('sliderValue').innerText = "$"+ value + "/hr";
+function updateLaborRate() {
+  document.getElementById('laborRateValue').innerText = "$"+ labor_rate + "/hr";
   console.log(laborTotal)
 
-  let labor_rate = parseFloat(value);
   let labor_adjusted = laborTotal / labor_rate;
   $('#laborAdjusted').text(labor_adjusted.toFixed(2) + " hours");
   console.log(labor_adjusted)
 }
 
+function changeLaborRateHelper(value) {
+  labor_rate = value;
+  updateLaborRate();
+  debounceChangeLaborRate();
+}
+
+// Removed duplicate declaration of debounceChangeLaborRate
+
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
+
+
+
+function changeLaborRate() {
+  console.log("Changing labor rate to: " + labor_rate);
+  $.post("/change-labor-rate", { takeoff_id: takeoff_id, labor_rate: labor_rate })
+    .done(function () {
+      console.log("Labor rate updated: " + labor_rate);
+      //loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      console.log("Failed to update labor rate: " + labor_rate);
+    });
+}
+
+const debounceChangeLaborRate = debounce(function () {
+  changeLaborRate();
+}, 500);
+
+function changeLaborMarkupHelper(value) {
+  labor_markup = value;
+  $('#laborMarkupValue').text(labor_markup + "%");
+  debounceChangeLaborMarkup(value);
+}
+
+const debounceChangeLaborMarkup = debounce(function (value) {
+  changeLaborMarkup(value);
+}, 500);
+
+function changeLaborMarkup(value){
+  labor_markup = value;
+  console.log("Changing labor markup to: " + labor_markup);
+  $("#laborMarkupValue").text(labor_markup + "%");
+
+  laborTotalAdjusted = laborTotal * (1 + labor_markup / 100);
+  $('#laborTotal').text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)));
+  $('#sum').text("Total Cost: $" + numberWithCommas((laborTotalAdjusted + materialTotal).toFixed(2)));
+  $.post("/change-labor-markup", { takeoff_id: takeoff_id, labor_markup: labor_markup })
+    .done(function () {
+      console.log("Labor markup updated: " + labor_markup);
+      //loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      console.log("Failed to update labor markup: " + labor_markup);
+    });
+}
+
+
 // the big one
 function loadTakeoffMaterials(id) {
   takeoff_id = id;
 
-  
   laborTotal = 0;
   materialTotal = 0;
 
@@ -223,7 +291,19 @@ function loadTakeoffMaterials(id) {
 
   $.post("/loadTakeoffMaterials", { takeoff_id: takeoff_id })
     .done(function (data) {
-      console.log("Takeoff materials loaded");
+      console.log(data.takeoff);
+
+      // set some global variables
+      labor_rate = parseFloat(data.takeoff[0].labor_rate);
+      labor_markup = parseFloat(data.takeoff[0].labor_markup);
+      material_markup = parseFloat(data.takeoff[0].material_markup);
+      supervisor_markup = parseFloat(data.takeoff[0].supervisor_markup);
+
+      
+
+      
+    
+
       $("#takeoff_materials_table").empty();
 
       let headerRow = $("<tr></tr>");
@@ -361,7 +441,7 @@ function loadTakeoffMaterials(id) {
         let subsum = 0;
         let laborsum = 0;
 
-        laborsum = row.labor_cost * parseFloat(row.measurement);
+        laborsum = parseFloat(row.labor_cost) * parseFloat(row.measurement);
         laborTotal += laborsum;
         if (row.applied != 0) {
           console.log(row.selected_materials);
@@ -455,34 +535,6 @@ function loadTakeoffMaterials(id) {
 
 
 
-
-            //   // use ceiling to round up to the nearest whole number
-            //   subsum += newCost * Math.ceil(adjustedMeasurement / material.coverage);
-
-
-
-            //   // Calculate labor cost
-
-
-            //   if (row.labor_cost > 0) {
-              
-          
-
-            //       if (row.measurement_unit === "sf") {
-            //         laborsum += adjustedMeasurement * row.labor_cost;
-            //       }
-
-            //       if (row.measurement_unit === "ft' in\"") {
-            //         laborsum += adjustedMeasurement * row.labor_cost;
-            //       }
-
-            //       if (row.measurement_unit === "Count") {
-            //         laborsum += adjustedMeasurement * row.labor_cost;
-            //       }
-            // }
-
-
-
             });
           } else {
             console.log("No materials applied or selected_materials are nnull for some reason");
@@ -518,11 +570,36 @@ function loadTakeoffMaterials(id) {
         $("#takeoff_materials_table").append(newRow);
       });
 
+      // if labor_markup is not 0 then adjust the labor total
+      if (labor_markup != 0) {
+        laborTotalAdjusted = laborTotal * (1 + labor_markup / 100);
+      }
+
+      if (material_markup != 0) {
+        materialTotal = materialTotal * (1 + material_markup / 100);
+      }
+
+
+
+      let adjustedTotal = laborTotal + materialTotal;
+
+
+      if (supervisor_markup != 0) {
+        adjustedTotal = adjustedTotal * (1 + supervisor_markup / 100);
+      }
+
       // Update total sum
-      $("#sum").text("Total Cost: $" + numberWithCommas((laborTotal + materialTotal).toFixed(2)));
+      $("#sum").text("Total Cost: $" + numberWithCommas((adjustedTotal).toFixed(2)));
 
       // Update labor total
-      $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotal.toFixed(2)));
+      if (laborTotalAdjusted){
+        $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)));
+        // make it red 
+        $("#laborTotal").css("color", "red");
+       } else {
+        $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotal.toFixed(2)));
+
+       } 
       $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialTotal.toFixed(2)));
 
       //now post the new sums to /updateTakeoffTotal
@@ -702,11 +779,21 @@ function createSubject(event) {
 $(document).ready(function () {
   takeoff_id = $("#takeoff_id").val();
   console.log("Takeoff ID: " + takeoff_id);
-  loadTakeoffMaterials(takeoff_id); // better
-  setTimeout(function () {
-    updateSliderValue(21);
 
+  setTimeout(function () {
+    loadTakeoffMaterials(takeoff_id);
+  }, 300);
+
+
+  setTimeout(function () {
+    updateLaborRate();
   }, 500);
+
+  setTimeout(function () {
+    changeLaborMarkupHelper(labor_markup);
+  }, 600);
+
+  
 
   // call load takeoff materials every 5 seconds
   // setInterval(function () {

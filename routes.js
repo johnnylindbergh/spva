@@ -458,6 +458,33 @@ module.exports = function (app) {
     });
   });
 
+  app.post('/change-labor-rate', mid.isAdmin, function (req, res) {
+    console.log("changing labor rate ", req.body);
+    db.changeLaborRate(req.body.takeoff_id, req.body.labor_rate, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("updated labor rate");
+        res.end();
+      }
+    });
+  }
+  );
+
+  app.post("/change-labor-markup", mid.isAdmin, function (req, res) {
+    console.log("changing labor markup ", req.body);
+    db.changeLaborMarkup(req.body.takeoff_id, req.body.labor_markup, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("updated labor markup");
+        res.end();
+      }
+    });
+  }
+  );
+
+
   app.post("/updateTakeoffTotal", mid.isAdmin, function (req, res) {
     //console.log("updating takeoff total ", req.body);
     db.updateTakeoffTotal(req.body.takeoff_id, req.body.total, req.body.materialTotal, req.body.laborTotal, function (err) {
@@ -468,6 +495,7 @@ module.exports = function (app) {
       }
     });
   });
+
 
 
   app.post("/update-signature", function (req, res) {

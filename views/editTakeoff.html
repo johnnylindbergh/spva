@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Edit Takeoff | {{defaults.sysName}}</title>
   <link rel="stylesheet" type="text/css" href="css/reset.css">
@@ -20,180 +21,184 @@
 
 
 </head>
+
 <body>
   <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
   <div class="navbar">
-    <ul> 
+    <ul>
       <li><a href="javascript:history.back()">Back</a></li>
       <li><a href="/">{{defaults.sysName}}</a></li>
-      {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
+      {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}}
       <div style="float:right">
         <li><a href="/auth/google">Log In</a></li>
         <li><a href="/logout">Log Out</a></li>
       </div>
-
-        
-   
-   
     </ul>
   </div>
-
-  
-
- 
-
-
 
   <div class="container">
 
     {{#takeoff}}
-       <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
+    <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
 
-      <input type= 'text' class="titleInput" id= 'takeoff_name' onchange='updateTakeoffName()' value='{{name}}'></br>
-   
-      Owner:  <input type= 'text' class="hiddenInput" id= 'takeoff_owner_name' onchange='updateTakeoffOwnerName()' value='{{givenName}}'></br>
-      Billing Address: <input type= 'text' class="hiddenInput" id= 'owner_billing_address' onchange='updateTakeoffBillingAddress()' value='{{billing_address}}'></br>
-      Owner Email Address: <input type= 'text' class="hiddenInput" id= 'owner_email_address' onchange='updateTakeoffOwnerEmailAddress()' value='{{primary_email_address}}'></br>
-      Invoice Email Address: <input type= 'text' class="hiddenInput" id= 'invoice_email_address' onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email_address}}'></br>
+    <input type='text' class="titleInput" id='takeoff_name' onchange='updateTakeoffName()' value='{{name}}'></br>
+
+    Owner: <input type='text' class="hiddenInput" id='takeoff_owner_name' onchange='updateTakeoffOwnerName()'
+      value='{{givenName}}'></br>
+    Billing Address: <input type='text' class="hiddenInput" id='owner_billing_address'
+      onchange='updateTakeoffBillingAddress()' value='{{billing_address}}'></br>
+    Owner Email Address: <input type='text' class="hiddenInput" id='owner_email_address'
+      onchange='updateTakeoffOwnerEmailAddress()' value='{{primary_email_address}}'></br>
+    Invoice Email Address: <input type='text' class="hiddenInput" id='invoice_email_address'
+      onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email_address}}'></br>
+    </br>
+
+    <div class="float-right" style="text-align: right;">
+      <h1 class="h4" id="sum"></h1>
+      <h1 class="h5" id="materialTotal"></h1>
+
+      <h1 class="h5" id="laborTotal"></h1>
+      <h1 class="h5" style="color:green;" id="laborAdjusted"></h1>
+
+    
+      <div style="margin-left: 20px;">
+
+        <label for="slider">Labor Rate:</label>
+        <input type="range" id="laborRate" name="slider" min="0" max="100" value="{{takeoff.labor_rate}}"
+          oninput="changeLaborRateHelper(this.value)">
+        <span id="laborRateValue">{{takeoff.labor_rate}}</span>
       </br>
 
-      <div class="float-right" style="text-align: right;">
-        <h1 class="h4" id="sum"></h1>
-        <h1 class="h5" id="materialTotal"></h1>
-      
-        <h1 class="h5" id="laborTotal"></h1>
-        <h1 class="h5" style="color:green;" id="laborAdjusted"></h1>
-      <div style="display: inline-block; margin-left: 20px;">
-        <label for="slider">Labor Rate:</label>
-        <input type="range" id="laborRate" name="slider" min="0" max="100" value="21" oninput="updateSliderValue(this.value)">
-        <span id="sliderValue">50</span>
-      </div>
+        <label for="slider">Labor Markup:</label>
+        <input type="range" id="laborMarkup" name="slider" min="0" max="100" value="{{takeoff.labor_markup}}"
+          oninput="changeLaborMarkupHelper(this.value)">
+        <span id="laborMarkupValue">{{takeoff.labor_markup}}</span>
+      </br>
 
-      <div style="display: inline-block; margin-left: 20px;">
-        <label for="slider">Labor Rate:</label>
-        <input type="range" id="laborMarkup" name="slider" min="0" max="100" value="21" oninput="updateSliderValue(this.value)">
-        <span id="sliderValue">50</span>
-      </div>
+        <label for="slider">Material Markup:</label>
+        <input type="range" id="materialMarkup" name="slider" min="0" max="100" value="{{takeoff.material_markup}}"
+          oninput="updateSliderValue(this.value)">
+        <span id="materiallMarkupValue">{{takeoff.material_markup}}</span>
+      </br>
 
-      <div style="display: inline-block; margin-left: 20px;">
-        <label for="slider">Labor Rate:</label>
-        <input type="range" id="materialMarkup" name="slider" min="0" max="100" value="21" oninput="updateSliderValue(this.value)">
-        <span id="sliderValue">50</span>
-      </div>
+        <label for="slider">Supervisor Markup:</label>
+        <input type="range" id="supervisionMarkup" name="slider" min="0" max="100" value="21"
+          oninput="updateSliderValue(this.value)">
+        <span id="sliderValue"></span>
+      </br>
 
-      <div style="display: inline-block; margin-left: 20px;">
-        <label for="slider">Labor Rate:</label>
-        <input type="range" id="supervisionMarkup" name="slider" min="0" max="100" value="21" oninput="updateSliderValue(this.value)">
-        <span id="sliderValue">50</span>
-      </div>
-    
-      </div>
-      
-      {{^file_path_of_plans}}     
-      <div class = "upload_plans">
-        <form action="/uploadPlans" method="post" enctype="multipart/form-data">
-          <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
-          <input type="file" name="plans"/></br>
-          <input type="submit" value="Upload Plans">
-        </form>
-      
-      {{/file_path_of_plans}}
-
-      {{#file_path_of_plans}}
-       <!-- delete icon that calls deletePlans(); -->
-        <a href="{{sys.domain}}/plans/{{file_path_of_plans}}">View Plans</a> 
-        <i class="fa fa-trash" onclick="deletePlans()"></i>
-
-      {{/file_path_of_plans}}
-      
-</div>
-  </br>
-{{/takeoff}}
-
-
-
-        <!-- as a get request, changed from material settings to settings -->
-        <div style="display: flex; gap: 10px;">
-            <form action="/settings" method="POST">
-              <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
-              <input type="submit" value="Settings">
-            </form>
-
-          <form action='/generateEstimate' method='POST'> 
-              <input type='hidden' name='takeoff_id' value='{{takeoff_id}}'>
-              <input type="submit" value="Generate Estimate" style="float:right; background-color: rgb(31, 193, 31);">  
-          </form>
-        </div>
-  </div>
-
-     <div>
-
-        <div class="dropdown">
-      <!-- <a onclick="myFunction()" class="dropbtn">Material Library</a> -->
-      <div id="myDropdown" class="dropdown-content">
-       
-        <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
-          
-
-        {{#materials}}
-          <!-- a link that when you click it it runs a js function -->
-          <a href="#" onclick="add_material({{id}})">{{name}} <i style= "font-size: 6;">${{cost}} </i></a>
-
-        {{/materials}}
-      </div>
-      </div>
-      </div></li>
-                  <p id="selected_subject"></p>
+      <label for="slider">Travel Extra:</label>
+      <input type="number" id="travelExtra" name="travelExtra" min="0" max="100" value="0.00"
+        oninput="update(this.value)">
+      <span id="travelExtraValue"></span>
+    </br>
 
     </div>
 
+    </div>
+    
+  
+
+    {{^file_path_of_plans}}
+    <div class="upload_plans">
+      <form action="/uploadPlans" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+        <input type="file" name="plans" /></br>
+        <input type="submit" value="Upload Plans">
+      </form>
+
+      {{/file_path_of_plans}}
+
+      {{#file_path_of_plans}}
+      <!-- delete icon that calls deletePlans(); -->
+      <a href="{{sys.domain}}/plans/{{file_path_of_plans}}">View Plans</a>
+      <i class="fa fa-trash" onclick="deletePlans()"></i>
+
+      {{/file_path_of_plans}}
+
+    </div>
+
+
+    </br>
+    {{/takeoff}}
+
+
+
+    <!-- as a get request, changed from material settings to settings -->
+    <div style="display: flex; gap: 10px;">
+      <form action="/settings" method="POST">
+        <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+        <input type="submit" value="Settings">
+      </form>
+
+      <form action='/generateEstimate' method='POST'>
+        <input type='hidden' name='takeoff_id' value='{{takeoff_id}}'>
+        <input type="submit" value="Generate Estimate" style="float:right; background-color: rgb(31, 193, 31);">
+      </form>
+    </div>
+
+    
+
+  <div id="materialLibrary" class="dropdown-content">
+
+    <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+
+
+    {{#materials}}
+    <!-- a link that when you click it it runs a js function -->
+    <a href="#" onclick="add_material({{id}})">{{name}} <i style="font-size: 6;">${{cost}} </i></a>
+    {{/materials}}
   </div>
 
 
 
-<table id = "takeoff_materials_table">
-  
-  <tr>
- 
-    
-  </tr>
-   
+  <table id="takeoff_materials_table">
+
+    <tr>
+
+
+    </tr>
+
 
     {{^subjects}}
     No subjects found
     {{/subjects}}
-</table>
+  </table>
 
 
-<br>
+
+
+  <br>
 
   <div class="container" style="margin: 20px; ">
-<!-- add subject button with add icon -->
- <!-- on click, the form appears  -->
-  <button id="add-subject-btn" onclick="createSubjectIntent()">
-    <i class="fa fa-plus"></i> Add Subject
-  </button>
-
-  <!-- hidden add subject form  -->
-  <form id="add-subject-form" style="display: none;" onsubmit="return createSubject(event);">
-    <input type="hidden" name="takeoff_id" id="takeoff_id" value="{{takeoff_id}}">
-    <input type="text" name="subject_name" id="subject_name" placeholder="Subject Name">
-    <input type="text" name="measurement" id="measurement" placeholder="Measurement (sqft)">
-    <input type="text" name="labor_cost" id="labor_cost" placeholder="Labor Cost ($)/sqft">
-    <!-- Unit dropdown -->
-    <select name="measurement_unit" id="measurement_unit">
-      <option value="sqft">sqft</option>
-      <option value="lf">lf</option>
-      <option value="ea">ea</option>
-    </select>
-    <button type="submit" style="background-color: green; color: white; border: none; padding: 10px; border-radius: 5px;">
-      <i class="fa fa-check"></i> Add
+    <!-- add subject button with add icon -->
+    <!-- on click, the form appears  -->
+    <button id="add-subject-btn" onclick="createSubjectIntent()">
+      <i class="fa fa-plus"></i> Add Subject
     </button>
-  </form>
-</div>
+
+    <!-- hidden add subject form  -->
+    <form id="add-subject-form" style="display: none;" onsubmit="return createSubject(event);">
+      <input type="hidden" name="takeoff_id" id="takeoff_id" value="{{takeoff_id}}">
+      <input type="text" name="subject_name" id="subject_name" placeholder="Subject Name">
+      <input type="text" name="measurement" id="measurement" placeholder="Measurement (sqft)">
+      <input type="text" name="labor_cost" id="labor_cost" placeholder="Labor Cost ($)/sqft">
+      <!-- Unit dropdown -->
+      <select name="measurement_unit" id="measurement_unit">
+        <option value="sqft">sqft</option>
+        <option value="lf">lf</option>
+        <option value="ea">ea</option>
+      </select>
+      <button type="submit"
+        style="background-color: green; color: white; border: none; padding: 10px; border-radius: 5px;">
+        <i class="fa fa-check"></i> Add
+      </button>
+    </form>
+  </div>
 
 
 
 
 </body>
+
 </html>

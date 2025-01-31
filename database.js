@@ -3,6 +3,8 @@ const sys = require("./settings.js");
 const mysql = require("mysql2");
 const moment = require("moment");
 const date = require("date-and-time");
+const request = require("request");
+// const pushInvoiceToQuickbooks = require("./quickbooks.js").pushInvoiceToQuickbooks;
 moment().format();
 
 const queries = require("./queries.js");
@@ -11,6 +13,7 @@ const queries = require("./queries.js");
 const levenshtein = require("fast-levenshtein");
 const crypto = require("crypto");
 const e = require("express");
+const OAuthClient = require("intuit-oauth");
 
 // establish database connection
 const con = mysql.createPool({
@@ -56,6 +59,20 @@ function generateHash() {
     .replace(/\//g, "0")
     .slice(0, 32);
 }
+
+function pushInvoiceToQuickbooks(invoice_id, callback) {
+    // just make get request to /pushInvoiceToQuickBooks/{{invoice_id}}
+    request.get(sys.DOMAIN+"/pushInvoiceToQuickBooks/" + invoice_id, function (err, response, body) {
+      if (err) {
+        console.log(err);
+        return callback(err);
+      } 
+      console.log(body);
+      callback(null);
+    }
+  );
+}
+  
 
 function applySubjectCoatRules(takeoff_id, callback) {
   // for each applied_material with takeoff_id = takeoff_id, if the primer or top_coat integers are set to some number greater than 0, 
@@ -798,6 +815,30 @@ module.exports = {
     );
   },
 
+  changeLaborRate: function (takeoff_id, labor_rate, callback) {
+    console.log("change labor rate: ", labor_rate);
+    con.query(
+      "UPDATE takeoffs SET labor_rate = ? WHERE id = ?;",
+      [labor_rate, takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
+  changeLaborMarkup: function (takeoff_id, labor_markup, callback) {
+    console.log("change labor markup: ", labor_markup);
+    con.query(
+      "UPDATE takeoffs SET labor_markup = ? WHERE id = ?;",
+      [labor_markup, takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+  
   getAllSystemSettings: function (callback) {
     con.query("SELECT * FROM system_settings;", function (err, settings) {
       if (err) return callback(err);
@@ -1441,16 +1482,22 @@ module.exports = {
                 let invoiceTotal = parseFloat(takeoff[0].total) * 0.2;
                 let invoiceNumber = Math.floor(Math.random() * 1000000000);
                 con.query(
-                  "INSERT INTO invoices (takeoff_id, total, invoice_number) VALUES (?,?,?);",
+                  "INSERT INTO invoices (takeoff_id, total, invoice_number) VALUES (?,?,?); SELECT LAST_INSERT_ID() as last;",
                   [takeoff_id, invoiceTotal, invoiceNumber],
-                  function (err) {
+                  function (err, results) {
                     if (err) return callback(err);
                     //callback(true, null);
+
+                    console.log("Pushing inovice to qb with id:"  + results[1][0].last);
+                    pushInvoiceToQuickbooks(results[1][0].last, function (err) {
+                      if (err) return callback(err);
+                      callback(true, results[1][0].last);
+                    });
                   }
                 );
               }
             );
-            
+
           } else {
             console.log(
               "signature does not match owner_name or owner_name is null"

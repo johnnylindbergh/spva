@@ -326,6 +326,24 @@ function toggleNumbers() {
             $(this).css('display', $(this).css('display') === 'none' ? '' : 'none');
         });
     }
+
+    // hide the total, materialTotal, and laborTotal
+    const takeoffTotal = $('#takeoffTotal');
+    const materialTotal = $('#materialTotal');
+    const laborTotal = $('#laborTotal');
+    const tax = $('#takeoffTax');
+
+    takeoffTotal.toggle();
+    materialTotal.toggle();
+    laborTotal.toggle();
+    tax.toggle();
+
+    // also remove the amount header
+    const amountHeader = $('#amount-header');
+    amountHeader.toggle();
+    
+
+
 }
 function toggleTranslateMenu() {
     const translateElement = document.getElementById("google_translate_element");
