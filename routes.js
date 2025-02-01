@@ -484,6 +484,20 @@ module.exports = function (app) {
   }
   );
 
+  app.post("/change-material-markup", mid.isAdmin, function (req, res) {
+    console.log("changing material markup ", req.body);
+    db.changeMaterialMarkup(req.body.takeoff_id, req.body.material_markup, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("updated material markup");
+        res.end();
+      }
+    });
+  }
+  );
+  
+
 
   app.post("/updateTakeoffTotal", mid.isAdmin, function (req, res) {
     //console.log("updating takeoff total ", req.body);
@@ -625,6 +639,7 @@ module.exports = function (app) {
             console.log(err);
             res.status(500).send("Error generating estimate");
           } else {
+            console.log(estimate);
             console.log(takeoff_info[0].estimate_id)
             if (takeoff_info[0].estimate_id == null) {
               // Build the prompt

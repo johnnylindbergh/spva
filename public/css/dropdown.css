@@ -42,7 +42,7 @@
   color: black;
   border: none;
   cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.963);
   font-size: 16px;
   transition: background-color 0.3s ease;
   position: fixed;
@@ -51,7 +51,7 @@
   transform: translate(-50%, -50%);
   z-index: 2;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
 }
 

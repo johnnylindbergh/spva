@@ -64,7 +64,7 @@
       <div style="margin-left: 20px;">
 
         <label for="slider">Labor Rate:</label>
-        <input type="range" id="laborRate" name="slider" min="0" max="100" value="{{takeoff.labor_rate}}"
+        <input type="range" id="laborRate" name="slider" min="0" max="500" value="{{takeoff.labor_rate}}"
           oninput="changeLaborRateHelper(this.value)">
         <span id="laborRateValue">{{takeoff.labor_rate}}</span>
       </br>
@@ -77,8 +77,8 @@
 
         <label for="slider">Material Markup:</label>
         <input type="range" id="materialMarkup" name="slider" min="0" max="100" value="{{takeoff.material_markup}}"
-          oninput="updateSliderValue(this.value)">
-        <span id="materiallMarkupValue">{{takeoff.material_markup}}</span>
+          oninput="updateMaterialMarkupHelper(this.value)">
+        <span id="materialMarkupValue">{{takeoff.material_markup}}</span>
       </br>
 
         <label for="slider">Supervisor Markup:</label>

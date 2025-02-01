@@ -838,6 +838,19 @@ module.exports = {
       }
     );
   },
+
+  changeMaterialMarkup: function (takeoff_id, material_markup, callback) {
+    console.log("change material markup: ", material_markup);
+    con.query(
+      "UPDATE takeoffs SET material_markup = ? WHERE id = ?;",
+      [material_markup, takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  }
+  ,
   
   getAllSystemSettings: function (callback) {
     con.query("SELECT * FROM system_settings;", function (err, settings) {
@@ -938,18 +951,16 @@ module.exports = {
             if (row && row.material_id) {
               return new Promise((resolve, reject) => {
                 con.query(
-                  "SELECT * FROM materials WHERE id IN (?, ?, ?, ?);",
+                  "SELECT * FROM materials WHERE id = ?;",
                   [
                     row.material_id,
-                    row.secondary_material_id,
-                    row.tertiary_material_id,
-                    row.quaternary_material_id,
+             
                   ],
-                  function (err, materials) {
+                  function (err, material) {
                     if (err) return reject(err);
 
                     // Add material names to the row
-                    row.selected_materials = materials; // You can customize how you want to store the materials info
+                    row.selected_materials = material; 
                     resolve(row);
                   }
                 );
