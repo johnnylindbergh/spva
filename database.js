@@ -2024,9 +2024,9 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
   },
 
 
-  getInvoiceById: function (invoice_id, takeoff_id, callback) {
+  getInvoiceById: function (invoice_id, callback) {
     con.query(
-      "SELECT invoices.total AS invoiceTotal, takeoffs.name as takeoffName, takeoffs.customer_id AS customer_id, takeoffs.payment_method AS payment_method, takeoffs.id AS takeoff_id, invoices.hash AS invoice_hash FROM invoices join takeoffs ON takeoffs.id = invoices.takeoff_id WHERE invoices.id = ?;",
+     queries.getinvoiceById,
       [invoice_id],
       function (err, invoice) {
         if (err) return callback(err);
@@ -2035,13 +2035,15 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
     );
   },
 
-  getInvoiceByOnlyId: function (invoice_id, callback) {
+  getInvoiceItemsById: function (invoice_id, callback) {
     con.query(
       "SELECT * FROM invoices WHERE id = ?;",
       [invoice_id],
       function (err, invoice) {
-        if (err) return callback(err);
-        callback(null, invoice[0]);
+        con.query("SELECT * FROM invoice_items WHERE invoice_id = ?;", [invoice_id], function (err, items) {
+          if (err) return callback(err);
+          callback(err, invoice[0], items);
+        });     
       }
     );
   },

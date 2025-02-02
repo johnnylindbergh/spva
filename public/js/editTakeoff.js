@@ -827,7 +827,7 @@ $(document).ready(function () {
   }, 700);
   
 
-  setInterval(function () {
-    loadTakeoffMaterials(takeoff_id);
-  }, 5000);
+  // setInterval(function () {
+  //   loadTakeoffMaterials(takeoff_id);
+  // }, 5000);
 });

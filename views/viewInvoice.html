@@ -10,9 +10,12 @@
     
     <div class="container mt-5">
         <div class="card">
+            {{#invoice}}
             <div class="card-header text-center">
-                <h2>View Invoice Page Under construction</h2>
+                <h2>{{invoice_name}}</h2>
+                <p>Invoice Number: {{invoice_number}} | QB Number: {{qb_number}}</p>
             </div>
+            {{/invoice}}
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
@@ -21,7 +24,7 @@
                     </div>
                     <div class="col-md-6 text-right">
                         <h5>To:</h5>
-                        <p>Client Name<br>Address Line 1<br>Address Line 2<br>City, State, ZIP</p>
+                        <p>{{takeoff.customer_givenName}}<br>{{takeoff.customer_billing_address}}</p>
                     </div>
                 </div>
                 <div class="row mt-4">
@@ -37,27 +40,15 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {{#invoice_items}}
                                 <tr>
-                                    <td>1</td>
-                                    <td>Item 1</td>
-                                    <td>2</td>
-                                    <td>$50.00</td>
-                                    <td>$100.00</td>
+                                    <td>{{id}}</td>
+                                    <td>{{description}}</td>
+                                    <td>{{quantity}}</td>
+                                    <td>${{cost}}</td>
+                                    <td>${{total}}</td>
                                 </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>Item 2</td>
-                                    <td>1</td>
-                                    <td>$75.00</td>
-                                    <td>$75.00</td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Item 3</td>
-                                    <td>3</td>
-                                    <td>$25.00</td>
-                                    <td>$75.00</td>
-                                </tr>
+                                {{/invoice_items}}
                             </tbody>
                         </table>
                     </div>
@@ -69,15 +60,26 @@
                     </div>
                     <div class="col-md-6 text-right">
                         <h5>Total Amount Due:</h5>
-                        <p>$250.00</p>
+                        <p>${{totalAmout}}</p>
                     </div>
                 </div>
             </div>
             <div class="card-footer text-center">
+                <button class="btn btn-success">Edit</button>
+                <button class="btn btn-danger">Delete</button>
+                <!-- insert vertical separator -->
+                <span class="mx-2">|</span>
+
+                
                 <button class="btn btn-primary">Print Invoice</button>
+                <button class="btn btn-success">Share with Quickbooks</button>
+
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/4.2.0/mustache.min.js"></script>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

@@ -1405,7 +1405,7 @@ module.exports = function (app) {
       res.redirect("/");
     }
     // get takeoff
-    db.getInvoiceById(invoice_id, null, function (err, invoice) {
+    db.getInvoiceById(invoice_id, function (err, invoice) {
      // console.log(invoice.invoice_name + " has a total of " + total);
       if (err) {
         console.log(err);
@@ -1466,7 +1466,7 @@ module.exports = function (app) {
 
   
     // get takeoff
-    db.getInvoiceById(invoice_id, null, function (err, invoice) {
+    db.getInvoiceById(invoice_id, function (err, invoice) {
      // console.log(invoice.invoice_name + " has a total of " + total);
       if (err) {
         console.log(err);
@@ -1596,7 +1596,7 @@ module.exports = function (app) {
       res.redirect("/");
     }
 
-    db.getInvoiceById(req.params.invoice_id, null, function (err, invoice) { // this applies tax
+    db.getInvoiceById(req.params.invoice_id, function (err, invoice) { // this applies tax
       if (err) {
         console.log(err);
         res.status(500).send("Error retrieving takeoff");
@@ -1841,19 +1841,35 @@ module.exports = function (app) {
     // });
 
     app.get('/viewInvoice', mid.isAdmin, function (req, res) {
-      const invoice_id = req.query.invoice_id;
-      const takeoff_id = req.query.takeoff_id;
+      const invoice_id = parseInt(req.query.invoice_id);
 
       console.log("viewing invoice ", invoice_id);
-      db.getInvoiceById(invoice_id, takeoff_id,
-        function (err, invoice) {
+
+      db.getInvoiceItemsById(invoice_id,
+        function (err, invoice, invoice_items) {
           if (err) {
             console.log(err);
             res.send("error retrieving invoice");
+          } else if (invoice.length === 0) {
+            res.send("No invoice found");
           } else {
             console.log(invoice);
-            res.render("viewInvoice.html", { invoice: invoice[0] });
-          }
+            console.log(invoice_items);
+
+            let totalAmout = 0;
+            for (let i = 0; i < invoice_items.length; i++) {
+              totalAmout += invoice_items[i].cost * invoice_items[i].quantity;
+            }
+            db.getTakeoffById(invoice.takeoff_id, function (err, takeoff) {
+              if (err) {
+                console.log(err);
+                res.send("error retrieving takeoff");
+              } else {
+                console.log(takeoff);
+                res.render("viewInvoice.html", { invoice: invoice, invoice_items: invoice_items, takeoff: takeoff[0],totalAmout: totalAmout });
+              }
+            } 
+            );}
         });
     });
 

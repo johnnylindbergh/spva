@@ -106,6 +106,17 @@ WHERE
 
 fullJoin: `SELECT * FROM subcontractor_forms JOIN forms ON subcontractor_forms.form_id = forms.id JOIN form_items ON form_items.form_id =forms.id JOIN form_item_days ON form_item_days.form_item_id = form_items.id WHERE subcontractor_forms.user_id = 1`,
 
+getinvoiceById:  `SELECT 
+    invoices.total AS invoiceTotal, 
+    takeoffs.name AS takeoffName, 
+    takeoffs.customer_id AS customer_id, 
+    takeoffs.payment_method AS payment_method, 
+    takeoffs.id AS takeoff_id, 
+    invoices.hash AS invoice_hash 
+FROM invoices 
+JOIN takeoffs ON takeoffs.id = invoices.takeoff_id 
+WHERE invoices.id = ?;`
+
 }
 
 

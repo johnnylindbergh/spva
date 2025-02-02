@@ -179,13 +179,15 @@ CREATE TABLE invoices (
 CREATE TABLE invoice_items (
   id INT NOT NULL AUTO_INCREMENT,
   invoice_id INT NOT NULL,
-  description VARCHAR(255),
   cost DECIMAL(10,2),
   quantity INT,
   description VARCHAR(64),
   PRIMARY KEY (id),
   FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
 );
+
+-- example insert 
+INSERT INTO invoice_items (invoice_id, cost, quantity, description) VALUES (1, 2000.00, 1, 'Description 1');
 
 -- Payment history table
 CREATE TABLE payment_history (

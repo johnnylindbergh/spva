@@ -111,7 +111,7 @@ async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
     } else {
       console.log(takeoff);
       if (takeoff[0].customer_invoice_email_address && takeoff[0].customer_givenName) {
-        db.getInvoiceById(invoice_id, takeoff_id, (err, invoice) => {
+        db.getInvoiceById(invoice_id, (err, invoice) => {
           if (err) {
             console.log(err);
             callback("big error", null);

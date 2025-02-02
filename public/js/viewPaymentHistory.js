@@ -86,7 +86,7 @@ function populatePaymentHistoryTable(takeoff_id) {
             // allign cell3 to the right
             cell3.style.textAlign = 'right';
             cell4.textContent = invoice.view_count;  
-            cell5.innerHTML = `<a href="/viewInvoice/?invoice_id=${invoice.id}?takeoff_id=${takeoff_id}">View</a>`;
+            cell5.innerHTML = `<a href="/viewInvoice/?invoice_id=${invoice.id}">View</a>`;
 
         });
 
