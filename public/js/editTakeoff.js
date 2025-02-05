@@ -276,6 +276,21 @@ function changeLaborMarkup(value){
     })
     .fail(function () {
       console.log("Failed to update labor markup: " + labor_markup);
+
+      XSAlert({
+        title: 'Error',
+        message: 'Cannot modify signed takeoff',
+        icon: 'error',
+        hideCancelButton: true
+    }).then((result) => {
+
+        console.log('clicked');
+        // go back one page
+        //window.history.back();
+        console.log("i gonna edit it anyway")
+    });
+
+
     });
 }
 

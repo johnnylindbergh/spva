@@ -14,6 +14,7 @@ const levenshtein = require("fast-levenshtein");
 const crypto = require("crypto");
 const e = require("express");
 const OAuthClient = require("intuit-oauth");
+const { group } = require("console");
 
 // establish database connection
 const con = mysql.createPool({
@@ -905,6 +906,85 @@ module.exports = {
     );
   },
 
+//   -- Options table
+// CREATE TABLE options (
+//   id INT NOT NULL AUTO_INCREMENT,
+//   takeoff_id INT NOT NULL,
+//   description TEXT,
+//   cost DECIMAL(10,2),
+//   applied TINYINT(1) DEFAULT 1,
+//   PRIMARY KEY (id),
+//   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+// );
+
+
+  separateAlts: function (takeoff_id, callback) {
+    console.log("separateAlts called");
+    // get the applied materials for the takeoff_id
+    con.query(
+      "SELECT *, applied_materials.name as subject, applied_materials.labor_cost as applied_materials_labor_cost  FROM applied_materials  JOIN materials ON materials.id = applied_materials.material_id  WHERE applied_materials.takeoff_id = ?;", // weird query, just alternate name for shared 'name' and 'labor_cost' columns
+      [takeoff_id],
+      function (err, subjects) {
+        if (err) return callback(err);
+        // for each subject, if the name contains "alt" or "alternate" or "option", 
+        // insert a new row into the applied_materials table with the same values as the original row
+        // except the name is the original name + " alt" + n
+        // where n is the number of alts for that subject
+
+        let groups = {};
+        for (let i = 0; i < subjects.length; i++) {
+          const subject = subjects[i];
+          if (
+            subject.subject.toLowerCase().includes("alt") ||
+            subject.subject.toLowerCase().includes("alternate") ||
+            subject.subject.toLowerCase().includes("option")
+          ) {
+              console.log(subject.subject);
+            // use map to subject name is of the form "alt <group number> <subject name>"
+            let group_number = subject.subject.split(" ")[1];
+            let subject_name = subject.subject.split(" ").slice(2).join(" ");
+
+            console.log("The group number is: ", group_number); 
+            console.log("The subject name is: ", subject_name);
+
+
+            console.log(subject)
+
+            let optionMaterialTotal = (parseFloat(subject.measurement)/parseFloat(subject.coverage)) * (parseFloat(subject.cost) - parseFloat(subject.cost_delta));
+            let optionLaborTotal = parseFloat(subject.measurement) * parseFloat(subject.applied_materials_labor_cost);
+
+            console.log( "the optionMaterialTotal is: ", optionMaterialTotal);
+            console.log( "the optionLaborTotal is: ", optionLaborTotal);
+
+            groups[group_number] = groups[group_number] + optionMaterialTotal + optionLaborTotal;
+
+
+       
+          }
+        }
+
+        for (group_number in groups) {
+          console.log("The group number is: ", group_number); 
+          console.log("The total cost for this group is: ", groups[group_number]); 
+
+          con.query(
+            "INSERT INTO options (takeoff_id, description, cost) VALUES (?, ?, ?);",
+            [
+              takeoff_id,
+              "Alt group" + group_number,
+              groups[group_number],
+            ],
+            function (err) {
+             // if (err) return callback(err);
+            }
+          );
+        }
+      
+      }
+    );
+    callback(null);
+  },
+
   generateEstimate: function (takeoff_id, callback) {
     // query takeoffs table for estimate_id
     // if the estimate_id is null, create a new estimate insert it into the db, and update the takeoff's estimate_id in the takeoffs table
@@ -914,7 +994,7 @@ module.exports = {
       [takeoff_id],
       function (err, estimate_id) {
         if (err) return callback(err);
-        console.log(estimate_id);
+        //console.log(estimate_id);
 
         if (estimate_id[0].estimate_id == null) {
           con.query(
@@ -1018,7 +1098,7 @@ module.exports = {
           console.log(err);
           return callback(err);
         } else {
-          console.log(customerInfo[0]);
+         //(customerInfo[0]);
           con.query(
             "UPDATE customers SET primary_email_address = ? WHERE id = ?;",
             [owner_email, customerInfo[0].customer_id],
@@ -1042,7 +1122,7 @@ module.exports = {
             console.log(err);
             return callback(err);
           } else {
-            console.log(customerInfo[0]);
+           // console.log(customerInfo[0]);
             con.query(
               "UPDATE customers SET invoice_email_address = ? WHERE id = ?;",
               [owner_email, customerInfo[0].customer_id],
@@ -1135,7 +1215,7 @@ module.exports = {
         if (!estimateTakeoffObject || estimateTakeoffObject.length === 0 || !total || total.length === 0) {
           return callback(new Error("Invalid data retrieved"));
         }
-        console.log("got signed_total: ", (parseFloat(estimateTakeoffObject[0].signed_total) - parseFloat(total[0].total)).toFixed(2));
+       // console.log("got signed_total: ", (parseFloat(estimateTakeoffObject[0].signed_total) - parseFloat(total[0].total)).toFixed(2));
         callback(null, (parseFloat(estimateTakeoffObject[0].signed_total) - parseFloat(total[0].total)).toFixed(2));
       });
 
@@ -1362,7 +1442,7 @@ module.exports = {
 
         const takeoff = takeoffResults[0]; // assuming only one result
 
-        console.log("getting shared takeoff:", takeoff);
+       // console.log("getting shared takeoff:", takeoff);
 
         con.query(
           "SELECT * FROM estimates WHERE id = ?;",
@@ -1438,7 +1518,7 @@ module.exports = {
   updateCustomerPhone: function (takeoff_id, phone, callback) {
     con.query('SELECT customer_id FROM takeoffs WHERE id = ?;', [takeoff_id], function(err, results){
       if (err) return callback(err);
-      console.log("updating phone number for customer_id: ", results[0].customer_id); 
+      //console.log("updating phone number for customer_id: ", results[0].customer_id); 
       con.query("UPDATE customers SET phone = ? WHERE id = ?;", [phone, results[0].customer_id], function(err){
         if (err) return callback(err);
         callback(null);
@@ -1938,7 +2018,7 @@ module.exports = {
       function (err, rows) {
         if (err) return callback(err);
         if (rows[0] != null && rows[0].total != null && rows[0].name != null) {
-          console.log(rows[0]);
+         // console.log(rows[0]);
           let total = rows[0].total;
           let takeoffName = rows[0].name;
           callback(null, takeoffName, total);
@@ -1977,21 +2057,21 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
       "SELECT  signed_total, name, tax, payment_method FROM estimates join takeoffs ON takeoffs.estimate_id = estimates.id WHERE takeoffs.id = ?;",
       [takeoff_id],
       function (err, rows) {
-        console.log(rows);
+     //   console.log(rows);
         if (err) return callback(err);
         if (rows[0] != null && rows[0].signed_total != null && rows[0].name != null) {
 
           // get the option total
           con
 
-          console.log(rows[0]);
+    //      console.log(rows[0]);
           let tax = parseFloat(rows[0].tax);
           let estimateTotal = parseFloat(rows[0].signed_total);
           let method = rows[0].payment_method;
 
-          console.log("estimateTotal: ", estimateTotal);
-          console.log("tax: ", tax);
-          console.log("method: ", method);
+          // console.log("estimateTotal: ", estimateTotal);
+          // console.log("tax: ", tax);
+          // console.log("method: ", method);
 
           // apply offsets for the stripe total
           let total = parseFloat(estimateTotal);
@@ -2189,6 +2269,20 @@ getTakeoffTotalForDeposit: function (takeoff_id, callback) {
   //     }
   //   );
   // },
+
+  takeoffGetStatus: function (takeoff_id, callback) {
+    con.query(
+      "SELECT status FROM takeoffs WHERE id = ?;",
+      [takeoff_id],
+      function (err, results) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
+        callback(null, results[0].status);
+      }
+    );
+  },
 
   takeoffSetStatus: function (takeoff_id, status, cb) {
     con.query(

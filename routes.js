@@ -473,29 +473,58 @@ module.exports = function (app) {
 
   app.post("/change-labor-markup", mid.isAdmin, function (req, res) {
     console.log("changing labor markup ", req.body);
-    db.changeLaborMarkup(req.body.takeoff_id, req.body.labor_markup, function (err) {
+    // first check that the status is not signed, status < 4
+
+    db.takeoffGetStatus(req.body.takeoff_id, function (err, status) {
       if (err) {
         console.log(err);
       } else {
-        console.log("updated labor markup");
-        res.end();
+        console.log(status)
+        if (status < 4) {
+
+          db.changeLaborMarkup(req.body.takeoff_id, req.body.labor_markup, function (err) {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log("updated labor markup");
+              res.end();
+            }
+          });
+        } else {
+          console.log("Takeoff is signed, cannot change markup");
+          res.status(500).send("Takeoff is signed, cannot change markup");  
+        }
       }
     });
   }
   );
 
   app.post("/change-material-markup", mid.isAdmin, function (req, res) {
-    console.log("changing material markup ", req.body);
-    db.changeMaterialMarkup(req.body.takeoff_id, req.body.material_markup, function (err) {
+
+    db.takeoffGetStatus(req.body.takeoff_id, function (err, status) {
       if (err) {
         console.log(err);
+        res.status(500).send("Error retrieving takeoff status");
       } else {
-        console.log("updated material markup");
-        res.end();
+        if (status < 4) {
+          db.changeMaterialMarkup(req.body.takeoff_id, req.body.material_markup, function (err) {
+            if (err) {
+              console.log(err);
+              res.status(500).send("Error updating material markup");
+            } else {
+              console.log("updated material markup");
+              res.end();
+            }
+          });
+        } else {
+          console.log("Takeoff is signed, cannot change markup");
+          res.status(500).send("Takeoff is signed, cannot change markup");
+        }
       }
     });
-  }
-  );
+  });
+   
+  
   
 
 
@@ -633,109 +662,112 @@ module.exports = function (app) {
           // Handle the error if necessary
 
         }
+        db.separateAlts(takeoff_id, function (err) {
 
-        db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
-          if (err) {
-            console.log(err);
-            res.status(500).send("Error generating estimate");
-          } else {
-            console.log(estimate);
-            console.log(takeoff_info[0].estimate_id)
-            if (takeoff_info[0].estimate_id == null) {
-              // Build the prompt
+          db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
+            if (err) {
+              console.log(err);
+              res.status(500).send("Error generating estimate");
+            } else {
+            // console.log(estimate);
+              console.log(takeoff_info[0].estimate_id)
+              if (takeoff_info[0].estimate_id == null) {
+                // Build the prompt
 
 
-              prompt = prompt[0].setting_value;
+                prompt = prompt[0].setting_value;
 
-              for (var i = 0; i < estimate.length; i++) {
-                prompt += " subject={ " + estimate[i].material_name;
-                prompt +=
-                  " measurement: " +
-                  estimate[i].measurement +
-                  estimate[i].measurement_unit;
-                " " + estimate[i].measurement_unit;
-                if (estimate[i].selected_materials != null) {
-                  for (var j = 0; j < estimate[i].selected_materials.length; j++) {
-                    //console.log(estimate[i].selected_materials[j]);
-                    prompt +=
-                      " name: " + estimate[i].selected_materials[j].name + "'";
-                    prompt +=
-                      " desc: " + estimate[i].selected_materials[j].description;
+                for (var i = 0; i < estimate.length; i++) {
+                  prompt += " subject={ " + estimate[i].material_name;
+                  prompt +=
+                    " measurement: " +
+                    estimate[i].measurement +
+                    estimate[i].measurement_unit;
+                  " " + estimate[i].measurement_unit;
+                  if (estimate[i].selected_materials != null) {
+                    for (var j = 0; j < estimate[i].selected_materials.length; j++) {
+                      //console.log(estimate[i].selected_materials[j]);
+                      prompt +=
+                        " name: " + estimate[i].selected_materials[j].name + "'";
+                      prompt +=
+                        " desc: " + estimate[i].selected_materials[j].description;
+                    }
                   }
+                  prompt += "}";
                 }
-                prompt += "}";
-              }
 
-              // call to  async function callChatGPT with the response as the return value and saves the it to the database
-              let response = "";
-              console.log("prompt",prompt + JSON.stringify(estimate))
-              chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
-                response = subres;
-                //console.log("Response:", response);
+                // call to  async function callChatGPT with the response as the return value and saves the it to the database
+                let response = "";
+                //console.log("prompt",prompt + JSON.stringify(estimate))
+                chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
+                  response = subres;
+                  //console.log("Response:", response);
 
-                // process response for render
-                // split into two vars called includes, and exclusions
-                let inclusions = response.split("</br>")[0];
-                let exclusions = response.split("</br>")[1];
+                  // process response for render
+                  // split into two vars called includes, and exclusions
+                  let inclusions = response.split("</br>")[0];
+                  let exclusions = response.split("</br>")[1];
 
-                if (inclusions == null || exclusions == null) {
-                  // throw an error
-                  console.log("Error splitting response");
-                  res.send("Error generating estimate. Please try again with assigned materials.");
+                  if (inclusions == null || exclusions == null) {
+                    // throw an error
+                    console.log("Error splitting response");
+                    res.send("Error generating estimate. Please try again with assigned materials.");
 
-                } else {
+                  } else {
 
-                  // check if the response has been split correctly
-                  console.log("Includes:", inclusions.substring(0, 20) + "...");
-                  console.log("Exclusions:", exclusions.substring(0, 20) + "...");
-                  //nul checking for inclusions and exclusions
-                  if (inclusions == null) {
-                    // set the inclusions to the response
-                    inclusions = response;
+                    // check if the response has been split correctly
+                    console.log("Includes:", inclusions.substring(0, 20) + "...");
+                    console.log("Exclusions:", exclusions.substring(0, 20) + "...");
+                    //nul checking for inclusions and exclusions
+                    if (inclusions == null) {
+                      // set the inclusions to the response
+                      inclusions = response;
+                    }
+                    if (exclusions == null) {
+                      // set the exclusions to the response
+                      exclusions = "";
+                    }
+                    db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
+                      res.render("viewEstimate.html", {
+                        inclusions: inclusions,
+                        exclusions: exclusions,
+                        takeoff_id: takeoff_id,
+                        estimate: estimate,
+                        takeoff: takeoff_info,
+                        email:req.user.local.email,
+                      });
+                    });
+
                   }
-                  if (exclusions == null) {
-                    // set the exclusions to the response
-                    exclusions = "";
-                  }
-                  db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
+
+                });
+
+              } else {
+                console.log("No estimate generated, just retrieved");
+
+                // get the inclusions and exclusions from the database
+                db.getEstimateData(takeoff_id, function (err, estimate, takeoff_info) {
+                  if (err) {
+                    console.log(err);
+                  } else {
+                    console.log(takeoff_info);
                     res.render("viewEstimate.html", {
-                      inclusions: inclusions,
-                      exclusions: exclusions,
-                      takeoff_id: takeoff_id,
                       estimate: estimate,
                       takeoff: takeoff_info,
+                      takeoff_id: takeoff_id,
                       email:req.user.local.email,
                     });
-                  });
+                  }
+                });
 
-                }
-
-              });
-
-            } else {
-              console.log("No estimate generated, just retrieved");
-
-              // get the inclusions and exclusions from the database
-              db.getEstimateData(takeoff_id, function (err, estimate, takeoff_info) {
-                if (err) {
-                  console.log(err);
-                } else {
-                  console.log(takeoff_info);
-                  res.render("viewEstimate.html", {
-                    estimate: estimate,
-                    takeoff: takeoff_info,
-                    takeoff_id: takeoff_id,
-                    email:req.user.local.email,
-                  });
-                }
-              });
-
+              }
             }
-          }
+          });
         });
       });
     });
   });
+
 
 
   app.post("/viewEstimate", mid.isAdmin, function (req, res) {
@@ -1090,10 +1122,14 @@ module.exports = function (app) {
               options: options
             });
           } else {
+
+            let materialTax = parseFloat(takeoff.material_total) * (1.00 + parseFloat(takeoff.material_markup)) * (parseFloat(takeoff.takeoff_tax/100)); // calulate the tax for just materials
+            console.log("Material tax: ", materialTax);
             res.render("viewEstimateClient.html", {
               takeoff: takeoff,
               estimate: estimate[0],
               options: options,
+              materialTax: materialTax.toFixed(2),
             });
 
           }

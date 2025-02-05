@@ -3,6 +3,7 @@ var subtotal = 0;
 var tax = 0;
 var taxRate = 0;
 var total = 0;
+var materialTax = 0;
 var includesTotal = 0;
 var excludesTotal = 0;
 var optionsTotal = 0;
@@ -130,15 +131,14 @@ function updateTotals() {
     // Assuming total = subtotal + optionsTotal + tax
     total = subtotal + optionsTotal;
 
-    tax = total*(taxRate)
+    
 
     // $('#subtotal').text("Subtotal: $" + numberWithCommas(subtotal.toFixed(2))); this never changes
-    $('#tax').text("Tax: $" + numberWithCommas(tax.toFixed(2)));
-    $('#total').text("Total: $" + numberWithCommas((tax+total).toFixed(2)));
+    $('#tax').text("Tax: $" + numberWithCommas(materialTax.toFixed(2)));
+    $('#total').text("Total: $" + numberWithCommas((total).toFixed(2)));
 
     console.log("Subtotal:", subtotal);
     console.log("Options Total:", optionsTotal);
-    console.log("Tax:", tax);
 }
 
 function handleSignatureChange() {
@@ -230,11 +230,15 @@ $(document).ready(function() {
 
         if (data.takeoff[0].customer_taxable) {
             taxRate = (parseFloat(data.takeoff[0].takeoff_tax)/100.0); // should be zero if not taxable
+            materialTax = parseFloat(data.materialTax);
+            console.log("Material Tax: ", materialTax);
         } else {
             tax = 0; // nop
         }
+
+
         
-        $('#tax').text("Tax: $"+numberWithCommas(tax.toFixed(2)));
+        $('#tax').text("Tax: $"+numberWithCommas(materialTax.toFixed(2)));
 
         var taxedTotal = subtotal + tax;
         $('#total').text("Total: $"+numberWithCommas(taxedTotal.toFixed(2)));
