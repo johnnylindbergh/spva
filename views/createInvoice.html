@@ -19,6 +19,22 @@
 
     <script>
 
+    let rowCount = 0;
+
+    function addRow(){
+        const table = document.getElementById("invoice-item-table");
+        const row = table.insertRow(-1);
+        const numberCell = row.insertCell(0);
+        const quantityCell = row.insertCell(1);
+        const costCell = row.insertCell(2);
+        const descriptionCell = row.insertCell(3);
+
+        numberCell.innerHTML = `${++rowCount}`;
+        quantityCell.innerHTML = `<input style="width:150px" type="number" name="quantity">`;
+        costCell.innerHTML = `<input style="width=10px" type="number" name="cost">`;
+        descriptionCell.innerHTML = `<input style="width=10px" type="text" name="description">`;
+    }
+
         function pushInvoiceToQuickbooks(invoice_id) {
             console.log('push invoice to quickbooks clicked');
 
@@ -101,10 +117,9 @@
 
                 const customerName = document.getElementById('customer-name').value;
                 const email = document.getElementById('email').value;
-                const customAmount = document.getElementById('custom-amount').value;
                 const takeoffId = document.getElementById('takeoff_id').value;
 
-                if (!customerName || !email || !customAmount) {
+                if (!customerName || !email) {
                     XSAlert.alert('Please fill out all required fields');
                     return;
                 }
@@ -116,6 +131,23 @@
                     return;
                 }
 
+                const invoiceItems = [];
+                const rows = document.querySelectorAll("#invoice-item-table tbody tr");
+
+                rows.forEach(row => {
+                    const quantity = row.querySelector("input[name='quantity']").value;
+                    const cost = row.querySelector("input[name='cost']").value;
+                    const description = row.querySelector("input[name='description']").value;
+
+                    if (quantity && cost && description) {
+                        invoiceItems.push({
+                            quantity: quantity,
+                            cost: cost,
+                            description: description
+                        });
+                    }
+                });
+
                 $.ajax({
                     url: '/create-invoice',
                     method: 'POST',
@@ -123,8 +155,8 @@
                     data: JSON.stringify({
                         customer_name: customerName,
                         email: email,
-                        custom_amount: customAmount,
                         takeoff_id: takeoffId,
+                        invoice_items: invoiceItems
                     }),
                     success: function (invoice) {
                         const invoiceContainer = document.querySelector('.invoice-container');
@@ -221,9 +253,26 @@
             <label for="time">Time</label>
             <input type="time" id="time" name="time" value="13:00"> -->
 
-            <label for="payment-amount">Payment Amount</label>
-            <input type="text" id="custom-amount" name="custom_amount" placeholder="Enter custom amount" min="0">
+            <!-- <label for="payment-amount">Payment Amount</label>
+            <input type="text" id="custom-amount" name="custom_amount" placeholder="Enter custom amount" min="0"> -->
 
+            <!-- a table with columns number, quantity, cost, description -->
+            <table id="invoice-item-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Quantity</th>
+                        <th>Cost</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="invoice-items">
+                  
+                </tbody>
+            </table>
+
+            <!-- add row button -->
+             <button type="button" onclick="addRow()">Add Row</button>
 
             <button type="submit">Create Invoice</button>
             {{/takeoff}}

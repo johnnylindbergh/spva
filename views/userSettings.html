@@ -104,6 +104,11 @@
       <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
       <button type="submit" class="btn btn-danger" id="deleteTakeoff">Delete Takeoff</button>
     </form>
+    <!-- copy takeoff button that posts to copyTakeoff -->
+    <form action="/copyTakeoff" method="POST" style="display:inline;">
+      <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+      <button type="submit" class="btn btn-secondary" id="copyTakeoff">Copy Takeoff</button>
+    </form>
   </div>
 
   <script>

@@ -121,6 +121,9 @@ function changeStartDate() {
 
     $.post('/changeStartDate', {takeoff_id: takeoff_id, startDate: changeStartDate}, function(data) {
         console.log(data);
+    }).fail(function(error) {
+        console.log("Start date must be six days in the future.");
+        alert("Start date must be at least six days from the current date.");
     });
 }
 

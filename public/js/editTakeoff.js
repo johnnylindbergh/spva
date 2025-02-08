@@ -10,6 +10,7 @@ let labor_markup = 0;
 let laborTotalAdjusted = 0;
 let material_markup = 0;
 let supervisor_markup = 0;
+let travel_extra = 0;
 
 
 
@@ -37,7 +38,7 @@ function separateLineItem(materialId, checkbox) {
 
   let isChecked = checkbox.checked ? 1 : 0;
 
-  $.post("/separate-line-item", { material_id: materialId })  
+  $.post("/separate-line-item", { material_id: materialId, takeoff_id: takeoff_id })  
     .done(function () {
       console.log("Material separate line item toggled successfully: " + materialId);
       loadTakeoffMaterials(takeoff_id);
@@ -264,7 +265,7 @@ const debounceChangeLaborMarkup = debounce(function (value) {
 function changeLaborMarkup(value){
   labor_markup = value/100.0;
   console.log("Changing labor markup to: " + labor_markup);
-  $("#laborMarkupValue").text(labor_markup*100 + "%");
+  $("#laborMarkupValue").text(parseInt(labor_markup*100) + "%");
 
   laborTotalAdjusted = laborTotal * (1.0 + labor_markup);
   $('#laborTotal').text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)));
@@ -314,13 +315,90 @@ function changeMaterialMarkup(value){
       loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
-      console.log("Failed to update material markup: " + material_markup);
+      XSAlert({
+        title: 'Error',
+        message: 'Cannot modify signed takeoff',
+        icon: 'error',
+        hideCancelButton: true
+    }).then((result) => {
+
+        console.log('clicked');
+        // go back one page
+        //window.history.back();
+        console.log("i gonna edit it anyway")
+    });
     });
 }
 
 const debounceChangeMaterialMarkup = debounce(function (value) {
   changeMaterialMarkup(value);
 }, 500);
+
+function updateSupervisorMarkup(value){
+  supervisor_markup = value/100.0;
+  console.log("Changing supervisor markup to: " + supervisor_markup);
+  $("#supervisorMarkupValue").text(parseInt(value ) + "%");
+
+  $.post("/change-supervisor-markup", { takeoff_id: takeoff_id, supervisor_markup: supervisor_markup })
+    .done(function () {
+      console.log("Supervisor markup updated: " + supervisor_markup);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      XSAlert({
+        title: 'Error',
+        message: 'Cannot modify signed takeoff',
+        icon: 'error',
+        hideCancelButton: true
+    }).then((result) => {
+
+        console.log('clicked');
+        // go back one page
+        //window.history.back();
+        console.log("i gonna edit it anyway")
+    });
+    });
+}
+
+// helper debounced
+function updateSupervisorMarkupHelper(value) {
+  supervisor_markup = value;
+  $('#supervisorMarkupValue').text(supervisor_markup + "%");
+  debounceUpdateSupervisorMarkup(value);
+}
+
+const debounceUpdateSupervisorMarkup = debounce(function (value) {
+
+  updateSupervisorMarkup(value);
+}, 500);
+
+
+function updateTravelExtra(value){
+  travel_extra = value;
+  console.log("Changing travel extra markup to: " + travel_extra);
+  $("#travelExtra").val(parseFloat(value));
+
+  $.post("/change-travel-cost", { takeoff_id: takeoff_id, travel_extra: travel_extra })
+    .done(function () {
+      console.log("Travel extra markup updated: " + travel_extra);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      XSAlert({
+        title: 'Error',
+        message: 'Cannot modify signed takeoff',
+        icon: 'error',
+        hideCancelButton: true
+    }).then((result) => {
+
+        console.log('clicked');
+        // go back one page
+        //window.history.back();
+        console.log("i gonna edit it anyway")
+    });
+    });
+}
+
 
 
 // the big one
@@ -341,7 +419,7 @@ function loadTakeoffMaterials(id) {
       labor_markup = parseFloat(data.takeoff[0].labor_markup);
       material_markup = parseFloat(data.takeoff[0].material_markup);
       supervisor_markup = parseFloat(data.takeoff[0].supervisor_markup);
-
+      travel_extra = parseFloat(data.takeoff[0].travel_cost);
       
 
       
@@ -631,6 +709,10 @@ function loadTakeoffMaterials(id) {
         adjustedTotal = adjustedTotal * (1 + supervisor_markup);
       }
 
+      if (travel_extra != 0 && travel_extra != null) {
+        adjustedTotal = adjustedTotal + travel_extra;
+      }
+
       // Update total sum
       $("#sum").text("Total Cost: $" + numberWithCommas((adjustedTotal).toFixed(2)));
 
@@ -833,13 +915,21 @@ $(document).ready(function () {
     updateLaborRate();
   }, 500);
 
-  setTimeout(function () {
+  setTimeout(function () { // initiates the status check
     changeLaborMarkupHelper(labor_markup*100);
   }, 600);
 
-  setTimeout(function () {
-    updateMaterialMarkupHelper(material_markup*100);
-  }, 700);
+  // setTimeout(function () {
+  //   updateMaterialMarkupHelper(material_markup*100);
+  // }, 700);
+
+  // setTimeout(function () {
+  //   updateSupervisorMarkup(supervisor_markup*100);
+  // }, 800);
+  
+  // setTimeout(function () {
+  //   updateTravelExtra(travel_extra);
+  // }, 900);
   
 
   // setInterval(function () {

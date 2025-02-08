@@ -24,6 +24,25 @@ const chatgpt = require("./chatgpt.js");
 const emailer = require("./email.js");
 const creds = require("./credentials.js");
 const querystring = require("querystring");
+const schedule = require('node-schedule');
+
+// execute every day at 12:30pm
+const job = schedule.scheduleJob('30 12 * * *', function () {
+  db.checkForExpiredEstimates(function (err, expiredEstimates) {
+    if (err) {
+      console.error('Error checking for expired takeoffs:', err);
+      return;
+    }
+
+    if (expiredEstimates.length > 0) {
+      for (const estimate of expiredEstimates) {
+        emailer.sendExpiredEstimateEmail(estimate.id);
+      }
+    }
+  });
+});
+
+
 
 // require payment.js
 //const payment = require("./payment.js");
@@ -198,6 +217,16 @@ module.exports = function (app) {
     });
   });
 
+  app.post("/copyTakeoff", mid.isAdmin, (req, res) => {
+    db.copyTakeoff(req.body.takeoff_id, req.user.local.id, function (err) {
+      if (err) {
+        console.log(err);
+        res.end();
+      }
+    });
+  });
+  
+
 
   //updateTakeoff POST
   app.post("/update-takeoff-name", mid.isAdmin, (req, res) => {
@@ -212,6 +241,26 @@ module.exports = function (app) {
         res.end();
       } else {
         res.redirect("/");
+      }
+    });
+  });
+
+  app.get("/expiredTakeoffs", mid.isAdmin, (req, res) => {
+    db.checkForExpiredEstimates(function (err, expiredEstimates) {
+      if (err) {
+        console.error('Error checking for expired takeoffs:', err);
+        return;
+      }
+  
+      if (expiredEstimates.length > 0) {
+        for (const estimate of expiredEstimates) {
+          emailer.sendExpiredEstimateEmail(estimate.id, function(err){
+            if (err) {
+              console.error('Error sending expired takeoff email:', err);
+            }
+          
+          });
+        }
       }
     });
   });
@@ -249,6 +298,10 @@ module.exports = function (app) {
   app.post("/update-takeoff-invoice-email", mid.isAdmin, (req, res) => {
     console.log("updating takeoff invoice email");
     let email = req.body.owner_invoice_email_address;
+
+    if (email == null) {
+      email = req.body.invoice_email_address;
+    }
     let takeoff_id = req.body.takeoff_id;
     console.log(req.body);
     db.updateTakeoffInvoiceEmail(req.body.takeoff_id, email, function (err) {
@@ -524,6 +577,49 @@ module.exports = function (app) {
     });
   });
    
+
+  app.post("/change-supervisor-markup", mid.isAdmin, function (req, res) {
+    console.log("changing supervisor markup ", req.body);
+    db.takeoffGetStatus(req.body.takeoff_id, function (err, status) {
+      if (status < 4) {
+        db.changeSupervisorMarkup(req.body.takeoff_id, req.body.supervisor_markup, function (err) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("updated supervisor markup");
+            res.end();
+          }
+        });
+      } else {
+        console.log("Takeoff is signed, cannot change markup");
+        res.status(500).send("Takeoff is signed, cannot change markup");
+      }
+    });
+  });
+  app.post("/change-travel-cost", mid.isAdmin, function (req, res) {  
+    console.log("changing travel cost ", req.body);
+    db.takeoffGetStatus(req.body.takeoff_id, function (err, status) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving takeoff status");
+      } else {
+        if (status < 4) {
+          db.changeTravelCost(req.body.takeoff_id, req.body.travel_extra, function (err) {
+            if (err) {
+              console.log(err);
+              res.status(500).send("Error updating travel cost");
+            } else {
+              console.log("updated travel cost");
+              res.end();
+            }
+          });
+        } else {
+          console.log("Takeoff is signed, cannot change travel cost");
+          res.status(500).send("Takeoff is signed, cannot change travel cost");
+        }
+      }
+    });
+  });
   
   
 
@@ -547,7 +643,7 @@ module.exports = function (app) {
       req.body.takeoff_id,
       req.body.signature,
       req.body.date,
-      function (valid, err) {
+      function (valid, invoice_id, err) {
         if (err) {
           console.log(err);
         } else {
@@ -557,7 +653,25 @@ module.exports = function (app) {
               if (err) {
               console.log(err);
               } else {
-              res.send(valid);
+
+                // send the email
+
+                db.getTakeoff(req.body.takeoff_id, function (err, takeoff) {
+                  if (err) {
+                    console.log(err);
+                  } else {
+                    
+                    console.log("sending email to ", takeoff);
+                    emailer.sendInvoiceEmail(req, res, req.body.takeoff_id, invoice_id, function (err) {
+                      if (err) {
+                        console.log(err);
+                      } else {
+                        res.send(valid);
+                      }
+                    });
+                  }
+                }
+                );
               }
             });
 
@@ -644,7 +758,7 @@ module.exports = function (app) {
   });
 
 
-  app.post("/generateEstimate", function (req, res) {
+  app.post("/generateEstimate", mid.isAdmin, function (req, res) {
     // priority: this function should check to see if an estimate has been generated, if yes, send to client, if no, generate
     var takeoff_id = req.body.takeoff_id;
     console.log("your email is: ", req.user.local.email);
@@ -662,7 +776,7 @@ module.exports = function (app) {
           // Handle the error if necessary
 
         }
-        db.separateAlts(takeoff_id, function (err) {
+       
 
           db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
             if (err) {
@@ -673,73 +787,75 @@ module.exports = function (app) {
               console.log(takeoff_info[0].estimate_id)
               if (takeoff_info[0].estimate_id == null) {
                 // Build the prompt
+                db.separateAlts(takeoff_id, function (err) {
 
 
-                prompt = prompt[0].setting_value;
+                  prompt = prompt[0].setting_value;
 
-                for (var i = 0; i < estimate.length; i++) {
-                  prompt += " subject={ " + estimate[i].material_name;
-                  prompt +=
-                    " measurement: " +
-                    estimate[i].measurement +
-                    estimate[i].measurement_unit;
-                  " " + estimate[i].measurement_unit;
-                  if (estimate[i].selected_materials != null) {
-                    for (var j = 0; j < estimate[i].selected_materials.length; j++) {
-                      //console.log(estimate[i].selected_materials[j]);
-                      prompt +=
-                        " name: " + estimate[i].selected_materials[j].name + "'";
-                      prompt +=
-                        " desc: " + estimate[i].selected_materials[j].description;
+                  for (var i = 0; i < estimate.length; i++) {
+                    prompt += " subject={ " + estimate[i].material_name;
+                    prompt +=
+                      " measurement: " +
+                      estimate[i].measurement +
+                      estimate[i].measurement_unit;
+                    " " + estimate[i].measurement_unit;
+                    if (estimate[i].selected_materials != null) {
+                      for (var j = 0; j < estimate[i].selected_materials.length; j++) {
+                        //console.log(estimate[i].selected_materials[j]);
+                        prompt +=
+                          " name: " + estimate[i].selected_materials[j].name + "'";
+                        prompt +=
+                          " desc: " + estimate[i].selected_materials[j].description;
+                      }
                     }
+                    prompt += "}";
                   }
-                  prompt += "}";
-                }
 
-                // call to  async function callChatGPT with the response as the return value and saves the it to the database
-                let response = "";
-                //console.log("prompt",prompt + JSON.stringify(estimate))
-                chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
-                  response = subres;
-                  //console.log("Response:", response);
+                  // call to  async function callChatGPT with the response as the return value and saves the it to the database
+                  let response = "";
+                  //console.log("prompt",prompt + JSON.stringify(estimate))
+                  chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
+                    response = subres;
+                    //console.log("Response:", response);
 
-                  // process response for render
-                  // split into two vars called includes, and exclusions
-                  let inclusions = response.split("</br>")[0];
-                  let exclusions = response.split("</br>")[1];
+                    // process response for render
+                    // split into two vars called includes, and exclusions
+                    let inclusions = response.split("</br>")[0];
+                    let exclusions = response.split("</br>")[1];
 
-                  if (inclusions == null || exclusions == null) {
-                    // throw an error
-                    console.log("Error splitting response");
-                    res.send("Error generating estimate. Please try again with assigned materials.");
+                    if (inclusions == null || exclusions == null) {
+                      // throw an error
+                      console.log("Error splitting response");
+                      res.send("Error generating estimate. Please try again with assigned materials.");
 
-                  } else {
+                    } else {
 
-                    // check if the response has been split correctly
-                    console.log("Includes:", inclusions.substring(0, 20) + "...");
-                    console.log("Exclusions:", exclusions.substring(0, 20) + "...");
-                    //nul checking for inclusions and exclusions
-                    if (inclusions == null) {
-                      // set the inclusions to the response
-                      inclusions = response;
-                    }
-                    if (exclusions == null) {
-                      // set the exclusions to the response
-                      exclusions = "";
-                    }
-                    db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
-                      res.render("viewEstimate.html", {
-                        inclusions: inclusions,
-                        exclusions: exclusions,
-                        takeoff_id: takeoff_id,
-                        estimate: estimate,
-                        takeoff: takeoff_info,
-                        email:req.user.local.email,
+                      // check if the response has been split correctly
+                      console.log("Includes:", inclusions.substring(0, 20) + "...");
+                      console.log("Exclusions:", exclusions.substring(0, 20) + "...");
+                      //nul checking for inclusions and exclusions
+                      if (inclusions == null) {
+                        // set the inclusions to the response
+                        inclusions = response;
+                      }
+                      if (exclusions == null) {
+                        // set the exclusions to the response
+                        exclusions = "";
+                      }
+                      db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
+                        res.render("viewEstimate.html", {
+                          inclusions: inclusions,
+                          exclusions: exclusions,
+                          takeoff_id: takeoff_id,
+                          estimate: estimate,
+                          takeoff: takeoff_info,
+                          email:req.user.local.email,
+                        });
                       });
-                    });
 
-                  }
+                    }
 
+                  });
                 });
 
               } else {
@@ -763,7 +879,7 @@ module.exports = function (app) {
               }
             }
           });
-        });
+        
       });
     });
   });
@@ -803,8 +919,8 @@ module.exports = function (app) {
   app.post("/separate-line-item", mid.isAdmin, function (req, res) {
     console.log("separating ", req.body.material_id);
     let material_id = req.body.material_id;
-    if (material_id) {
-      db.separateLineItem(req.body.material_id, function (err) {
+    if (material_id && req.body.takeoff_id) {
+      db.separateLineItem(req.body.takeoff_id, req.body.material_id, function (err) {
         if (err) {
           console.log(err);
         } else {
@@ -1110,11 +1226,11 @@ module.exports = function (app) {
           res.redirect("/");
         } else {
           console.log(estimate[0])
-          console.log("estimate created at ", estimate[0].date_created);
-          console.log("estimate expires at ", moment(estimate[0].date_created).add(30, 'days').format('YYYY-MM-DD HH:mm:ss')); // 30 days from creation
+          console.log("estimate created at ", estimate[0].date_last_shared);
+          console.log("estimate expires at ", moment(estimate[0].date_last_shared).add(30, 'days').format('YYYY-MM-DD HH:mm:ss')); // 30 days from creation
 
           // if the current date is greater than the expiration date, redirect to the home page
-          if (moment().isAfter(moment(estimate[0].date_created).add(30, 'days'))) {
+          if (moment().isAfter(moment(estimate[0].date_last_shared).add(30, 'days'))) {
             console.log("expired");
             res.render("expiredEstimate.html", {
               takeoff: takeoff,
@@ -1145,6 +1261,7 @@ module.exports = function (app) {
     db.changeStartDate(req.body.takeoff_id, req.body.startDate, function (err) {
       if (err) {
         console.log(err);
+        res.status(500).send("Failed to update start date");
       } else {
         console.log("updated start date");
       }
@@ -1165,18 +1282,38 @@ module.exports = function (app) {
   });
 
   // renewEstimate POST
+  // get the estimate from the database
+  // get estimates.creator_id
+  // use the user is to get the email of the user
+  // send renewal email to the creator
+
 
   app.post("/renewEstimate", function (req, res) {
     console.log("renewing estimate ", req.body.estimate_id);
-    db.renewEstimate(req.body.estimate_id, function (err) {
-      if (err) {
+    db.getEstimateById(req.body.estimate_id, function (err, estimate) {
+      if (err){
         console.log(err);
+        res.status(500).send("Failed to retrieve estimate");
       } else {
-        console.log("renewed");
-        res.end();
+        db.getUserById(estimate.creator_id, function (err, user) {
+          if (err) {
+            console.log(err);
+            res.status(500).send("Failed to retrieve user");
+          } else {
+            emailer.sendRenewalEmail(user.email, estimate.estimate_id, function (err) {
+              if (err) {
+                console.log(err);
+                res.status(500).send("Failed to send renewal email");
+              } else {
+                res.end();
+              }
+            });
+          }
+        });
       }
     });
   });
+  
 
   app.post("/updateOptionsSelection", mid.isAuth, function (req, res) {
     console.log("updating options selection ", req.body);
@@ -1209,6 +1346,8 @@ module.exports = function (app) {
             if (err) {
               console.log(err);
             } else {
+
+
               res.send("email sent");
             }
           }
@@ -1910,109 +2049,97 @@ module.exports = function (app) {
     });
 
 
-    // POST /create-invoice
-  app.post('/create-invoice', mid.isAdmin, (req, res) => {
-    console.log("/create-invoice recieved", req.body)
-    const {
-      customer_name,
-      custom_amount,
-      invoice_email_address,
-      takeoff_id
-    } = req.body;
-
-    // mutable corrected to takeoff name if null
-    let invoice_name = req.body.invoice_name;
-
-
-    if (invoice_name == null || invoice_name == "") {
-      db.getTakeoffById( takeoff_id, (err, rows) => {
-        if (err) {
-          console.log(err);
-          return res.status(500).json({ error: 'Failed to fetch takeoff.' });
-        }
-        console.log("No invoice name provided, using customer name");
-        invoice_name = `Invoice for ${customer_name}`;
+    app.post('/create-invoice', mid.isAdmin, (req, res) => {
+      console.log("/create-invoice received", req.body);
+  
+      const { customer_name, invoice_email_address, takeoff_id, invoice_items } = req.body;
+      let invoice_name = req.body.invoice_name || `Invoice for ${customer_name}`;
+      let invoiceTotal = 0;
+  
+      // Calculate invoice total
+      if (Array.isArray(invoice_items) && invoice_items.length > 0) {
+          invoiceTotal = invoice_items.reduce((sum, item) => sum + (item.quantity * item.cost), 0);
       }
-      );
-    }
-
-    let computedAmount = 0;
-
-    db.getInvoicableTotal(takeoff_id, (err, invoiceableTotal) => {
-      if (err) {
-        console.error('Error fetching total:', err);
-        return res.status(500).json({ error: 'Failed to fetch total.' });
-      }
-
-      console.log("getInvoicableTotal", invoiceableTotal);
-      // console.log("payment_amount is ", payment_amount);
-      // payment amount should probably be changed to payment_percent
-      if (custom_amount > invoiceableTotal){
-        console.log("custom amount is greater than total");
-      }
-
-      // query the db and get the count of the invoices with takeoff_id
-      db.getInvoiceCount(takeoff_id, (err, count) => {
-        if (err) {
-          console.error('Error fetching invoice count:', err);
-          return res.status(500).json({ error: 'Failed to fetch invoice count.' });
-        }
-
-        if (count == 1) { // this is the first invoice
-          console.log("first invoice");
-          // update takeoff status to invoiced (5)
-          db.takeoffSetStatus(takeoff_id, 5, function (err) {
+      console.log(invoiceTotal);
+        // Get invoice count
+        db.getInvoiceCount(takeoff_id, function (err, count) {
             if (err) {
-              console.log(err);
-            }
-          });
-
-        }
-
-        // Generate invoice number
-        // prepend a 7 digit random number to takeoff_id 
-        const long_id = String(Math.floor(Math.random() * 10000000)) + String(takeoff_id);
-        const invoiceNumber = `${String(long_id).padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
-
-        // Insert into database
-        const query = `INSERT INTO invoices (takeoff_id, total, invoice_number, invoice_name, hash) VALUES (?, ?, ?, ?, ?)`;
-        const values = [takeoff_id, custom_amount, invoiceNumber, invoice_name, db.generateHash()];
-
-        db.query(query, values, (results) => {
-          // Fetch the created invoice
-          console.log(results);
-          const fetchQuery = `SELECT * FROM invoices WHERE id = ?`;
-          db.query(fetchQuery, [results.insertId], (rows) => {
-            if (rows.length === 0) {
-              console.error('Error fetching created invoice:', err);
-              return res.status(500).json({ error: 'Failed to fetch created invoice.' });
+                console.error("Error fetching invoice count:", err);
+                return res.status(500).json({ error: 'Failed to fetch invoice count.' });
             }
 
-            const createdInvoice = rows[0];
+            if (count === 1) {
+                console.log("First invoice - updating status");
+                db.takeoffSetStatus(takeoff_id, 5, function (err) {
+                    if (err) console.error("Error updating takeoff status:", err);
+                });
+            }
 
-            // Add default values for undefined fields in the database
-            // createdInvoice.payments = [];
+            // Generate invoice number
+            const long_id = String(Math.floor(Math.random() * 10000000)) + String(takeoff_id);
+            const invoiceNumber = `${long_id.padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
 
-            // get the payment history
-            db.getPaymentHistory(takeoff_id, (err, payments) => {
-              if (err) {
-                console.error('Error fetching payment history:', err);
-                return res.status(500).json({ error: 'Failed to fetch payment history.' });
-              }
+            // Insert invoice into the database
+            const insertQuery = `INSERT INTO invoices (takeoff_id, total, invoice_number, invoice_name, hash) VALUES (?, ?, ?, ?, ?)`;
+            const hashValue = db.generateHash();
+            db.query(insertQuery, [takeoff_id, invoiceTotal, invoiceNumber, invoice_name, hashValue], function (err, result) {
+                if (err) {
+                    console.error("Error inserting invoice:", err);
+                    return res.status(500).json({ error: 'Failed to create invoice.' });
+                }
 
-              createdInvoice.payments = payments;
-              createdInvoice.timeline = [
-                { date: createdInvoice.created_at, label: 'Invoice Created', amount: createdInvoice.total }
-              ];
+                const invoiceId = result.insertId;
 
-              console.log('Invoice created:', createdInvoice);
-              res.status(201).json(createdInvoice);
+                // Insert invoice items
+                if (invoice_items.length > 0) {
+                    const itemQuery = `INSERT INTO invoice_items (invoice_id, quantity, cost, description) VALUES ?`;
+                    const itemValues = invoice_items.map(item => [invoiceId, item.quantity, item.cost, item.description]);
+
+                    db.query(itemQuery, [itemValues], function (err, itemResult) {
+                        if (err) {
+                            console.error("Error inserting invoice items:", err);
+                            return res.status(500).json({ error: 'Failed to insert invoice items.' });
+                        }
+
+                        if (itemResult.affectedRows !== invoice_items.length) {
+                            console.error("Not all invoice items were inserted:", itemResult);
+                            return res.status(500).json({ error: 'Failed to insert all invoice items.' });
+                        }
+
+                        // Fetch the created invoice
+                        db.query(`SELECT * FROM invoices WHERE id = ?`, [invoiceId], function (err, rows) {
+                            if (err || rows.length === 0) {
+                                console.error("Error fetching created invoice:", err);
+                                return res.status(500).json({ error: 'Failed to fetch created invoice.' });
+                            }
+
+                            const createdInvoice = rows[0];
+
+                            // Get payment history
+                            db.getPaymentHistory(takeoff_id, function (err, payments) {
+                                if (err) {
+                                    console.error("Error fetching payment history:", err);
+                                    return res.status(500).json({ error: 'Failed to fetch payment history.' });
+                                }
+
+                                createdInvoice.payments = payments;
+                                createdInvoice.timeline = [
+                                    { date: createdInvoice.created_at, label: 'Invoice Created', amount: createdInvoice.total }
+                                ];
+
+                                console.log("Invoice created successfully:", createdInvoice);
+                                res.status(201).json(createdInvoice);
+                            });
+                        });
+                    });
+                } else {
+                    res.status(201).json({ message: "Invoice created but no items added." });
+                }
             });
-          });
         });
-      });
-    });
+      
   });
+  
 
     app.post('/share-invoice', mid.isAdmin, function (req, res) {
       console.log("sending email to client ", req.body.takeoff_id);

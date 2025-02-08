@@ -59,7 +59,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ estimateId: estimateId })
+                body: JSON.stringify({ estimate_id: estimateId })
             })
             .then(response => {
                 if (response.ok) {

@@ -81,6 +81,7 @@ CREATE TABLE estimates (
   signed_total DECIMAL(10,2),
   isArchived TINYINT(1) DEFAULT 0,
   date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  date_last_shared TIMESTAMP,
   inclusions TEXT,
   labor TEXT,
   exclusions TEXT,
@@ -99,7 +100,6 @@ CREATE TABLE takeoffs (
   hash VARCHAR(64),
   view_count INT DEFAULT 0,
   total DECIMAL(10,2),
-  material_cost DECIMAL(10,2),
   travel_cost DECIMAL(10,2) DEFAULT 0.00,
   tax DECIMAL(10,2) DEFAULT 5.3,
   labor_cost DECIMAL(10,2) DEFAULT 0.00,
@@ -199,6 +199,27 @@ CREATE TABLE payment_history (
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
   FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+);
+
+CREATE TABLE change_orders (
+  id INT NOT NULL AUTO_INCREMENT,
+  takeoff_id INT NOT NULL,
+  description TEXT,
+  change_order_total DECIMAL(10,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+);
+
+CREATE TABLE change_order_items (
+  id INT NOT NULL AUTO_INCREMENT,
+  change_order_id INT NOT NULL,
+  description TEXT,
+  cost DECIMAL(10,2),
+  quantity INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
 );
 
 -- Material archetypes table

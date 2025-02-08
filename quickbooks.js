@@ -380,13 +380,14 @@ module.exports = function (app) {
 
             // Sync invoice to database
             const sql = `
-              INSERT INTO invoices (id, customer_id, total, due_date, invoice_date, status) VALUES ?
+              INSERT INTO invoices (id, customer_id, total, due_date, invoice_date, status, hash) VALUES ?
               ON DUPLICATE KEY UPDATE
               customer_id = VALUES(customer_id),
               total = VALUES(total),
               due_date = VALUES(due_date),
               invoice_date = VALUES(invoice_date),
-              status = VALUES(status);
+              status = VALUES(status,
+              hash = VALUES(hash);
             `;
             const values = [[
               invoice.json.Invoice.Id,
@@ -395,6 +396,7 @@ module.exports = function (app) {
               invoice.json.Invoice.DueDate,
               invoice.json.Invoice.TxnDate,
               invoice.json.Invoice.Balance,
+              crypto.createHash('md5').update(JSON.stringify(invoice.json.Invoice)).digest('hex'),
             ]];
 
             db.query(sql, [values], (err) => {

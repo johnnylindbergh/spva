@@ -49,6 +49,8 @@ async function sendEstimateEmail(req, res, takeoff_id, callback) {
               if (err) { console.log(err); } 
                callback(null, info.response);
             });
+
+
           }
         });
       } else {
@@ -105,14 +107,14 @@ async function sendEstimateEmailInternally(req, res, takeoff_id, targetEmail, ca
 
 async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
   db.getTakeoffById(takeoff_id, (err, takeoff) => {
-    if (err) {
+    if (err || !takeoff) {
       console.log(err);
       callback("big error", null);
     } else {
       console.log(takeoff);
       if (takeoff[0].customer_invoice_email_address && takeoff[0].customer_givenName) {
         db.getInvoiceById(invoice_id, (err, invoice) => {
-          if (err) {
+          if (err || !invoice) {
             console.log(err);
             callback("big error", null);
           } else {
@@ -153,6 +155,85 @@ async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
   });
 }
 
+async function sendExpiredEstimateEmail(estimate_id, callback) {
+ 
+  // use the takeoff id to get the email address of the owner
+
+  db.getEstimateById(estimate_id, (err, estimate) => {
+    if (err) {
+      console.log(err);
+      callback("big error", null);
+    } else {  
+      db.getUserById(estimate.creator_id, (err, user) => {
+        if (err) {
+          console.log(err);
+          callback("big error", null);
+        } else {  
+          const mailOptions = {
+            from: credentials.serverEmail,
+            to: user.email,
+            subject: "Your Estimate from Sun Painting",
+            html: `
+              <h3>Hello, ${user.name},</h3>
+              <h3>Your estimate has expired.</h3>
+              <p>Please click the link below to view it:</p>
+              <a href="${credentials.domain}/share/?hash=${estimate.hash}">View Estimate</a></br>
+              <img style="margin:20px;width:140px;"src="${credentials.domain}/SWAM_LOGO.jpg" alt="Swam Logo"></br>
+              <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
+            `,
+          };
+          
+          const info = transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+              console.log(err);
+              callback(err, null);
+            } else {
+              console.log("Email sent: " + info.response);
+              callback(null, info.response);
+            }
+          });
+        }
+      }
+      );
+    }
+  }
+  );
+}
+
+async function sendRenewalEmail(user_email, estimate_id, callback) {
+  db.getEstimateById(estimate_id, (err, estimate) => {
+    if (err) {
+      console.log(err);
+      callback("big error", null);
+    } else {  
+      const mailOptions = {
+        from: credentials.serverEmail,
+        to: user_email,
+        subject: "Your Estimate from Sun Painting",
+        html: `
+          <h3>Hello, ${user_email},</h3>
+          <h3>Your estimate is about to expire.</h3>
+          <p>Please click the link below to view it:</p>
+          <a href="${credentials.domain}/share/?hash=${estimate.hash}">View Estimate</a></br>
+          <img style="margin:20px;width:140px;"src="${credentials.domain}/SWAM_LOGO.jpg" alt="Swam Logo"></br>
+          <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
+        `,
+      };
+      
+      const info = transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+          console.log(err);
+          callback(err, null);
+        } else {
+          console.log("Email sent: " + info.response);
+          callback(null, info.response);
+        }
+      });
+    }
+  }
+  );
+}
+
 
 
 
@@ -160,5 +241,7 @@ async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
 module.exports = {
   sendEstimateEmail,
   sendEstimateEmailInternally,
-  sendInvoiceEmail
+  sendInvoiceEmail,
+  sendExpiredEstimateEmail,
+  sendRenewalEmail
 };

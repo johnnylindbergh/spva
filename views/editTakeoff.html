@@ -86,15 +86,14 @@
       </br>
 
         <label for="slider">Supervisor Markup:</label>
-        <input type="range" id="supervisionMarkup" name="slider" min="0" max="100" value="21"
-          oninput="updateSliderValue(this.value)">
-        <span id="sliderValue"></span>
+        <input type="range" id="supervisionMarkup" name="slider" min="0" max="100" value="0"
+          oninput="updateSupervisorMarkupHelper(this.value)">
+        <span id="supervisorMarkupValue"></span>
       </br>
 
       <label for="slider">Travel Extra:</label>
-      <input type="number" id="travelExtra" name="travelExtra" min="0" max="100" value="0.00"
-        oninput="update(this.value)">
-      <span id="travelExtraValue"></span>
+      <input type="number" id="travelExtra" name="travelExtra" value="{{takeoff.travel_cost}}"
+        onchange="updateTravelExtra(this.value)">
     </br>
 
     </div>
