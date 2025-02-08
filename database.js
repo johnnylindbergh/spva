@@ -477,25 +477,35 @@ module.exports = {
 
       }
 
+      var subjectIndex = headers.indexOf("Subject");
+      if (subjectIndex === -1) {
+        subjectIndex = headers.indexOf("subject");
+      }
+      var subject = results[i][subjectIndex];
+      
+      var pageLabelIndex = headers.indexOf("Page Label");
+      if (pageLabelIndex === -1) {
+        pageLabelIndex = headers.indexOf("page label");
+      }
+      var pageLabel = results[i][pageLabelIndex];
 
+      var colorRef = headers.indexOf("Color");
+      if (colorRef === -1) {
+        colorRef = headers.indexOf("color");
+      }
+      var color = results[i][colorRef];
 
-      // console.log(results[i]);
-      // console.log("subject: ", results[i][0]);
-      // console.log("page_label: ", results[i][1]);
-      // console.log("date: " ,results[i][2]);
-      // console.log("layer: ", results[i][3]);
-      // console.log("color: " ,results[i][4]);
-      // console.log("length: " ,results[i][5]);
-      // console.log("length_unit: ", results[i][6]);
-      // console.log("area: ",  results[i][7]);
-      // console.log("area_unit: " ,results[i][8]);
-      // console.log("wall_area: " ,parseFloat(results[i][9]));
-      // console.log("wall_area_unit: " ,results[i][10]);
-      // console.log("depth: " ,results[i][11]);
-      // console.log("depth_unit: " ,results[i][12]);
-      // console.log("count: " ,results[i][13]);
-      // console.log("measurement: " ,results[i][14]);
-      // console.log("measurement_unit: " ,results[i][15]);
+      var topCoatIndex = headers.indexOf("Top Coat");
+      if (topCoatIndex === -1) {
+        topCoatIndex = headers.indexOf("top coat");
+      }
+      var topCoat = results[i][topCoatIndex];
+
+      var primerIndex = headers.indexOf("Primer");
+      if (primerIndex === -1) {
+        primerIndex = headers.indexOf("primer");
+      }
+      var primer = results[i][primerIndex];
 
 
       var mesurementIndex = headers.indexOf("Measurement");
@@ -534,30 +544,18 @@ module.exports = {
           measurementUnit = "sqft";
         }
       }
-      //console.log("measurement: ", measurement);
-
-      // id INT NOT NULL AUTO_INCREMENT,
-      //   takeoff_id INT,
-      //   material_id INT,
-      //   subject VARCHAR(64),
-      //   page_label VARCHAR(64),
-      //   layer VARCHAR(64),
-      //   color VARCHAR(64),
-      //   measurement DECIMAL(10,2),
-      //   measurement_unit VARCHAR(64),
 
       con.query(
-        "INSERT INTO subjects (takeoff_id, subject, page_label, layer, color, measurement, measurement_unit, top_coat, primer) VALUES (?,?,?,?,?,?,?,?,?);",
+        "INSERT INTO subjects (takeoff_id, subject, page_label, color, measurement, measurement_unit, top_coat, primer) VALUES (?,?,?,?,?,?,?,?);",
         [
           takeoff_id,
-          results[i][0],
-          results[i][1],
-          results[i][3],
-          results[i][4],
+          subject,
+          pageLabel,
+          color,
           parseFloat(measurement),
           measurementUnit,
-          results[i][16],
-          results[i][17],
+          parseFloat(topCoat),
+          primer,
         ],
         function (err) {
           if (err) {

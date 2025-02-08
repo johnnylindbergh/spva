@@ -27,7 +27,7 @@ const querystring = require("querystring");
 const schedule = require('node-schedule');
 
 // execute every day at 12:30pm
-const job = schedule.scheduleJob('30 12 * * *', function () {
+const job = schedule.scheduleJob('30 2 * * *', function () {
   db.checkForExpiredEstimates(function (err, expiredEstimates) {
     if (err) {
       console.error('Error checking for expired takeoffs:', err);
