@@ -27,7 +27,7 @@ const querystring = require("querystring");
 const schedule = require('node-schedule');
 
 // execute every day at 12:30pm
-const job = schedule.scheduleJob('30 2 * * *', function () {
+const job = schedule.scheduleJob('47 14 * * *', function () {
   db.checkForExpiredEstimates(function (err, expiredEstimates) {
     if (err) {
       console.error('Error checking for expired takeoffs:', err);
@@ -2080,58 +2080,32 @@ module.exports = function (app) {
             const invoiceNumber = `${long_id.padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
 
             // Insert invoice into the database
-            const insertQuery = `INSERT INTO invoices (takeoff_id, total, invoice_number, invoice_name, hash) VALUES (?, ?, ?, ?, ?)`;
+            const insertQuery = `INSERT INTO invoices (takeoff_id, total, invoice_number, invoice_name, hash) VALUES (?, ?, ?, ?, ?); SELECT LAST_INSERT_ID() AS invoice_id;`;
             const hashValue = db.generateHash();
-            db.query(insertQuery, [takeoff_id, invoiceTotal, invoiceNumber, invoice_name, hashValue], function (err, result) {
+            db.query(insertQuery, [takeoff_id, invoiceTotal, invoiceNumber, invoice_name, hashValue], function (results) {
+              console.log(results);
                 if (err) {
                     console.error("Error inserting invoice:", err);
                     return res.status(500).json({ error: 'Failed to create invoice.' });
                 }
 
-                const invoiceId = result.insertId;
+                const invoiceId = results[1][0].invoice_id;
 
                 // Insert invoice items
+                console.log("Inserting invoice items");
+                console.log("invoice_id", invoiceId);
+                console.log("items", invoice_items);
                 if (invoice_items.length > 0) {
-                    const itemQuery = `INSERT INTO invoice_items (invoice_id, quantity, cost, description) VALUES ?`;
-                    const itemValues = invoice_items.map(item => [invoiceId, item.quantity, item.cost, item.description]);
-
-                    db.query(itemQuery, [itemValues], function (err, itemResult) {
+                  for (var i = 0; i < invoice_items.length; i++) {
+                    const item = invoice_items[i];
+                    const insertItemQuery = `INSERT INTO invoice_items (invoice_id, description, cost, quantity) VALUES (?, ?, ?, ?)`;
+                    db.query(insertItemQuery, [invoiceId, item.description, item.cost, item.quantity], function (err) {
                         if (err) {
-                            console.error("Error inserting invoice items:", err);
-                            return res.status(500).json({ error: 'Failed to insert invoice items.' });
+                            console.error("Error inserting invoice item:", err);
                         }
-
-                        if (itemResult.affectedRows !== invoice_items.length) {
-                            console.error("Not all invoice items were inserted:", itemResult);
-                            return res.status(500).json({ error: 'Failed to insert all invoice items.' });
-                        }
-
-                        // Fetch the created invoice
-                        db.query(`SELECT * FROM invoices WHERE id = ?`, [invoiceId], function (err, rows) {
-                            if (err || rows.length === 0) {
-                                console.error("Error fetching created invoice:", err);
-                                return res.status(500).json({ error: 'Failed to fetch created invoice.' });
-                            }
-
-                            const createdInvoice = rows[0];
-
-                            // Get payment history
-                            db.getPaymentHistory(takeoff_id, function (err, payments) {
-                                if (err) {
-                                    console.error("Error fetching payment history:", err);
-                                    return res.status(500).json({ error: 'Failed to fetch payment history.' });
-                                }
-
-                                createdInvoice.payments = payments;
-                                createdInvoice.timeline = [
-                                    { date: createdInvoice.created_at, label: 'Invoice Created', amount: createdInvoice.total }
-                                ];
-
-                                console.log("Invoice created successfully:", createdInvoice);
-                                res.status(201).json(createdInvoice);
-                            });
-                        });
                     });
+                  }
+
                 } else {
                     res.status(201).json({ message: "Invoice created but no items added." });
                 }

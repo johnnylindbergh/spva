@@ -27,9 +27,8 @@ body {
 }
 
 .form-container input,
-.form-container select,
-.form-container button {
-    width: 100%;
+.form-container select {
+    width: 96%;
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
@@ -38,11 +37,14 @@ body {
 }
 
 .form-container button {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    width: 45%;
     background-color: #0893A1;
     color: white;
-    border: none;
-    cursor: pointer;
-}
+    border: none;  
+ }
 
 .form-container button:hover {
     background-color: #056b74;

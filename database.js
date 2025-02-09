@@ -1266,9 +1266,10 @@ module.exports = {
   checkForExpiredEstimates: function (callback) {
     let expritationDate = new Date();
     // add 60 days to the expritationDate 
-    expritationDate.setDate(expritationDate.getDate() - 60);
+    expritationDate.setDate(expritationDate.getDate() - 30);
     console.log("expritationDate: ", expritationDate);
-    con.query("SELECT * FROM estimates where date_last_shared < ?", [expritationDate], function (err, estimates) {
+    // status < 4 means the estimate has not been signed
+    con.query("SELECT * FROM estimates join takeoffs on estimates.takeoff_id = takeoffs.id where estimates.date_last_shared < ?  AND takeoffs.status < 4 ", [expritationDate], function (err, estimates) {
       if (err) return callback(err);
       console.log("expired estimates: ", estimates);
       callback(null, estimates);

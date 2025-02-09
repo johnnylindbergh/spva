@@ -189,6 +189,15 @@ async function sendExpiredEstimateEmail(estimate_id, callback) {
               callback(err, null);
             } else {
               console.log("Email sent: " + info.response);
+              // update the estimate, set the status to expired
+              db.updateEstimateStatus(estimate_id, 7, (err, result) => {
+                if (err) {
+                  console.log(err);
+                  callback(err, null);
+                } else {
+                  callback(null, info.response);
+                }
+              });
               callback(null, info.response);
             }
           });
@@ -212,8 +221,8 @@ async function sendRenewalEmail(user_email, estimate_id, callback) {
         subject: "Your Estimate from Sun Painting",
         html: `
           <h3>Hello, ${user_email},</h3>
-          <h3>Your estimate is about to expire.</h3>
-          <p>Please click the link below to view it:</p>
+          <h3>YourYour estimate has expired.</h3>
+          <p>Please click the link below to renew it:</p>
           <a href="${credentials.domain}/share/?hash=${estimate.hash}">View Estimate</a></br>
           <img style="margin:20px;width:140px;"src="${credentials.domain}/SWAM_LOGO.jpg" alt="Swam Logo"></br>
           <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">

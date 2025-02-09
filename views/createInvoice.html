@@ -21,18 +21,16 @@
 
     let rowCount = 0;
 
-    function addRow(){
-        const table = document.getElementById("invoice-item-table");
-        const row = table.insertRow(-1);
-        const numberCell = row.insertCell(0);
-        const quantityCell = row.insertCell(1);
-        const costCell = row.insertCell(2);
-        const descriptionCell = row.insertCell(3);
-
-        numberCell.innerHTML = `${++rowCount}`;
-        quantityCell.innerHTML = `<input style="width:150px" type="number" name="quantity">`;
-        costCell.innerHTML = `<input style="width=10px" type="number" name="cost">`;
-        descriptionCell.innerHTML = `<input style="width=10px" type="text" name="description">`;
+    function addRow() {
+    const table = document.getElementById("invoice-item-table").querySelector("tbody");
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td>${++rowCount}</td>
+        <td><input style="width:150px" type="number" name="invoice_items[${rowCount}][quantity]"></td>
+        <td><input style="width:150px" type="number" step="0.01" name="invoice_items[${rowCount}][cost]"></td>
+        <td><input style="width:150px" type="text" name="invoice_items[${rowCount}][description]"></td>
+    `;
+    table.appendChild(row);
     }
 
         function pushInvoiceToQuickbooks(invoice_id) {
@@ -111,9 +109,11 @@
             // hide the invoce initially
             document.querySelector('.invoice-container').style.display = 'none';
 
+            // add row initially
+            addRow();
 
             form.addEventListener('submit', function (event) {
-                event.preventDefault();
+                event.preventDefault();  // Prevents normal form submission
 
                 const customerName = document.getElementById('customer-name').value;
                 const email = document.getElementById('email').value;
@@ -124,8 +124,6 @@
                     return;
                 }
 
-
-
                 if (!takeoffId) {
                     XSAlert.alert('Takeoff ID not defined');
                     return;
@@ -135,9 +133,9 @@
                 const rows = document.querySelectorAll("#invoice-item-table tbody tr");
 
                 rows.forEach(row => {
-                    const quantity = row.querySelector("input[name='quantity']").value;
-                    const cost = row.querySelector("input[name='cost']").value;
-                    const description = row.querySelector("input[name='description']").value;
+                    const quantity = row.querySelector("input[name^='invoice_items'][name$='[quantity]']").value;
+                    const cost = row.querySelector("input[name^='invoice_items'][name$='[cost]']").value;
+                    const description = row.querySelector("input[name^='invoice_items'][name$='[description]']").value;
 
                     if (quantity && cost && description) {
                         invoiceItems.push({
@@ -151,7 +149,7 @@
                 $.ajax({
                     url: '/create-invoice',
                     method: 'POST',
-                    contentType: 'application/json', // Set content type
+                    contentType: 'application/json',
                     data: JSON.stringify({
                         customer_name: customerName,
                         email: email,
@@ -159,58 +157,14 @@
                         invoice_items: invoiceItems
                     }),
                     success: function (invoice) {
-                        const invoiceContainer = document.querySelector('.invoice-container');
-
-                        // show the invoice
-                        invoiceContainer.style.display = 'inline-block';
-
-                        // hide the form-container
-                        document.querySelector('.form-container').style.display = 'none';
-
-                        console.log("invoice", invoice);
-
-                        // append the invoice_number to the invoice-info
-                        const invoiceInfo = document.querySelector('.invoice-info');
-
-                        // created_at: "2025-01-07T01:22:16.000Z"
-                        // hash: null
-                        // id: 26
-                        // invoice_number: "1-26"
-                        // timeline: [{date: "2025-01-07T01:22:16.000Z", label: "Invoice Created", amount: "200.00"}] (1)
-                        // total: "200.00"
-                        // view_count: 0
-                        const invoiceHtml = `
-                    <p>Invoice Number: ${invoice.invoice_number}</p>
-                    <p>Total: ${invoice.total}</p>
-                    <p>Created At: ${moment(invoice.created_at).format('MMMM Do YYYY, h:mm:ss a')}</p>
-                    <h3>Timeline:</h3>
-                    <ul>
-                        ${invoice.timeline.map(event => `
-                            <li>${moment(event.date).format('MMMM Do YYYY, h:mm:ss a')} - ${event.label}: ${event.amount}</li>
-                        `).join('')}
-                    </ul>
-                    <div style="display:flex; gap: 15px;">
-                        <div id="shareWithCustomer">
-                            <button id="share-with-customer" onclick="shareInvoiceWithCustomer(${invoice.id});">Share with Customer</button>
-                        </div>
-                        {{^invoice.qb_number}}
-                        <div id="pushToQuickbooks">
-                            <button id="push-to-quickbooks" onclick="pushInvoiceToQuickbooks(${invoice.id});">Push to Quickbooks</button>
-                        </div>
-                        {{/invoice.qb_number}}
-                    </div>
-                `;
-                        invoiceInfo.innerHTML = invoiceHtml;
-
-
+                        console.log("Invoice created:", invoice);
                     },
                     error: function (error) {
                         XSAlert.alert('Failed to create invoice. Please try again.');
                     },
                 });
-
-
             });
+
 
         });
 
@@ -257,24 +211,28 @@
             <input type="text" id="custom-amount" name="custom_amount" placeholder="Enter custom amount" min="0"> -->
 
             <!-- a table with columns number, quantity, cost, description -->
-            <table id="invoice-item-table">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Quantity</th>
-                        <th>Cost</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody id="invoice-items">
-                  
-                </tbody>
-            </table>
+            <div style="overflow-x:auto;">
+                <table id="invoice-item-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Quantity</th>
+                            <th>Cost</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody> <!-- Make sure this exists -->
+                    </tbody>
+                </table>
+            </br>
 
-            <!-- add row button -->
-             <button type="button" onclick="addRow()">Add Row</button>
-
-            <button type="submit">Create Invoice</button>
+                <!-- add row button -->
+                <button style = "width: 25%" type="button" onclick="addRow()">Add Row</button>
+            </div>
+        </br>
+            <div style="text-align:center;">
+                <button style="background-color: rgb(1, 152, 1);" type="submit">Create Invoice</button>
+            </div>
             {{/takeoff}}
         </form>
     </div>
