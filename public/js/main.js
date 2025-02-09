@@ -1,7 +1,7 @@
 // const { name } = require("ejs");
 
 $(document).ready(function () {
-  function createProgressBar(statusCode, dateCreated) {
+  function createStatusIndicator(statusCode, dateCreated) {
     const statuses = [
       { code: 1, label: "Takeoff Uploaded" },
       { code: 2, label: "Estimate Generated" },
@@ -10,39 +10,23 @@ $(document).ready(function () {
       { code: 5, label: "Invoiced" },
     ];
 
-    // Find the index of the current status
-    let currentIndex = statuses.findIndex((s) => s.code === statusCode);
-    if (currentIndex === -1) {
-      currentIndex = 0; // Default to the first status if not found
+    const status = statuses.find((s) => s.code === statusCode);
+    if (!status) {
+      console.error("Invalid status code:", statusCode);
+      return;
     }
 
-    // Create the progress bar container
-    const progressBar = $("<div>").addClass("progress-bar");
+    const indicator = document.createElement("div");
+    // indicator.classList.add("status-indicator");
+    // radius: 50%;
+ 
+    // padding: 5px;
+    indicator.style.padding = "10px";
+    indicator.style.display = "inline-block";
+    indicator.textContent = status.label;
+    indicator.style.backgroundColor = getColor(dateCreated);
+    return indicator;
 
-    // Create each segment of the progress bar
-    statuses.forEach((stage, index) => {
-      const segment = $("<div>").addClass("progress-segment");
-      segment.text(stage.label);
-
-      if (index <= currentIndex) {
-        segment.addClass("completed");
-      }
-
-    // Apply gradient color to "Estimate Published"
-    if (stage.code === 3) {
-      if (dateCreated) {
-        const color = getColor(dateCreated);
-        console.log("Computed color:", color);
-        segment.attr("style", `background-color: ${color}; color: white !important`);
-      } else {
-       // console.warn("'dateCreated' is not provided for 'Estimate Published'");
-      }
-    }
-
-      progressBar.append(segment);
-    });
-
-    return progressBar;
   }
 
   function getColor(dateCreated) {
@@ -155,7 +139,7 @@ $(document).ready(function () {
         row.append($("<td>").append(viewForm));
   
         // Add the progress bar
-        let progressBar = createProgressBar(takeoff.status, takeoff.date_created);
+        let status = createStatusIndicator(takeoff.status, takeoff.takeoff_created_at);
         let tdProgress = $("<td>");
         if (takeoff.status === 4) {
           tdProgress.addClass("hoverable").attr(
@@ -163,13 +147,14 @@ $(document).ready(function () {
             `Estimate Signed: ${new Date(takeoff.signed_at).toLocaleString("en-US")}`
           );
         } else if (takeoff.status > 3) {
-          progressBar.addClass("hoverable").attr(
-            "title",
-            `View Count: ${takeoff.view_count}`
-          );
+         
         }
-        tdProgress.append(progressBar);
+        tdProgress.append(status);
         row.append(tdProgress);
+
+        // add amout due
+        row.append($("<td>").text(takeoff.total_due));
+
   
         // Append the row to the table
         $("#takeoffs_table").append(row);

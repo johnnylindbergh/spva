@@ -186,18 +186,31 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
 // main page stuff
 module.exports = function (app) {
   // GET requests
-  app.get("/", mid.isAdmin, (req, res) => {
+  app.get("/", mid.isAuth, (req, res) => {
+    if (req.user.local.user_type == "1") {
+      res.redirect("/admin");
+    } else if (req.user.local.user_type == "2") {
+      res.redirect("/user");
+    } else  if (req.user.local.user_type == "3") {
+      res.redirect("/subcontractor");
+    } else {
+      res.redirect("/login");
+    }
+  });
+
+  
+  app.get("/admin", mid.isAdmin, (req, res) => {
     var render = defaultRender(req);
     db.summaryAllTakeoffs(function (err, takeoffs) {
       if (err) {
         console.log(err);
       } else {
         render.takeoffs = takeoffs;
-        console.log("User: " + " " + req.user.local.name + " " + "is viewing the main page");
         res.render("main.html", render);
       }
     });
-  });
+  }
+  );
 
   app.get("/addTakeoff", mid.isAdmin, (req, res) => {
     var render = defaultRender(req);
@@ -326,7 +339,7 @@ module.exports = function (app) {
   
 
   app.get("/getTakeoffs", mid.isAdmin, (req, res) => {
-    db.getTakeoffs(function (err, takeoffs) {
+    db.summaryAllTakeoffs(function (err, takeoffs) {
       if (err) {
         console.log(err);
       } else {
@@ -465,6 +478,9 @@ module.exports = function (app) {
   );
   app.post("/editTakeoff", mid.isAdmin, function (req, res) {
     var render = defaultRender(req);
+    if (req.body.takeoff_id == null) {
+      res.redirect("/");
+    }
 
     db.getTakeoff(req.body.takeoff_id, function (err, takeoff, materials) {
       if (err) {
@@ -2033,7 +2049,7 @@ module.exports = function (app) {
 
             let totalAmout = 0;
             for (let i = 0; i < invoice_items.length; i++) {
-              totalAmout += invoice_items[i].cost * invoice_items[i].quantity;
+              totalAmout += parseFloat(invoice_items[i].total);
             }
             db.getTakeoffById(invoice.takeoff_id, function (err, takeoff) {
               if (err) {
@@ -2041,7 +2057,7 @@ module.exports = function (app) {
                 res.send("error retrieving takeoff");
               } else {
                 console.log(takeoff);
-                res.render("viewInvoice.html", { invoice: invoice, invoice_items: invoice_items, takeoff: takeoff[0],totalAmout: totalAmout });
+                res.render("viewInvoice.html", { invoice: invoice, invoice_items: invoice_items, takeoff: takeoff[0],totalAmout: totalAmout.toFixed(2)});
               }
             } 
             );}
@@ -2082,13 +2098,12 @@ module.exports = function (app) {
             // Insert invoice into the database
             const insertQuery = `INSERT INTO invoices (takeoff_id, total, invoice_number, invoice_name, hash) VALUES (?, ?, ?, ?, ?); SELECT LAST_INSERT_ID() AS invoice_id;`;
             const hashValue = db.generateHash();
-            db.query(insertQuery, [takeoff_id, invoiceTotal, invoiceNumber, invoice_name, hashValue], function (results) {
-              console.log(results);
+            db.query(insertQuery, [takeoff_id, invoiceTotal, invoiceNumber, invoice_name, hashValue], function (err,results) {
                 if (err) {
                     console.error("Error inserting invoice:", err);
                     return res.status(500).json({ error: 'Failed to create invoice.' });
                 }
-
+                console.log(results);
                 const invoiceId = results[1][0].invoice_id;
 
                 // Insert invoice items
@@ -2098,6 +2113,9 @@ module.exports = function (app) {
                 if (invoice_items.length > 0) {
                   for (var i = 0; i < invoice_items.length; i++) {
                     const item = invoice_items[i];
+                    if (item.description === "") {
+                      item.description = "N/A";
+                    }
                     const insertItemQuery = `INSERT INTO invoice_items (invoice_id, description, cost, quantity) VALUES (?, ?, ?, ?)`;
                     db.query(insertItemQuery, [invoiceId, item.description, item.cost, item.quantity], function (err) {
                         if (err) {
@@ -2105,6 +2123,7 @@ module.exports = function (app) {
                         }
                     });
                   }
+                  res.status(201).json({ message: "Invoice created and items added.", invoice_id: invoiceId });
 
                 } else {
                     res.status(201).json({ message: "Invoice created but no items added." });

@@ -63,3 +63,9 @@
 .container {
   margin-top: 60px;
 }
+/* print style that hides the navbar */
+@media print {
+  .navbar {
+    display: none;
+  }
+}

@@ -23,9 +23,12 @@ module.exports = function (app) {
 
     app.get('/subcontractor', mid.isAuth, mid.isSubcontractor, async (req, res) => {
       console.log(req.user.local.id);  
-        db.query('SELECT * FROM subcontractor_forms JOIN forms ON subcontractor_forms.form_id = forms.id WHERE subcontractor_forms.user_id = ?;', [req.user.local.id], (results) => {
+        db.query('SELECT * FROM subcontractor_forms JOIN forms ON subcontractor_forms.form_id = forms.id WHERE subcontractor_forms.user_id = ?;', [req.user.local.id], (err,results) => {
           console.log(results);
-
+          if (results == null) {
+            res.render('subcontractor.html', {forms: [], defaults: {email: req.user.local.email, name: req.user.local.name}});
+            return;
+          }
           for (var i = 0; i < results.length; i++) {
             results[i].created_at = new Date(results[i].created_at).toLocaleString();
           }
@@ -97,12 +100,12 @@ module.exports = function (app) {
         }
     
         // Insert form into database
-        db.query('INSERT INTO forms (form_name, user_id) VALUES (?, ?)', [form.form_name, user_id], ( results) => {
+        db.query('INSERT INTO forms (form_name, user_id) VALUES (?, ?); SELECT LAST_INSERT_ID() as last;', [form.form_name, user_id], (err, results) => {
          
           form_id = results.insertId;
           console.log("Form ID:", form_id); 
           // Link subcontractor to form
-          db.query('INSERT INTO subcontractor_forms (user_id, form_id) VALUES (?, ?)', [user_id, form_id], (err, results) => {
+          db.query('INSERT INTO subcontractor_forms (user_id, form_id) VALUES (?, ?)', [user_id, form_id], (err) => {
             console.log(err);
          
 

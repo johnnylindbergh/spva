@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- navbar -->
+    <link rel="stylesheet" type="text/css" href="/css/navbar.css">
     <title>Subcontractor Dashboard</title>
     <style>
         body {
@@ -70,6 +72,20 @@
     </style>
 </head>
 <body>
+    <div class="navbar">
+        <ul>
+          <li><a href="/">{{defaults.sysName}}</a></li>
+          {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}}
+          <div style="float:right">
+            <!-- log out -->
+           <li>  <a href="/logout">Log Out</a></li>
+            <!-- profile -->
+             <li><a href="/profile">Profile</a></li>
+          </div>
+        </ul>
+      </div>
+    </br>
+
     <div class="container">
         <div class="welcome-message">
             <h1>Welcome, <span id="userName">{{defaults.name}}</span>!</h1>

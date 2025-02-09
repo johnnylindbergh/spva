@@ -158,6 +158,9 @@
                     }),
                     success: function (invoice) {
                         console.log("Invoice created:", invoice);
+
+                        // redirect to /viewInvoice/:invoice_id
+                        window.location.href = `/viewInvoice/?invoice_id=${invoice.invoice_id}`;
                     },
                     error: function (error) {
                         XSAlert.alert('Failed to create invoice. Please try again.');

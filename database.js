@@ -421,8 +421,52 @@ module.exports = {
   },
 
   summaryAllTakeoffs: function (callback) {
-    con.query("SELECT * FROM takeoffs;", function (err, takeoffs) {
+    con.query("SELECT *, takeoffs.id as id, customers.id as customer_id FROM takeoffs join customers on takeoffs.customer_id = customers.id;", function (err, takeoffs) {
       if (err) return callback(err);
+
+      // sum the invoices for each takeoff
+      // sum the change orders for each takeoff
+
+      // sum the payment_history table for each takeoff
+      // finally compute total due = sum of invoices + sum of change orders - sum of payment_history
+
+      for (var i = 0; i < takeoffs.length; i++) {
+        var takeoff = takeoffs[i];
+        con.query("SELECT SUM(total) as total FROM invoices WHERE takeoff_id = ?;", [takeoff.id], function (err, invoices) {
+          if (err) {
+            console.log(err);
+            return callback(err);
+          }
+          takeoff.invoices = invoices[0].total;
+        }
+        );
+
+        con.query("SELECT SUM(change_order_total) as total FROM change_orders WHERE takeoff_id = ?;", [takeoff.id], function (err, change_orders) {
+          if (err) {
+            console.log(err);
+            return callback(err);
+          }
+          takeoff.change_orders = change_orders[0].total;
+        }
+        );
+
+        con.query("SELECT SUM(amount) as total FROM payment_history WHERE takeoff_id = ?;", [takeoff.id], function (err, payment_history) {
+          if (err) {
+            console.log(err);
+            return callback(err);
+          }
+          takeoff.payment_history = payment_history[0].total;
+        }
+        );
+      }
+
+      for (var i = 0; i < takeoffs.length; i++) {
+        takeoff = takeoffs[i];
+        takeoff.total_due = takeoff.invoices + takeoff.change_orders - takeoff.payment_history;
+      }
+
+      
+      
       callback(null, takeoffs);
     });
   },
@@ -2333,6 +2377,14 @@ module.exports = {
       function (err, invoice) {
         con.query("SELECT * FROM invoice_items WHERE invoice_id = ?;", [invoice_id], function (err, items) {
           if (err) return callback(err);
+          // add the item total to each row 
+          // total = quantity * cost
+          for (var i = 0; i < items.length; i++) {
+            items[i].total = items[i].quantity * items[i].cost;
+            // round to two decimal places
+            items[i].total = items[i].total.toFixed(2);
+          }
+          
           callback(err, invoice[0], items);
         });
       }
@@ -2482,6 +2534,10 @@ module.exports = {
   // },
 
   takeoffGetStatus: function (takeoff_id, callback) {
+    if (takeoff_id == null) {
+      console.log("takeoffGetStatus got null takeoff_id");
+    }
+    console.log("Getting status for takeoff_id: ", takeoff_id);
     con.query(
       "SELECT status FROM takeoffs WHERE id = ?;",
       [takeoff_id],
@@ -2608,7 +2664,7 @@ module.exports = {
   query: function (sql, args, callback) {
     con.query(sql, args, function (err, results) {
       if (err) return callback(err);
-      callback(results);
+      callback(err,results);
     });
   },
 };

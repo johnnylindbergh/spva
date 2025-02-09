@@ -5,8 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/css/navbar.css">
+    <link rel="stylesheet" type="text/css" href="/css/invoice.css">
 </head>
 <body>
+    <!-- nav bar -->
+    <div class="navbar">
+        <ul>
+          <!-- button that posts the takeoff_id to /viewPaymentHistory -->
+            <li> <form> <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff.takeoff_id}}"> <button type="submit" style ="color:white;" class= "btn" formaction="/viewPaymentHistory" formmethod="post">back</button> </form> </li>
+          <li><a href="/">{{defaults.sysName}}</a></li>
+          {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}}
+          <div style="float:right">
+          </div>
+        </ul>
+      </div>
+    </br>
+
+
     
     <div class="container mt-5">
         <div class="card">
@@ -70,8 +86,8 @@
                 <span class="mx-2">|</span>
 
                 
-                <button class="btn btn-primary">Print Invoice</button>
-                <button class="btn btn-success">Share with Quickbooks</button>
+                <button class="btn btn-primary" id = "printButton" onclick="window.print()">Print Invoice</button>
+                <button class="btn btn-success" id = "shareWithQuickbooks" onclick="shareWithQuickbooks()">Share with Quickbooks</button>
 
             </div>
         </div>

@@ -179,8 +179,8 @@ CREATE TABLE invoices (
 CREATE TABLE invoice_items (
   id INT NOT NULL AUTO_INCREMENT,
   invoice_id INT NOT NULL,
-  cost DECIMAL(10,2),
-  quantity INT,
+  cost DECIMAL(10,2) NOT NULL,
+  quantity INT NOT NULL,
   description VARCHAR(64),
   PRIMARY KEY (id),
   FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE

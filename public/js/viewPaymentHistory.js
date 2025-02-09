@@ -46,25 +46,33 @@ function populatePaymentHistoryTable(takeoff_id) {
         invoiceTable.innerHTML = ''; // Clear existing rows
         // add the headers 
         const headerRow = invoiceTable.insertRow();
-        const headerCell1 = headerRow.insertCell(0);
-        const headerCell2 = headerRow.insertCell(1);
-        const headerCell3 = headerRow.insertCell(2);
-        const headerCell4 = headerRow.insertCell(3);
-        const headerCell5 = headerRow.insertCell(4);
-        headerCell1.textContent = 'Invoice Number';
+        const headerCell0 = headerRow.insertCell(0);
+        const headerCell1 = headerRow.insertCell(1);
+        const headerCell2 = headerRow.insertCell(2);
+        const headerCell3 = headerRow.insertCell(3);
+        const headerCell4 = headerRow.insertCell(4);
+        const headerCell5 = headerRow.insertCell(5);
+
+        headerCell0.textContent = 'Name';
+        headerCell1.textContent = 'Number';
         headerCell2.textContent = 'Total';
         headerCell3.textContent = 'Status';
         headerCell4.textContent = 'View Count';
-        headerCell5.textContent = 'View';
+        headerCell5.textContent = ' '; 
         
         invoices.forEach(invoice => {
             const row = invoiceTable.insertRow();
-            const cell1 = row.insertCell(0);
-            const cell2 = row.insertCell(1);
-            const cell3 = row.insertCell(2);
-            const cell4 = row.insertCell(3);
-            const cell5 = row.insertCell(4);
-            cell1.textContent = invoice.invoice_number;
+            const cell0 = row.insertCell(0);
+            const cell1 = row.insertCell(1);
+            const cell2 = row.insertCell(2);
+            const cell3 = row.insertCell(3);
+            const cell4 = row.insertCell(4);
+            const cell5 = row.insertCell(5);
+            // show name 
+            cell0.textContent = invoice.invoice_name;
+            // show invoice number
+            cell1.innerHTML = `Invoice #${invoice.invoice_number}`;
+            cell1.style.fontWeight = 'bold';
             cell2.textContent = "$"+ invoice.total;
             
             if (invoice.status == 0) {
@@ -86,7 +94,7 @@ function populatePaymentHistoryTable(takeoff_id) {
             // allign cell3 to the right
             cell3.style.textAlign = 'right';
             cell4.textContent = invoice.view_count;  
-            cell5.innerHTML = `<a href="/viewInvoice/?invoice_id=${invoice.id}">View</a>`;
+            cell5.innerHTML = `<a style="text-decoration: none;" href="/viewInvoice/?invoice_id=${invoice.id}">View</a>`;
 
         });
 
