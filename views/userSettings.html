@@ -109,6 +109,11 @@
       <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
       <button type="submit" class="btn btn-secondary" id="copyTakeoff">Copy Takeoff</button>
     </form>
+    <!-- archive takeoff -->
+    <form action="/archiveTakeoff" method="POST" style="display:inline;">
+      <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+      <button type="submit" class="btn btn-warning" id="archiveTakeoff">Archive Takeoff</button>
+    </form>
   </div>
 
   <script>

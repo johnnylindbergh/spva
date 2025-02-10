@@ -66,36 +66,37 @@
 
     
       <div style="margin-left: 20px;">
-
+        {{#takeoff}}
         <label for="slider">Labor Rate:</label>
-        <input type="range" id="laborRate" name="slider" min="0" max="500" value="{{takeoff.labor_rate}}"
+        <input type="range" id="laborRate" name="slider" min="0" max="500" value="{{labor_rate}}"
           oninput="changeLaborRateHelper(this.value)">
-        <span id="laborRateValue">{{takeoff.labor_rate}}</span>
+        <span id="laborRateValue">{{labor_rate}}</span>
       </br>
+     
 
         <label for="slider">Labor Markup:</label>
-        <input type="range" id="laborMarkup" name="slider" min="0" max="100" value="{{takeoff.labor_markup}}"
+        <input type="range" id="laborMarkup" name="slider" min="0" max="100" value="{{labor_markup}}"
           oninput="changeLaborMarkupHelper(this.value)">
-        <span id="laborMarkupValue">{{takeoff.labor_markup}}</span>
+        <span id="laborMarkupValue">{{labor_markup}}%</span>
       </br>
 
         <label for="slider">Material Markup:</label>
-        <input type="range" id="materialMarkup" name="slider" min="0" max="100" value="{{takeoff.material_markup}}"
+        <input type="range" id="materialMarkup" name="slider" min="0" max="100" value="{{material_markup}}"
           oninput="updateMaterialMarkupHelper(this.value)">
-        <span id="materialMarkupValue">{{takeoff.material_markup}}</span>
+        <span id="materialMarkupValue">{{material_markup}}%</span>
       </br>
 
         <label for="slider">Supervisor Markup:</label>
         <input type="range" id="supervisionMarkup" name="slider" min="0" max="100" value="0"
           oninput="updateSupervisorMarkupHelper(this.value)">
-        <span id="supervisorMarkupValue"></span>
+        <span id="supervisorMarkupValue">{{supervisor_markup}}%</span>
       </br>
 
       <label for="slider">Travel Extra:</label>
-      <input type="number" id="travelExtra" name="travelExtra" value="{{takeoff.travel_cost}}"
+      <input type="number" id="travelExtra" name="travelExtra" value="{{travel_cost}}"
         onchange="updateTravelExtra(this.value)">
     </br>
-
+    {{/takeoff}}
     </div>
 
     </div>

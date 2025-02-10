@@ -435,7 +435,7 @@ function loadTakeoffMaterials(id) {
       headerRow.append("<th>Measurement</th>");
       headerRow.append("<th>Labor Cost</th>");
       headerRow.append("<th>Materials</th>");
-      headerRow.append("<th>....</th>");
+      headerRow.append("<th></th>");
       headerRow.append("<th>Subtotal</th>");
       headerRow.append("<th>Labor Cost</th>");
       $("#takeoff_materials_table").append(headerRow);
@@ -463,15 +463,15 @@ function loadTakeoffMaterials(id) {
         newRow.append($("<td></td>").append(checkbox));
 
         // Checkbox for makeing material a separate line item
-        let separateLineCheckbox = $(
-          "<input type='checkbox' onclick='separateLineItem(" +
-            row.id +
-            ", this)'>"
-        );
-        if (row.separate_line_item == 1) {
-          separateLineCheckbox.attr("checked", "checked");
-        }
-        newRow.append($("<td></td>").append(separateLineCheckbox));
+        // let separateLineCheckbox = $(
+        //   "<input type='checkbox' onclick='separateLineItem(" +
+        //     row.id +
+        //     ", this)'>"
+        // );
+        // if (row.separate_line_item == 1) {
+        //   separateLineCheckbox.attr("checked", "checked");
+        // }
+        // newRow.append($("<td></td>").append(separateLineCheckbox));
 
         // Material name
         newRow.append("<td >" + row.material_name + "</td>");
@@ -911,13 +911,13 @@ $(document).ready(function () {
   }, 300);
 
 
-  setTimeout(function () {
-    updateLaborRate();
-  }, 500);
+  // setTimeout(function () {
+  //   updateLaborRate();
+  // }, 500);
 
-  setTimeout(function () { // initiates the status check
-    changeLaborMarkupHelper(labor_markup*100);
-  }, 600);
+  // setTimeout(function () { // initiates the status check
+  //   changeLaborMarkupHelper(labor_markup*100);
+  // }, 600);
 
   // setTimeout(function () {
   //   updateMaterialMarkupHelper(material_markup*100);

@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Sweet alert -->
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
     <link rel="stylesheet" type="text/css" href="/css/navbar.css">
     <link rel="stylesheet" type="text/css" href="/css/invoice.css">
 </head>
@@ -27,6 +32,7 @@
     <div class="container mt-5">
         <div class="card">
             {{#invoice}}
+            <input type="hidden" id="invoice_id" name="invoice_id" value="{{id}}">
             <div class="card-header text-center">
                 <h2>{{invoice_name}}</h2>
                 <p>Invoice Number: {{invoice_number}} | QB Number: {{qb_number}}</p>
@@ -88,15 +94,60 @@
                 
                 <button class="btn btn-primary" id = "printButton" onclick="window.print()">Print Invoice</button>
                 <button class="btn btn-success" id = "shareWithQuickbooks" onclick="shareWithQuickbooks()">Share with Quickbooks</button>
-
+                <!-- share invoice with client button  -->
+                <button class="btn btn-success" id = "shareInvoiceWithClient" onclick="shareInvoiceWithClient()">Share with Client</button>
             </div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/4.2.0/mustache.min.js"></script>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Removed duplicate jQuery inclusion -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+<script>
+
+    function shareWithQuickbooks() {
+        // Implement logic to share invoice with Quickbooks
+        alert("Invoice shared with Quickbooks");
+    }
+
+    function shareInvoiceWithClient() {
+        // Implement logic to share invoice with client
+        
+        Swal.fire({
+        title: 'Email Confirmation',
+        text: 'Are you sure you want to share this invoice with the client?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, share it!',
+        cancelButtonText: 'No, cancel'
+     }).then((result) => {
+        console.log("dialogue output", result);
+        if(result.isConfirmed){
+            console.log("invoice id", $('#invoice_id').val());
+            console.log("takeoff id", $('#takeoff_id').val());
+
+            $.post('/shareInvoiceWithClient', {takeoff_id: $('#takeoff_id').val(), invoice_id:$('#invoice_id').val()}, function(data) {
+                console.log("twas the email sent?", data);
+                if (data == "email sent") {
+                    Swal.fire({
+                        title: 'Email Sent',
+                        text: 'The invoice has been sent to the client.',
+                        icon: 'success',
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: "The invoice could not be sent. Please set an owner email.",
+                        icon: 'error',
+                    });
+                }
+            });
+
+        }
+    });
+    }
+</script>
 </html>

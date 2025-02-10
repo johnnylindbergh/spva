@@ -348,6 +348,16 @@ module.exports = function (app) {
     });
   });
 
+  app.post("/archiveTakeoff", mid.isAdmin, (req, res) => {
+    db.archiveTakeoff(req.body.takeoff_id, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.redirect("/");
+      }
+    });
+  });
+
   app.post("/alButton", mid.isAdmin, function (req, res) {
     console.log("alButton");
     // if the user name is al, res.send "Hello AL!" otherwise, say you are not al
@@ -449,8 +459,12 @@ module.exports = function (app) {
     });
   });
 
-    app.post("/uploadPlans", mid.isAuth, function (req, res) {
-      console.log("uploading plans...");
+  app.post("/uploadPlans", mid.isAuth, function (req, res) {
+    console.log("uploading plans...");
+
+    if (req.body.takeoff_id == null || req.body.file == null) {
+      res.render("error.html", { link:'javascript:history.back()', linkTitle:'back',friendly: "Missing File, doofus" });
+    } else {
       // Use Multer middleware to handle file upload
       uploadPlans(req, res, function (err) {
         if (err) {
@@ -464,11 +478,12 @@ module.exports = function (app) {
             } else {
               console.log("plans uploaded");
               res.send("plans uploaded")
-          // Success message after a successful upload
+              // Success message after a successful upload
+            }
+          });
         }
       });
-      }
-    });
+    }
   });
 
   app.get("/plans/:filename", mid.isAuth, function (req, res) {
@@ -492,6 +507,12 @@ module.exports = function (app) {
         } else {
           console.log(takeoff);
           //console.log(allMaterials);
+
+          // for rendering purposes, convert all the decimals to percents
+          takeoff[0].labor_markup = (takeoff[0].labor_markup * 100);
+          takeoff[0].material_markup = (takeoff[0].material_markup * 100);
+          takeoff[0].supervisor_markup = (takeoff[0].supervisor_markup * 100);
+          
           res.render("editTakeoff.html", {
             sys:render.sys,
             takeoff: takeoff,
@@ -2159,6 +2180,29 @@ module.exports = function (app) {
       }
     }
     );
+    // called by admin to send the invoice email
+    app.post("/shareInvoiceWithClient", mid.isAdmin, function (req, res) {
+      console.log("sending invoice to client ", req.body);
+      db.getInvoiceById(req.body.invoice_id, function (err, invoice) {
+        if (err) {
+          console.log(err);
+          res.send("error retrieving invoice");
+        } else {
+          console.log(invoice);
+          emailer.sendInvoiceEmail(req, res, req.body.takeoff_id, req.body.invoice_id, function (err, response) {
+            if (err) {
+              console.log(err);
+              res.send("email failed");
+            } else {
+              console.log(response);
+              res.send("email sent");
+            }
+          });
+        }
+      });
+    }
+    );
+    
 
 
     app.get('/shareInvoice', function (req, res) {

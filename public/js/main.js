@@ -1,6 +1,11 @@
 // const { name } = require("ejs");
 
 $(document).ready(function () {
+
+  function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
   function createStatusIndicator(statusCode, dateCreated) {
     const statuses = [
       { code: 1, label: "Takeoff Uploaded" },
@@ -23,6 +28,7 @@ $(document).ready(function () {
     // padding: 5px;
     indicator.style.padding = "10px";
     indicator.style.display = "inline-block";
+    indicator.style.color = "white";
     indicator.textContent = status.label;
     indicator.style.backgroundColor = getColor(dateCreated);
     return indicator;
@@ -94,6 +100,19 @@ $(document).ready(function () {
     console.log("Retrieving takeoffs...");
     // Clear the table
     $("#takeoffs_table").empty();
+
+    // add headers
+    let headers = $("<tr>");
+    headers.append($("<th>").text("Name"));
+    headers.append($("<th>").text("Client"));
+    headers.append($("<th>").text(" "));
+    headers.append($("<th>").text(" "));
+    headers.append($("<th>").text("Status"));
+    headers.append($("<th>").text("Total Due"));
+    headers.append($("<th>").text("Signed Total"));
+    // headers.append($("<th>").text("Total"));
+
+    $("#takeoffs_table").append(headers);
   
     // Fetch takeoff data from the server
     $.get("/getTakeoffs", function (data) {
@@ -111,6 +130,11 @@ $(document).ready(function () {
 
 
         row.append(nameCell);
+
+        let clientCell = $("<td>").text(takeoff.givenName);
+        clientCell.css("width", "160px");
+        row.append(clientCell);
+        
   
         // Create the 'Edit' form
         let editForm = $("<form>", {
@@ -153,8 +177,9 @@ $(document).ready(function () {
         row.append(tdProgress);
 
         // add amout due
-        row.append($("<td>").text(takeoff.total_due));
-
+        row.append($("<td>").text("$"+ numberWithCommas(parseFloat(takeoff.total_due).toFixed(2))));
+        row.append($("<td>").text("$"+ numberWithCommas(parseFloat(takeoff.signed_total).toFixed(2))));
+        // row.append($("<td>").text("$"+ numberWithCommas(parseFloat(takeoff.total).toFixed(2))));
   
         // Append the row to the table
         $("#takeoffs_table").append(row);

@@ -421,55 +421,55 @@ module.exports = {
   },
 
   summaryAllTakeoffs: function (callback) {
-    con.query("SELECT *, takeoffs.id as id, customers.id as customer_id FROM takeoffs join customers on takeoffs.customer_id = customers.id;", function (err, takeoffs) {
-      if (err) return callback(err);
-
-      // sum the invoices for each takeoff
-      // sum the change orders for each takeoff
-
-      // sum the payment_history table for each takeoff
-      // finally compute total due = sum of invoices + sum of change orders - sum of payment_history
-
-      for (var i = 0; i < takeoffs.length; i++) {
-        var takeoff = takeoffs[i];
-        con.query("SELECT SUM(total) as total FROM invoices WHERE takeoff_id = ?;", [takeoff.id], function (err, invoices) {
-          if (err) {
-            console.log(err);
-            return callback(err);
-          }
-          takeoff.invoices = invoices[0].total;
+    con.query(
+        "SELECT *, takeoffs.id as id, customers.id as customer_id, estimates.id AS estimate_id FROM takeoffs JOIN customers ON takeoffs.customer_id = customers.id JOIN estimates on takeoffs.estimate_id = estimates.id WHERE takeoffs.isArchived = 0;",
+        function (err, takeoffs) {
+            if (err) return callback(err);
+            
+            let modifiedTakeoffs = [];
+            let totalTakeoffs = takeoffs.length;
+            let completedQueries = 0;
+            
+            console.log(takeoffs[0]);
+            for (let i = 0; i < totalTakeoffs; i++) {
+                let takeoff = takeoffs[i];
+                takeoff.total_due = 0;
+                
+                let invoiceQuery = `SELECT COALESCE(SUM(total), 0) AS total FROM invoices WHERE takeoff_id = ${takeoff.id};`;
+                let changeOrdersQuery = `SELECT COALESCE(SUM(change_order_total), 0) AS total FROM change_orders WHERE takeoff_id = ${takeoff.id};`;
+                let paymentHistoryQuery = `SELECT COALESCE(SUM(amount), 0) AS total FROM payment_history WHERE takeoff_id = ${takeoff.id};`;
+                
+                con.query(invoiceQuery, function (err, invoices) {
+                    if (err) return callback(err);
+                    let invoiceTotal = parseFloat(invoices[0].total);
+                    
+                    con.query(changeOrdersQuery, function (err, changeOrders) {
+                        if (err) return callback(err);
+                        let changeOrdersTotal = parseFloat(changeOrders[0].total);
+                        
+                        con.query(paymentHistoryQuery, function (err, paymentHistory) {
+                            if (err) return callback(err);
+                            let paymentHistoryTotal = parseFloat(paymentHistory[0].total);
+                            
+                            takeoff.total_due = invoiceTotal + changeOrdersTotal - paymentHistoryTotal;
+                            console.log("paymentHistoryTotal", paymentHistoryTotal);
+                            console.log("invoiceTotal", invoiceTotal);
+                            console.log("changeOrdersTotal", changeOrdersTotal);
+                            console.log("takeoff.total_due", takeoff.total_due);
+                            modifiedTakeoffs.push(takeoff);
+                            completedQueries++;
+                            
+                            if (completedQueries === totalTakeoffs) {
+                                callback(null, modifiedTakeoffs);
+                            }
+                        });
+                    });
+                });
+            }
         }
-        );
+    );
+},
 
-        con.query("SELECT SUM(change_order_total) as total FROM change_orders WHERE takeoff_id = ?;", [takeoff.id], function (err, change_orders) {
-          if (err) {
-            console.log(err);
-            return callback(err);
-          }
-          takeoff.change_orders = change_orders[0].total;
-        }
-        );
-
-        con.query("SELECT SUM(amount) as total FROM payment_history WHERE takeoff_id = ?;", [takeoff.id], function (err, payment_history) {
-          if (err) {
-            console.log(err);
-            return callback(err);
-          }
-          takeoff.payment_history = payment_history[0].total;
-        }
-        );
-      }
-
-      for (var i = 0; i < takeoffs.length; i++) {
-        takeoff = takeoffs[i];
-        takeoff.total_due = takeoff.invoices + takeoff.change_orders - takeoff.payment_history;
-      }
-
-      
-      
-      callback(null, takeoffs);
-    });
-  },
 
   // loads results with is an array with the headers into the table subjects in the database
 
@@ -958,6 +958,14 @@ module.exports = {
           }
         });
       }
+    );
+  },
+
+  archiveTakeoff: function (takeoff_id, callback) {
+    con.query("UPDATE takeoffs SET isArchived = 1 WHERE id = ?;", [takeoff_id], function (err) {
+      if (err) return callback(err);
+      callback(null);
+    }
     );
   },
 
