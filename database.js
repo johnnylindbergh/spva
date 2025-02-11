@@ -422,7 +422,7 @@ module.exports = {
 
   summaryAllTakeoffs: function (callback) {
     con.query(
-        "SELECT *, takeoffs.id as id, customers.id as customer_id, estimates.id AS estimate_id FROM takeoffs JOIN customers ON takeoffs.customer_id = customers.id JOIN estimates on takeoffs.estimate_id = estimates.id WHERE takeoffs.isArchived = 0;",
+        "SELECT *, takeoffs.id as id, customers.id as customer_id, estimates.id AS estimate_id FROM takeoffs JOIN customers ON takeoffs.customer_id = customers.id LEFT JOIN estimates on takeoffs.estimate_id = estimates.id WHERE takeoffs.isArchived = 0;",
         function (err, takeoffs) {
             if (err) return callback(err);
             
@@ -1083,6 +1083,20 @@ module.exports = {
       }
     );
   },
+
+  getChangeOrdersByTakeoffId: function (takeoff_id, callback) {
+    con.query(
+      "SELECT * FROM change_orders WHERE takeoff_id = ?; ",
+      [takeoff_id],
+      function (err, changeOrders) {
+        if (err) return callback(err);
+        console.log(changeOrders);
+        callback(null, changeOrders);
+      }
+    );
+  },
+
+
   // used for code reference
   getSystemSettingById: function (setting_id, callback) {
     con.query(

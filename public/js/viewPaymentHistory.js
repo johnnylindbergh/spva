@@ -98,6 +98,54 @@ function populatePaymentHistoryTable(takeoff_id) {
 
         });
 
+        // populate the change orders table 
+        const changeOrderTable = document.getElementById('changeOrderTable');
+        changeOrderTable.innerHTML = ''; // Clear existing rows
+        // add the headers
+        const changeOrderHeaderRow = changeOrderTable.insertRow();
+        const changeOrderHeaderCell0 = changeOrderHeaderRow.insertCell(0);
+        const changeOrderHeaderCell1 = changeOrderHeaderRow.insertCell(1);
+        const changeOrderHeaderCell2 = changeOrderHeaderRow.insertCell(2);
+        const changeOrderHeaderCell3 = changeOrderHeaderRow.insertCell(3);
+
+        changeOrderHeaderCell0.textContent = 'Name';
+        changeOrderHeaderCell1.textContent = 'Total';
+        changeOrderHeaderCell2.textContent = 'Status';
+        changeOrderHeaderCell3.textContent = 'View Count';
+
+        let changeOrders = data.change_orders;
+
+        changeOrders.forEach(changeOrder => {
+            const row = changeOrderTable.insertRow();
+            const cell0 = row.insertCell(0);
+            const cell1 = row.insertCell(1);
+            const cell2 = row.insertCell(2);
+            const cell3 = row.insertCell(3);
+
+            cell0.textContent = changeOrder.change_order_name;
+            cell1.textContent = "$"+ changeOrder.total;
+            if (changeOrder.status == 0) {
+                // add a yellow ! icon
+                cell2.innerHTML = 'unpaid <i style="color:orange;" class="fa-solid fa-triangle-exclamation"></i>';
+            }
+            else if (changeOrder.status == 1) {
+               // green circle check icon
+                cell2.innerHTML = `Paid <i style="color:green;" class="fas fa-check-circle"></i>`;
+
+            } else if (changeOrder.status == 2) {
+                cell2.textContent = 'Due';
+                // add red exclamation icon
+                cell2.innerHTML = `Due <i style="color:red;" class="fas fa-circle-exclamation"></i>`;
+            }
+
+            totalDue += parseFloat(changeOrder.total);
+
+            // allign cell2 to the right
+            cell2.style.textAlign = 'right';
+            cell3.textContent = changeOrder.view_count;  
+        }
+        );
+        
         // Update the total paid and total due
 
        

@@ -1970,7 +1970,16 @@ module.exports = function (app) {
             }
 
             console.log("invoice(s) retrieved: ", invoices);
-            res.send({ payments: payments, takeoff: takeoff[0], invoices: invoices });
+
+            db.getChangeOrdersByTakeoffId(req.body.takeoff_id, function (err, change_orders) {
+              if (err) {
+                console.log(err);
+              }
+
+              console.log("change orders retrieved: ", change_orders);
+
+              res.send({ payments: payments, takeoff: takeoff[0], invoices: invoices, change_orders: change_orders });
+            });
           });
         });
     

@@ -204,12 +204,19 @@ CREATE TABLE payment_history (
 CREATE TABLE change_orders (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT NOT NULL,
+  name VARCHAR(64),
   description TEXT,
+  qb_number INT,
+  co_number INT,
+  hash VARCHAR(64),
+  status TINYINT(1) DEFAULT 0,
   change_order_total DECIMAL(10,2),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
 );
+
+INSERT INTO change_orders (takeoff_id, name, description, qb_number, co_number, hash, change_order_total) VALUES (1, 'Change Order 1', 'Description 1', 1234, 1, 'hash1', 2000.00);
 
 CREATE TABLE change_order_items (
   id INT NOT NULL AUTO_INCREMENT,
@@ -221,6 +228,21 @@ CREATE TABLE change_order_items (
   PRIMARY KEY (id),
   FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
 );
+
+INSERT INTO change_order_items (change_order_id, description, cost, quantity) VALUES (1, 'Description 1', 2000.00, 1);
+
+CREATE TABLE invoice_change_orders (
+  id INT NOT NULL AUTO_INCREMENT,
+  invoice_id INT NOT NULL,
+  change_order_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+  FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
+);
+
+-- example insert
+INSERT INTO invoice_change_orders (invoice_id, change_order_id) VALUES (1, 1);
 
 -- Material archetypes table
 CREATE TABLE material_archetypes (

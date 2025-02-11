@@ -38,7 +38,7 @@ function separateLineItem(materialId, checkbox) {
 
   let isChecked = checkbox.checked ? 1 : 0;
 
-  $.post("/separate-line-item", { material_id: materialId, takeoff_id: takeoff_id })  
+  $.post("/separate-line-item", { material_id: materialId, takeoff_id: takeoff_id })
     .done(function () {
       console.log("Material separate line item toggled successfully: " + materialId);
       loadTakeoffMaterials(takeoff_id);
@@ -133,7 +133,7 @@ function add_subject(id) {
   // move the dropdown to the position of the button that was clicked the row id is the subject id
   let button = $("#add_material_button_" + id);
   let dropdown = $("#materialLibrary");
-      dropdown.toggle();
+  dropdown.toggle();
   // get the coordinates of the button
 
 
@@ -196,25 +196,25 @@ function add_material_subject() {
   }
 }
 
-function deletePlans(){
+function deletePlans() {
   console.log("Deleting plans");
-  $.post("/deletePlans", {takeoff_id: takeoff_id})
-    .done(function(){
+  $.post("/deletePlans", { takeoff_id: takeoff_id })
+    .done(function () {
       console.log("Plans deleted");
       // reload the page
       location.reload();
     })
-    .fail(function(){
+    .fail(function () {
       console.log("Failed to delete plans");
     });
 }
 
 function updateLaborRate() {
-  document.getElementById('laborRateValue').innerText = "$"+ labor_rate + "/hr";
+  document.getElementById('laborRateValue').innerText = "$" + labor_rate + "/hr";
   console.log(laborTotal)
 
   let labor_adjusted = laborTotal / labor_rate;
-  $('#laborAdjusted').text((labor_adjusted/8.0).toFixed(2) + " work days (8hrs/day)");
+  $('#laborAdjusted').text((labor_adjusted / 8.0).toFixed(2) + " work days (8hrs/day)");
   console.log(labor_adjusted)
 }
 
@@ -253,8 +253,8 @@ const debounceChangeLaborRate = debounce(function () {
 }, 500);
 
 function changeLaborMarkupHelper(value) {
-  labor_markup = value/100;
-  $('#laborMarkupValue').text(parseInt(labor_markup*100) + "%");
+  labor_markup = value / 100;
+  $('#laborMarkupValue').text(parseInt(labor_markup * 100) + "%");
   debounceChangeLaborMarkup(value);
 }
 
@@ -262,10 +262,10 @@ const debounceChangeLaborMarkup = debounce(function (value) {
   changeLaborMarkup(value);
 }, 500);
 
-function changeLaborMarkup(value){
-  labor_markup = value/100.0;
+function changeLaborMarkup(value) {
+  labor_markup = value / 100.0;
   console.log("Changing labor markup to: " + labor_markup);
-  $("#laborMarkupValue").text(parseInt(labor_markup*100) + "%");
+  $("#laborMarkupValue").text(parseInt(labor_markup * 100) + "%");
 
   laborTotalAdjusted = laborTotal * (1.0 + labor_markup);
   $('#laborTotal').text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)));
@@ -283,13 +283,13 @@ function changeLaborMarkup(value){
         message: 'Cannot modify signed takeoff',
         icon: 'error',
         hideCancelButton: true
-    }).then((result) => {
+      }).then((result) => {
 
         console.log('clicked');
         // go back one page
         //window.history.back();
         console.log("i gonna edit it anyway")
-    });
+      });
 
 
     });
@@ -301,10 +301,10 @@ function updateMaterialMarkupHelper(value) {
   debounceChangeMaterialMarkup(value);
 }
 
-function changeMaterialMarkup(value){
-  material_markup = value/100.0;
+function changeMaterialMarkup(value) {
+  material_markup = value / 100.0;
   console.log("Changing material markup to: " + material_markup);
-  $("#materialMarkupValue").text(parseInt(material_markup*100) + "%");
+  $("#materialMarkupValue").text(parseInt(material_markup * 100) + "%");
 
   materialTotal = materialTotal * (1.0 + material_markup);
   $('#materialTotal').text("Material Cost: $" + numberWithCommas(materialTotal.toFixed(2)));
@@ -320,13 +320,13 @@ function changeMaterialMarkup(value){
         message: 'Cannot modify signed takeoff',
         icon: 'error',
         hideCancelButton: true
-    }).then((result) => {
+      }).then((result) => {
 
         console.log('clicked');
         // go back one page
         //window.history.back();
         console.log("i gonna edit it anyway")
-    });
+      });
     });
 }
 
@@ -334,10 +334,10 @@ const debounceChangeMaterialMarkup = debounce(function (value) {
   changeMaterialMarkup(value);
 }, 500);
 
-function updateSupervisorMarkup(value){
-  supervisor_markup = value/100.0;
+function updateSupervisorMarkup(value) {
+  supervisor_markup = value / 100.0;
   console.log("Changing supervisor markup to: " + supervisor_markup);
-  $("#supervisorMarkupValue").text(parseInt(value ) + "%");
+  $("#supervisorMarkupValue").text(parseInt(value) + "%");
 
   $.post("/change-supervisor-markup", { takeoff_id: takeoff_id, supervisor_markup: supervisor_markup })
     .done(function () {
@@ -350,13 +350,13 @@ function updateSupervisorMarkup(value){
         message: 'Cannot modify signed takeoff',
         icon: 'error',
         hideCancelButton: true
-    }).then((result) => {
+      }).then((result) => {
 
         console.log('clicked');
         // go back one page
         //window.history.back();
         console.log("i gonna edit it anyway")
-    });
+      });
     });
 }
 
@@ -373,7 +373,7 @@ const debounceUpdateSupervisorMarkup = debounce(function (value) {
 }, 500);
 
 
-function updateTravelExtra(value){
+function updateTravelExtra(value) {
   travel_extra = value;
   console.log("Changing travel extra markup to: " + travel_extra);
   $("#travelExtra").val(parseFloat(value));
@@ -389,13 +389,13 @@ function updateTravelExtra(value){
         message: 'Cannot modify signed takeoff',
         icon: 'error',
         hideCancelButton: true
-    }).then((result) => {
+      }).then((result) => {
 
         console.log('clicked');
         // go back one page
         //window.history.back();
         console.log("i gonna edit it anyway")
-    });
+      });
     });
 }
 
@@ -420,10 +420,10 @@ function loadTakeoffMaterials(id) {
       material_markup = parseFloat(data.takeoff[0].material_markup);
       supervisor_markup = parseFloat(data.takeoff[0].supervisor_markup);
       travel_extra = parseFloat(data.takeoff[0].travel_cost);
-      
 
-      
-    
+
+
+
 
       $("#takeoff_materials_table").empty();
 
@@ -440,7 +440,7 @@ function loadTakeoffMaterials(id) {
       headerRow.append("<th>Labor Cost</th>");
       $("#takeoff_materials_table").append(headerRow);
 
-    
+
 
       data.subjects.forEach((row) => {
         console.log(row);
@@ -454,8 +454,8 @@ function loadTakeoffMaterials(id) {
         // Checkbox for toggling material
         let checkbox = $(
           "<input type='checkbox' onclick='toggleMaterial(" +
-            row.id +
-            ", this)'>"
+          row.id +
+          ", this)'>"
         );
         if (row.applied == 1) {
           checkbox.attr("checked", "checked");
@@ -500,18 +500,18 @@ function loadTakeoffMaterials(id) {
           measurementUnitInput.append(option);
         });
 
-    
+
 
         let measurementCell = $("<td></td>")
           .append(measurementInput)
           .append(" ")
           .append(measurementUnitInput);
 
-          if (row.measurement_unit === "ft' in\"") {
-            // add an alert icon to the cell
-            let alertIcon = $("<i class='fa fa-exclamation-triangle'><i style = 'font-size:9px;'>measurement is in linear ft</i>");
-            measurementCell.append(alertIcon);
-          }
+        if (row.measurement_unit === "ft' in\"") {
+          // add an alert icon to the cell
+          let alertIcon = $("<i class='fa fa-exclamation-triangle'><i style = 'font-size:9px;'>measurement is in linear ft</i>");
+          measurementCell.append(alertIcon);
+        }
 
 
 
@@ -541,12 +541,12 @@ function loadTakeoffMaterials(id) {
         // Labor price input
         let laborPrice = $(
           "<input type='number' class='laborInput' id='labor_price_" +
-            row.id +
-            "' value='" +
-            row.labor_cost +
-            "' step='any' min='0' onchange='laborPriceChange(" +
-            row.id +
-            ")'>"
+          row.id +
+          "' value='" +
+          row.labor_cost +
+          "' step='any' min='0' onchange='laborPriceChange(" +
+          row.id +
+          ")'>"
         );
         laborPrice.attr("style", "width: 50px;");
         let laborCell = $("<td></td>");
@@ -563,22 +563,29 @@ function loadTakeoffMaterials(id) {
         let laborsum = 0;
 
         laborsum = parseFloat(row.labor_cost) * parseFloat(row.measurement);
-        laborTotal += laborsum;
-        if (row.applied != 0) {
+        console.log("item with labor total", laborsum);
+        console.log("total labor", laborTotal);
+        if (row.applied == 0) {
+          newRow.attr("style", "background-color: #f2f2f2; opacity: 0.5;");
+        } else {
+
+          laborTotal += laborsum;
+
+          
           console.log(row.selected_materials);
           if (row.selected_materials && row.selected_materials.length > 0) {
-            row.selected_materials.forEach((material) => {
-              materialsCell.append(
+            let material = row.selected_materials[0];
+            materialsCell.append(
                 "<i style='display:inline-block; padding:5px;'>" +
-                  material.name +
-                  " </i> "
+                material.name +
+                " </i> "
               );
               let materialCell = $(
                 "<i class='fa fa-trash' onclick='removeMaterial(" +
-                  row.id +
-                  ", " +
-                  material.id +
-                  ")'>"
+                row.id +
+                ", " +
+                material.id +
+                ")'>"
               );
               materialsCell.append(materialCell);
 
@@ -588,35 +595,35 @@ function loadTakeoffMaterials(id) {
               let coverage = parseFloat(material.coverage) || 1; // Default to 1 to avoid division by zero
               console.log(
                 "Material cost: " +
-                  materialCost +
-                  " Measurement: " +
-                  measurement +
-                  " Coverage: " +
-                  coverage
+                materialCost +
+                " Measurement: " +
+                measurement +
+                " Coverage: " +
+                coverage
               );
               let newCost = materialCost;
 
               // Adjust cost for primary, secondary, and tertiary materials
-              if (material.id == row.material_id) {
+              
                 let primaryCostDelta = parseFloat(row.cost_delta) || 0;
                 newCost += primaryCostDelta;
                 // if the cost delta is positive color the input red and if negative color it green
                 let materialPrice = $(
                   "<input type='number' id='material_price_" +
-                    material.id +
-                    "' value='" +
-                    newCost.toFixed(2) +
-                    "' step='any' min='0' onchange='priceChange(" +
-                    material.id +
-                    ")'><br>"
+                  material.id +
+                  "' value='" +
+                  newCost.toFixed(2) +
+                  "' step='any' min='0' onchange='priceChange(" +
+                  material.id +
+                  ")'><br>"
                 );
                 materialPrice.addClass("material-price-input");
                 materialPrice.append(
                   "<input type='hidden' id='raw_material_price_" +
-                    material.id +
-                    "' value='" +
-                    material.cost +
-                    "'>"
+                  material.id +
+                  "' value='" +
+                  material.cost +
+                  "'>"
                 );
 
                 let delta = newCost - material.cost;
@@ -627,7 +634,7 @@ function loadTakeoffMaterials(id) {
                 }
 
                 materialsCell.append(materialPrice);
-              } 
+              
 
               let adjustedMeasurement = measurement;
               if (
@@ -637,26 +644,26 @@ function loadTakeoffMaterials(id) {
                 adjustedMeasurement = 0;
               }
 
-             
+
 
 
               if (row.measurement_unit === "sf") {
-                subsum += newCost * Math.ceil(adjustedMeasurement/coverage);
-              } 
+                subsum += newCost * Math.ceil(adjustedMeasurement / coverage);
+              }
 
               if (row.measurement_unit === "ft' in\"") {
-                subsum += newCost * Math.ceil(adjustedMeasurement/coverage);
-            
+                subsum += newCost * Math.ceil(adjustedMeasurement / coverage);
+
               }
 
               if (row.measurement_unit === "Count") {
                 var sfPerCount = 60;
-                subsum += newCost * Math.ceil((adjustedMeasurement*sfPerCount)/coverage) ; // not divided by coverage
+                subsum += newCost * Math.ceil((adjustedMeasurement * sfPerCount) / coverage); // not divided by coverage
               }
 
 
 
-            });
+          
           } else {
             console.log("No materials applied or selected_materials are nnull for some reason");
           }
@@ -678,10 +685,7 @@ function loadTakeoffMaterials(id) {
             subsum = 0; // Reset subsum to 0 if invalid
           }
           materialTotal += subsum;
-          
-        } else {
-          newRow.append("<td>No Materials Applied</td>");
-          newRow.attr("style", "background-color: #f2f2f2; opacity: 0.5;");
+
         }
 
         // Append subsum to the row
@@ -717,14 +721,14 @@ function loadTakeoffMaterials(id) {
       $("#sum").text("Total Cost: $" + numberWithCommas((adjustedTotal).toFixed(2)));
 
       // Update labor total
-      if (laborTotalAdjusted){
+      if (laborTotalAdjusted) {
         $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)));
         // make it red 
         $("#laborTotal").css("color", "red");
-       } else {
+      } else {
         $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotal.toFixed(2)));
 
-       } 
+      }
 
       $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialTotal.toFixed(2)));
 
@@ -732,7 +736,7 @@ function loadTakeoffMaterials(id) {
       $.post("/updateTakeoffTotal", {
         takeoff_id: takeoff_id,
         total: (adjustedTotal).toFixed(2),
-        laborTotal: laborTotalAdjusted.toFixed(2),
+        laborTotal: (laborTotalAdjusted.toFixed(2) || laborTotal.toFixed(2)),
         materialTotal: materialTotal.toFixed(2),
       })
         .done(function () {
@@ -850,8 +854,8 @@ function createSubjectIntent() {
   // hide the button
   $("#add-subject-button").hide();
 
-    // scroll the page down 500px
-    //window.scrollBy(0, 100);
+  // scroll the page down 500px
+  //window.scrollBy(0, 100);
 
   let name = $("#new_subject_name").val();
   console.log("Creating new subject: " + name);
@@ -926,11 +930,11 @@ $(document).ready(function () {
   // setTimeout(function () {
   //   updateSupervisorMarkup(supervisor_markup*100);
   // }, 800);
-  
+
   // setTimeout(function () {
   //   updateTravelExtra(travel_extra);
   // }, 900);
-  
+
 
   // setInterval(function () {
   //   loadTakeoffMaterials(takeoff_id);
