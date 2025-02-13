@@ -680,6 +680,7 @@ module.exports = function (app) {
       req.body.takeoff_id,
       req.body.signature,
       req.body.date,
+      // make the invoice but doesnt get the invoice id
       function (valid, invoice_id, err) {
         if (err) {
           console.log(err);
@@ -698,7 +699,9 @@ module.exports = function (app) {
                     console.log(err);
                   } else {
                     
-                    console.log("sending email to ", takeoff);
+                    console.log("sending email to ",  takeoff);
+                    console.log("for invoice_id", invoice_id);
+
                     emailer.sendInvoiceEmail(req, res, req.body.takeoff_id, invoice_id, function (err) {
                       if (err) {
                         console.log(err);

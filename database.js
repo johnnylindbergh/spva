@@ -1847,15 +1847,18 @@ module.exports = {
                   [takeoff_id, invoiceTotal, invoiceNumber, generateHash()],
                   function (err, results) {
                     if (err) return callback(err);
-
+                    console.log(results);
+                    let invoice_id = results[1][0].last;
+                    console.log("invoice id in update sig", invoice_id);
                     // insert into invoice_items
                     con.query(
                       "INSERT INTO invoice_items (invoice_id, description, amount) VALUES (?,?,?);",
-                      [results[1][0].last, "Initial Deposit", invoiceTotal],
+                      [invoice_id, "Initial Deposit", invoiceTotal],
                       function (err) {
                         if (err) return callback(err);
                         // return the invoice_id
-                        callback(true, results[1][0].last, null);
+                        console.log(`passing new invoice id ${invoice_id}`);
+                        callback(true, invoice_id, null);
                       });
 
              
