@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Sweet alert -->
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/css/navbar.css">
+    <link rel="stylesheet" type="text/css" href="/css/invoice.css">
+
+    <script src="/js/invoice.js"></script>
+</head>
+<body>
+    <!-- nav bar -->
+    <div class="navbar">
+        <ul>
+          <!-- button that posts the takeoff_id to /viewPaymentHistory -->
+            <li> <form> <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff.takeoff_id}}"> <button type="submit" style ="color:white;" class= "btn" formaction="/viewPaymentHistory" formmethod="post">back</button> </form> </li>
+          <li><a href="/">{{defaults.sysName}}</a></li>
+          {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}}
+          <div style="float:right">
+          </div>
+        </ul>
+      </div>
+    </br>
+
+
+    
+    <div class="container mt-5">
+        <div class="card">
+            {{#invoice}}
+            <input type="hidden" id="invoice_id" name="invoice_id" value="{{id}}">
+            <div class="card-header text-center">
+                <h2>{{invoice_name}}</h2>
+                <p>Invoice Number: {{invoice_number}} | QB Number: {{qb_number}}</p>
+            </div>
+            {{/invoice}}
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>From:</h5>
+                        <p>Sun Painting<br>1819 Broadway<br>Charlottesville, VA  22902</p>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <h5>To:</h5>
+                        <p>{{takeoff.givenName}}<br>{{takeoff.billing_address}}</p>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Description</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#invoice_items}}
+                                <tr>
+                                    <td>{{id}}</td>
+                                    <td>{{description}}</td>
+                                    <td>{{quantity}}</td>
+                                    <td>${{cost}}</td>
+                                    <td>${{total}}</td>
+                                </tr>
+                                {{/invoice_items}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5>Notes:</h5>
+                        <p>Thank you for your business.</p>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <h5>Total Amount Due:</h5>
+                        <p>${{totalAmout}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                <!-- payment -->
+                          <!-- pay with card button that calls createPaymentIntent("card") -->
+                    <button class="btn btn-primary" onclick="createPaymentIntentInvoice('card')">Pay with Card</br> (+3%)</button> 
+
+                    <!-- pay with bank button that calls createPaymentIntent("us_bank_account") -->
+                    <button class="btn btn-primary" onclick="createPaymentIntentInvoice('us_bank_account')">Pay with Bank </br> (+$15)</button>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/4.2.0/mustache.min.js"></script>
+
+    <!-- Removed duplicate jQuery inclusion -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+<script>
+
+    function shareWithQuickbooks() {
+        // Implement logic to share invoice with Quickbooks
+        alert("Invoice shared with Quickbooks");
+    }
+
+    function shareInvoiceWithClient() {
+        // Implement logic to share invoice with client
+        
+        Swal.fire({
+        title: 'Email Confirmation',
+        text: 'Are you sure you want to share this invoice with the client?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, share it!',
+        cancelButtonText: 'No, cancel'
+     }).then((result) => {
+        console.log("dialogue output", result);
+        if(result.isConfirmed){
+            console.log("invoice id", $('#invoice_id').val());
+            console.log("takeoff id", $('#takeoff_id').val());
+
+            $.post('/shareInvoiceWithClient', {takeoff_id: $('#takeoff_id').val(), invoice_id:$('#invoice_id').val()}, function(data) {
+                console.log("twas the email sent?", data);
+                if (data == "email sent") {
+                    Swal.fire({
+                        title: 'Email Sent',
+                        text: 'The invoice has been sent to the client.',
+                        icon: 'success',
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: "The invoice could not be sent. Please set an owner email.",
+                        icon: 'error',
+                    });
+                }
+            });
+
+        }
+    });
+    }
+</script>
+</html>

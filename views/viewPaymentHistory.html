@@ -85,7 +85,7 @@
         </div>
 
         <div id="change-orders">
-            <h3 class="mb-4">Invoices</h2>
+            <h3 class="mb-4">Change Orders</h2>
             <table id="changeOrderTable" class="table table-striped">
                 <thead class="thead-dark">
                     <tr>
@@ -99,6 +99,11 @@
                     <!-- Rows will be populated by JavaScript -->
                 </tbody>
             </table>
+            <!-- create change order button -->
+            <form id="createChangeOrderBtn" action="/changeOrderCreator" method="POST" class="d-inline">
+                <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
+                <button type="submit" style="background-color: 0893A1;"btn btn-primary">Create Change Order</button>
+            </form> 
         </div>
 
     </div>
