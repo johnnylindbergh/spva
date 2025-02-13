@@ -1847,8 +1847,18 @@ module.exports = {
                   [takeoff_id, invoiceTotal, invoiceNumber, generateHash()],
                   function (err, results) {
                     if (err) return callback(err);
-                    // return the invoice_id
-                    callback(true, results[1][0].last, null);
+
+                    // insert into invoice_items
+                    con.query(
+                      "INSERT INTO invoice_items (invoice_id, description, amount) VALUES (?,?,?);",
+                      [results[1][0].last, "Initial Deposit", invoiceTotal],
+                      function (err) {
+                        if (err) return callback(err);
+                        // return the invoice_id
+                        callback(true, results[1][0].last, null);
+                      });
+
+             
 
 
                   });
@@ -2447,7 +2457,35 @@ module.exports = {
           console.log("non-existent hash: ", hash);
           return callback(new Error("No invoice found for the provided hash"));
         }
-        callback(null, invoice[0]);
+
+        // get the invoice items
+        con.query(
+          "SELECT * FROM invoice_items WHERE invoice_id = ?;",
+          [invoice[0].id],
+          function (err, items) {
+            if (err) return callback(err);
+            //console.log(items);
+
+            // get the takeoff
+            con.query(
+              "SELECT takeoffs.*, customers.* FROM takeoffs JOIN customers ON takeoffs.customer_id = customers.id WHERE takeoffs.id = ?;",
+              [invoice[0].takeoff_id],
+              function (err, takeoff) {
+              if (err) return callback(err);
+
+              //console.log(takeoff);
+
+              // compute the total amount for the invoice
+              let total = 0;
+              for (var i = 0; i < items.length; i++) {
+                total += items[i].quantity * items[i].cost;
+              }
+
+              callback(null, invoice[0], items, takeoff[0], total);
+              }
+            );
+          }
+        );
       }
     );
   },

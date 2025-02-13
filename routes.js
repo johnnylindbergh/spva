@@ -2222,7 +2222,7 @@ module.exports = function (app) {
       }
       db.getSharedInvoice(
         hash,
-        function (err, invoice, takeoff) {
+        function (err, invoice, items, takeoff, totalAmout) {
           if (err || invoice == null) {
             console.log(err);
             res.redirect("/");
@@ -2240,13 +2240,12 @@ module.exports = function (app) {
               });
             } else {
               console.log(invoice);
+              console.log(items);
               // some renameing to make the invoice object render work
               invoice.invoice_id = invoice.id;
               invoice.invoiceTotal = invoice.total;
-              res.render("invoice.html", {
-                takeoff: takeoff,
-                invoice: invoice,
-              });
+              res.render("viewInvoiceClient.html", { invoice: invoice, invoice_items: items, takeoff: takeoff,totalAmout: totalAmout.toFixed(2)});
+
 
             }
             

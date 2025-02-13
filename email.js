@@ -19,7 +19,7 @@ async function sendEstimateEmail(req, res, takeoff_id, callback) {
   db.getTakeoffById(takeoff_id, (err, takeoff) => {
     if (err) {
       console.log(err);
-      callback("big error", null);
+      callback("could not get takeoffs by id", null);
     } else {
       console.log(takeoff);
       if (takeoff[0].customer_primary_email_address && takeoff[0].customer_givenName && takeoff[0].takeoff_hash) { 
@@ -67,7 +67,7 @@ async function sendEstimateEmailInternally(req, res, takeoff_id, targetEmail, ca
   db.getTakeoffById(takeoff_id, (err, takeoff) => {
     if (err) {
       console.log(err);
-      callback("big error", null);
+      callback("could not get takeoff by id", null);
     } else {
       console.log(takeoff);
       if (targetEmail && takeoff[0].takeoff_hash) {
@@ -109,14 +109,14 @@ async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
   db.getTakeoffById(takeoff_id, (err, takeoff) => {
     if (err || !takeoff) {
       console.log(err);
-      callback("big error", null);
+      callback("could not get takeoff by id", null);
     } else {
       console.log(takeoff);
       if (takeoff[0].customer_invoice_email_address && takeoff[0].customer_givenName) {
         db.getInvoiceById(invoice_id, (err, invoice) => {
           if (err || !invoice) {
             console.log(err);
-            callback("big error", null);
+            callback("could not get invoice by id", null);
           } else {
             console.log(invoice);
             if (invoice.invoice_hash) {
@@ -162,12 +162,12 @@ async function sendExpiredEstimateEmail(estimate_id, callback) {
   db.getEstimateById(estimate_id, (err, estimate) => {
     if (err) {
       console.log(err);
-      callback("big error", null);
+      callback("could not get estimate by id", null);
     } else {  
       db.getUserById(estimate.creator_id, (err, user) => {
         if (err) {
           console.log(err);
-          callback("big error", null);
+          callback("could not get user by id ", null);
         } else {  
           const mailOptions = {
             from: credentials.serverEmail,
@@ -213,7 +213,7 @@ async function sendRenewalEmail(user_email, estimate_id, callback) {
   db.getEstimateById(estimate_id, (err, estimate) => {
     if (err) {
       console.log(err);
-      callback("big error", null);
+      callback("could not get estimate by id", null);
     } else {  
       const mailOptions = {
         from: credentials.serverEmail,
