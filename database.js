@@ -2464,7 +2464,7 @@ module.exports = {
           [invoice[0].id],
           function (err, items) {
             if (err) return callback(err);
-            console.log(items);
+            //console.log(items);
 
             // get the takeoff
             con.query(
@@ -2473,7 +2473,7 @@ module.exports = {
               function (err, takeoff) {
               if (err) return callback(err);
 
-              console.log(takeoff);
+              //console.log(takeoff);
 
               // compute the total amount for the invoice
               let total = 0;

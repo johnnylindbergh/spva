@@ -2240,10 +2240,11 @@ module.exports = function (app) {
               });
             } else {
               console.log(invoice);
+              console.log(items);
               // some renameing to make the invoice object render work
               invoice.invoice_id = invoice.id;
               invoice.invoiceTotal = invoice.total;
-              res.render("viewInvoiceClient.html", { invoice: invoice, invoice_items: items, takeoff: takeoff[0],totalAmout: totalAmout.toFixed(2)});
+              res.render("viewInvoiceClient.html", { invoice: invoice, invoice_items: items, takeoff: takeoff,totalAmout: totalAmout.toFixed(2)});
 
 
             }
