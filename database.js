@@ -1918,10 +1918,10 @@ module.exports = {
               let currentSubject = subjects[i].subject;
               let currentSubjectId = subjects[i].id;
 
-              // if the current subject contains "notes" or note, skip it
-              if (currentSubject.toLowerCase().includes("note")) {
-                continue;
-              }
+              // // if the current subject contains "notes" or note, skip it
+              // if (currentSubject.toLowerCase().includes("note")) {
+              //   continue;
+              // }
               console.log("Inserted subject: ", currentSubject);
               con.query(
                 "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
@@ -2479,6 +2479,8 @@ module.exports = {
               let total = 0;
               for (var i = 0; i < items.length; i++) {
                 total += items[i].quantity * items[i].cost;
+                // also set the rows total
+                items[i].total = items[i].quantity * items[i].cost;
               }
 
               callback(null, invoice[0], items, takeoff[0], total);

@@ -54,7 +54,7 @@ function filterFunction() {
   let input, filter, div, a, i, txtValue;
   input = document.getElementById("myInput");
   filter = input.value.toUpperCase();
-  div = document.getElementById("myDropdown");
+  div = document.getElementById("materialLibrary");
   a = div.getElementsByTagName("a");
   for (i = 0; i < a.length; i++) {
     txtValue = a[i].textContent || a[i].innerText;
@@ -657,8 +657,8 @@ function loadTakeoffMaterials(id) {
               }
 
               if (row.measurement_unit === "Count") {
-                var sfPerCount = 60;
-                subsum += newCost * Math.ceil((adjustedMeasurement * sfPerCount) / coverage); // not divided by coverage
+                
+                subsum += newCost * Math.ceil((adjustedMeasurement) / coverage); // not divided by coverage
               }
 
 

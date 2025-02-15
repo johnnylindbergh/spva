@@ -76,7 +76,7 @@ function getMaterialTypes() {
 function filterFunction() {
     const input = document.getElementById('myInput');
     const filter = input.value.toUpperCase();
-    const div = document.getElementById('myDropdown');
+    const div = document.getElementById('materialLibrary');
     const a = div.getElementsByTagName('a');
     for (let i = 0; i < a.length; i++) {
         const txtValue = a[i].textContent || a[i].innerText;
@@ -90,7 +90,7 @@ function filterFunction() {
 
 // Function to handle dropdown menu
 function myFunction() {
-    document.getElementById('myDropdown').classList.toggle('show');
+    document.getElementById('materialLibrary').classList.toggle('show');
 }
 
 // Close the dropdown if the user clicks outside of it
