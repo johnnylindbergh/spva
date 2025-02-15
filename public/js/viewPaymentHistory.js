@@ -109,9 +109,10 @@ function populatePaymentHistoryTable(takeoff_id) {
         const changeOrderHeaderCell3 = changeOrderHeaderRow.insertCell(3);
 
         changeOrderHeaderCell0.textContent = 'Name';
-        changeOrderHeaderCell1.textContent = 'Total';
-        changeOrderHeaderCell2.textContent = 'Status';
-        changeOrderHeaderCell3.textContent = 'View Count';
+        changeOrderHeaderCell1.textContent = 'Number';
+        changeOrderHeaderCell2.textContent = 'Total';
+        changeOrderHeaderCell3.textContent = 'Status';
+
 
         let changeOrders = data.change_orders;
 
@@ -122,27 +123,26 @@ function populatePaymentHistoryTable(takeoff_id) {
             const cell2 = row.insertCell(2);
             const cell3 = row.insertCell(3);
 
-            cell0.textContent = changeOrder.change_order_name;
-            cell1.textContent = "$"+ changeOrder.total;
+            cell0.textContent = changeOrder.name;
+            cell1.textContent = "CO-"+ changeOrder.co_number;
             if (changeOrder.status == 0) {
                 // add a yellow ! icon
-                cell2.innerHTML = 'unpaid <i style="color:orange;" class="fa-solid fa-triangle-exclamation"></i>';
+                cell3.innerHTML = 'unpaid <i style="color:orange;" class="fa-solid fa-triangle-exclamation"></i>';
             }
             else if (changeOrder.status == 1) {
                // green circle check icon
-                cell2.innerHTML = `Paid <i style="color:green;" class="fas fa-check-circle"></i>`;
+                cell3.innerHTML = `Paid <i style="color:green;" class="fas fa-check-circle"></i>`;
 
             } else if (changeOrder.status == 2) {
-                cell2.textContent = 'Due';
+                cell3.textContent = 'Due';
                 // add red exclamation icon
-                cell2.innerHTML = `Due <i style="color:red;" class="fas fa-circle-exclamation"></i>`;
+                cell3.innerHTML = `Due <i style="color:red;" class="fas fa-circle-exclamation"></i>`;
             }
 
-            totalDue += parseFloat(changeOrder.total);
+            totalDue += parseFloat(changeOrder.change_order_total);
+            cell2.textContent = "$"+ changeOrder.change_order_total;
 
-            // allign cell2 to the right
-            cell2.style.textAlign = 'right';
-            cell3.textContent = changeOrder.view_count;  
+     
         }
         );
         
