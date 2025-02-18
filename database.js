@@ -1908,7 +1908,7 @@ module.exports = {
       "SELECT subject, SUM(measurement) AS total_measurement, MAX(measurement_unit) AS measurement_unit, MAX(color) AS color, MAX(top_coat) AS top_coat, MAX(primer) AS primer FROM subjects WHERE takeoff_id = ? GROUP BY subject;",
       [takeoff_id],
       function (err, subjects) {
-        if (err) return callback(err);
+        if (err || subjects.length == 0) return callback(err);
 
         // Get labor_cost setting
         con.query(
@@ -1921,10 +1921,14 @@ module.exports = {
               let currentSubject = subjects[i].subject;
               let currentSubjectId = subjects[i].id;
 
-              // // if the current subject contains "notes" or note, skip it
-              // if (currentSubject.toLowerCase().includes("note")) {
-              //   continue;
-              // }
+              if (currentSubject == null) {
+                continue;
+              }
+
+            //  if the current subject contains "notes" or note, skip it
+              if (currentSubject && (currentSubject.toLowerCase().includes("note")) || currentSubject.toLowerCase().includes("notes")) {
+                continue;
+              }
               console.log("Inserted subject: ", currentSubject);
               con.query(
                 "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",

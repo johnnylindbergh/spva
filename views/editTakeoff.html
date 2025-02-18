@@ -143,16 +143,7 @@
 
     
 
-  <div id="materialLibrary" class="dropdown-content">
 
-    <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
-
-
-    {{#materials}}
-    <!-- a link that when you click it it runs a js function -->
-    <a href="#" onclick="add_material({{id}})">{{name}} <i style="font-size: 6;">${{cost}} </i></a>
-    {{/materials}}
-  </div>
 
 
 
@@ -198,6 +189,19 @@
         <i class="fa fa-check"></i> Add
       </button>
     </form>
+  </div>
+
+
+  <div id="materialLibrary" class="dropdown-content">
+    <!-- close button -->
+    <a href="#" onclick="closeDropdown()"><span><i class="fa fa-times"></i></span></a>
+    <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+
+
+    {{#materials}}
+    <!-- a link that when you click it it runs a js function -->
+    <a href="#" onclick="add_material({{id}})">{{name}} <i style="font-size: 6;">${{cost}} </i> - <i>{{coverage}} sqft</i></a>
+    {{/materials}}
   </div>
 
 

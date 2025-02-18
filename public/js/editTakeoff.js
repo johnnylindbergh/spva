@@ -30,7 +30,7 @@ function toggleMaterial(materialId, checkbox) {
 }
 
 function myFunction() {
-  document.getElementById("myDropdown").classList.toggle("show");
+  document.getElementById("materialLibrary").classList.toggle("show");
 }
 
 function separateLineItem(materialId, checkbox) {
@@ -133,17 +133,31 @@ function add_subject(id) {
   // move the dropdown to the position of the button that was clicked the row id is the subject id
   let button = $("#add_material_button_" + id);
   let dropdown = $("#materialLibrary");
+
+
+  // let scrollPos = $(window).scrollTop(); // Store current scroll position
+  
   dropdown.toggle();
   // get the coordinates of the button
+  // $(window).scrollTop(scrollPos);
 
 
+}
+
+function closeDropdown() {
+  let scrollPos = $(window).scrollTop(); // Store current scroll position
+  let dropdown = $("#materialLibrary");
+  dropdown.toggle();
+  $(window).scrollTop(scrollPos); // Restore scroll position
 }
 
 function add_material(id) {
   console.log("Added material_id " + id + " for subject " + subject_id);
   material_id = id;
   let dropdown = $("#materialLibrary");
+  let scrollPos = $(window).scrollTop(); // Store current scroll position
   dropdown.toggle();
+  $(window).scrollTop(scrollPos +400); // Restore scroll position
 
   if (material_id != null && subject_id != null) {
     add_material_subject();
@@ -183,9 +197,11 @@ function add_material_subject() {
           "Material added to subject: " + material_id + " " + subject_id
         );
         // wait 0.5 seconds and then call loadTakeoffMaterials
+        let scrollPos = $(window).scrollTop(); // Store current scroll position
         setTimeout(function () {
           loadTakeoffMaterials(takeoff_id);
-        }, 500);
+        }, 200);
+        $(window).scrollTop(scrollPos); // Restore scroll position
       })
       .fail(function () {
         console.log("Failed to add material to subject: " + material_id);
