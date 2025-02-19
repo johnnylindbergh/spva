@@ -1047,6 +1047,18 @@ module.exports = {
     );
   },
 
+  changeTouchupsCost: function (takeoff_id, touchups_cost, callback) {
+    console.log("change touchups cost: ", touchups_cost);
+    con.query(
+      "UPDATE takeoffs SET touchups_cost = ? WHERE id = ?;",
+      [touchups_cost, takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
 
   getAllSystemSettings: function (callback) {
     con.query("SELECT * FROM system_settings;", function (err, settings) {

@@ -58,6 +58,7 @@ const YOUR_DOMAIN = creds.domain;
 const fs = require("fs");
 const { parse } = require("csv-parse");
 const { raw } = require("body-parser");
+const { session } = require("passport");
 
 var fileCounter = Math.floor(1000 + Math.random() * 9000);
 
@@ -657,9 +658,32 @@ module.exports = function (app) {
       }
     });
   });
-  
-  
 
+  app.post("/change-touchups-cost", mid.isAdmin, function (req, res) {
+    console.log("changing touchups cost ", req.body);
+    db.takeoffGetStatus(req.body.takeoff_id, function (err, status) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving takeoff status");
+      } else {
+        if (status < 4) {
+          db.changeTouchupsCost(req.body.takeoff_id, req.body.touchups_cost, function (err) {
+            if (err) {
+              console.log(err);
+              res.status(500).send("Error updating touchups cost");
+            } else {
+              console.log("updated touchups cost");
+              res.end();
+            }
+          });
+        }
+        else {
+          console.log("Takeoff is signed, cannot change touchups cost");
+          res.status(500).send("Takeoff is signed, cannot change touchups cost");
+        }
+      }
+    });
+  });
 
   app.post("/updateTakeoffTotal", mid.isAdmin, function (req, res) {
     //console.log("updating takeoff total ", req.body);
@@ -1284,6 +1308,11 @@ module.exports = function (app) {
           console.log(err);
           res.redirect("/");
         } else {
+          // authenticate the user session
+          // if the user is not authenticated, redirect to the login page
+
+            req.session.estimate_id = estimate[0].estimate_id;
+            req.session.hash = hash;
           console.log(estimate[0])
           console.log("estimate created at ", estimate[0].date_last_shared);
           console.log("estimate expires at ", moment(estimate[0].date_last_shared).add(30, 'days').format('YYYY-MM-DD HH:mm:ss')); // 30 days from creation
@@ -1374,7 +1403,7 @@ module.exports = function (app) {
   });
   
 
-  app.post("/updateOptionsSelection", mid.isAuth, function (req, res) {
+  app.post("/updateOptionsSelection", function (req, res) {
     console.log("updating options selection ", req.body);
     db.updateOptionSelection(
       req.body.takeoff_id,

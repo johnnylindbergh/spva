@@ -92,6 +92,12 @@
         <span id="supervisorMarkupValue">{{supervisor_markup}}%</span>
       </br>
 
+      <label for="slider">Touchups:</label>
+      <input type="range" id="touchupsCost" name="slider" min="0" max="5000" value="{{touchups_cost}}"
+        oninput="updateTouchupsCostHelper(this.value)">
+      <span id="touchupsCostValue">${{touchups_cost}}</span>
+    </br>
+
       <label for="slider">Travel Extra:</label>
       <input type="number" id="travelExtra" name="travelExtra" value="{{travel_cost}}"
         onchange="updateTravelExtra(this.value)">

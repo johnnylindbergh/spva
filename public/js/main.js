@@ -178,6 +178,10 @@ $(document).ready(function () {
 
         // add amout due
         row.append($("<td>").text("$"+ numberWithCommas(parseFloat(takeoff.total_due).toFixed(2))));
+        if (takeoff.signed_total == null) {
+          takeoff.signed_total = 0;
+        }
+        
         row.append($("<td>").text("$"+ numberWithCommas(parseFloat(takeoff.signed_total).toFixed(2))));
         // row.append($("<td>").text("$"+ numberWithCommas(parseFloat(takeoff.total).toFixed(2))));
   

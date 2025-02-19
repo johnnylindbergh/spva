@@ -42,14 +42,19 @@
         <div style="float:right; text-align: right;">
             <h2 id="totalPaid" class="mb-4">
                 </h1>
-                <h2 id="totalDue" class="mb-4">
-                    </h1>
+            <h2 id="totalDue" class="mb-4">
+                </h1>
+            <h2 id="totalRemaining" class="mb-4">
+                </h1>
+            </h2>
         </div>
 
         <!-- estimate info  -->
 
         <div id="estimateInfo">
         </div>
+
+    </br>
 
 
         <!-- options table -->
@@ -88,7 +93,7 @@
             <div id="actionButtons" class="mb-4">
                 <form id="createInvoiceBtn" action="/invoiceCreator" method="POST" class="d-inline">
                     <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
-                    <button type="submit" style="background-color: 0893A1;" btn btn-primary">Create Invoice</button>
+                    <button type="submit" style="background-color: 0893A1;">Create Invoice</button>
                 </form>
             </div>
 

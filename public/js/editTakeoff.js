@@ -415,6 +415,43 @@ function updateTravelExtra(value) {
     });
 }
 
+function updateTouchupsCostHelper(value) {
+  touchups_cost = value;
+  $('#touchupsCostValue').text("$" + touchups_cost);
+  debounceUpdateTouchupsCost(value);
+}
+
+const debounceUpdateTouchupsCost = debounce(function (value) {
+  updateTouchupsCost(value);
+}, 500);
+
+function updateTouchupsCost(value) {
+  touchups_cost = value;
+  console.log("Changing touchups cost to: " + touchups_cost);
+  $("#touchupsCost").val(parseFloat(value));
+  
+  $.post("/change-touchups-cost", { takeoff_id: takeoff_id, touchups_cost: touchups_cost })
+    .done(function () {
+      console.log("Touchups cost updated: " + touchups_cost);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      XSAlert({
+        title: 'Error',
+        message: 'Cannot modify signed takeoff',
+        icon: 'error',
+        hideCancelButton: true
+      }).then((result) => {
+
+        console.log('clicked');
+        // go back one page
+        //window.history.back();
+        console.log("i gonna edit it anyway")
+      });
+    });
+}
+
+
 
 
 // the big one

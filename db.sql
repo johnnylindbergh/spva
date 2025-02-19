@@ -112,6 +112,7 @@ CREATE TABLE takeoffs (
   material_markup DECIMAL(10,2) DEFAULT 0.30, 
   labor_markup DECIMAL(10,2) DEFAULT 0.40, 
   supervisor_markup DECIMAL(10,2) DEFAULT 0.03, 
+  touchups_cost DECIMAL(10,2) DEFAULT 0.00,
   payment_method VARCHAR(64),
   duration_hours INT,
   start_date TIMESTAMP,

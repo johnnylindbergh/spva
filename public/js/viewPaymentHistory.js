@@ -26,6 +26,7 @@ function populatePaymentHistoryTable(takeoff_id) {
         let estimate = data.estimate;
         let options = data.options;
         let totalPaid = 0;
+        let signed_total = estimate ? parseFloat(estimate.signed_total) || 0 : 0;
         let totalDue = 0;
         // add the header row
         payments.forEach(payment => {
@@ -198,9 +199,12 @@ function populatePaymentHistoryTable(takeoff_id) {
        
         const totalPaidElement = document.getElementById('totalPaid');
         const totalDueElement = document.getElementById('totalDue');
-
+        const totalRemainingElement = document.getElementById('totalRemaining');
+        console.log("estimate total",estimate.signed_total);
         totalPaidElement.textContent = "Paid: $"+numberWithCommas(totalPaid.toFixed(2));
-        totalDueElement.textContent = "Due: $"+numberWithCommas(totalDue.toFixed(2));
+        
+        totalDueElement.textContent = "Due: $"+numberWithCommas(signed_total.toFixed(2));
+        totalRemainingElement.textContent = "Remaining: $"+numberWithCommas((signed_total - totalPaid).toFixed(2));
 
         const estimateInfo = document.getElementById('estimateInfo');
         // show the estimate info
