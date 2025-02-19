@@ -74,6 +74,9 @@ CREATE TABLE customers (
   PRIMARY KEY (id)
 );
 
+--example insert
+INSERT INTO customers (taxable, job, givenName, billing_address, CompanyName, phone, primary_email_address, invoice_email_address) VALUES (1, 0, 'John Doe', '123 Main St, Anytown, USA', 'Doe Construction', '1234567890', 'jdoe@intuit.com', 'test@gmail.com');
+
 -- Estimates table
 CREATE TABLE estimates (
   id INT NOT NULL AUTO_INCREMENT,
@@ -124,6 +127,8 @@ CREATE TABLE takeoffs (
   PRIMARY KEY (id)
 );
 
+-- example insert
+INSERT INTO takeoffs (name, creator_id, file_path_of_plans, status, hash, total, travel_cost, tax, labor_cost, labor_rate, material_cost, material_markup, labor_markup, supervisor_markup, payment_method, duration_hours, start_date, end_date, last_updated_by, customer_id) VALUES ('Takeoff 1', 1, 'path/to/plans', 0, 'hash1', 2000.00, 0.00, 5.3, 0.00, 25.00, 0.00, 0.30, 0.40, 0.03, 'card', 40, '2022-01-01 00:00:00', '2022-01-31 00:00:00', 1, 1);
 -- Customer-Takeoff relationship table
 CREATE TABLE customer_takeoffs (
   id INT NOT NULL AUTO_INCREMENT,

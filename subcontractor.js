@@ -44,7 +44,11 @@ module.exports = function (app) {
       }
       db.query('SELECT * FROM forms WHERE id = ?;', [id], (results) => {
         console.log(results);
-
+        if (results == null) {
+          res.send('sowwy, no form found with that id');
+          return;
+        }
+        
         res.render('subcontractorViewForm.html', {form: results[0]});
 
         // db.query('SELECT * FROM form_items JOIN form_item_days ON form_items.id = form_item_days.form_item_id WHERE form_items.form_id = ?;', [id], (fields) => {

@@ -466,6 +466,12 @@ module.exports = {
                     });
                 });
             }
+
+            // if there are no takeoffs, return an empty array
+            if (totalTakeoffs === 0) {
+                callback(null, []);
+            }
+            
         }
     );
 },
@@ -1852,8 +1858,8 @@ module.exports = {
                     console.log("invoice id in update sig", invoice_id);
                     // insert into invoice_items
                     con.query(
-                      "INSERT INTO invoice_items (invoice_id, cost, quantity) VALUES (?,?,?);",
-                      [invoice_id, invoiceTotal, 1],
+                      "INSERT INTO invoice_items (invoice_id, cost, quantity, description) VALUES (?,?,?,?);",
+                      [invoice_id, invoiceTotal, 1, "Initial Deposit"],
                       function (err) {
                         if (err){
                           console.log(err);
@@ -2457,6 +2463,7 @@ module.exports = {
     );
   },
 
+  // used by client to get the invoice, thus the view is counted
   getSharedInvoice: function (hash, callback) {
     con.query(
       "SELECT * FROM invoices WHERE hash = ?;",
@@ -2493,7 +2500,18 @@ module.exports = {
                 items[i].total = items[i].quantity * items[i].cost;
               }
 
-              callback(null, invoice[0], items, takeoff[0], total);
+              // update the view count
+              con.query(
+                "UPDATE invoices SET view_count = view_count + 1 WHERE hash = ?;",
+                [hash],
+                function (err) {
+                  if (err) {
+                    console.log(err);
+                  }
+                  callback(null, invoice[0], items, takeoff[0], total);
+                }
+              );
+
               }
             );
           }
