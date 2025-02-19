@@ -430,7 +430,7 @@ module.exports = {
             let totalTakeoffs = takeoffs.length;
             let completedQueries = 0;
             
-            console.log(takeoffs[0]);
+            //console.log(takeoffs[0]);
             for (let i = 0; i < totalTakeoffs; i++) {
                 let takeoff = takeoffs[i];
                 takeoff.total_due = 0;
@@ -452,10 +452,10 @@ module.exports = {
                             let paymentHistoryTotal = parseFloat(paymentHistory[0].total);
                             
                             takeoff.total_due = invoiceTotal + changeOrdersTotal - paymentHistoryTotal;
-                            console.log("paymentHistoryTotal", paymentHistoryTotal);
-                            console.log("invoiceTotal", invoiceTotal);
-                            console.log("changeOrdersTotal", changeOrdersTotal);
-                            console.log("takeoff.total_due", takeoff.total_due);
+                            // console.log("paymentHistoryTotal", paymentHistoryTotal);
+                            // console.log("invoiceTotal", invoiceTotal);
+                            // console.log("changeOrdersTotal", changeOrdersTotal);
+                            // console.log("takeoff.total_due", takeoff.total_due);
                             modifiedTakeoffs.push(takeoff);
                             completedQueries++;
                             
@@ -1852,10 +1852,13 @@ module.exports = {
                     console.log("invoice id in update sig", invoice_id);
                     // insert into invoice_items
                     con.query(
-                      "INSERT INTO invoice_items (invoice_id, description, amount) VALUES (?,?,?);",
-                      [invoice_id, "Initial Deposit", invoiceTotal],
+                      "INSERT INTO invoice_items (invoice_id, cost, quantity) VALUES (?,?,?);",
+                      [invoice_id, invoiceTotal, 1],
                       function (err) {
-                        if (err) return callback(err);
+                        if (err){
+                          console.log(err);
+                          return callback(err);
+                        }
                         // return the invoice_id
                         console.log(`passing new invoice id ${invoice_id}`);
                         callback(true, invoice_id, null);

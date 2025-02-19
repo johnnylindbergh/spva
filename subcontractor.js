@@ -98,16 +98,27 @@ module.exports = function (app) {
         if (!form.form_name || form.form_name.trim() === '') {
           form.form_name = 'New Form';
         }
-    
+        
+        // null check
+      
         // Insert form into database
         db.query('INSERT INTO forms (form_name, user_id) VALUES (?, ?); SELECT LAST_INSERT_ID() as last;', [form.form_name, user_id], (err, results) => {
+          if (err){
+            console.log(err);
+            res.status(500).send('Error submitting form.');
+            return; 
+          }
          
           form_id = results.insertId;
           console.log("Form ID:", form_id); 
           // Link subcontractor to form
           db.query('INSERT INTO subcontractor_forms (user_id, form_id) VALUES (?, ?)', [user_id, form_id], (err) => {
-            console.log(err);
-         
+            if (err){
+              console.log(err);
+              res.status(500).send('Error submitting form.');
+              return; 
+            }
+
 
             // Insert items into form_items
             const items = form.data || [];

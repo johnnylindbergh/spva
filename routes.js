@@ -928,7 +928,7 @@ module.exports = function (app) {
 
   app.post("/viewEstimate", mid.isAdmin, function (req, res) {
     console.log("estimate view");
-    db.getEstimateData(req.body.id, function (err, estimate, takeoff, tax) {
+    db.getEstimateData(req.body.id, function (err, estimate, takeoff, tax) { // this passes takeoff_id
       if (err) {
         console.log(err);
       } else {
@@ -941,6 +941,25 @@ module.exports = function (app) {
       }
     });
   });
+
+  app.get("/viewEstimate/", mid.isAdmin, function (req, res) {
+    let takeoff_id = req.query.takeoff_id;
+    console.log("estimate view");
+    db.getEstimateData(takeoff_id, function (err, estimate, takeoff, tax) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(estimate);
+        res.render("viewEstimate.html", {
+          estimate: estimate,
+          takeoff: takeoff,
+          email:req.user.local.email,
+        });
+      }
+    }
+    );
+  }
+  );
 
   app.post("/toggle-material", mid.isAdmin, function (req, res) {
     console.log("toggling ", req.body.material_id);
@@ -1960,33 +1979,48 @@ module.exports = function (app) {
 
         // format the dates of the payments
         for (let i = 0; i < payments.length; i++) {
-            payments[i].created_at = moment(payments[i].created_at).format('MMMM Do YYYY, h:mm:ss a');
+          payments[i].created_at = moment(payments[i].created_at).format('MMMM Do YYYY, h:mm:ss a');
         }
         db.getTakeoffById(req.body.takeoff_id, function (err, takeoff) {
           if (err) {
             console.log(err);
           }
 
-          db.getInvoicesByTakeoffId(req.body.takeoff_id, function (err, invoices) {
+          db.getEstimateById(takeoff[0].estimate_id, function (err, estimate) {
             if (err) {
               console.log(err);
             }
 
-            console.log("invoice(s) retrieved: ", invoices);
-
-            db.getChangeOrdersByTakeoffId(req.body.takeoff_id, function (err, change_orders) {
+            db.getOptions(req.body.takeoff_id, function (err, options) {
               if (err) {
                 console.log(err);
               }
 
-              console.log("change orders retrieved: ", change_orders);
 
-              res.send({ payments: payments, takeoff: takeoff[0], invoices: invoices, change_orders: change_orders });
-            });
+
+              db.getInvoicesByTakeoffId(req.body.takeoff_id, function (err, invoices) {
+                if (err) {
+                  console.log(err);
+                }
+
+                console.log("invoice(s) retrieved: ", invoices);
+
+                db.getChangeOrdersByTakeoffId(req.body.takeoff_id, function (err, change_orders) {
+                  if (err) {
+                    console.log(err);
+                  }
+
+                  console.log("change orders retrieved: ", change_orders);
+                  console.log(takeoff[0]);
+                  res.send({ payments: payments, takeoff: takeoff[0], estimate: estimate, options:options, invoices: invoices, change_orders: change_orders });
+                });
+              });
+            }
+            );
           });
         });
-    
- 
+
+
       });
     });
 

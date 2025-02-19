@@ -23,6 +23,8 @@ function populatePaymentHistoryTable(takeoff_id) {
         let payments = data.payments;
         let takeoff = data.takeoff;
         let invoices = data.invoices;
+        let estimate = data.estimate;
+        let options = data.options;
         let totalPaid = 0;
         let totalDue = 0;
         // add the header row
@@ -145,6 +147,51 @@ function populatePaymentHistoryTable(takeoff_id) {
      
         }
         );
+
+        // populate the options table
+        const optionsTable = document.getElementById('optionsTable');
+        optionsTable.innerHTML = ''; // Clear existing rows
+        // add the headers
+        const optionsHeaderRow = optionsTable.insertRow();
+        const optionsHeaderCell0 = optionsHeaderRow.insertCell(0);
+
+        optionsHeaderCell0.textContent = 'Name';
+
+        const optionsHeaderCell1 = optionsHeaderRow.insertCell(1);
+        optionsHeaderCell1.textContent = 'Total';
+
+        const optionsHeaderCell2 = optionsHeaderRow.insertCell(2);
+        optionsHeaderCell2.textContent = 'Status';
+
+        
+        options.forEach(option => {
+            const row = optionsTable.insertRow();
+            const cell0 = row.insertCell(0);
+            console.log(option);
+            cell0.textContent = option.description;
+
+            // if (option.applied == 1) {
+            //     cell0.style.fontWeight = 'bold';
+            // }
+            const cell1 = row.insertCell(1);
+            cell1.textContent = "$"+ option.cost;
+            const cell2 = row.insertCell(2);
+            if (option.applied == 0) {
+                // add a yellow ! icon
+                cell2.innerHTML = ' <i style="color:brown;" class="fas fa-poop"></i>';
+            }
+            else if (option.applied == 1) {
+               // green circle check icon
+                cell2.innerHTML = `<i style="color:green;" class="fas fa-check-circle"></i>`;
+
+            } else if (option.Status == 2) {
+                // add red exclamation icon
+                cell2.innerHTML = ` <i style="color:red;" class="fas fa-circle-exclamation"></i>`;
+            }
+ 
+            
+        }
+        );
         
         // Update the total paid and total due
 
@@ -154,6 +201,24 @@ function populatePaymentHistoryTable(takeoff_id) {
 
         totalPaidElement.textContent = "Paid: $"+numberWithCommas(totalPaid.toFixed(2));
         totalDueElement.textContent = "Due: $"+numberWithCommas(totalDue.toFixed(2));
+
+        const estimateInfo = document.getElementById('estimateInfo');
+        // show the estimate info
+        // if the estimate is signed, show a check mark, and "Estimate signed at {date}"
+        // otherwise show "Estimate not signed"'
+        //console.log(takeoff);
+
+        if (takeoff.takeoff_status >= 4) {
+            estimateInfo.innerHTML = `<i style="color:green;" class="fas fa-check-circle"></i> Estimate signed at ${new Date(estimate.signed_at).toLocaleString("en-US")}`;
+            // add option to view estimate
+            estimateInfo.innerHTML += ` <a style="text-decoration: none;" href="/viewEstimate/?takeoff_id=${takeoff.takeoff_id}">View Estimate</a>`;
+
+        } else {
+            estimateInfo.innerHTML = `Estimate not Signed <form action="/editTakeoff" method="POST" style="display:inline;">
+                        <input type="hidden" name="takeoff_id" value="${takeoff.takeoff_id}">
+                        <input type="submit" value="Edit" style="color:blue;background:none;border:none;color:blue;text-decoration:none;cursor:pointer;">
+                        </form>`;   
+            }
 
         
     })

@@ -173,7 +173,12 @@
                 });
                 console.log(data);
                 $.post('/subcontractor/submit', { data: data, form_name: formName }, function (response) {
-                    console.log(response);
+                    if (response.success) {
+                        alert('Data submitted successfully');
+                    } else {
+                        alert('Error submitting data');
+                    }
+                    
                 });
             });
         });

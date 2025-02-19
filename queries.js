@@ -70,6 +70,7 @@ WHERE
     takeoffs.file_path_of_plans,
     takeoffs.estimate_id,
     takeoffs.status AS takeoff_status,
+    takeoffs.signed_at AS takeoff_signed_at,
     takeoffs.hash AS takeoff_hash,
     takeoffs.view_count AS takeoff_view_count,
     takeoffs.total AS takeoff_total,

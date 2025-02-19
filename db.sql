@@ -98,6 +98,7 @@ CREATE TABLE takeoffs (
   estimate_id INT UNIQUE,
   status TINYINT(1) DEFAULT 0,
   hash VARCHAR(64),
+  signed_at TIMESTAMP,
   view_count INT DEFAULT 0,
   total DECIMAL(10,2),
   travel_cost DECIMAL(10,2) DEFAULT 0.00,
