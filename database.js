@@ -1718,10 +1718,17 @@ module.exports = {
           );
         }
 
-        //format the takeoff_start_date
-        takeoffResults[0].takeoff_start_date = moment(takeoffResults[0].takeoff_start_date).format("YYYY-MM-DD");
-
         const takeoff = takeoffResults[0]; // assuming only one result
+
+        // if the takeoff is signed, throw error
+        console.log("takeoff status: ", takeoff);
+        if (takeoff.takeoff_status == 4) {
+          return callback(new Error("This estimate has already been signed"));
+        }
+
+        //format the takeoff_start_date
+        takeoff.takeoff_start_date = moment(takeoff.takeoff_start_date).format("YYYY-MM-DD");
+
 
         // console.log("getting shared takeoff:", takeoff);
 

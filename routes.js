@@ -1306,7 +1306,8 @@ module.exports = function (app) {
       function (err, estimate, takeoff, options) {
         if (err || estimate.length == 0) {
           console.log(err);
-          res.redirect("/");
+          res.render("error.html", { link:'/', linkTitle:'back',friendly: "Invalid estimate link. Estimate has been signed" });
+         // res.redirect("/");
         } else {
           // authenticate the user session
           // if the user is not authenticated, redirect to the login page
@@ -1344,7 +1345,7 @@ module.exports = function (app) {
     );
   });
 
-  app.post('/changeStartDate', mid.isAdmin, function (req, res) {
+  app.post('/changeStartDate', function (req, res) {
     console.log("changing start date ", req.body);
     db.changeStartDate(req.body.takeoff_id, req.body.startDate, function (err) {
       if (err) {
@@ -1358,7 +1359,7 @@ module.exports = function (app) {
   );
 
 
-  app.post('/updateCustomerPhone', mid.isAdmin, function (req, res) {
+  app.post('/updateCustomerPhone', function (req, res) {
     console.log("updating customer phone ", req.body);
     db.updateCustomerPhone(req.body.takeoff_id, req.body.phone, function (err) {
       if (err) {
@@ -1476,7 +1477,7 @@ module.exports = function (app) {
     }
   });
 
-  app.post('/checkMeout/:takeoff_id', mid.isAuth, function (req, res) {
+  app.post('/checkMeout/:takeoff_id', function (req, res) {
     console.log("/checkMeout/");
     const takeoff_id = req.params.takeoff_id;
     const method = req.body.method;
@@ -1536,7 +1537,7 @@ module.exports = function (app) {
     );
   });
 
-  app.get('/checkMeout/:takeoff_id', mid.isAuth, function (req, res) {
+  app.get('/checkMeout/:takeoff_id', function (req, res) {
     console.log("/checkMeout/ rendered as estimate via get");
     console.log("/checkMeout/");
     const takeoff_id = req.params.takeoff_id;
@@ -1973,7 +1974,7 @@ module.exports = function (app) {
       });
     });
 
-    app.get('/return', mid.isAdmin, async (req, res) => {
+    app.get('/return', async (req, res) => {
       console.log("GET /return")
       console.log("returning from stripe");
       const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
