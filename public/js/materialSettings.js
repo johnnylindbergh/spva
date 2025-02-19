@@ -88,10 +88,7 @@ function filterFunction() {
     }
 }
 
-// Function to handle dropdown menu
-function myFunction() {
-    document.getElementById('materialLibrary').classList.toggle('show');
-}
+
 
 // Close the dropdown if the user clicks outside of it
 window.onclick = function(event) {

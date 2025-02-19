@@ -29,9 +29,7 @@ function toggleMaterial(materialId, checkbox) {
     });
 }
 
-function myFunction() {
-  document.getElementById("materialLibrary").classList.toggle("show");
-}
+
 
 function separateLineItem(materialId, checkbox) {
   console.log("Material separate line item toggled: " + materialId);
@@ -145,10 +143,8 @@ function add_subject(id) {
 }
 
 function closeDropdown() {
-  let scrollPos = $(window).scrollTop(); // Store current scroll position
   let dropdown = $("#materialLibrary");
   dropdown.toggle();
-  $(window).scrollTop(scrollPos); // Restore scroll position
 }
 
 function add_material(id) {
@@ -157,11 +153,14 @@ function add_material(id) {
   let dropdown = $("#materialLibrary");
   let scrollPos = $(window).scrollTop(); // Store current scroll position
   dropdown.toggle();
-  $(window).scrollTop(scrollPos +400); // Restore scroll position
 
   if (material_id != null && subject_id != null) {
     add_material_subject();
   }
+  setTimeout(function () {
+    $(window).scrollTop(scrollPos); // Restore scroll position
+  }, 2000);
+
 }
 
 function removeMaterial(subject_id, id) {
@@ -456,6 +455,8 @@ function updateTouchupsCost(value) {
 
 // the big one
 function loadTakeoffMaterials(id) {
+
+  let scrollPos = $(window).scrollTop(); // Store current scroll position
   takeoff_id = id;
 
   laborTotal = 0;
@@ -784,6 +785,8 @@ function loadTakeoffMaterials(id) {
       }
 
       $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialTotal.toFixed(2)));
+
+      $(window).scrollTop(scrollPos); // Restore scroll position
 
       //now post the new sums to /updateTakeoffTotal
       $.post("/updateTakeoffTotal", {

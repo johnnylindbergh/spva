@@ -81,7 +81,7 @@ function applySubjectCoatRules(takeoff_id, callback) {
   // insert duplicate row with top_coat = 0 and name = name + " top coat" + n
   // for n in primer,
   // insert duplicate row with primer = 0 and name = name + " primer" + n 
-
+  console.log("Applying subject coat rules.db");
   con.query("SELECT * FROM applied_materials WHERE takeoff_id = ?;", [takeoff_id], function (err, subjects) {
     if (err) {
       console.error("Error fetching subjects:", err);
@@ -90,8 +90,12 @@ function applySubjectCoatRules(takeoff_id, callback) {
     for (let i = 0; i < subjects.length; i++) {
       const subject = subjects[i];
       //console.log("Processing subject:", subject);
+      subject.top_coat = parseInt(subject.top_coat);
+      subject.primer = parseInt(subject.primer);
+
       if (subject.top_coat > 0) {
         for (let n = 1; n <= subject.top_coat; n++) {
+          console.log("inserting top coat"), subject + " top coat " + n;
           con.query(
             "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
             [takeoff_id, subject.name + " top coat " + n, subject.measurement, subject.measurement_unit, subject.color, 0, 0, 0],
@@ -1977,10 +1981,10 @@ module.exports = {
               callback(null);
             });
 
-            // sleep for 1 second to allow the database to update
-            setTimeout(function () {
-              callback(null);
-            }, 1000);
+            // // sleep for 1 second to allow the database to update
+            // setTimeout(function () {
+            //   callback(null);
+            // }, 1000);
           }
 
         );
