@@ -688,7 +688,7 @@ module.exports = {
         return callback("Unauthorized: You can only delete takeoffs you created");
       }
 
-      con.query("DELETE FROM takeoffs WHERE id = ?;", [takeoff_id], function (err) {
+      con.query("UPDATE takeoffs SET isArchived = 1 where id = ?;", [takeoff_id], function (err) {
         if (err) return callback(err);
         callback(null);
       });
