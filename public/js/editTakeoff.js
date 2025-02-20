@@ -11,6 +11,7 @@ let laborTotalAdjusted = 0;
 let material_markup = 0;
 let supervisor_markup = 0;
 let travel_extra = 0;
+let touchups_cost = 0;
 
 
 
@@ -354,7 +355,7 @@ function updateSupervisorMarkup(value) {
   console.log("Changing supervisor markup to: " + supervisor_markup);
   $("#supervisorMarkupValue").text(parseInt(value) + "%");
 
-  $.post("/change-supervisor-markup", { takeoff_id: takeoff_id, supervisor_markup: supervisor_markup })
+  $.post("/change-supervisor-markup", { takeoff_id: takeoff_id, supervisor_markup: (parseInt(value)/100).toFixed(2) })
     .done(function () {
       console.log("Supervisor markup updated: " + supervisor_markup);
       loadTakeoffMaterials(takeoff_id);
@@ -474,7 +475,7 @@ function loadTakeoffMaterials(id) {
       material_markup = parseFloat(data.takeoff[0].material_markup);
       supervisor_markup = parseFloat(data.takeoff[0].supervisor_markup);
       travel_extra = parseFloat(data.takeoff[0].travel_cost);
-
+      touchups_cost = parseFloat(data.takeoff[0].touchups_cost);
 
 
 
@@ -771,6 +772,9 @@ function loadTakeoffMaterials(id) {
         adjustedTotal = adjustedTotal + travel_extra;
       }
 
+      if (touchups_cost != 0 && touchups_cost != null) {
+        adjustedTotal = adjustedTotal + touchups_cost;
+      }
       // Update total sum
       $("#sum").text("Total Cost: $" + numberWithCommas((adjustedTotal).toFixed(2)));
 

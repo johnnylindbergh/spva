@@ -70,32 +70,32 @@
         <label for="slider">Labor Rate:</label>
         <input type="range" id="laborRate" name="slider" min="0" max="500" value="{{labor_rate}}"
           oninput="changeLaborRateHelper(this.value)">
-        <span id="laborRateValue">{{labor_rate}}</span>
+        <span id="laborRateValue" style="display: inline-block; width: 50px;">{{labor_rate}}</span>
       </br>
      
 
         <label for="slider">Labor Markup:</label>
         <input type="range" id="laborMarkup" name="slider" min="0" max="100" value="{{labor_markup}}"
           oninput="changeLaborMarkupHelper(this.value)">
-        <span id="laborMarkupValue">{{labor_markup}}%</span>
+        <span id="laborMarkupValue" style="display: inline-block; width: 50px;">{{labor_markup}}%</span>
       </br>
 
         <label for="slider">Material Markup:</label>
         <input type="range" id="materialMarkup" name="slider" min="0" max="100" value="{{material_markup}}"
           oninput="updateMaterialMarkupHelper(this.value)">
-        <span id="materialMarkupValue">{{material_markup}}%</span>
+        <span id="materialMarkupValue" style="display: inline-block; width: 50px;">{{material_markup}}%</span>
       </br>
 
         <label for="slider">Supervisor Markup:</label>
         <input type="range" id="supervisionMarkup" name="slider" min="0" max="100" value="0"
           oninput="updateSupervisorMarkupHelper(this.value)">
-        <span id="supervisorMarkupValue">{{supervisor_markup}}%</span>
+        <span id="supervisorMarkupValue" style="display: inline-block; width: 50px;">{{supervisor_markup}}%</span>
       </br>
 
       <label for="slider">Touchups:</label>
       <input type="range" id="touchupsCost" name="slider" min="0" max="5000" value="{{touchups_cost}}"
         oninput="updateTouchupsCostHelper(this.value)">
-      <span id="touchupsCostValue">${{touchups_cost}}</span>
+      <span id="touchupsCostValue" style="display: inline-block; width: 50px;">${{touchups_cost}}</span>
     </br>
 
       <label for="slider">Travel Extra:</label>

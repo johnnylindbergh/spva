@@ -224,7 +224,7 @@ module.exports = function (app) {
     db.deleteTakeoff(req.body.takeoff_id, req.user.local.id, function (err) {
       if (err) {
         console.log(err);
-        res.end();
+        res.render("error.html", { link:'javascript:history.back()', linkTitle:'back',friendly: "Error deleting takeoff. You can only delete takeoffs you created." });
       } else {
         res.redirect("/");
       }

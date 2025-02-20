@@ -211,15 +211,22 @@ function applySubjectNamingRules(takeoff_id, callback) {
 }
 
 
-
+//needs work...
 function matchSubjectStrings(currentSubjectId, takeoff_id) {
   // get the current subject
-  con.query("SELECT * FROM subjects WHERE id = ?;", [currentSubjectId], function (err, currentSubjects) {
+  console.log("Matching subject strings.");
+  console.log("currentSubjectId", currentSubjectId);
+  con.query("SELECT * FROM applied_materials WHERE id = ?;", [currentSubjectId], function (err, currentSubjects) {
     if (err) {
       console.log(err);
       return;
     }
-    const currentSubject = currentSubjects[0].name;
+    console.log("currentSubjects", currentSubjects);
+    if (currentSubjects.length === 0) {
+      console.log("No current subjects found");
+      return;
+    }
+    const currentSubject = currentSubjects[0].subject;
 
     //console.log("Matching subject strings.");
     // First, get the frequency of materials applied to a given subject in the applied_materials table
@@ -1031,7 +1038,7 @@ module.exports = {
 
     con.query(
       "UPDATE takeoffs SET supervisor_markup = ? WHERE id = ?;",
-      [supervisor_markup, takeoff_id],
+      [parseFloat(supervisor_markup).toFixed(2), takeoff_id],
       function (err) {
         if (err) return callback(err);
         callback(null);
@@ -1947,7 +1954,7 @@ module.exports = {
           "SELECT setting_value FROM system_settings WHERE setting_name = 'default_labor_cost';",
           function (err, default_labor_cost) {
             if (err) return callback(err);
-
+            console.log(subjects[0]);
             for (var i = 0; i < subjects.length; i++) {
               // Insert into applied_materials
               let currentSubject = subjects[i].subject;
@@ -1963,7 +1970,7 @@ module.exports = {
               }
               console.log("Inserted subject: ", currentSubject);
               con.query(
-                "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+                "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;",
                 [
                   takeoff_id,
                   subjects[i].subject,
@@ -1974,11 +1981,11 @@ module.exports = {
                   subjects[i].top_coat || 0,
                   subjects[i].primer || 0,
                 ],
-                function (err) {
+                function (err, results) {
                   if (err) {
                     console.log(err);
                   } else {
-                    //  matchSubjectStrings(currentSubjectId, takeoff_id);
+                      //matchSubjectStrings(results[1][0].last, takeoff_id);
                   }
                 }
               );
