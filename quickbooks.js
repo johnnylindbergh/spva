@@ -92,9 +92,9 @@ async function syncCustomers() {
 }
 
 // function to create an invoice given an invoice_id, takeoff_id, and callback
-async function pushInvoiceToQuickbooks (invoice_id, takeoff_id, callback) {
+async function pushInvoiceToQuickbooks (invoice_id, callback) {
   // get the invoice from the database
-  db.getInvoiceById(invoice_id, takeoff_id, async (err, invoice) => {
+  db.getInvoiceById(invoice_id, async (err, invoice) => {
     if (err) {
       console.log(err);
       return callback("big error", null);
@@ -237,18 +237,18 @@ module.exports = function (app) {
   });
 
   app.post("/pushInvoiceToQuickbooks", async (req, res) => {
+    console.log("pushInvoiceToQuickbooks");
     // query the database for the invoice_id and takeoff_id in the post req
     let invoice_id = req.body.invoice_id;
-    let takeoff_id = req.body.takeoff_id;
 
     // call the pushInvoiceToQuickbooks function
-    pushInvoiceToQuickbooks(invoice_id, takeoff_id, (err, response) => {
+    pushInvoiceToQuickbooks(invoice_id, (err, response) => {
       if (err) {
         console.log("qb error:",err);
-        res.status(500).send(err);
+        res.send("error");
             } else {
         console.log(response);
-        res.send(response);
+        res.send("shared");
       }
     }
     );
@@ -328,6 +328,8 @@ module.exports = function (app) {
       res.status(500).send('Error refreshing access token');
     }
   });
+
+    
 
   app.post('/webhook', async (req, res) => {
 

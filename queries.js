@@ -121,6 +121,7 @@ WHERE
 fullJoin: `SELECT * FROM subcontractor_forms JOIN forms ON subcontractor_forms.form_id = forms.id JOIN form_items ON form_items.form_id =forms.id JOIN form_item_days ON form_item_days.form_item_id = form_items.id WHERE subcontractor_forms.user_id = 1`,
 
 getinvoiceById:  `SELECT 
+    invoices.id AS invoice_id,
     invoices.total AS invoiceTotal, 
     takeoffs.name AS takeoffName, 
     takeoffs.customer_id AS customer_id, 

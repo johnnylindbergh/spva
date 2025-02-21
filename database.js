@@ -211,45 +211,46 @@ function applySubjectNamingRules(takeoff_id, callback) {
 }
 
 
-//needs work...
-function matchSubjectStrings(currentSubjectId, takeoff_id) {
+function matchSubjectStrings(currentSubjectId, takeoff_id, callback) {
   // get the current subject
   console.log("Matching subject strings.");
   console.log("currentSubjectId", currentSubjectId);
   con.query("SELECT * FROM applied_materials WHERE id = ?;", [currentSubjectId], function (err, currentSubjects) {
     if (err) {
       console.log(err);
-      return;
+      return callback(err);
     }
-    console.log("currentSubjects", currentSubjects);
     if (currentSubjects.length === 0) {
       console.log("No current subjects found");
-      return;
+      return callback(null);
     }
-    const currentSubject = currentSubjects[0].subject;
 
-    //console.log("Matching subject strings.");
+    const currentSubject = currentSubjects[0];
+
+
+    if (currentSubject){
+      console.log("currentSubject", currentSubject);
     // First, get the frequency of materials applied to a given subject in the applied_materials table
     con.query(
       "SELECT material_id, name, COUNT(*) as count FROM applied_materials WHERE name = ? AND material_id IS NOT NULL GROUP BY material_id ORDER BY count DESC LIMIT 1;",
-      [currentSubject],
+      [currentSubject.name],
       function (err, materials) {
         if (err) {
           console.log(err);
+          return callback(err);
         }
 
-        // Assign these materials to the applied_materials table
-        //console.log("Frequent materials for " + currentSubject + ":" + materials);
-
         if (materials != null && materials.length > 0) {
-          //very important to match to takeoff_id or else this query would update all the takeoffs in the table
+          // very important to match to takeoff_id or else this query would update all the takeoffs in the table
           con.query(
             "UPDATE applied_materials SET material_id = ? WHERE name = ? AND takeoff_id = ?;",
-            [materials[0].material_id, currentSubject, takeoff_id],
+            [materials[0].material_id, currentSubject.name, takeoff_id],
             function (err) {
               if (err) {
                 console.log(err);
+                return callback(err);
               }
+              callback(null);
             }
           );
         } else {
@@ -259,12 +260,13 @@ function matchSubjectStrings(currentSubjectId, takeoff_id) {
           con.query("SELECT * FROM materials;", function (err, allMaterials) {
             if (err) {
               console.log(err);
+              return callback(err);
             }
 
             var minDistance = 100;
             var min_id = 0;
             for (var j = 0; j < allMaterials.length; j++) {
-              var distance = levenshtein.get(allMaterials[j].name, currentSubject);
+              var distance = levenshtein.get(allMaterials[j].name, currentSubject.name);
               if (distance < minDistance) {
                 minDistance = distance;
                 min_id = allMaterials[j].id;
@@ -274,21 +276,29 @@ function matchSubjectStrings(currentSubjectId, takeoff_id) {
             if (minDistance < 2) {
               con.query(
                 "UPDATE applied_materials SET material_id = ? WHERE name = ? AND takeoff_id = ?;",
-                [min_id, currentSubject, takeoff_id],
+                [min_id, currentSubject.name, takeoff_id],
                 function (err) {
                   if (err) {
                     console.log(err);
+                    return callback(err);
                   }
-                  //console.log("found a close match: ", currentSubject, min_id);
+                  callback(null);
                 }
               );
+            } else {
+              callback(null);
             }
           });
         }
       }
     );
+  }
   });
 }
+  
+
+    
+
 
 
 async function copyTakeoff(takeoff_id, callback) {
@@ -752,6 +762,29 @@ module.exports = {
         }
       );
     }
+  },
+
+  // uses levenstein distance to match the material names to the subject names
+  // if the material name is not found, ie distance > 1, then disregard
+  // if the material name is found, then update the applied_materials table with the material_id
+  matchSubjectsToMaterial: function (takeoff_id, callback) {
+    con.query("SELECT * FROM applied_materials WHERE takeoff_id = ?;", [takeoff_id], function (err, subjects) {
+      if (err) {
+        console.log(err);
+        return callback(err);
+      }
+      for (let i = 0; i < subjects.length; i++) {
+        matchSubjectStrings(subjects[i].id, takeoff_id, function (err) {
+          if (err) {
+            console.log(err);
+            return callback(err);
+          } else {
+            callback(null);
+          }
+        });
+      }
+      callback(null);
+    });
   },
 
   getCustomers: function (callback) {
@@ -1965,9 +1998,9 @@ module.exports = {
               }
 
             //  if the current subject contains "notes" or note, skip it
-              if (currentSubject && (currentSubject.toLowerCase().includes("note")) || currentSubject.toLowerCase().includes("notes")) {
-                continue;
-              }
+              // if (currentSubject && (currentSubject.toLowerCase().includes("note")) || currentSubject.toLowerCase().includes("notes")) {
+              //   continue;
+              // }
               console.log("Inserted subject: ", currentSubject);
               con.query(
                 "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;",
@@ -1985,7 +2018,7 @@ module.exports = {
                   if (err) {
                     console.log(err);
                   } else {
-                      //matchSubjectStrings(results[1][0].last, takeoff_id);
+                      //åmatchSubjectStrings(results[1][0].last, takeoff_id);
                   }
                 }
               );
@@ -1995,10 +2028,10 @@ module.exports = {
               callback(null);
             });
 
-            // // sleep for 1 second to allow the database to update
-            // setTimeout(function () {
-            //   callback(null);
-            // }, 1000);
+            // sleep for 1 second to allow the database to update
+            setTimeout(function () {
+              callback(null);
+            }, 1000);
           }
 
         );
@@ -2562,6 +2595,7 @@ module.exports = {
   },
 
   invoicePayed: function (takeoff_id, invoice_id, amount, callback) {
+    console.log("invoice payed id: ", invoice_id);
     // get the invoice 
     // check if the takeoff_id matches
     // check if the amount matches
@@ -2574,11 +2608,9 @@ module.exports = {
       [invoice_id],
       function (err, invoice) {
         if (err) return callback(err);
-        if (invoice[0].takeoff_id != takeoff_id) {
-          return callback("Takeoff ID does not match");
-        }
+        let invoice_total = invoice[0].total;
 
-        if (invoice[0].status == 1) {
+        if (invoice.status == 1) {
           return callback("Invoice is already payed");
         }
 
@@ -2587,9 +2619,10 @@ module.exports = {
           [invoice_id],
           function (err) {
             if (err) return callback(err);
+            console.log("invoice", invoice);
             con.query(
               "INSERT INTO payment_history (takeoff_id, invoice_id, amount) VALUES (?,?,?);",
-              [takeoff_id, invoice_id, amount],
+              [takeoff_id, invoice_id, invoice_total],
               function (err) {
                 if (err) return callback(err);
                 callback(null);

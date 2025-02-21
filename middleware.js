@@ -61,8 +61,8 @@ module.exports = {
     } else {
       res.render("error.html", {
         friendly: "You are unable to access this resource. Admins only", 
-        link: "/subcontractor",
-        linkTitle: "I am a subcontractor"
+        link: "/login",
+        linkTitle: "login"
       });
       //res.redirect(sys.DOMAIN);
     }

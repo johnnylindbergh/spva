@@ -97,46 +97,43 @@
 </body>
 <script>
 
-    function shareWithQuickbooks() {
-        // Implement logic to share invoice with Quickbooks
-        alert("Invoice shared with Quickbooks");
-    }
+    
 
-    function shareInvoiceWithClient() {
-        // Implement logic to share invoice with client
+    // function shareInvoiceWithClient() {
+    //     // Implement logic to share invoice with client
         
-        Swal.fire({
-        title: 'Email Confirmation',
-        text: 'Are you sure you want to share this invoice with the client?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, share it!',
-        cancelButtonText: 'No, cancel'
-     }).then((result) => {
-        console.log("dialogue output", result);
-        if(result.isConfirmed){
-            console.log("invoice id", $('#invoice_id').val());
-            console.log("takeoff id", $('#takeoff_id').val());
+    //     Swal.fire({
+    //     title: 'Email Confirmation',
+    //     text: 'Are you sure you want to share this invoice with the client?',
+    //     icon: 'warning',
+    //     showCancelButton: true,
+    //     confirmButtonText: 'Share',
+    //     cancelButtonText: 'Cancel'
+    //  }).then((result) => {
+    //     console.log("dialogue output", result);
+    //     if(result.isConfirmed){
+    //         console.log("invoice id", $('#invoice_id').val());
+    //         console.log("takeoff id", $('#takeoff_id').val());
 
-            $.post('/shareInvoiceWithClient', {takeoff_id: $('#takeoff_id').val(), invoice_id:$('#invoice_id').val()}, function(data) {
-                console.log("twas the email sent?", data);
-                if (data == "email sent") {
-                    Swal.fire({
-                        title: 'Email Sent',
-                        text: 'The invoice has been sent to the client.',
-                        icon: 'success',
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        text: "The invoice could not be sent. Please set an owner email.",
-                        icon: 'error',
-                    });
-                }
-            });
+    //         $.post('/shareInvoiceWithClient', {takeoff_id: $('#takeoff_id').val(), invoice_id:$('#invoice_id').val()}, function(data) {
+    //             console.log("twas the email sent?", data);
+    //             if (data == "email sent") {
+    //                 Swal.fire({
+    //                     title: 'Email Sent',
+    //                     text: 'The invoice has been sent to the client.',
+    //                     icon: 'success',
+    //                 });
+    //             } else {
+    //                 Swal.fire({
+    //                     title: 'Error',
+    //                     text: "The invoice could not be sent. Please set an owner email.",
+    //                     icon: 'error',
+    //                 });
+    //             }
+    //         });
 
-        }
-    });
-    }
+    //     }
+    // });
+    // }
 </script>
 </html>

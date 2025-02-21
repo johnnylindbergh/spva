@@ -167,8 +167,17 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
                       console.log(err);
                       cb(err);
                     }
-                    cb(null);
+                    
+                    db.matchSubjectsToMaterial(takeoff_id, function(err){
+                      if (err) {
+                        console.log(err);
+                        cb(err);
+                      }
+                     cb(null);
+                    });
+                    
                   }); 
+
                 });
               }
             });
@@ -184,6 +193,11 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
       });
 }
 
+// number formatting 
+
+function numbersWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 // main page stuff
 module.exports = function (app) {
   // GET requests
@@ -1948,17 +1962,28 @@ module.exports = function (app) {
       // insert into the payment history table (takeoff_id, invoice_id, amount)
 
       // get the takeoff_id from the invoice_id
-      db.getInvoiceByOnlyId(session.metadata.invoice_id, function (err, invoice) {
+      db.getInvoiceById(session.metadata.invoice_id, function (err, invoice) {
         if (err) {
           console.log(err);
         } else {
           console.log("invoice is ", invoice);
           console.log()
-          db.invoicePayed(invoice.takeoff_id, invoice.id, raw_amount, function (err) {
+          db.invoicePayed(invoice.takeoff_id, invoice.invoice_id, raw_amount, function (err) {
             if (err) {
               console.log(err);
             } else {
               console.log("payment history inserted");
+              // send payment confirmation email to the customer
+              console.log("sending payment confirmation email to invoice id:", invoice.invoice_id);
+              console.log("sending payment confirmation email to takeoff id:", invoice.takeoff_id);
+              emailer.sendPaymentConfirmationEmail(req, res,  invoice.takeoff_id, invoice.invoice_id,function (err) {
+                if (err) {
+                  console.log(err);
+                } else {
+                  console.log("payment confirmation email sent");
+                }
+              });
+
             }
           });
         }
@@ -2147,6 +2172,8 @@ module.exports = function (app) {
             let totalAmout = 0;
             for (let i = 0; i < invoice_items.length; i++) {
               totalAmout += parseFloat(invoice_items[i].total);
+              invoice_items[i].total = numbersWithCommas(parseFloat(invoice_items[i].total).toFixed(2));
+              invoice_items[i].number  = i + 1;
             }
             db.getTakeoffById(invoice.takeoff_id, function (err, takeoff) {
               if (err) {
@@ -2154,7 +2181,7 @@ module.exports = function (app) {
                 res.send("error retrieving takeoff");
               } else {
                 console.log(takeoff);
-                res.render("viewInvoice.html", { invoice: invoice, invoice_items: invoice_items, takeoff: takeoff[0],totalAmout: totalAmout.toFixed(2)});
+                res.render("viewInvoice.html", { invoice: invoice, invoice_items: invoice_items, takeoff: takeoff[0],totalAmout: numbersWithCommas(totalAmout.toFixed(2))});
               }
             } 
             );}
@@ -2294,26 +2321,34 @@ module.exports = function (app) {
             console.log(err);
             res.redirect("/");
           } else {
-            console.log(invoice[0])
-            console.log("invoice created at ", invoice.date_created);
-            console.log("invoice expires at ", moment(invoice.date_created).add(30, 'days').format('YYYY-MM-DD HH:mm:ss')); // 30 days from creation
 
-            // if the current date is greater than the expiration date, redirect to the home page
-            if (moment().isAfter(moment(invoice.date_created).add(30, 'days'))) {
-              console.log("expired");
-              res.render("expiredInvoice.html", {
-                takeoff: takeoff,
-                invoice: invoice[0],
+            if (invoice.status == 1) {
+              // if the invoice is paid, render message the invoice is paid
+              res.render("paidInvoice.html", {
+                message: "This invoice has been paid."
               });
             } else {
-              console.log(invoice);
-              console.log(items);
-              // some renameing to make the invoice object render work
-              invoice.invoice_id = invoice.id;
-              invoice.invoiceTotal = invoice.total;
-              res.render("viewInvoiceClient.html", { invoice: invoice, invoice_items: items, takeoff: takeoff,totalAmout: totalAmout.toFixed(2)});
+              console.log(invoice[0])
+              console.log("invoice created at ", invoice.date_created);
+              console.log("invoice expires at ", moment(invoice.date_created).add(30, 'days').format('YYYY-MM-DD HH:mm:ss')); // 30 days from creation
+
+              // if the current date is greater than the expiration date, redirect to the home page
+              if (moment().isAfter(moment(invoice.date_created).add(30, 'days'))) {
+                console.log("expired");
+                res.render("expiredInvoice.html", {
+                  takeoff: takeoff,
+                  invoice: invoice[0],
+                });
+              } else {
+                console.log(invoice);
+                console.log(items);
+                // some renameing to make the invoice object render work
+                invoice.invoice_id = invoice.id;
+                invoice.invoiceTotal = invoice.total;
+                res.render("viewInvoiceClient.html", { invoice: invoice, invoice_items: items, takeoff: takeoff,totalAmout: totalAmout.toFixed(2)});
 
 
+              }
             }
             
           }
@@ -2321,6 +2356,7 @@ module.exports = function (app) {
       );
     });
 
+ 
 
 
     // ending perentheses do not delete (for the module.exports thing)

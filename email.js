@@ -155,6 +155,58 @@ async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
   });
 }
 
+
+async function sendPaymentConfirmationEmail(req, res, takeoff_id, invoice_id, callback) {
+  db.getTakeoffById(takeoff_id, (err, takeoff) => {
+    if (err || !takeoff) {
+      console.log(err);
+      callback("could not get takeoff by id", null);
+    } else {
+      console.log(takeoff);
+      if (takeoff[0].customer_invoice_email_address && takeoff[0].customer_givenName) {
+        db.getInvoiceById(invoice_id, (err, invoice) => {
+          if (err || !invoice) {
+            console.log(err);
+            callback("could not get invoice by id", null);
+          } else {
+            console.log(invoice);
+            if (invoice.invoice_hash) {
+              const mailOptions = {
+                from: credentials.serverEmail,
+                to: takeoff[0].customer_invoice_email_address,
+                subject: "Your Payment Confirmation from Sun Painting",
+                html: `
+                  <h3>Hello, ${takeoff[0].customer_givenName},</h3>
+                  <h3>Your payment has been received.</h3>
+                  <p>Please click the link below to view your invoice:</p>
+                  <a href="${credentials.domain}/shareInvoice/?hash=${invoice?.invoice_hash}">View Invoice</a></br>
+                  <img style="margin:20px;width:140px;"src="${credentials.domain}/SWAM_LOGO.jpg" alt="Swam Logo"></br>
+                  <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
+                `,
+              };
+              
+              const info = transporter.sendMail(mailOptions, (err, info) => {
+                if (err) {
+                  console.log(err);
+                  callback(err, null);
+                } else {
+                  console.log("Email sent: " + info.response);
+                  callback(null, info.response);
+                }
+              });
+            } else {
+              console.log("Some info is missing from this invoice invoice.hash");
+              callback("Some info is missing from this invoice invoice.hash", null);
+            }
+          }
+        }
+        );
+      }
+    }
+  });
+}
+
+
 async function sendExpiredEstimateEmail(estimate_id, callback) {
  
   // use the takeoff id to get the email address of the owner
@@ -252,5 +304,6 @@ module.exports = {
   sendEstimateEmailInternally,
   sendInvoiceEmail,
   sendExpiredEstimateEmail,
-  sendRenewalEmail
+  sendRenewalEmail,
+  sendPaymentConfirmationEmail
 };
