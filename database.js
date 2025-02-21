@@ -616,6 +616,16 @@ module.exports = {
         }
       }
 
+      // if top_coat or primer is not a number, set it to zero
+      if (isNaN(parseFloat(topCoat))) {
+        topCoat = 0;
+      }
+      if (isNaN(parseFloat(primer))) {
+        primer = 0;
+      }
+      if (subject.toLowerCase().includes("note")) {
+        continue;
+      }
       con.query(
         "INSERT INTO subjects (takeoff_id, subject, page_label, color, measurement, measurement_unit, top_coat, primer) VALUES (?,?,?,?,?,?,?,?);",
         [
@@ -626,7 +636,7 @@ module.exports = {
           parseFloat(measurement),
           measurementUnit,
           parseFloat(topCoat),
-          primer,
+          parseFloat(primer),
         ],
         function (err) {
           if (err) {
@@ -638,9 +648,10 @@ module.exports = {
 
     }
     //console.log("values", values);
-    setTimeout(() => {
-      cb(null);
-    }, 2000);
+    // setTimeout(() => {
+    //   cb(null);
+    // }, 2000);
+    cb(null);
 
   },
 
@@ -752,7 +763,7 @@ module.exports = {
     } else {
       con.query(
         "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?);",
-        [takeoff_id, subject.name, subject.measurement, subject.measurement_unit, 0, 0, 0],
+        [takeoff_id, subject.name, subject.measurement, subject.measurement_unit, subject.labor_cost, 0, 0],
         function (err) {
           if (err) {
             console.log(err);
@@ -1997,8 +2008,9 @@ module.exports = {
                 continue;
               }
 
-            //  if the current subject contains "notes" or note, skip it
+             //if the current subject contains "notes" or note, skip it
               // if (currentSubject && (currentSubject.toLowerCase().includes("note")) || currentSubject.toLowerCase().includes("notes")) {
+              //   console.log()
               //   continue;
               // }
               console.log("Inserted subject: ", currentSubject);
@@ -2029,9 +2041,10 @@ module.exports = {
             // });
 
             //sleep for 1 second to allow the database to update
-            setTimeout(function () {
-              callback(null);
-            }, 2000);
+            // setTimeout(function () {
+            //   callback(null);
+            // }, 2000);
+            callback(null);
           }
 
         );
