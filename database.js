@@ -2023,15 +2023,15 @@ module.exports = {
                 }
               );
             }
-            applySubjectNamingRules(takeoff_id, function (err) {
-              if (err) return callback(err);
-              callback(null);
-            });
+            // applySubjectNamingRules(takeoff_id, function (err) {
+            //   if (err) return callback(err);
+            //   callback(null);
+            // });
 
-            // sleep for 1 second to allow the database to update
+            //sleep for 1 second to allow the database to update
             setTimeout(function () {
               callback(null);
-            }, 1000);
+            }, 2000);
           }
 
         );

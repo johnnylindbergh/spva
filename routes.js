@@ -167,14 +167,15 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
                       console.log(err);
                       cb(err);
                     }
+                    cb(null); 
                     
-                    db.matchSubjectsToMaterial(takeoff_id, function(err){
-                      if (err) {
-                        console.log(err);
-                        cb(err);
-                      }
-                     cb(null);
-                    });
+                    // db.matchSubjectsToMaterial(takeoff_id, function(err){
+                    //   if (err) {
+                    //     console.log(err);
+                    //     cb(err);
+                    //   }
+                    //  cb(null);
+                    // });
                     
                   }); 
 
