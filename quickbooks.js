@@ -12,7 +12,8 @@ const creds = require('./credentials');
 const db = require('./database.js');
 require('dotenv').config();
 var Quickbooks = require('node-quickbooks');
-
+var request = require('request');
+var qs = require('querystring');
 
 
 let oauth2_token_json = null;
@@ -205,36 +206,129 @@ module.exports = function (app) {
     res.send(authUri);
   });
 
-  app.get('/callback', async (req, res) => {
+  app.get('/callback', async function(req, res) {
     try {
       const authResponse = await oauthClient.createToken(req.url);
-      oauth2_token_json = JSON.stringify(authResponse.json, null, 2);
-      console.log('OAuth Token:', oauth2_token_json);
+      oauth2_token_json = JSON.stringify(authResponse.getJson(), null, 2);
 
-      // Start syncing customers after authentication
-      await syncCustomers();
+      // save the access token somewhere on behalf of the logged in user
+      qbo = new Quickbooks(creds.quickbooks.consumerKey,
+                           creds.quickbooks.consumerSecret,
+                           authResponse.getToken().access_token,
+                           false, // no token secret for OAuth 2.0
+                           authResponse.getToken().realmId,
+                           true, // use the Sandbox
+                           true, // turn debugging on
+                           '75', // minorversion
+                           '2.0', // OAuth version
+                           authResponse.getToken().refresh_token);
 
-      qbo = new QuickBooks(consumerKey,
-        creds.quickbooks.consumerSecret,
-        oauthClient.getToken().accessToken,
-        false, // no token secret for oAuth 2.0
-        oauthClient.getToken().realmId,
-        true, // use the sandbox?
-        true, // enable debugging?
-        null, // set minorversion, or null for the latest version
-        '2.0', //oAuth version
-        refreshToken);
+      // test out account access
+      // qbo.findAccounts(function(_, accounts) {
+      //   accounts.QueryResponse.Account.forEach(function(account) {
+      //     console.log(account.Name);
+      //   });
+      // });
 
-        qbo.getBillPayment('42', function(err, billPayment) {
-          console.log(billPayment)
-        })
 
-      res.send('Callback success. Customers syncing...');
+      // Start syncing invoices after authentication
+      // get all the qb invoices and create them in the database if they don't exist
+
+      qbo.findInvoices({ }, async function (err, invoices) {
+        console.log(invoices.Error);
+        for (var i = 0; i < invoices.QueryResponse.Invoice.length; i++) {
+          let invoice = invoices.QueryResponse.Invoice[i];
+          let total = 0;
+          for (var j = 0; j < invoice.Line.length; j++) {
+            total += invoice.Line[j].Amount;
+            // get line items?
+          }
+
+          //  get the takeoff with a matching customer_id
+
+          console.log(invoice);
+          db.getTakeoffByCustomerID(invoice.CustomerRef.value, (err, takeoff) => {
+          
+            if (err || !takeoff) {
+              console.log(err);
+              return;
+            }
+
+
+            //console.log(takeoff);
+          const sql = `
+            INSERT INTO invoices (qb_number, invoice_number, takeoff_id, total, due_date, created_at, hash) VALUES ?
+            ON DUPLICATE KEY UPDATE
+            qb_number = VALUES(qb_number),
+            takeoff_id = VALUES(takeoff_id),
+            total = VALUES(total),
+            due_date = VALUES(due_date),
+            created_at = VALUES(created_at),
+            hash = VALUES(hash);
+          `;
+          const values = [[
+            invoice.DocNumber,
+            Math.floor(Math.random() * 1000000),
+            takeoff.takeoff_id,
+            total,
+            invoice.DueDate,
+            invoice.TxnDate,
+            crypto.createHash('md5').update(JSON.stringify(invoice)).digest('hex'),
+          ]];
+
+          db.query(sql, [values], (err) => {
+            if (err) {
+              console.error('Error inserting invoice into database:', err);
+
+              console.log("takeoff_id", takeoff);
+              return;
+            }
+            console.log('Invoice synced successfully.');
+          });
+
+        });
+        }
+      }
+      );
+      
+
+      res.send('<!DOCTYPE html><html lang="en"><head></head><body><script>window.opener.location.reload(); window.close();</script></body></html>');
     } catch (error) {
       console.error('Error during callback:', error);
       res.status(500).send('Callback error');
     }
   });
+  // app.get('/callback', async (req, res) => {
+  //   try {
+  //     const authResponse = await oauthClient.createToken(req.url);
+  //     //oauth2_token_json = JSON.stringify(authResponse.json, null, 2);
+
+  //     // Start syncing customers after authentication
+  //     await syncCustomers();
+
+  //     qbo = new Quickbooks(creds.quickbooks.consumerKey,
+  //       creds.quickbooks.consumerSecret,
+  //       oauthClient.getToken().accessToken,
+  //       null, // no token secret for oAuth 2.0
+  //       oauthClient.getToken().realmId,
+  //       true, // use the sandbox?
+  //       true, // enable debugging?
+  //       '75', // set minorversion, or null for the latest version
+  //       '2.0', //oAuth version
+  //       oauthClient.getToken().refreshToken);
+
+  //       // test request
+  //       qbo.findCustomers({ maxResults: 5 }, function (err, customers) {
+  //         console.log(customers);
+  //       });
+
+
+  //     res.send('Callback success. Customers syncing...');
+  //   } catch (error) {
+  //     console.error('Error during callback:', error);
+  //     res.status(500).send('Callback error');
+  //   }
+  // });
 
   app.post("/pushInvoiceToQuickbooks", async (req, res) => {
     console.log("pushInvoiceToQuickbooks");
@@ -333,10 +427,31 @@ module.exports = function (app) {
 
   app.post('/webhook', async (req, res) => {
 
+
+    
+
     let payload = req.body;
     console.log('Webhook payload:', payload);
 
     // Verify the signature given by creds.quickbooks.webhooksVerifier
+
+    if (oauthClient.isAccessTokenValid()) {
+      console.log('The access_token is valid');
+    }
+    
+    if (!oauthClient.isAccessTokenValid()) {
+      oauthClient
+        .refresh()
+        .then(function (authResponse) {
+          console.log('Tokens refreshed : ' + JSON.stringify(authResponse.getToken()));
+        })
+        .catch(function (e) {
+          console.error('The error message is :' + e.originalMessage);
+          console.error(e.intuit_tid);
+        });
+    }
+
+  
    
     
     for (var i = 0; i < payload.eventNotifications.length; i++) {

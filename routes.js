@@ -1969,7 +1969,7 @@ module.exports = function (app) {
         } else {
           console.log("invoice is ", invoice);
           console.log()
-          db.invoicePayed(invoice.takeoff_id, invoice.invoice_id, raw_amount, function (err) {
+          db.invoicePaid(invoice.takeoff_id, invoice.invoice_id, raw_amount, function (err) {
             if (err) {
               console.log(err);
             } else {
@@ -2325,8 +2325,10 @@ module.exports = function (app) {
 
             if (invoice.status == 1) {
               // if the invoice is paid, render message the invoice is paid
+              console.log(invoice);
               res.render("paidInvoice.html", {
-                message: "This invoice has been paid."
+                message: "This invoice has been paid.",
+                invoice: invoice
               });
             } else {
               console.log(invoice[0])

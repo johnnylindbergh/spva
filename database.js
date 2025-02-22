@@ -2388,6 +2388,18 @@ module.exports = {
     );
   },
 
+  getTakeoffByCustomerID: function (customer_id, callback) {
+    con.query(
+      queries.getTakeoffByCustomerID,
+      [customer_id],
+      function (err, takeoff) {
+        if (err) return callback(err);
+        callback(null, takeoff[0]);
+      }
+    );
+  }
+  ,
+
   //    db.getTakeoffTotal(takeoff_id, function (err, takeoff, total) {
   // get the raw pretax total excluding options
   getTakeoffTotal: function (takeoff_id, callback) {
@@ -2607,13 +2619,13 @@ module.exports = {
     );
   },
 
-  invoicePayed: function (takeoff_id, invoice_id, amount, callback) {
-    console.log("invoice payed id: ", invoice_id);
+  invoicePaid: function (takeoff_id, invoice_id, amount, callback) {
+    console.log("invoice paid id: ", invoice_id);
     // get the invoice 
     // check if the takeoff_id matches
     // check if the amount matches
-    // check if the invoice is not already payed
-    // update the invoice to payed
+    // check if the invoice is not already paid
+    // update the invoice to paid
     // insert the payment into the payment_history table
 
     con.query(
@@ -2624,7 +2636,7 @@ module.exports = {
         let invoice_total = invoice[0].total;
 
         if (invoice.status == 1) {
-          return callback("Invoice is already payed");
+          return callback("Invoice is already paid");
         }
 
         con.query(
