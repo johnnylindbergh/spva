@@ -1,5 +1,5 @@
 # spva-track
-A simple project tracking web application.
+A simple business tracking application.
 
 ## Installation
 1. Clone the repository: `git clone https://github.com/johnylindbergh/fsc-track.git`
