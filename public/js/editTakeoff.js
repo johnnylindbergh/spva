@@ -485,7 +485,6 @@ function loadTakeoffMaterials(id) {
       let headerRow = $("<tr></tr>");
       headerRow.append("<th></th>");
       headerRow.append("<th>Applied</th>");
-      headerRow.append("<th>Separate <br> Line item</th>");
       headerRow.append("<th>Name</th>");
       headerRow.append("<th>Measurement</th>");
       headerRow.append("<th>Labor Cost</th>");
