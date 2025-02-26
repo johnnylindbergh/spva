@@ -12,6 +12,12 @@ let material_markup = 0;
 let supervisor_markup = 0;
 let travel_extra = 0;
 let touchups_cost = 0;
+let tax = 0;
+let profit = 0;
+
+// a dic that will hold the paint order
+// materialId, materialName, numberOfGallons
+let paintOrder = [];
 
 
 
@@ -145,7 +151,12 @@ function add_subject(id) {
 
 function closeDropdown() {
   let dropdown = $("#materialLibrary");
+
+  let scrollPos = $(window).scrollTop(); // Store current scroll position
   dropdown.toggle();
+  setTimeout(function () {
+    $(window).scrollTop(scrollPos); // Restore scroll position
+  }, 200);
 }
 
 function add_material(id) {
@@ -160,7 +171,7 @@ function add_material(id) {
   }
   setTimeout(function () {
     $(window).scrollTop(scrollPos); // Restore scroll position
-  }, 2000);
+  }, 150);
 
 }
 
@@ -197,11 +208,9 @@ function add_material_subject() {
           "Material added to subject: " + material_id + " " + subject_id
         );
         // wait 0.5 seconds and then call loadTakeoffMaterials
-        let scrollPos = $(window).scrollTop(); // Store current scroll position
         setTimeout(function () {
           loadTakeoffMaterials(takeoff_id);
-        }, 200);
-        $(window).scrollTop(scrollPos); // Restore scroll position
+        }, 150);
       })
       .fail(function () {
         console.log("Failed to add material to subject: " + material_id);
@@ -489,6 +498,44 @@ const debounceUpdateProfit = debounce(function (value) {
 }, 500);
 
 
+function updateTaxHelper(value) {
+  tax = value;
+  $('#taxValue').text(tax + "%");
+  debounceUpdateTax(value);
+}
+
+const debounceUpdateTax = debounce(function (value) {
+  updateTax(value);
+} , 500);
+
+function updateTax(value) {
+  tax = value;
+  console.log("Changing tax to: " + tax);
+  $("#tax").val(parseFloat(value));
+  $.post("/change-tax", { takeoff_id: takeoff_id, tax: tax })
+    .done(function () {
+      console.log("Tax updated: " + tax);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      XSAlert({
+        title: 'Error',
+        message: 'Cannot modify signed takeoff',
+        icon: 'error',
+        hideCancelButton: true
+      }).then((result) => {
+        
+        console.log('clicked');
+        // go back one page
+        //window.history.back();
+        console.log("i gonna edit it anyway")
+      }
+      );
+    });
+}
+
+
+
 
 
 
@@ -515,6 +562,8 @@ function loadTakeoffMaterials(id) {
       travel_extra = parseFloat(data.takeoff[0].travel_cost);
       touchups_cost = parseFloat(data.takeoff[0].touchups_cost);
       profit = parseFloat(data.takeoff[0].profit);
+      tax = parseFloat(data.takeoff[0].tax);
+      paintOrder = [];
 
 
 
@@ -754,6 +803,24 @@ function loadTakeoffMaterials(id) {
                 subsum += newCost * Math.ceil((adjustedMeasurement) / coverage); // not divided by coverage
               }
 
+              // update the paint order
+
+              let paintOrderIndex = paintOrder.findIndex(
+                (x) => x.materialId === material.id
+              );
+
+              if (paintOrderIndex === -1) {
+                paintOrder.push({
+                  materialId: material.id,
+                  materialName: material.name,
+                  numberOfGallons: Math.ceil(adjustedMeasurement / coverage),
+                });
+              } else {
+                paintOrder[paintOrderIndex].numberOfGallons += Math.ceil(
+                  adjustedMeasurement / coverage
+                );
+              }
+
 
 
           
@@ -825,6 +892,11 @@ function loadTakeoffMaterials(id) {
         adjustedTotal = adjustedTotal * (1 + (parseFloat(profit)/100));
       }
 
+      if (tax != 0 && tax != null) {
+        adjustedTotal = adjustedTotal * (1 + (parseFloat(tax)/100));
+      }
+
+
       if (isNaN(adjustedTotal) || !isFinite(adjustedTotal)) {
         console.log("Total is NaN or Infinite");
         adjustedTotal = 0; // Reset total to 0 if invalid
@@ -846,9 +918,9 @@ function loadTakeoffMaterials(id) {
 
       $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialTotal.toFixed(2)));
 
-      $(window).scrollTop(scrollPos); // Restore scroll position
 
-    
+
+      renderPaintOrder(paintOrder);
       //now post the new sums to /updateTakeoffTotal
       $.post("/updateTakeoffTotal", {
         takeoff_id: takeoff_id,
@@ -963,6 +1035,24 @@ function priceChange(id) {
     loadTakeoffMaterials(takeoff_id);
   }, 500);
 }
+
+function renderPaintOrder(paintOrder) {
+  let paintOrderTable = $("#paintOrderTable");
+  paintOrderTable.empty();
+
+  // append the headers
+  let headerRow = $("<tr></tr>");
+  headerRow.append("<th>Material</th>");
+  headerRow.append("<th>Gallons</th>");
+  paintOrderTable.append(headerRow);
+  paintOrder.forEach((row) => {
+    let newRow = $("<tr></tr>");
+    newRow.append("<td>" + row.materialName + "</td>");
+    newRow.append("<td>" + row.numberOfGallons +" gal"+ "</td>");
+    paintOrderTable.append(newRow);
+  });
+}
+
 
 
 function createSubjectIntent() {

@@ -110,11 +110,13 @@ button:active { background-color:
   }
 }
 
-table {
+.table {
+  width: 80%;
   border-collapse: collapse;
   border-spacing: 0;
   padding: 1px;
-  margin-left: 35px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 td {
@@ -232,7 +234,7 @@ input:checked + .slider {
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px # #share-with-customer {
+  box-shadow: 0 0 1px;
     /* button style blue */
     background-color: #0893A1;
     color: white;
@@ -259,7 +261,7 @@ input:focus + .slider {
 #push-to-quickbooks:hover {
     background-color: #0893A1;
 };
-}
+
 
 input:checked + .slider:before {
   -webkit-transform: translateX(26px);

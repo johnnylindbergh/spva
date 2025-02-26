@@ -725,6 +725,32 @@ module.exports = function (app) {
     });
   }
   );
+
+
+  app.post("/change-tax", mid.isAdmin, function (req, res) {
+    console.log("changing tax ", req.body);
+    db.takeoffGetStatus(req.body.takeoff_id, function (err, status) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving takeoff status");
+      } else {
+        if (status < 4) {
+          db.changeTax(req.body.takeoff_id, req.body.tax, function (err) {
+            if (err) {
+              console.log(err);
+              res.status(500).send("Error updating tax");
+            } else {
+              console.log("updated tax");
+              res.end();
+            }
+          });
+        } else {
+          console.log("Takeoff is signed, cannot change tax");
+          res.status(500).send("Takeoff is signed, cannot change tax");
+        }
+      }
+    });
+  });
   
   app.post("/updateTakeoffTotal", mid.isAdmin, function (req, res) {
     //console.log("updating takeoff total ", req.body);

@@ -213,7 +213,7 @@ function populatePaymentHistoryTable(takeoff_id) {
         //console.log(takeoff);
 
         if (takeoff.takeoff_status >= 4) {
-            estimateInfo.innerHTML = `<i style="color:green;" class="fas fa-check-circle"></i> Estimate signed at ${new Date(estimate.signed_at).toLocaleString("en-US")}`;
+            estimateInfo.innerHTML = `<i style="color:green;" class="fas fa-check-circle"></i> Estimate signed at ${estimate.signed_at}`;
             // add option to view estimate
             estimateInfo.innerHTML += ` <a style="text-decoration: none;" href="/viewEstimate/?takeoff_id=${takeoff.takeoff_id}">View Estimate</a>`;
 

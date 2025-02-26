@@ -1126,6 +1126,18 @@ module.exports = {
     );
   },
 
+  changeTax: function(takeoff_id, tax, callback) {
+    console.log("change tax: ", tax);
+    con.query(
+      "UPDATE takeoffs SET tax = ? WHERE id = ?;",
+      [tax, takeoff_id],
+      function(err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
 
   getAllSystemSettings: function (callback) {
     con.query("SELECT * FROM system_settings;", function (err, settings) {
@@ -1918,7 +1930,7 @@ module.exports = {
 
             // also update the signed_at date
             con.query(
-              "UPDATE takeoffs SET signed_at = ? WHERE id = ?;",
+              "UPDATE takeoffs SET signed_at = NOW() WHERE id = ?;",
               [date, takeoff_id],
               function (err) {
                 if (err) return callback(err);
@@ -2575,7 +2587,7 @@ module.exports = {
     );
   },
 
-  
+
   // used by client to get the invoice, thus the view is counted
   getSharedInvoice: function (hash, callback) {
     con.query(

@@ -76,15 +76,18 @@
     </br>
        
   
-        Phone Number: <input type="tel" id="customerPhone" class="input-field" value="{{takeoff.customer_phone}}" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
-             <br>
-    
-        Email:<input type="email" id="email" class="input-field" value="{{takeoff.customer_primary_email_address}}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required> 
+    <div class="customer-section">
+        <h3>Additional Information</h3>
+        <label for="customerPhone">Phone Number:</label>
+        <input type="tel" id="customerPhone" class="input-field" value="{{takeoff.customer_phone}}" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
         <br>
-
-        Preferred Start Date: <input type="date" id="startDate" value="{{takeoff.takeoff_start_date}}" onchange='changeStartDate();'><br>
-</br>
-  
+        <label for="email">Email:</label>
+        <input type="email" id="email" class="input-field" value="{{takeoff.customer_primary_email_address}}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required>
+        <br>
+        <label for="startDate">Preferred Start Date:</label>
+        <input type="date" id="startDate" class="input-field" value="" onchange='changeStartDate();'>
+        <br>
+    </div>
 
     
 
@@ -95,11 +98,14 @@
         <div class="signature">
             <p><em>This budget estimate is not a contract until signed and returned to Sun Painting.</em></p> </br>
             <p>
-                <!-- <p style="float:up;">[{{takeoff.owner}}]</p> -->
-                <strong>Authorized Signature:</strong><input type="text" id="signature" value='' placeholder="{{takeoff.customer_givenName}}"><strong> &nbsp Date:</strong> <input type="date" id="signedDate"> <i class="loader" style ="margin-bottom: -10px; margin-left:2px"></i>
-                <!-- submit button that calls handleSig.. -->
-                <button class="sign-btn" onclick="handleSignatureChange()">Sign</button>
-            
+            <!-- <p style="float:up;">[{{takeoff.owner}}]</p> -->
+            <label for="signature"><strong>Authorized Signature:</strong></label>
+            <input type="text" id="signature" value='' placeholder="{{takeoff.customer_givenName}}">
+            <label for="signedDate"><strong> &nbsp Date:</strong></label>
+            <input type="date" id="signedDate">
+            <i class="loader" style="margin-bottom: -10px; margin-left:2px"></i>
+            <!-- submit button that calls handleSig.. -->
+            <button class="sign-btn" onclick="handleSignatureChange()">Sign</button>
             </p>
         </div>
 

@@ -98,17 +98,30 @@
       <span id="touchupsCostValue" style="display: inline-block; width: 50px;">${{touchups_cost}}</span>
     </br>
 
+
+     <!-- profit slider % -->
+     <label for="slider">Profit:</label>
+     <input type="range" id="profit" name="slider" min="0" max="100" value="{{profit}}"
+       oninput="updateProfitHelper(this.value)">
+     <span id="profitValue" style="display: inline-block; width: 50px;">{{profit}}%</span>
+   </br>
+
+    <!-- tax slider -->
+    <label for="slider">Tax:</label>
+    <input type="range" id="tax" name="slider" min="0" max="100" value="{{tax}}"
+      oninput="updateTaxHelper(this.value)">
+    <span id="taxValue" style="display: inline-block; width: 50px;">{{tax}}%</span>
+  </br>
+   
+    <!-- travel extra -->
+
+
       <label for="slider">Travel Extra:</label>
       <input type="number" id="travelExtra" name="travelExtra" value="{{travel_cost}}"
         onchange="updateTravelExtra(this.value)">
     </br>
 
-    <!-- profit slider % -->
-    <label for="slider">Profit:</label>
-    <input type="range" id="profit" name="slider" min="0" max="100" value="{{profit}}"
-      oninput="updateProfitHelper(this.value)">
-    <span id="profitValue" style="display: inline-block; width: 50px;">{{profit}}%</span>
-  </br>
+   
     {{/takeoff}}
     </div>
 
@@ -159,6 +172,15 @@
 
 
 
+<br>
+  <div id = "paintOrder">
+    <table id="paintOrderTable">
+      <tr>
+      </tr>
+    </table>
+  </div>
+
+  <br>
 
   <table id="takeoff_materials_table">
 
@@ -203,7 +225,6 @@
       </button>
     </form>
   </div>
-
 
   <div id="materialLibrary" class="dropdown-content">
     <!-- close button -->

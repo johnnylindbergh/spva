@@ -66,38 +66,55 @@ function populateOptions(takeoff_id) {
             const descriptionCell = $('<td>').text(data[i].description);
             const amountCell = $('<td id= "amount">').text(data[i].cost);
             
-            const checkboxCell = $('<td >');
-            checkboxCell.css('width', '105px');
-            const includeCheckbox = $('<input>').attr('type', 'checkbox').attr('name', 'option-' + data[i].id).attr('value', 'include');
+            const radioCell = $('<td >');
+            radioCell.css('width', '105px');
+            const yesRadio = $('<input>').attr('type', 'radio').attr('name', 'option-' + data[i].id).attr('value', 'yes');
+            const noRadio = $('<input>').attr('type', 'radio').attr('name', 'option-' + data[i].id).attr('value', 'no');
             
             if (data[i].applied) {
-                includeCheckbox.prop('checked', true);
+                yesRadio.prop('checked', true);
                 optionsTotal += parseFloat(data[i].cost.replace('$',''));
+            } else {
+                noRadio.prop('checked', true);
             }
             
-            includeCheckbox.on('change', function() {
-                const state = $(this).is(':checked');
+            yesRadio.on('change', function() {
+                if ($(this).is(':checked')) {
+                    $.post('/updateOptionsSelection', {
+                        takeoff_id: takeoff_id,
+                        option_id: data[i].id,
+                        applied: true
+                    }, function(response) {
+                        console.log('Radio button updated:', response);
+                        populateOptions(takeoff_id);
+                        optionsTouched = true;
+                    });
+                }
+            });
 
-                $.post('/updateOptionsSelection', {
-                    takeoff_id: takeoff_id,
-                    option_id: data[i].id,
-                    applied: state
-                }, function(response) {
-                    console.log('Checkbox updated:', response);
-                    populateOptions(takeoff_id);
-                    optionsTouched = true;
-                });
-        
+            noRadio.on('change', function() {
+                if ($(this).is(':checked')) {
+                    $.post('/updateOptionsSelection', {
+                        takeoff_id: takeoff_id,
+                        option_id: data[i].id,
+                        applied: false
+                    }, function(response) {
+                        console.log('Radio button updated:', response);
+                        populateOptions(takeoff_id);
+                        optionsTouched = true;
+                    });
+                }
             });
 
             if (!mutable) {
-                includeCheckbox.prop('disabled', true);
+                yesRadio.prop('disabled', true);
+                noRadio.prop('disabled', true);
             }
             
-            checkboxCell.append(includeCheckbox).append(' Yes ');
+            radioCell.append(yesRadio).append(' Yes ').append(noRadio).append(' No ');
             newRow.append(descriptionCell);
             newRow.append(amountCell);
-            newRow.append(checkboxCell);
+            newRow.append(radioCell);
             table.append(newRow);
 
             descriptionCell.on('focusout', function() {
@@ -153,6 +170,12 @@ function handleSignatureChange() {
 
     const signatureInput = $('#signature').val();
     const dateInput = $('#signedDate').val();
+    const prefferedStartDate = $('#startDate').val();
+
+    if(prefferedStartDate === '' || prefferedStartDate === null) {
+        alert('Please provide a start date');
+        return;
+    }
 
     if (signatureInput === '') {
         alert('Please provide a signature');
@@ -163,6 +186,8 @@ function handleSignatureChange() {
         alert('Please provide a date');
         return;
     }
+
+    
 
     const data = {
         takeoff_id: parseInt($('#takeoff_id').val()),

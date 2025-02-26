@@ -114,9 +114,10 @@ CREATE TABLE takeoffs (
   touchups_cost DECIMAL(10,2) DEFAULT 0.30,
   supervisor_markup DECIMAL(10,2) DEFAULT 0.03,
   profit DECIMAL(10,2) DEFAULT 0.00,
+  misc_materials_cost DECIMAL(10,2) DEFAULT 0.00,
   payment_method VARCHAR(64),
   duration_hours INT,
-  start_date TIMESTAMP,
+  start_date DATETIME,
   end_date DATETIME,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -220,12 +221,40 @@ CREATE TABLE change_orders (
   hash VARCHAR(64),
   status TINYINT(1) DEFAULT 0,
   change_order_total DECIMAL(10,2),
+  payment_confirmation_email_sent TINYINT(1) DEFAULT 0,
+  due_date TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_viewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  view_count INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
 );
 
 INSERT INTO change_orders (takeoff_id, name, description, qb_number, co_number, hash, change_order_total) VALUES (1, 'Change Order 1', 'Description 1', 1234, 1, 'hash1', 2000.00);
+
+-- stores the relationship between invoices and change orders
+-- an invoice can have multiple change orders
+CREATE TABLE invoice_change_orders (
+  id INT NOT NULL AUTO_INCREMENT,
+  invoice_id INT NOT NULL,
+  change_order_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+  FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
+);
+
+CREATE TABLE change_order_items (
+  id INT NOT NULL AUTO_INCREMENT,
+  change_order_id INT NOT NULL,
+  description TEXT,
+  cost DECIMAL(10,2),
+  quantity INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
+);
 
 CREATE TABLE change_order_items (
   id INT NOT NULL AUTO_INCREMENT,

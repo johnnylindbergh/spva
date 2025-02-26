@@ -8,9 +8,9 @@ body {
 .container {
     width: 90%;
     margin: auto;
-    padding: 20px;
+    padding: 30px;
     background-color: #ffffff;
-    padding: 20px;
+    padding: 30px;
     border: 1px solid #dddddd;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -358,14 +358,17 @@ input[type="text"]:focus, input[type="date"]:focus {
   }
 
 
-  .input-field {
+.input-field {
     display: block;
-    width: 50%;
     padding: 10px;
+    margin: 10px auto; /* Center the input field */
     border: 1px solid #ddd;
     border-radius: 5px;
     font-size: 1em;
-  }
+    width: 90%; /* Make it responsive on mobile */
+    max-width: 400px; /* Limit the maximum width */
+    box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+}
 
   /* Table styles */
     #estimate-table {
@@ -451,4 +454,14 @@ input[type="text"]:focus, input[type="date"]:focus {
             opacity: 1;
             transform: translateY(0);
         }
+    }
+
+    .customer-section {
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 80%;
     }
