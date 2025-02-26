@@ -451,6 +451,44 @@ function updateTouchupsCost(value) {
     });
 }
 
+function updateProfit(value) {
+  profit = value;
+  console.log("Changing profit to: " + profit);
+  $("#profit").val(parseFloat(value));
+  $.post("/change-profit", { takeoff_id: takeoff_id, profit: profit })
+    .done(function () {
+      console.log("Profit updated: " + profit);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      XSAlert({
+        title: 'Error',
+        message: 'Cannot modify signed takeoff',
+        icon: 'error',
+        hideCancelButton: true
+      }).then((result) => {
+
+        console.log('clicked');
+        // go back one page
+        //window.history.back();
+        console.log("i gonna edit it anyway")
+      });
+    });
+}
+
+
+// debounce the profit change
+function updateProfitHelper(value) {
+  profit = value;
+  $('#profitValue').text(profit + "%");
+  debounceUpdateProfit(value);
+}
+
+const debounceUpdateProfit = debounce(function (value) {
+  updateProfit(value);
+}, 500);
+
+
 
 
 
@@ -476,6 +514,7 @@ function loadTakeoffMaterials(id) {
       supervisor_markup = parseFloat(data.takeoff[0].supervisor_markup);
       travel_extra = parseFloat(data.takeoff[0].travel_cost);
       touchups_cost = parseFloat(data.takeoff[0].touchups_cost);
+      profit = parseFloat(data.takeoff[0].profit);
 
 
 
@@ -751,11 +790,11 @@ function loadTakeoffMaterials(id) {
 
       // if labor_markup is not 0 then adjust the labor total
       if (labor_markup != 0) {
-        laborTotalAdjusted = laborTotal * (1 + labor_markup);
+        laborTotalAdjusted = laborTotal * (1 + parseFloat(labor_markup));
       }
 
       if (material_markup != 0) {
-        materialTotal = materialTotal * (1 + material_markup);
+        materialTotal = materialTotal * (1 + parseFloat(material_markup));
       }
 
 
@@ -763,7 +802,14 @@ function loadTakeoffMaterials(id) {
       let adjustedTotal = laborTotalAdjusted + materialTotal;
 
 
-      if (supervisor_markup != 0) {
+
+      if (isNaN(adjustedTotal) || !isFinite(adjustedTotal)) {
+        console.log("Total is NaN or Infinite");
+        adjustedTotal = 0; // Reset total to 0 if invalid
+      }
+
+
+      if (supervisor_markup != 0 || supervisor_markup != null) {
         adjustedTotal = adjustedTotal * (1 + supervisor_markup);
       }
 
@@ -774,6 +820,17 @@ function loadTakeoffMaterials(id) {
       if (touchups_cost != 0 && touchups_cost != null) {
         adjustedTotal = adjustedTotal + touchups_cost;
       }
+
+      if (profit != 0 && profit != null) {
+        adjustedTotal = adjustedTotal * (1 + (parseFloat(profit)/100));
+      }
+
+      if (isNaN(adjustedTotal) || !isFinite(adjustedTotal)) {
+        console.log("Total is NaN or Infinite");
+        adjustedTotal = 0; // Reset total to 0 if invalid
+      }
+
+      
       // Update total sum
       $("#sum").text("Total Cost: $" + numberWithCommas((adjustedTotal).toFixed(2)));
 
@@ -781,7 +838,7 @@ function loadTakeoffMaterials(id) {
       if (laborTotalAdjusted) {
         $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)));
         // make it red 
-        $("#laborTotal").css("color", "red");
+       // $("#laborTotal").css("color", "red");
       } else {
         $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotal.toFixed(2)));
 
@@ -791,6 +848,7 @@ function loadTakeoffMaterials(id) {
 
       $(window).scrollTop(scrollPos); // Restore scroll position
 
+    
       //now post the new sums to /updateTakeoffTotal
       $.post("/updateTakeoffTotal", {
         takeoff_id: takeoff_id,

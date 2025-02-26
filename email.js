@@ -170,6 +170,13 @@ async function sendPaymentConfirmationEmail(req, res, takeoff_id, invoice_id, ca
             callback("could not get invoice by id", null);
           } else {
             console.log(invoice);
+
+            if (invoice.payment_confirmation_email_sent) {
+              console.log("Email already sent");
+              callback("Email already sent", null);
+              return;
+            }
+
             if (invoice.invoice_hash) {
               const mailOptions = {
                 from: credentials.serverEmail,
@@ -194,6 +201,17 @@ async function sendPaymentConfirmationEmail(req, res, takeoff_id, invoice_id, ca
                   callback(null, info.response);
                 }
               });
+
+              //update the invoice.payment_confirmation_email_sent to true
+              db.updateInvoicePaymentConfirmationEmailSent(invoice_id, (err, result) => {
+                if (err) {
+                  console.log(err);
+                  callback(err, null);
+                } else {
+                  console.log("invoice.payment_confirmation_email_sent updated");
+                }
+              }
+              );
             } else {
               console.log("Some info is missing from this invoice invoice.hash");
               callback("Some info is missing from this invoice invoice.hash", null);

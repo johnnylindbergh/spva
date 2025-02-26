@@ -102,6 +102,13 @@
       <input type="number" id="travelExtra" name="travelExtra" value="{{travel_cost}}"
         onchange="updateTravelExtra(this.value)">
     </br>
+
+    <!-- profit slider % -->
+    <label for="slider">Profit:</label>
+    <input type="range" id="profit" name="slider" min="0" max="100" value="{{profit}}"
+      oninput="updateProfitHelper(this.value)">
+    <span id="profitValue" style="display: inline-block; width: 50px;">{{profit}}%</span>
+  </br>
     {{/takeoff}}
     </div>
 

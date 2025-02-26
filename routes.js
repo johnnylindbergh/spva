@@ -700,6 +700,32 @@ module.exports = function (app) {
     });
   });
 
+  app.post("/change-profit", mid.isAdmin, function (req, res) {
+    console.log("changing profit ", req.body);
+    db.takeoffGetStatus(req.body.takeoff_id, function (err, status) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving takeoff status");
+      } else {
+        if (status < 4) {
+          db.changeProfit(req.body.takeoff_id, req.body.profit, function (err) {
+            if (err) {
+              console.log(err);
+              res.status(500).send("Error updating profit");
+            } else {
+              console.log("updated profit");
+              res.end();
+            }
+          });
+        } else {
+          console.log("Takeoff is signed, cannot change profit");
+          res.status(500).send("Takeoff is signed, cannot change profit");
+        }
+      }
+    });
+  }
+  );
+  
   app.post("/updateTakeoffTotal", mid.isAdmin, function (req, res) {
     //console.log("updating takeoff total ", req.body);
     db.updateTakeoffTotal(req.body.takeoff_id, req.body.total, req.body.materialTotal, req.body.laborTotal, function (err) {

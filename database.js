@@ -1114,6 +1114,18 @@ module.exports = {
     );
   },
 
+  changeProfit: function (takeoff_id, profit, callback) {
+    console.log("change profit: ", profit);
+    con.query(
+      "UPDATE takeoffs SET profit = ? WHERE id = ?;",
+      [profit, takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
 
   getAllSystemSettings: function (callback) {
     con.query("SELECT * FROM system_settings;", function (err, settings) {
@@ -2551,6 +2563,19 @@ module.exports = {
     );
   },
 
+  // updates the invoice to payment_confirmation_email_sent = true to prevent multiple emails from being sent
+  updateInvoicePaymentConfirmationEmailSent: function (invoice_id, callback) {
+    con.query(
+      "UPDATE invoices SET payment_confirmation_email_sent = 1 WHERE id = ?;",
+      [invoice_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
+  
   // used by client to get the invoice, thus the view is counted
   getSharedInvoice: function (hash, callback) {
     con.query(
