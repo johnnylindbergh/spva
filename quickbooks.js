@@ -472,10 +472,17 @@ module.exports = function (app) {
         if (operation === 'Create' || operation === 'Update') {
           if (entityType === 'Customer') {
             let customerID = entity.id;
-            let customer = await oauthClient.makeApiCall({
-              url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${realmId}/customer/${customerID}`,
-            });
-            console.log('Customer:', customer.json.Customer);
+            qbo.findCustomers({field:'Id',value:entity.id,operator:'LIKE'}, function (e, customers) {
+              if (e) {
+                console.log(e);
+              } else {
+                console.log('Customer:', customers);
+
+                req.end();
+              }
+            }
+            );
+           // console.log('Customer:', customers.json.Customer);
           } else if (entityType === 'Invoice') {
             let invoiceID = entity.id;
             // first check if the oauthClient is initialized
