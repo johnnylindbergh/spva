@@ -40,7 +40,7 @@ function populateExclusions(exclusions) {
     exclusionsList.empty(); // Clear any existing content
 
     exclusionsList.html(formatTextToHTML(exclusions));
-    $('#excludes-total').text("$0.00"); 
+   // $('#excludes-total').text("$0.00"); 
 }
 
 var optionsTouched = false;
@@ -49,22 +49,27 @@ function populateOptions(takeoff_id) {
     // Use the global optionsTotal variable
     optionsTotal = 0;
 
-    $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
+    $.post('/loadOptions', {takeoff_id: takeoff_id}, function(response) {
         
-        var mutable = data.mutable;
+        var mutable = response.mutable;
         if (!mutable) {
             $('.signature').toggle();
             $('.signature-success').toggle();
             $('#options-table').find('input').prop('disabled', true);
         }
 
-        data = data.options;
+
+        console.log(response);
+        let data = response.options;
+
+        materialTax = parseFloat(response.optionsMaterialTax);
+        $('#optionsTax').text("Options Tax: $" + materialTax.toFixed(2));
         const table = $('#options-table');
         table.empty(); // Clear any existing content
         for (let i = 0; i < data.length; i++) {
             const newRow = $('<tr>').attr('data-row-id', data[i].id);
             const descriptionCell = $('<td>').text(data[i].description);
-            const amountCell = $('<td id= "amount">').text(data[i].cost);
+            const amountCell = $('<td id= "amount">').text("$"+data[i].total_cost);
             
             const radioCell = $('<td >');
             radioCell.css('width', '105px');
@@ -73,7 +78,7 @@ function populateOptions(takeoff_id) {
             
             if (data[i].applied) {
                 yesRadio.prop('checked', true);
-                optionsTotal += parseFloat(data[i].cost.replace('$',''));
+                optionsTotal += parseFloat(data[i].total_cost.replace('$',''));
             } else {
                 noRadio.prop('checked', true);
             }
@@ -126,6 +131,7 @@ function populateOptions(takeoff_id) {
         }
 
         $('#options-total').text("Options: $" + optionsTotal.toFixed(2));
+        $('materialTax').text("Tax: $" + materialTax.toFixed(2));
 
         updateTotals();
     });

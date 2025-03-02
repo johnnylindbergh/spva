@@ -1327,12 +1327,12 @@ module.exports = function (app) {
 
   app.post("/loadOptions", function (req, res) {
     console.log("loading options for takeoff ", req.body.takeoff_id);
-    db.getOptions(req.body.takeoff_id, function (err, options, mutable) {
+    db.getOptions(req.body.takeoff_id, function (err, options, mutable, optionsMaterialTax) {
       if (err) {
         console.log(err);
       }
-      
-      res.send({ options: options, mutable: mutable });
+
+      res.send({ options: options, mutable: mutable, optionsMaterialTax: optionsMaterialTax });
     });
   });
 
@@ -1399,6 +1399,16 @@ module.exports = function (app) {
           } else {
 
             let materialTax = parseFloat(takeoff.material_total) * (1.00 + parseFloat(takeoff.material_markup)) * (parseFloat(takeoff.takeoff_tax/100)); // calulate the tax for just materials
+            
+
+            // compute the options tax
+
+            for (var i = 0; i < options.length; i++) {
+              if (options[i].applied == 1) {
+                materialTax += parseFloat(options[i].material_cost) * (1.00 + parseFloat(takeoff.material_markup)) * (parseFloat(takeoff.takeoff_tax/100));
+              }
+            }
+
             console.log("Material tax: ", materialTax);
             res.render("viewEstimateClient.html", {
               takeoff: takeoff,

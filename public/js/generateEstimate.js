@@ -1,3 +1,5 @@
+// const { t } = require("i18next");
+
 const takeoff_data = [];
 
 function updateTakeoffOwnerEmailAddress(){
@@ -76,7 +78,7 @@ function populateExclusions(exclusions) {
     exclusionsList.html(formatTextToHTML(exclusions));
 
 
-    $('#excludes-total').text("$0.00"); 
+   // $('#excludes-total').text("$0.00"); 
 }
 
 
@@ -108,6 +110,13 @@ function populateExclusions(exclusions) {
 function populateOptions(takeoff_id) {   
     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
         data = data.options;
+
+        if (data.length === 0) {
+            console.log('No options found for takeoff:', takeoff_id);
+            const table = $('#options-table');
+            table.empty(); // Clear the table before populating it with new data
+            table.append('<tr><td>No options found.</td></tr>');
+        }
         const table = $('#options-table');
         table.empty(); // Clear the table before populating it with new data
 

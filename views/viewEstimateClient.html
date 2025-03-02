@@ -52,9 +52,11 @@
                 <td class="editable" id="exclusions">
                     <ul id="exclusions-list"></ul>
                 </td>
-                <td id="excludes-total">${{exclude_total}}</td>
+                <td id="excludes-total"></td>
             </tr>
         </table>
+    </br>
+    </br>
         <table id="options-table">
             <tr>
                 <th>Description</th>
@@ -67,7 +69,9 @@
         <div class="total" style="text-align: right;" >
             <h3 class="total" id = "subtotal"></h3>
             <h3 class="total" id = "options-total"></h3>
-            <h3 class="total" id = "materialTax">{{materialTax}}</h3>
+            <h3 class="total" id = "optionsTax"></h3>
+            <h3 class="total" id = "materialTax">Material Tax: ${{materialTax}}</h3>
+
             <h2 class="total" id = "total"></h2>
 
             <!-- <h3 class="total" id = "total" onchange="updateTotal()">$</h3> </br> -->

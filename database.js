@@ -1661,11 +1661,27 @@ module.exports = {
           [takeoff_id],
           function (err, status) {
             if (err) return callback(err);
+
+            let materialTax = 0;
+
+              for (let i = 0; i < options.length; i++) {
+                if (options[i].applied){
+                  materialTax += options[i].material_cost * 0.053;
+
+                }
+              }
+            
             // if the status is 4, the takeoff is signed and the options should be locked
             if (status[0].status == 4) {
-              return callback(null, options, false); // the third parameter is a boolean that indicates whether the options are mutable
+
+              // compute the selected options material tax
+              // the material_cost has already been taxed 5.3% so do the math to get the tax alone
+
+              
+             
+              return callback(null, options, false, materialTax); // the third parameter is a boolean that indicates whether the options are mutable
             } else {
-              return callback(null, options, true);
+              return callback(null, options, true, materialTax);
             }
           }
         );
@@ -1683,8 +1699,8 @@ module.exports = {
     } else {
 
       // add 5.3% to the material cost
-      material_cost = material_cost * 1.053;
-      let optionTotal = material_cost + labor_cost;
+      material_cost = parseFloat(material_cost) * 1.053;
+      let optionTotal = parseFloat(material_cost) + parseFloat(labor_cost);
 
       con.query(
         "INSERT INTO options (takeoff_id, description, material_cost, labor_cost, total_cost) VALUES (?,?,?,?,?); SELECT LAST_INSERT_ID() as last;",
