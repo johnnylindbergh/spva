@@ -159,10 +159,16 @@ function populatePaymentHistoryTable(takeoff_id) {
         optionsHeaderCell0.textContent = 'Name';
 
         const optionsHeaderCell1 = optionsHeaderRow.insertCell(1);
-        optionsHeaderCell1.textContent = 'Total';
+        optionsHeaderCell1.textContent = 'Material Cost';
 
         const optionsHeaderCell2 = optionsHeaderRow.insertCell(2);
-        optionsHeaderCell2.textContent = 'Status';
+        optionsHeaderCell2.textContent = 'Labor Cost';
+
+        const optionsHeaderCell3 = optionsHeaderRow.insertCell(3);
+        optionsHeaderCell3.textContent = 'Total';
+
+        const optionsHeaderCell4 = optionsHeaderRow.insertCell(4);
+        optionsHeaderCell4.textContent = 'Status';
 
         
         options.forEach(option => {
@@ -175,19 +181,26 @@ function populatePaymentHistoryTable(takeoff_id) {
             //     cell0.style.fontWeight = 'bold';
             // }
             const cell1 = row.insertCell(1);
-            cell1.textContent = "$"+ option.cost;
+            cell1.textContent = "$"+ option.material_cost;
+
             const cell2 = row.insertCell(2);
+            cell2.textContent = "$"+ option.labor_cost;
+
+            const cell3 = row.insertCell(3);
+            cell3.textContent = "$"+ (parseFloat(option.labor_cost) + parseFloat(option.material_cost)).toFixed(2);
+
+            const cell4 = row.insertCell(4);
             if (option.applied == 0) {
                 // add a yellow ! icon
-                cell2.innerHTML = ' <i style="color:brown;" class="fas fa-poop"></i>';
+                cell4.innerHTML = ' <i style="color:brown;" class="fa-solid fa-xmark"></i>';
             }
             else if (option.applied == 1) {
                // green circle check icon
-                cell2.innerHTML = `<i style="color:green;" class="fas fa-check-circle"></i>`;
+                cell4.innerHTML = `<i style="color:green;" class="fas fa-check-circle"></i>`;
 
             } else if (option.Status == 2) {
                 // add red exclamation icon
-                cell2.innerHTML = ` <i style="color:red;" class="fas fa-circle-exclamation"></i>`;
+                cell4.innerHTML = ` <i style="color:red;" class="fas fa-circle-exclamation"></i>`;
             }
  
             

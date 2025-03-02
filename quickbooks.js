@@ -222,7 +222,7 @@ module.exports = function (app) {
                            '75', // minorversion
                            '2.0', // OAuth version
                            authResponse.getToken().refresh_token);
-
+      await syncCustomers();
       // test out account access
       // qbo.findAccounts(function(_, accounts) {
       //   accounts.QueryResponse.Account.forEach(function(account) {
@@ -435,7 +435,7 @@ module.exports = function (app) {
 
     // Verify the signature given by creds.quickbooks.webhooksVerifier
 
-    if (oauthClient.isAccessTokenValid()) {
+    if (oauthClient && oauthClient.isAccessTokenValid()) {
       console.log('The access_token is valid');
     }
     

@@ -147,10 +147,14 @@ CREATE TABLE options (
   id INT NOT NULL AUTO_INCREMENT,
   takeoff_id INT NOT NULL,
   description TEXT,
-  cost DECIMAL(10,2),
+  labor_cost DECIMAL(10,2),
+  material_cost DECIMAL(10,2),
+  total_cost DECIMAL(10,2), -- computed server-side
+  created_by INT,
   applied TINYINT(1) DEFAULT 1,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Statements table
@@ -219,11 +223,13 @@ CREATE TABLE change_orders (
   qb_number INT,
   co_number INT,
   hash VARCHAR(64),
+  -- 0 unpaid, 1 paid, 2 due, 
   status TINYINT(1) DEFAULT 0,
+  -- client-agreement 0 not approved, 1 approved
+  co_approved TINYINT DEFAULT 0,
   change_order_total DECIMAL(10,2),
   payment_confirmation_email_sent TINYINT(1) DEFAULT 0,
   due_date TIMESTAMP,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_viewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   view_count INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -233,6 +239,18 @@ CREATE TABLE change_orders (
 
 INSERT INTO change_orders (takeoff_id, name, description, qb_number, co_number, hash, change_order_total) VALUES (1, 'Change Order 1', 'Description 1', 1234, 1, 'hash1', 2000.00);
 
+
+
+CREATE TABLE change_order_items (
+  id INT NOT NULL AUTO_INCREMENT,
+  change_order_id INT NOT NULL,
+  description TEXT,
+  cost DECIMAL(10,2),
+  quantity INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
+);
 -- stores the relationship between invoices and change orders
 -- an invoice can have multiple change orders
 CREATE TABLE invoice_change_orders (
@@ -245,27 +263,6 @@ CREATE TABLE invoice_change_orders (
   FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
 );
 
-CREATE TABLE change_order_items (
-  id INT NOT NULL AUTO_INCREMENT,
-  change_order_id INT NOT NULL,
-  description TEXT,
-  cost DECIMAL(10,2),
-  quantity INT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
-);
-
-CREATE TABLE change_order_items (
-  id INT NOT NULL AUTO_INCREMENT,
-  change_order_id INT NOT NULL,
-  description TEXT,
-  cost DECIMAL(10,2),
-  quantity INT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
-);
 
 INSERT INTO change_order_items (change_order_id, description, cost, quantity) VALUES (1, 'Description 1', 2000.00, 1);
 
@@ -301,6 +298,8 @@ CREATE TABLE materials (
   labor_cost DECIMAL(10,2),
   coverage DECIMAL(10,2),
   material_type INT NOT NULL,
+  -- a hyper link to the material's datasheet
+  datasheet VARCHAR(255),
   PRIMARY KEY (id),
   FOREIGN KEY (material_type) REFERENCES material_archetypes(id) ON DELETE CASCADE
 );

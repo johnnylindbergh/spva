@@ -623,9 +623,10 @@ module.exports = {
       if (isNaN(parseFloat(primer))) {
         primer = 0;
       }
-      if (subject.toLowerCase().includes("note")) {
+      if (subject && subject.toLowerCase().includes("note")) {
         continue;
       }
+
       con.query(
         "INSERT INTO subjects (takeoff_id, subject, page_label, color, measurement, measurement_unit, top_coat, primer) VALUES (?,?,?,?,?,?,?,?);",
         [
@@ -1206,16 +1207,7 @@ module.exports = {
     );
   },
 
-  //   -- Options table
-  // CREATE TABLE options (
-  //   id INT NOT NULL AUTO_INCREMENT,
-  //   takeoff_id INT NOT NULL,
-  //   description TEXT,
-  //   cost DECIMAL(10,2),
-  //   applied TINYINT(1) DEFAULT 1,
-  //   PRIMARY KEY (id),
-  //   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
-  // );
+
 
 
   separateAlts: function (takeoff_id, callback) {
@@ -1231,7 +1223,8 @@ module.exports = {
         // except the name is the original name + " alt" + n
         // where n is the number of alts for that subject
 
-        let groupTotals = {};
+        let groupMaterialTotals = {};
+        let groupLaborTotals = {};
         let groupNames = {};
 
         for (let i = 0; i < subjects.length; i++) {
@@ -1258,17 +1251,22 @@ module.exports = {
             console.log("the optionMaterialTotal is: ", optionMaterialTotal);
             console.log("the optionLaborTotal is: ", optionLaborTotal);
 
-            if (groupTotals[group_number] == null) {
-              groupTotals[group_number] = optionMaterialTotal + optionLaborTotal;
+            if (groupMaterialTotals[group_number] == null) {
+              groupMaterialTotals[group_number] = optionMaterialTotal;
             } else {
-              groupTotals[group_number] = groupTotals[group_number] + optionMaterialTotal + optionLaborTotal;
+              groupMaterialTotals[group_number] = groupTotals[group_number] + optionMaterialTotal;
             }
+
+            if (groupLaborTotals[group_number] == null) {
+              groupLaborTotals[group_number] = optionLaborTotal;
+            } else {
+              groupLaborTotals[group_number] = groupLaborTotals[group_number] + optionLaborTotal;
+            } 
 
             if (groupNames[group_number] == null) {
               groupNames[group_number] = subject_name;
             } else {
               console.log(groupNames);
-              console.log(groupTotals);
             }
           }
         }
@@ -1281,11 +1279,12 @@ module.exports = {
           console.log("The total cost for this group is: ", groupTotals[group_number]);
 
           con.query(
-            "INSERT INTO options (takeoff_id, description, cost) VALUES (?, ?, ?);",
+            "INSERT INTO options (takeoff_id, description, material_cost, labor_cost) VALUES (?, ?, ?, ?);",
             [
               takeoff_id,
               groupNames[group_number],
-              groupTotals[group_number]
+              groupMaterialTotals[group_number],
+              groupLaborTotals[group_number]
             ],
             function (err) {
               console.log(err);
@@ -1674,17 +1673,22 @@ module.exports = {
     );
   },
 
-  addOption: function (takeoff_id, description, cost_delta, callback) {
+  addOption: function (takeoff_id, description, material_cost, labor_cost, callback) {
     // first check if the row_id is null, if it is, insert a new row
     // if it is not, update the existing row
 
     // if row exists but is now blank, delete the row
-    if (description == "" || cost_delta == null) {
+    if (description == "" || material_cost == null || labor_cost == null) {
       callback("Option or cost_delta is blank");
     } else {
+
+      // add 5.3% to the material cost
+      material_cost = material_cost * 1.053;
+      let optionTotal = material_cost + labor_cost;
+
       con.query(
-        "INSERT INTO options (takeoff_id, description, cost) VALUES (?,?,?); SELECT LAST_INSERT_ID() as last;",
-        [takeoff_id, description, cost_delta],
+        "INSERT INTO options (takeoff_id, description, material_cost, labor_cost, total_cost) VALUES (?,?,?,?,?); SELECT LAST_INSERT_ID() as last;",
+        [takeoff_id, description, material_cost, labor_cost, optionTotal],
         function (err, last) {
           if (err) return callback(err);
           callback(null, last[1][0].last);

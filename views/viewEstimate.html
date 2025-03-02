@@ -116,9 +116,10 @@
                     <form id="addOptionForm" onsubmit="postToAddOption(event)">
                         <label for="description">Description:</label>
                         <input type="text" id="description" name="description" required>
-                        <label for="optionPrice">Option Price:</label>
-                        <input type="text" id="cost_delta" name="cost_delta" required>
-                        <input type="hidden" id="takeoff_id" name="takeoff_id" value="1234">
+                        <label for="laborCost">Labor Cosr:</label>
+                        <input type="text" id="laborCost" name="laborCost" required>
+                        <label for="materialCost">Material Cost:</label>
+                        <input type="text" id="materialCost" name="materialCost" value="0">
                         <input type="submit" value="Add Option">
                     </form>
                 </div>

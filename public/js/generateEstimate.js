@@ -110,10 +110,25 @@ function populateOptions(takeoff_id) {
         data = data.options;
         const table = $('#options-table');
         table.empty(); // Clear the table before populating it with new data
+
+        // add headers
+        const headerRow = $('<tr>');
+        const deleteHeader = $('<th>').text('Delete');
+        const descriptionHeader = $('<th>').text('Description');
+        const laborCostHeader = $('<th>').text('Labor Cost');
+        const materialCostHeader = $('<th>').text('Material Cost');
+        headerRow.append(deleteHeader);
+        headerRow.append(descriptionHeader);
+        headerRow.append(laborCostHeader);
+        headerRow.append(materialCostHeader);
+        table.append(headerRow);
+        
+
         for (let i = 0; i < data.length; i++) {
             const newRow = $('<tr>').data('row_id', data[i].id); // Store row_id as data attribute
             const descriptionCell = $('<td contenteditable="false" class="editable">').text(data[i].description);
-            const amountCell = $('<td contenteditable="false" class="editable">').text(numberWithCommas(data[i].cost));
+            const laborCostCell = $('<td contenteditable="false" class="editable">').text(numberWithCommas(data[i].labor_cost));
+            const materialCostCell = $('<td contenteditable="false" class="editable">').text(numberWithCommas(data[i].material_cost));
             // delete cell with a fontawesome trashcan
             const deleteCell = $('<td>').html('<i class="fa fa-trash"></i>');
 
@@ -121,37 +136,20 @@ function populateOptions(takeoff_id) {
                 deleteOption(data[i].id);
             });
 
-                // 
-
-            // "<i class='fa fa-trash' onclick='removeMaterial(" +
-            // row.id 
-            // edit cell with a fontawesome pencil
-            // const editCell = $('<td>').html('<i class="fa fa-pencil"></i>');
-
-            // make the edit cell 15px wide
-
-            // editCell.css('width', '5px');
-
             deleteCell.css('width', '5px');
 
-            amountCell.addClass('amount-column'); // Add class to identify amount columns
+            laborCostCell.addClass('amount-column'); // Add class to identify amount columns
+            materialCostCell.addClass('amount-column'); // Add class to identify
 
-            amountCell.css('width', '100px');
 
 
             newRow.append(deleteCell);
             // newRow.append(editCell);
             newRow.append(descriptionCell);
-            newRow.append(amountCell);
+            newRow.append(laborCostCell);
+            newRow.append(materialCostCell);
             table.append(newRow);
 
-            // // Trigger post to server when editing is finished (focusout)
-            // descriptionCell.on('focusout', function() {
-            //    // postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.data('row_id'));
-            // });
-            // amountCell.on('focusout', function() {
-            //     postToAddOption(descriptionCell.text(), amountCell.text(), takeoff_id, newRow.data('row_id'));
-            // });
         }
     });
 }
@@ -165,10 +163,16 @@ function postToAddOption(event) {
     event.preventDefault(); // Prevent the default form submission behavior
     const takeoff_id = $('#takeoff_id').val();
     const description = $('#description').val();
-    let cost = $('#cost_delta').val();
-    // Clean and validate the cost input
-    cost = cost.replace(/[^0-9.-]+/g, '');
-    if (isNaN(parseFloat(cost))) {
+    let laborCost = $('#laborCost').val();
+    let materialCost = $('#materialCost').val();
+
+    // Clean and validate the cost inputs
+    laborCost = laborCost.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
+    materialCost = materialCost.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
+
+
+
+    if (isNaN(parseFloat(laborCost)) || isNaN(parseFloat(laborCost))) {
         alert('Please enter a valid number for Option Price.');
         return;
     }
@@ -176,7 +180,8 @@ function postToAddOption(event) {
     // Prepare the data to send to the server
     const data = {
         description: description,
-        cost_delta: cost, // Consistent naming with backend
+        material_cost: materialCost, // Consistent naming with backend
+        labor_cost: laborCost,
         takeoff_id: takeoff_id,
     };
 
@@ -190,7 +195,8 @@ function postToAddOption(event) {
                  
                  // empty the input fields
                     $('#description').val('');
-                    $('#cost_delta').val('');
+                    $('#laborCost').val('');
+                    $('#materialCost').val('');
                 
             }
         })
@@ -352,7 +358,8 @@ function toggleTranslateMenu() {
 
 function deleteOption(id){
     console.log("deleting option with id: ", id);
-    $.post('/deleteOption', {option_id: id}, function(data) {
+    let takeoff_id = $('#takeoff_id').val();
+    $.post('/deleteOption', {option_id: id, takeoff_id: takeoff_id}, function(data) {
         console.log(data);
         populateOptions($('#takeoff_id').val());
     })

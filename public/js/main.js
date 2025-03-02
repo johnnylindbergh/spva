@@ -47,10 +47,10 @@ $(document).ready(function () {
     const percentage = Math.min(days / maxDays, 1); // Clamp percentage between 0 and 1
 
     const gradientStops = [
-        { day: 0, color: { r: 76, g: 175, b: 80 } },  // #4CAF50 - vibrant green
+        { day: 0, color: { r: 76, g: 175, b: 80 } },  //rgba(76, 175, 79, 0.36) - vibrant green
         { day: 10, color: { r: 173, g: 204, b: 78 } }, // Slightly yellow-green
-        { day: 20, color: { r: 255, g: 193, b: 7 } },  // #FFC107 - bright yellow
-        { day: 30, color: { r: 255, g: 13, b: 13 } },  // #FF0D0D - red
+        { day: 20, color: { r: 255, g: 193, b: 7 } },  //rgba(255, 193, 7, 0.4) - bright yellow
+        { day: 30, color: { r: 255, g: 13, b: 13 } },  //rgba(255, 13, 13, 0.4) - red
     ];
 
     // Interpolate between stops

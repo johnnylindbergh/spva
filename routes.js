@@ -1299,12 +1299,14 @@ module.exports = function (app) {
   app.post("/addOption", mid.isAdmin, function (req, res) {
     console.log("Adding row to takeoff", req.body.takeoff_id);
     console.log("Getting option:", req.body.description);
-    console.log("Cost Delta:", req.body.cost_delta);
+    console.log("material Delta:", req.body.material_cost);
+    console.log("Labor Delta:", req.body.labor_cost);
 
     db.addOption(
       req.body.takeoff_id,
       req.body.description,
-      req.body.cost_delta,
+      req.body.material_cost,
+      req.body.labor_cost,
       function (err, new_row_id) {
         if (err) {
           console.error("Error adding option:", err);
@@ -1329,6 +1331,7 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
       }
+      
       res.send({ options: options, mutable: mutable });
     });
   });
@@ -2094,6 +2097,10 @@ module.exports = function (app) {
             console.log(err);
           }
 
+          if (takeoff[0] == null || takeoff[0].status < 4) {
+            console.log("takeoff not signed");
+            res.send("takeoff not signed");
+          } else {
           db.getEstimateById(takeoff[0].estimate_id, function (err, estimate) {
             if (err) {
               console.log(err);
@@ -2126,6 +2133,7 @@ module.exports = function (app) {
             }
             );
           });
+        }
         });
 
 
