@@ -21,20 +21,20 @@ let paintOrder = [];
 
 
 
-function toggleMaterial(materialId, checkbox) {
-  console.log("Material toggled: " + materialId);
+// function toggleMaterial(materialId, checkbox) {
+//   console.log("Material toggled: " + materialId);
 
-  let isChecked = checkbox.checked ? 1 : 0;
+//   let isChecked = checkbox.checked ? 1 : 0;
 
-  $.post("/toggle-material", { material_id: materialId })
-    .done(function () {
-      console.log("Material toggled successfully: " + materialId);
-      loadTakeoffMaterials(takeoff_id);
-    })
-    .fail(function () {
-      console.log("Failed to toggle material: " + materialId);
-    });
-}
+//   $.post("/toggle-material", { material_id: materialId })
+//     .done(function () {
+//       console.log("Material toggled successfully: " + materialId);
+//       loadTakeoffMaterials(takeoff_id);
+//     })
+//     .fail(function () {
+//       console.log("Failed to toggle material: " + materialId);
+//     });
+// }
 
 
 
@@ -167,7 +167,7 @@ function add_material(id) {
   dropdown.toggle();
 
   if (material_id != null && subject_id != null) {
-    add_material_subject();
+    addMaterialSubject();
   }
   setTimeout(function () {
     $(window).scrollTop(scrollPos); // Restore scroll position
@@ -175,24 +175,54 @@ function add_material(id) {
 
 }
 
-function removeMaterial(subject_id, id) {
-  material_id = id;
+// function removeMaterial(subject_id, id) {
+//   material_id = id;
 
-  if (subject_id && id) {
-    $.post("/remove-material-subject", {
-      material_id: material_id,
-      subject_id: subject_id,
+//   if (subject_id && id) {
+//     $.post("/remove-material-subject", {
+//       material_id: material_id,
+//       subject_id: subject_id,
+//     })
+//       .done(function () {
+//         console.log(
+//           "Material removed: " + material_id + " from subject: " + subject_id
+//         );
+//         loadTakeoffMaterials(takeoff_id); // Only reload the takeoff materials table
+//       })
+//       .fail(function () {
+//         console.log("Failed to remove material from subject: " + material_id);
+//       });
+//   }
+// }
+
+function removeMaterial(sId, mId) {
+  removeMaterialSubject(sId, mId);
+
+  // push onto undo stack
+  pushUndo({
+    action: "removeMaterialSubject",
+    undoData: {
+      subjectId: sId,
+      materialId: mId
+    },
+    redoData: {
+      subjectId: sId,
+      materialId: mId
+    }
+  });
+}
+function removeMaterialSubject(sId, mId) {
+  $.post("/remove-material-subject", { 
+    material_id: mId, 
+    subject_id: sId 
+  })
+    .done(function () {
+      console.log("Material removed: " + mId + " from subject: " + sId);
+      loadTakeoffMaterials(takeoff_id);
     })
-      .done(function () {
-        console.log(
-          "Material removed: " + material_id + " from subject: " + subject_id
-        );
-        loadTakeoffMaterials(takeoff_id); // Only reload the takeoff materials table
-      })
-      .fail(function () {
-        console.log("Failed to remove material from subject: " + material_id);
-      });
-  }
+    .fail(function () {
+      console.log("Failed to remove material from subject: " + mId);
+    });
 }
 
 function add_material_subject() {
@@ -215,6 +245,31 @@ function add_material_subject() {
       .fail(function () {
         console.log("Failed to add material to subject: " + material_id);
       });
+  } else {
+    console.log("Material or subject not selected");
+    alert("Please select both a material and a subject before adding.");
+  }
+}
+
+// Now rewire your old add/remove to track undo
+function addMaterialSubject() {
+  console.log("Adding material " + material_id + " to subject " + subject_id);
+
+  if (material_id !== 0 && subject_id !== 0) {
+    add_material_subject(subject_id, material_id);
+
+    // Add to undo stack
+    pushUndo({
+      action: "addMaterialSubject",
+      undoData: {
+        subjectId: subject_id,
+        materialId: material_id
+      },
+      redoData: {
+        subjectId: subject_id,
+        materialId: material_id
+      }
+    });
   } else {
     console.log("Material or subject not selected");
     alert("Please select both a material and a subject before adding.");
@@ -825,7 +880,7 @@ function loadTakeoffMaterials(id) {
 
           
           } else {
-            console.log("No materials applied or selected_materials are nnull for some reason");
+            console.log("LoadTakeoffMaterials: No materials selected");
           }
 
           newRow.append(materialsCell);
@@ -858,6 +913,8 @@ function loadTakeoffMaterials(id) {
       // if labor_markup is not 0 then adjust the labor total
       if (labor_markup != 0) {
         laborTotalAdjusted = laborTotal * (1 + parseFloat(labor_markup));
+      } else {
+        laborTotalAdjusted = laborTotal
       }
 
       if (material_markup != 0) {
@@ -867,7 +924,8 @@ function loadTakeoffMaterials(id) {
 
 
       let adjustedTotal = laborTotalAdjusted + materialTotal;
-
+      let costOfGoodsSold = laborTotal + materialTotal;
+      
 
 
       if (isNaN(adjustedTotal) || !isFinite(adjustedTotal)) {
@@ -902,6 +960,12 @@ function loadTakeoffMaterials(id) {
         adjustedTotal = 0; // Reset total to 0 if invalid
       }
 
+
+      let grossProfit = adjustedTotal - costOfGoodsSold;
+      let grossProfitMargin = (grossProfit / adjustedTotal) * 100;
+
+      $("#grossProfit").text("Gross Profit: $" + numberWithCommas(grossProfit.toFixed(2)));
+      $("#grossProfitMargin").text("Gross Profit Margin: " + grossProfitMargin.toFixed(2) + "%");
       
       // Update total sum
       $("#sum").text("Total Cost: $" + numberWithCommas((adjustedTotal).toFixed(2)));
@@ -944,7 +1008,24 @@ function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function updateMeasurement(rowId, newMeasurement) {
+function updateMeasurement(rowId, newMeasurement, oldMeasurement) {
+  setMeasurement(rowId, newMeasurement);
+
+  // push to undo
+  pushUndo({
+    action: "updateMeasurement",
+    undoData: {
+      subjectId: rowId,
+      oldMeasurement: oldMeasurement
+    },
+    redoData: {
+      subjectId: rowId,
+      newMeasurement: newMeasurement
+    }
+  });
+}
+
+function setMeasurement(rowId, newMeasurement) {
   $.post("/update-measurement", { id: rowId, measurement: newMeasurement })
     .done(function () {
       console.log("Measurement updated for subject: " + rowId);
@@ -954,6 +1035,18 @@ function updateMeasurement(rowId, newMeasurement) {
       console.log("Failed to update measurement for subject: " + rowId);
     });
 }
+
+
+// function updateMeasurement(rowId, newMeasurement) {
+//   $.post("/update-measurement", { id: rowId, measurement: newMeasurement })
+//     .done(function () {
+//       console.log("Measurement updated for subject: " + rowId);
+//       loadTakeoffMaterials(takeoff_id);
+//     })
+//     .fail(function () {
+//       console.log("Failed to update measurement for subject: " + rowId);
+//     });
+// }
 
 function updateMeasurementUnit(rowId, newUnit) {
   console.log(
@@ -1110,6 +1203,145 @@ function createSubject(event) {
 
   return false; // Prevent any further default behavior
 }
+
+let undoStack = [];
+  let redoStack = [];
+
+  // Listen for Cmd/Ctrl+Z and Cmd/Ctrl+Shift+Z
+  window.addEventListener('keydown', function (e) {
+    let isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    let metaKeyPressed = isMac ? e.metaKey : e.ctrlKey;
+
+    if (metaKeyPressed && e.key === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      handleUndo();
+    } else if (metaKeyPressed && e.key === 'z' && e.shiftKey) {
+      e.preventDefault();
+      handleRedo();
+    }
+  });
+
+  function pushUndo(actionObj) {
+    undoStack.push(actionObj);
+    redoStack = [];
+  }
+
+  function handleUndo() {
+    if (!undoStack.length) return;
+    let lastAction = undoStack.pop();
+    // For redo we push the same action again
+    redoStack.push(lastAction);
+    revertAction(lastAction);
+  }
+
+  function handleRedo() {
+    if (!redoStack.length) return;
+    let nextAction = redoStack.pop();
+    undoStack.push(nextAction);
+    reapplyAction(nextAction);
+  }
+
+  function revertAction(actionObj) {
+    switch (actionObj.action) {
+      case 'setMaterial':
+        // revert to old value
+        setMaterialState(actionObj.undoData.materialId, actionObj.undoData.value);
+        break;
+
+      // handle other action types likewise...
+    }
+  }
+  function reapplyAction(actionObj) {
+    switch (actionObj.action) {
+  
+      case "setMaterialApplied":
+        // reapply means use the new value
+        setMaterialAppliedState(
+          actionObj.redoData.materialId,
+          actionObj.redoData.applied
+        );
+        break;
+  
+      case "setSeparateLineItem":
+        setSeparateLineItemState(
+          actionObj.redoData.materialId,
+          actionObj.redoData.takeoffId,
+          actionObj.redoData.separate
+        );
+        break;
+  
+      case "updateMeasurement":
+        setMeasurement(
+          actionObj.redoData.subjectId,
+          actionObj.redoData.newMeasurement
+        );
+        break;
+  
+      case "updateMeasurementUnit":
+        setMeasurementUnit(
+          actionObj.redoData.subjectId,
+          actionObj.redoData.newUnit
+        );
+        break;
+  
+      case "addMaterialSubject":
+        // reapply means add again
+        addMaterialSubject(actionObj.redoData.subjectId, actionObj.redoData.materialId);
+        break;
+  
+      case "removeMaterialSubject":
+        // reapply means remove again
+        removeMaterial(actionObj.redoData.subjectId, actionObj.redoData.materialId);
+        break;
+  
+      case "setLaborRate":
+        setLaborRate(actionObj.redoData.takeoffId, actionObj.redoData.newValue);
+        break;
+  
+      case "setLaborMarkup":
+        setLaborMarkup(actionObj.redoData.takeoffId, actionObj.redoData.newValue);
+        break;
+  
+      case "setMaterialMarkup":
+        setMaterialMarkup(actionObj.redoData.takeoffId, actionObj.redoData.newValue);
+        break;
+  
+      // etc.
+    }
+  }
+
+  // This is the refactored "set" function that updates the server with explicit on/off
+  // and we always pass the desired final state.
+  function setMaterialState(materialId, value) {
+    $.post("/set-material-state", { material_id: materialId, applied: value })
+      .done(function() {
+         console.log("Updated material " + materialId + " to " + value);
+         // then refresh UI or call loadTakeoffMaterials
+      })
+      .fail(function() {
+         console.log("Failed to update material " + materialId);
+      });
+  }
+
+  // This is your "toggle" but now we explicitly do oldValue->newValue
+  function toggleMaterial(materialId, checkboxElem) {
+    let newValue = checkboxElem.checked ? 1 : 0;
+    let oldValue = newValue ? 0 : 1;
+
+    // do the actual set
+    setMaterialState(materialId, newValue);
+
+    // on success, push to undo stack
+    undoStack.push({
+      action: 'setMaterialApplied',
+      undoData: { materialId, value: oldValue },
+      redoData: { materialId, value: newValue }
+    });
+    // Clear redo stack
+    redoStack = [];
+  }
+
+  
 
 
 // on document ready, get the takeoff id from the hidden input field

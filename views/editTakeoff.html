@@ -64,6 +64,10 @@
       <h1 class="h5" id="laborTotal"></h1>
       <h1 class="h5" style="color:green;" id="laborAdjusted"></h1>
 
+            <!-- profit -->
+            <h1 class="h5" id="grossProfit"></h1>
+            <h1 class="h5" id="grossProfitMargin"></h1>
+
     
       <div style="margin-left: 20px;">
         {{#takeoff}}
@@ -72,8 +76,10 @@
           oninput="changeLaborRateHelper(this.value)">
         <span id="laborRateValue" style="display: inline-block; width: 50px;">{{labor_rate}}</span>
       </br>
-     
 
+
+
+      
         <label for="slider">Labor Markup:</label>
         <input type="range" id="laborMarkup" name="slider" min="0" max="100" value="{{labor_markup}}"
           oninput="changeLaborMarkupHelper(this.value)">

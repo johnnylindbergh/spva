@@ -1075,6 +1075,20 @@ module.exports = function (app) {
     }
   });
 
+  app.post("/set-material-state", mid.isAdmin, function (req, res) {
+    console.log("setting material state ", req.body.material_id);
+    let material_id = req.body.material_id;
+    if (material_id) {
+      db.setAppliedMaterialState(req.body.material_id, req.body.state, function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.end();
+        }
+      });
+    }
+  });
+
   app.post("/separate-line-item", mid.isAdmin, function (req, res) {
     console.log("separating ", req.body.material_id);
     let material_id = req.body.material_id;

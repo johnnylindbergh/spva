@@ -2247,6 +2247,21 @@ module.exports = {
     );
   },
 
+  setAppliedMaterialState: function (applied_material_id, state, callback) {
+    con.query(
+      "UPDATE applied_materials SET applied = ? WHERE id = ?;",
+      [state, applied_material_id],
+      function (err) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
+        callback(null);
+      }
+    );
+  },
+
+
   separateLineItem: function (takeoff_id, applied_material_id, callback) {
     // get the applied_materials row
     // insert the name into the options table with a default cost of 0
