@@ -2249,9 +2249,9 @@ module.exports = function (app) {
             console.log(invoice);
             console.log(invoice_items);
 
-            let totalAmout = 0;
+            let totalAmount = 0;
             for (let i = 0; i < invoice_items.length; i++) {
-              totalAmout += parseFloat(invoice_items[i].total);
+              totalAmount += parseFloat(invoice_items[i].total);
               invoice_items[i].total = numbersWithCommas(parseFloat(invoice_items[i].total).toFixed(2));
               invoice_items[i].number  = i + 1;
             }
@@ -2261,7 +2261,7 @@ module.exports = function (app) {
                 res.send("error retrieving takeoff");
               } else {
                 console.log(takeoff);
-                res.render("viewInvoice.html", { invoice: invoice, invoice_items: invoice_items, takeoff: takeoff[0],totalAmout: numbersWithCommas(totalAmout.toFixed(2))});
+                res.render("viewInvoice.html", { invoice: invoice, invoice_items: invoice_items, takeoff: takeoff[0],totalAmount: numbersWithCommas(totalAmount.toFixed(2))});
               }
             } 
             );}
@@ -2396,7 +2396,7 @@ module.exports = function (app) {
       }
       db.getSharedInvoice(
         hash,
-        function (err, invoice, items, takeoff, totalAmout) {
+        function (err, invoice, items, takeoff, totalAmount) {
           if (err || invoice == null) {
             console.log(err);
             res.redirect("/");
@@ -2410,9 +2410,9 @@ module.exports = function (app) {
                 invoice: invoice
               });
             } else {
-              console.log(invoice[0])
-              console.log("invoice created at ", invoice.date_created);
-              console.log("invoice expires at ", moment(invoice.date_created).add(30, 'days').format('YYYY-MM-DD HH:mm:ss')); // 30 days from creation
+              console.log(invoice)
+              console.log("invoice created at ", invoice.created_at);
+              console.log("invoice expires at ", moment(invoice.created_at).add(30, 'days').format('YYYY-MM-DD HH:mm:ss')); // 30 days from creation
 
               // if the current date is greater than the expiration date, redirect to the home page
               if (moment().isAfter(moment(invoice.date_created).add(30, 'days'))) {
@@ -2424,10 +2424,12 @@ module.exports = function (app) {
               } else {
                 console.log(invoice);
                 console.log(items);
+
+                console.log(totalAmount);
                 // some renameing to make the invoice object render work
                 invoice.invoice_id = invoice.id;
                 invoice.invoiceTotal = invoice.total;
-                res.render("viewInvoiceClient.html", { invoice: invoice, invoice_items: items, takeoff: takeoff,totalAmout: totalAmout.toFixed(2)});
+                res.render("viewInvoiceClient.html", { invoice: invoice, invoice_items: items, takeoff: takeoff, totalAmount: totalAmount.toFixed(2)});
 
 
               }

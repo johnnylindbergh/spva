@@ -2645,6 +2645,8 @@ module.exports = {
                 items[i].total = items[i].quantity * items[i].cost;
               }
 
+              console.log("invoice total: ", total);
+
               // update the view count
               con.query(
                 "UPDATE invoices SET view_count = view_count + 1 WHERE hash = ?;",
