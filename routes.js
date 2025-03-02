@@ -914,6 +914,15 @@ module.exports = function (app) {
               console.log(err);
               res.status(500).send("Error generating estimate");
             } else {
+
+              //console.log(takeoff_info);
+
+              console.log("Estimate generated");
+              // format the totals in takeoff_info  
+              takeoff_info[0].total = numbersWithCommas(takeoff_info[0].takeoff_total);
+              takeoff_info[0].material_total = numbersWithCommas(takeoff_info[0].material_total);
+              takeoff_info[0].labor_total = numbersWithCommas(takeoff_info[0].labor_total);
+
             // console.log(estimate);
               console.log(takeoff_info[0].estimate_id)
               if (takeoff_info[0].estimate_id == null) {

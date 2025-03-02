@@ -120,14 +120,20 @@
 
             <div class="options-container">
                 <div class="addOption">
-                    <form id="addOptionForm" onsubmit="postToAddOption(event)">
-                        <label for="description">Description:</label>
-                        <input type="text" id="description" name="description" required>
-                        <label for="laborCost">Labor Cost:</label>
-                        <input type="text" id="laborCost" name="laborCost" required>
-                        <label for="materialCost">Material Cost:</label>
-                        <input type="text" id="materialCost" name="materialCost">
-                        <input type="submit" value="Add Option">
+                    <form id="addOptionForm" onsubmit="postToAddOption(event)" class="form-inline">
+                        <div class="form-group mb-2">
+                            <label for="description" class="sr-only">Description:</label>
+                            <input type="text" id="description" name="description" class="form-control" placeholder="Description" required>
+                        </div>
+                        <div class="form-group mx-sm-3 mb-2">
+                            <label for="laborCost" class="sr-only">Labor Cost:</label>
+                            <input type="text" id="laborCost" name="laborCost" class="form-control" placeholder="Labor Cost" required>
+                        </div>
+                        <div class="form-group mx-sm-3 mb-2">
+                            <label for="materialCost" class="sr-only">Material Cost:</label>
+                            <input type="text" id="materialCost" name="materialCost" class="form-control" placeholder="Material Cost">
+                        </div>
+                        <input type="submit" class="img-button-client" value="Add Option" style="background-color: rgb(31, 193, 31);">
                     </form>
                 </div>
             </div>

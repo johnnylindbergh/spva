@@ -402,6 +402,9 @@ $(document).ready(function() {
         console.log(data.takeoff[0].total);
 
         $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].takeoff_total));
+        $('#materialTotal').text("Material   : $"+numberWithCommas(data.takeoff[0].material_total));
+        $('#laborTotal').text("Labor   : $"+numberWithCommas(data.takeoff[0].labor_total));
+        $('#takeoffTax').text("Tax: %"+numberWithCommas(data.takeoff[0].takeoff_tax));
  
     });
 
