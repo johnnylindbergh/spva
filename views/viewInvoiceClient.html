@@ -5,15 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+
     <!-- Sweet alert -->
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="/css/navbar.css">
-    <link rel="stylesheet" type="text/css" href="/css/invoice.css">
+    <!-- <link rel="stylesheet" type="text/css" href="/css/navbar.css"> -->
+    <!-- <link rel="stylesheet" type="text/css" href="/css/invoice.css"> -->
 
     <script src="/js/invoice.js"></script>
+
+    <style>
+        .table {
+            width: 100%;
+            display: flex;
+        }
+
+        #invoice-items {
+            width: 110%;
+            display: inline;
+            margin-left:auto;
+            margin-right:auto;
+        }
+
+
+        /* mobile styles */
+        /* fix table formatting */
+        @media (max-width: 768px) {
+            .table {
+                display: block;
+            }
+
+            #invoice-items {
+                display: block;
+            }
+        }
+
+
+
+    </style>
 </head>
 <body>
     <!-- nav bar -->
@@ -21,11 +53,11 @@
 
 
     
-    <div class="container mt-5">
+    <div class="container mt-6">
         <div class="card">
             {{#invoice}}
             <input type="hidden" id="invoice_id" name="invoice_id" value="{{id}}">
-            <div class="card-header text-center">
+            <div class="card-header">
                 <h2>{{invoice_name}}</h2>
                 <p>Invoice Number: {{invoice_number}} | QB Number: {{qb_number}}</p>
             </div>
@@ -41,9 +73,9 @@
                         <p>{{takeoff.givenName}}<br>{{takeoff.billing_address}}</p>
                     </div>
                 </div>
-                <div class="row mt-4">
-                    <div class="col-md-12">
-                        <table  style = "width:100%;" class="table table-bordered table-responsive">
+                <div class="row mt-4 justify-content-center">
+                    <div class="col-md-10">
+                        <table id="invoice-items" class="table table-responsive bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -74,7 +106,7 @@
                     </div>
                     <div class="col-md-6 text-right">
                         <h5>Total Amount Due:</h5>
-                        <p>${{totalAmout}}</p>
+                        <p>${{totalAmount}}</p>
                     </div>
                 </div>
             </div>
