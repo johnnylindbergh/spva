@@ -1271,7 +1271,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
   //   clientAgreement: 'on'
   // }
   createChangeOrder: function (request, callback) {
-    const {
+    let {
       takeoff_id,
       customerName,
       description,
@@ -1307,9 +1307,20 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     //   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
     // );
     // Insert the change order into the change_orders table
+    let status = 0;
+
+
+    clientAgreement = clientAgreement === "on" ? 1 : 0;
+
+    if (clientAgreement) {
+      status = 0;
+    } else {
+      status = 2;
+    }
+
     con.query(
-      "INSERT INTO change_orders (takeoff_id, name, description, qb_number, co_number, hash, change_order_total, require_client_approval ) VALUES (?, ?, ?, ?, ?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;", 
-      [takeoff_id, customerName, description, null, Math.floor(Math.random() * 1000000), generateHash(), parseFloat(changeOrderTotal), clientAgreement],
+      "INSERT INTO change_orders (takeoff_id, name, status, description, qb_number, co_number, hash, change_order_total, require_client_approval ) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?); SELECT LAST_INSERT_ID() as last;", 
+      [takeoff_id, customerName, status, description, null, Math.floor(Math.random() * 1000000), generateHash(), parseFloat(changeOrderTotal), clientAgreement],
       function (err, result) {
       if (err) {
         console.log(err);

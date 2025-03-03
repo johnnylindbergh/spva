@@ -2212,13 +2212,12 @@ module.exports = function (app) {
           res.send("error fetching takeoff");
         }
 
-        db.getChangeOrderByTakeoffId(req.body.takeoff_id, function (err, change_order) {
 
-          if (err) {
-            console.log(err);
-            res.send("error fetching change order");
-          }
-
+          db.getInvoicableChangeOrdersByTakeoffId(req.body.takeoff_id, function (err, invoicable_change_orders) {
+            if (err) {
+              console.log(err);
+              res.send("error fetching invoicable change orders");
+            }
 
         
         // is the estimate not signed?
@@ -2227,7 +2226,7 @@ module.exports = function (app) {
           res.send("estimate not signed");
         } else {
           console.log(takeoff[0]);
-          res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_name: "Invoice", takeoff: takeoff[0] });
+          res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_name: "Invoice", takeoff: takeoff[0], change_orders: invoicable_change_orders});
         }
       });
       });
@@ -2649,6 +2648,20 @@ module.exports = function (app) {
           res.send("error creating change order");
         } else {
           res.send("change order created");
+        }
+      });
+    });
+
+
+    app.get("/getInvoicableChangeOrders", mid.isAdmin, function (req, res) {
+      console.log("getting invoicable change orders");
+      let takeoff_id = req.query.takeoff_id;
+      db.getInvoicableChangeOrdersByTakeoffId(takeoff_id, function (err, change_orders) {
+        if (err) {
+          console.log(err);
+          res.send("error fetching change orders");
+        } else {
+          res.send(change_orders);
         }
       });
     });
