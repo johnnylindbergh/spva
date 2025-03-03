@@ -60,7 +60,7 @@ VALUES
 -- Customers table
 CREATE TABLE customers (
   id INT NOT NULL AUTO_INCREMENT, -- QB ID
-  taxable BOOLEAN NOT NULL DEFAULT 1,
+  taxable TINYINT(1) DEFAULT 1,
   job BOOLEAN NOT NULL DEFAULT 0,
   givenName VARCHAR(100),
   billing_address VARCHAR(255),
@@ -221,7 +221,7 @@ CREATE TABLE change_orders (
   name VARCHAR(64),
   description TEXT,
   qb_number INT,
-  co_number INT UNIQUE,
+  co_number INT,
   hash VARCHAR(64),
   -- 0 unapproved, 1 approved, 2 approved by creator, 
   status TINYINT(1) DEFAULT 0,
@@ -251,6 +251,9 @@ CREATE TABLE change_order_items (
   PRIMARY KEY (id),
   FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
 );
+
+INSERT INTO change_order_items (change_order_id, description, cost, quantity) VALUES (1, 'Description 1', 2000.00, 1);
+
 -- stores the relationship between invoices and change orders
 -- an invoice can have multiple change orders
 CREATE TABLE invoice_change_orders (
@@ -263,21 +266,10 @@ CREATE TABLE invoice_change_orders (
   FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
 );
 
-
-INSERT INTO change_order_items (change_order_id, description, cost, quantity) VALUES (1, 'Description 1', 2000.00, 1);
-
-CREATE TABLE invoice_change_orders (
-  id INT NOT NULL AUTO_INCREMENT,
-  invoice_id INT NOT NULL,
-  change_order_id INT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
-  FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
-);
-
 -- example insert
 INSERT INTO invoice_change_orders (invoice_id, change_order_id) VALUES (1, 1);
+
+
 
 -- Material archetypes table
 CREATE TABLE material_archetypes (
@@ -347,7 +339,7 @@ CREATE TABLE applied_materials (
   separate_line_item TINYINT(1) DEFAULT 0,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
-  FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
+  FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE SET NULL
 );
 
 -- Emails table
