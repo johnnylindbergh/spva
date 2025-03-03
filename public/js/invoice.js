@@ -27,6 +27,18 @@ function createPaymentIntentInvoice(method) {
     }
 }
 
+function addChangeOrderToInvoice(id) {
+    // append the change order id to the hidden input field and display message that change order has been added
+
+    $('#changeOrderAdded').show();
+
+    $('#changeOrderAdded').fadeOut(2500);
+
+    $("#invoice-item-table").append('<input type="hidden" name="change_order_id" value="'+id+'">');
+
+    $('#changeOrderButton').hide();
+}
+
 $(document).ready(function() {
     $('#submitEstimate').on('click', function() {
         var estimateId = $('#estimateId').val();

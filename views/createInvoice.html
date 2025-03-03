@@ -239,8 +239,13 @@
             </div>
             {{/takeoff}}
         </form>
+    </br>
 
-         <!-- change order that can be added to invoice -->
+
+        <div id="changeOrderAdded" style="display:none; max-height:5px; float:right; background-color: rgba(1, 152, 1, 0.36); border-radius: 5px; padding: 15px; text-align: center;">
+            <h5 style="margin: 0;">Change Order Added</h5>
+        </div>
+        <!-- change order that can be added to invoice -->
      <div class="change-order-container">
         <h2>Change Orders</h2>
         <table class="change-order-table">
@@ -260,7 +265,7 @@
                     <td>{{description}}</td>
                     <td>{{change_order_total}}</td>
                     <td>{{created_at}}</td>
-                    <td><button style="width:100%;" class="btn btn-primary" onclick="addChangeOrderToInvoice('{{co_number}}')">Add</button></td>
+                    <td><button style="width:100%;" class="btn btn-primary" onclick="addChangeOrderToInvoice('{{id}}')">Add</button></td>
                 </tr>
                 {{/change_orders}}
             </tbody>
