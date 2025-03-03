@@ -132,16 +132,16 @@ function populatePaymentHistoryTable(takeoff_id) {
                 cell1.textContent = "CO-"+ changeOrder.co_number;
                 if (changeOrder.status == 0) {
                 // add a yellow ! icon
-                cell3.innerHTML = 'unpaid <i style="color:orange;" class="fa-solid fa-triangle-exclamation"></i>';
+                cell3.innerHTML = 'not approved <i style="color:orange;" class="fa-solid fa-triangle-exclamation"></i>';
                 }
                 else if (changeOrder.status == 1) {
                    // green circle check icon
-                cell3.innerHTML = `Paid <i style="color:green;" class="fas fa-check-circle"></i>`;
+                cell3.innerHTML = `Approved <i style="color:green;" class="fas fa-check-circle"></i>`;
 
                 } else if (changeOrder.status == 2) {
-                cell3.textContent = 'Due';
+                //cell3.textContent = 'Due';
                 // add red exclamation icon
-                cell3.innerHTML = `Due <i style="color:red;" class="fas fa-circle-exclamation"></i>`;
+                cell3.innerHTML = `Approved by Creator <i style="color:orange;" class="fa-solid fa-triangle-exclamation"></i>`;
                 }
 
                 totalDue += parseFloat(changeOrder.change_order_total);

@@ -16,7 +16,7 @@
 <body>
     <div class="container mt-5">
         <h1>Create Change Order</h1>
-        <form action="/submitChangeOrder" method="post"></form>
+        <form action="/submitChangeOrder" method="POST">
             <!-- hidden input takeoff_id -->
             <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
             <div class="form-group">
@@ -58,6 +58,12 @@
                 <button type="button" class="btn btn-secondary" id="addRow">Add Row</button>
             </div>
 
+            <!-- total of change order -->
+            <div class="form-group">
+                <label for="changeOrderTotal">Change Order Total:</label>
+                <input type="number" class="form-control" id="changeOrderTotal" name="changeOrderTotal" required readonly>
+            </div>
+
             <div class="form-group form-check">
                 <input type="checkbox" class="form-check-input" id="clientAgreement" name="clientAgreement" {{#clientAgreement}}checked{{/clientAgreement}}>
                 <label class="form-check-label" for="clientAgreement">Client Agreement Required</label>
@@ -68,7 +74,7 @@
             <div id="tooltipContent" style="display: none;">
                 The client must agree to the terms and conditions before proceeding.
             </div>
-            <button type="submit" class="btn btn-primary mt-3">Submit</button>
+            <input type="submit" class="btn btn-primary mt-3" value="Submit">
         </form>
     </div>
     <script>
@@ -78,6 +84,16 @@
                 var cost = parseFloat(row.find('.cost').val()) || 0;
                 var total = quantity * cost;
                 row.find('.total').text(total.toFixed(2));
+                updateChangeOrderTotal();
+            }
+
+            function updateChangeOrderTotal() {
+                var changeOrderTotal = 0;
+                $('#amountTable tbody tr').each(function() {
+                    var total = parseFloat($(this).find('.total').text()) || 0;
+                    changeOrderTotal += total;
+                });
+                $('#changeOrderTotal').val(changeOrderTotal.toFixed(2));
             }
 
             $('#addRow').click(function() {
@@ -101,6 +117,7 @@
             $(document).on('click', '.remove-row', function() {
                 $(this).closest('tr').remove();
                 updateRowNumbers();
+                updateChangeOrderTotal();
             });
 
             function updateRowNumbers() {
