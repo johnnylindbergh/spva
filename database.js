@@ -1308,8 +1308,8 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     // );
     // Insert the change order into the change_orders table
     con.query(
-      "INSERT INTO change_orders (takeoff_id, name, description, qb_number, co_number, hash, change_order_total) VALUES (?, ?, ?, ?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;", 
-      [takeoff_id, customerName, description, null, Math.floor(Math.random() * 1000000), generateHash(), parseFloat(changeOrderTotal)],
+      "INSERT INTO change_orders (takeoff_id, name, description, qb_number, co_number, hash, change_order_total, require_client_approval ) VALUES (?, ?, ?, ?, ?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;", 
+      [takeoff_id, customerName, description, null, Math.floor(Math.random() * 1000000), generateHash(), parseFloat(changeOrderTotal), clientAgreement],
       function (err, result) {
       if (err) {
         console.log(err);

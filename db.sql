@@ -225,6 +225,7 @@ CREATE TABLE change_orders (
   hash VARCHAR(64),
   -- 0 unpaid, 1 paid, 2 due, 
   status TINYINT(1) DEFAULT 0,
+  require_client_approval TINYINT DEFAULT 0,
   -- client-agreement 0 not approved, 1 approved
   co_approved TINYINT DEFAULT 0,
   change_order_total DECIMAL(10,2),
