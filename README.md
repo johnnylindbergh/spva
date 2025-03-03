@@ -2,7 +2,7 @@
 A simple business tracking application.
 
 ## Installation
-1. Clone the repository: `git clone https://github.com/johnylindbergh/fsc-track.git`
+1. Clone the repository: `git clone https://github.com/johnylindbergh/spva.git`
 2. Install Node 
 3. Install the required packages: `npm install`
 4. install mysql and run db.sql with `source db.sql`
@@ -11,37 +11,61 @@ A simple business tracking application.
 
 
 ```javascript
-module.exports = {
+/*
+  credentials.js: System credentials
+*/
 
+const { environment } = require("intuit-oauth");
+
+module.exports = {
+  // openai credentiyals
+  openai_api_key: '',
   // Google OAuth2 credentials for user authentication
-  GOOGLE_CLIENT_ID: '{your_google_client_id}',
-  GOOGLE_CLIENT_SECRET: 'your_client_secret',
+  GOOGLE_CLIENT_ID: '',
+  GOOGLE_CLIENT_SECRET: '',
 
   // session encryption secret
-  SESSION_SECRET: 'your_session_secret',
+  SESSION_SECRET: '',
 
   // MySQL credentials
-  MYSQL_USERNAME: 'your_mysql_username',
-  MYSQL_PASSWORD: 'your_mysql_password',
+  MYSQL_USERNAME: '',
+  MYSQL_PASSWORD: '',
 
   // ssl stuff
-  approvedDomains: 'yourapproveddomain.com',
-  domain: 'https://your_domain.coc',
-  greenlockEmail:'your_greenlock_email',
+  approvedDomains: '',
+  domain: '',
+  greenlockEmail:'',
 
   // email stuff
 
-  serverEmail: "optional_server_email",
-  emailPassword: "server_email_password"
+  serverEmail: "",
+  emailPassword: "",
+
+  stripe: {
+    
+    secret: ''
+  },
+
+  quickbooks : {
+    consumerKey: '',
+    consumerSecret: '',
+    environment: 'sandbox',
+    webhooksVerifier:''
+  },
+
+  monday: {
+    token:''  
+  }
 
 }
+
 ```
 
 
 
 
 ## Usage
-1. Navigate to the project directory: `cd fsc-track`
+1. Navigate to the project directory: `cd spva`
 2. Run the application: `node server.js > logFileName.log &`
 3. Open your web browser and visit `http://localhost:5000`
 
