@@ -12,8 +12,31 @@
     <script src="https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.13"></script>
     <!-- fontawesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/defaults.css">
+    <link rel="stylesheet" href="/css/navbar.css">
 </head>
 <body>
+
+
+    <!-- navbar here -->
+    <div class="navbar">
+        <ul>
+            <li><a href="javascript:history.back()">Back</a></li>
+            <li><a href="/">{{defaults.sysName}}</a></li>
+            <div style="float:right">
+                <li><a href="/auth/google">Log In</a></li>
+                <li><a href="/logout">Log Out</a></li>
+            </div>
+
+
+        </ul>
+    </div>
+
+</br>
+</br>
+    
+
     <div class="container mt-5">
         <h1>Create Change Order</h1>
         <form action="/submitChangeOrder" method="POST">
@@ -77,6 +100,7 @@
             <input type="submit" class="btn btn-primary mt-3" value="Submit">
         </form>
     </div>
+</br>
     <script>
         $(document).ready(function() {
             function updateTotal(row) {

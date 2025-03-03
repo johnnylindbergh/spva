@@ -49,7 +49,7 @@
 
     Owner: <input type='text' class="hiddenInput" id='takeoff_owner_name' onchange='updateTakeoffOwnerName()'
       value='{{givenName}}'></br>
-    Billing Address: <input type='text' class="hiddenInput" id='owner_billing_address'
+    Billing Address: <input type='text' style="width:375px" class="hiddenInput" id='owner_billing_address'
       onchange='updateTakeoffBillingAddress()' value='{{billing_address}}'></br>
     Owner Email Address: <input type='text' class="hiddenInput" id='owner_email_address'
       onchange='updateTakeoffOwnerEmailAddress()' value='{{primary_email_address}}'></br>
@@ -71,54 +71,54 @@
     
       <div style="margin-left: 20px;">
         {{#takeoff}}
-        <label for="slider">Labor Rate:</label>
-        <input type="range" id="laborRate" name="slider" min="0" max="500" value="{{labor_rate}}"
-          oninput="changeLaborRateHelper(this.value)">
-        <span id="laborRateValue" style="display: inline-block; width: 50px;">{{labor_rate}}</span>
-      </br>
+        <div style="display: flex; align-items: center;">
+          <label for="laborRate" style="width: 150px; white-space: nowrap;">Labor Rate:</label>
+          <input type="range" id="laborRate" name="slider" min="0" max="500" value="{{labor_rate}}" oninput="changeLaborRateHelper(this.value)" style="width: 200px;">
+          <span id="laborRateValue" style="display: inline; width: 70px;">{{labor_rate}}</span>
+        </div>
+        <br>
 
+        <div style="display: flex; align-items: center;">
+          <label for="laborMarkup" style="width: 150px; white-space: nowrap;">Labor Markup:</label>
+          <input type="range" id="laborMarkup" name="slider" min="0" max="100" value="{{labor_markup}}" oninput="changeLaborMarkupHelper(this.value)" style="width: 200px;">
+          <span id="laborMarkupValue" style="display: inline; width: 70px;">{{labor_markup}}%</span>
+        </div>
+        <br>
 
+        <div style="display: flex; align-items: center;">
+          <label for="materialMarkup" style="width: 150px; white-space: nowrap;">Material Markup:</label>
+          <input type="range" id="materialMarkup" name="slider" min="0" max="100" value="{{material_markup}}" oninput="updateMaterialMarkupHelper(this.value)" style="width: 200px;">
+          <span id="materialMarkupValue" style="display: inline; width: 70px;">{{material_markup}}%</span>
+        </div>
+        <br>
 
-      
-        <label for="slider">Labor Markup:</label>
-        <input type="range" id="laborMarkup" name="slider" min="0" max="100" value="{{labor_markup}}"
-          oninput="changeLaborMarkupHelper(this.value)">
-        <span id="laborMarkupValue" style="display: inline-block; width: 50px;">{{labor_markup}}%</span>
-      </br>
+        <div style="display: flex; align-items: center;">
+          <label for="supervisionMarkup" style="width: 150px; white-space: nowrap;">Supervisor Markup:</label>
+          <input type="range" id="supervisionMarkup" name="slider" min="0" max="100" value="{{supervisor_markup}}" oninput="updateSupervisorMarkupHelper(this.value)" style="width: 200px;">
+          <span id="supervisorMarkupValue" style="display: inline; width: 70px;">{{supervisor_markup}}%</span>
+        </div>
+        <br>
 
-        <label for="slider">Material Markup:</label>
-        <input type="range" id="materialMarkup" name="slider" min="0" max="100" value="{{material_markup}}"
-          oninput="updateMaterialMarkupHelper(this.value)">
-        <span id="materialMarkupValue" style="display: inline-block; width: 50px;">{{material_markup}}%</span>
-      </br>
+        <div style="display: flex; align-items: center;">
+          <label for="touchupsCost" style="width: 150px; white-space: nowrap;">Touchups:</label>
+          <input type="range" id="touchupsCost" name="slider" min="0" max="5000" value="{{touchups_cost}}" oninput="updateTouchupsCostHelper(this.value)" style="width: 200px;">
+          <span id="touchupsCostValue" style="display: inline; width: 70px;">${{touchups_cost}}</span>
+        </div>
+        <br>
 
-        <label for="slider">Supervisor Markup:</label>
-        <input type="range" id="supervisionMarkup" name="slider" min="0" max="100" value="0"
-          oninput="updateSupervisorMarkupHelper(this.value)">
-        <span id="supervisorMarkupValue" style="display: inline-block; width: 50px;">{{supervisor_markup}}%</span>
-      </br>
+        <div style="display: flex; align-items: center;">
+          <label for="profit" style="width: 150px; white-space: nowrap;">GB Profit:</label>
+          <input type="range" id="profit" name="slider" min="0" max="100" value="{{profit}}" oninput="updateProfitHelper(this.value)" style="width: 200px;">
+          <span id="profitValue" style="display: inline; width: 70px;">{{profit}}%</span>
+        </div>
+        <br>
 
-      <label for="slider">Touchups:</label>
-      <input type="range" id="touchupsCost" name="slider" min="0" max="5000" value="{{touchups_cost}}"
-        oninput="updateTouchupsCostHelper(this.value)">
-      <span id="touchupsCostValue" style="display: inline-block; width: 50px;">${{touchups_cost}}</span>
-    </br>
-
-
-     <!-- profit slider % -->
-     <label for="slider">Profit:</label>
-     <input type="range" id="profit" name="slider" min="0" max="100" value="{{profit}}"
-       oninput="updateProfitHelper(this.value)">
-     <span id="profitValue" style="display: inline-block; width: 50px;">{{profit}}%</span>
-   </br>
-
-    <!-- tax slider -->
-    <label for="slider">Tax:</label>
-    <input type="range" id="tax" name="slider" min="0" max="100" value="{{tax}}"
-      oninput="updateTaxHelper(this.value)">
-    <span id="taxValue" style="display: inline-block; width: 50px;">{{tax}}%</span>
-  </br>
-   
+        <div style="display: flex; align-items: center;">
+          <label for="tax" style="width: 150px; white-space: nowrap;">Tax:</label>
+          <input type="range" id="tax" name="slider" min="0" max="100" value="{{tax}}" oninput="updateTaxHelper(this.value)" style="width: 200px;">
+          <span id="taxValue" style="display: inline; width: 70px;">{{tax}}%</span>
+        </div>
+        <br>
     <!-- travel extra -->
 
 

@@ -376,3 +376,89 @@ input[type=number] {
       margin-top: 10px; /* Add spacing for the submit button */
   }
 }
+
+
+/* sliders */
+
+input[type="range"] {
+  /* removing default appearance */
+  -webkit-appearance: none;
+  appearance: none; 
+  /* creating a custom design */
+  width: 100%;
+  cursor: pointer;
+  outline: none;
+  /*  slider progress trick  */
+  overflow: hidden;
+  border-radius: 16px;
+  margin-left: 25px;
+}
+
+/* Track: webkit browsers */
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 15px;
+  background: #ccc;
+  border-radius: 16px;
+}
+
+/* Track: Mozilla Firefox */
+input[type="range"]::-moz-range-track {
+  height: 15px;
+  background: #ccc;
+  border-radius: 16px;
+}
+
+/* Thumb: webkit */
+input[type="range"]::-webkit-slider-thumb {
+  /* removing default appearance */
+  -webkit-appearance: none;
+  appearance: none; 
+  /* creating a custom design */
+  height: 15px;
+  width: 15px;
+  background-color: #fff;
+  border-radius: 50%;
+  border: 2px solid #0893A1;
+  /*  slider progress trick  */
+  box-shadow: -407px 0 0 400px #0893A1;
+}
+
+
+/* Thumb: Firefox */
+input[type="range"]::-moz-range-thumb {
+  height: 15px;
+  width: 15px;
+  background-color: #fff;
+  border-radius: 50%;
+  border: 1px solid #0893A1;
+  /*  slider progress trick  */
+  box-shadow: -407px 0 0 400px #0893A1;
+}
+
+
+/*=============
+Aesthetics 
+=========================*/
+
+
+.wrapper {
+  color: #4b4949; 
+  background: #0893A1;
+  max-width: 40px;
+  width: 75%;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.range {
+  /* display: flex; */
+  align-items: center;
+  max-width: 500px;
+  height: 4rem;
+  width: 70%;
+  background: #fff;
+  padding: 7px 7px;
+}
