@@ -1194,6 +1194,157 @@ module.exports = {
     );
   },
 
+  getChangeOrderById: function (change_order_id, callback) {
+    con.query(
+      "SELECT * FROM change_orders WHERE id = ?; ",
+      [change_order_id],
+      function (err, changeOrder) {
+        if (err) return callback(err);
+        callback(null, changeOrder[0]);
+      }
+    );
+  },
+
+  getChangeOrderByTakeoffId: function (takeoff_id, callback) {
+    con.query(
+      "SELECT * FROM change_orders WHERE takeoff_id = ?; ",
+      [takeoff_id],
+      function (err, changeOrders) {
+        if (err) return callback(err);
+        console.log(changeOrders);
+        callback(null, changeOrders);
+      }
+    );
+  },
+
+      // change order is invoicable if it is marked as require_client_approval = false, or it is signed ie takeoff status > 4;
+  getInvoicableChangeOrdersByTakeoffId: function (takeoff_id, callback) {
+    con.query(
+      `SELECT * FROM change_orders 
+       WHERE takeoff_id = ? 
+       AND (require_client_approval = false OR (SELECT status FROM takeoffs WHERE id = takeoff_id) > 4);`,
+      [takeoff_id],
+      function (err, changeOrders) {
+        if (err) return callback(err);
+        console.log(changeOrders);
+        callback(null, changeOrders);
+      }
+    );
+  },
+
+
+
+getChangeOrderItemsById: function (change_order_id, callback) {
+    con.query(
+      "SELECT * FROM change_order_items WHERE change_order_id = ?; ",
+      [change_order_id],
+      function (err, changeOrderItems) {
+        if (err) return callback(err);
+        console.log(changeOrderItems);
+
+        //  for each change order item, set the total if it is not already set
+
+        for (let i = 0; i < changeOrderItems.length; i++) {
+          let changeOrderItem = changeOrderItems[i];
+          if (changeOrderItem.total === null) {
+            changeOrderItem.total = changeOrderItem.quantity * changeOrderItem.cost;
+          }
+        }
+
+        callback(null, changeOrderItems);
+      }
+    );
+  },
+
+
+  // this function is used to create a new change order
+  // request is an object:
+  // request = {
+  //   customerName: 'Test McTest',
+  //   customerAddress: '3141 Burnley Station Road, Barboursville, VA 22923',
+  //   description: 'Test desc',
+  //   itemDescription: [ 'Test one', 'Test Two' ],
+  //   quantity: [ '3', '2' ],
+  //   cost: [ '100', '200' ],
+  //   materialTotal: '300.00',
+  //   laborTotal: '400.00',
+  //   clientAgreement: 'on'
+  // }
+  createChangeOrder: function (request, callback) {
+    const {
+      takeoff_id,
+      customerName,
+      description,
+      itemDescription,
+      quantity,
+      cost,
+      materialTotal,
+      laborTotal,
+      clientAgreement
+    } = request;
+
+
+
+
+    // CREATE TABLE change_orders (
+    //   id INT NOT NULL AUTO_INCREMENT,
+    //   takeoff_id INT NOT NULL,
+    //   name VARCHAR(64),
+    //   description TEXT,
+    //   qb_number INT,
+    //   co_number INT,
+    //   hash VARCHAR(64),
+    //   -- 0 unpaid, 1 paid, 2 due, 
+    //   status TINYINT(1) DEFAULT 0,
+    //   -- client-agreement 0 not approved, 1 approved
+    //   co_approved TINYINT DEFAULT 0,
+    //   change_order_total DECIMAL(10,2),
+    //   payment_confirmation_email_sent TINYINT(1) DEFAULT 0,
+    //   due_date TIMESTAMP,
+    //   last_viewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    //   view_count INT DEFAULT 0,
+    //   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    //   PRIMARY KEY (id),
+    //   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+    // );
+    // Insert the change order into the change_orders table
+    con.query(
+      "INSERT INTO change_orders (takeoff_id, name, description, qb_number, co_number, hash, change_order_total) VALUES (?, ?, ?, ?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;", 
+      [takeoff_id, customerName, description, null, Math.floor(Math.random() * 1000000), generateHash(), parseFloat(materialTotal) + parseFloat(laborTotal)],
+      function (err, result) {
+      if (err) {
+        console.log(err);
+        return callback(err);
+      }
+
+      const changeOrderId = result[1][0].last;
+
+      // Insert each item into the change_order_items table
+      const items = itemDescription.map((desc, index) => [
+        changeOrderId,
+        desc,
+        quantity[index],
+        cost[index]
+      ]);
+
+      con.query(
+        "INSERT INTO change_order_items (change_order_id, description, quantity, cost) VALUES ?;",
+        [items],
+        function (err) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
+        callback(null, changeOrderId);
+        }
+      );
+      }
+    );
+  },
+
+
+
+
 
   // used for code reference
   getSystemSettingById: function (setting_id, callback) {

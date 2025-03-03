@@ -2211,6 +2211,15 @@ module.exports = function (app) {
           console.log(err);
           res.send("error fetching takeoff");
         }
+
+        db.getChangeOrderByTakeoffId(req.body.takeoff_id, function (err, change_order) {
+
+          if (err) {
+            console.log(err);
+            res.send("error fetching change order");
+          }
+
+
         
         // is the estimate not signed?
         if (takeoff[0].status <= 3) { // at least the estimate is signed
@@ -2220,6 +2229,7 @@ module.exports = function (app) {
           console.log(takeoff[0]);
           res.render("createInvoice.html", { takeoff_id: req.body.takeoff_id, invoice_name: "Invoice", takeoff: takeoff[0] });
         }
+      });
       });
     });
     
@@ -2453,6 +2463,199 @@ module.exports = function (app) {
         }
       );
     });
+
+
+    // change order stuff
+
+    app.post('/changeOrderCreator', mid.isAdmin, function (req, res) {
+      console.log("creating change order for", req.body);
+
+      db.getTakeoffById(req.body.takeoff_id, function (err, takeoff) {
+        console.log(takeoff);
+        if (err || takeoff.length == 0) {
+          console.log(err);
+          res.send("error fetching takeoff");
+        }
+        
+        // is the estimate not signed?
+        if (takeoff[0].status <= 3) { // at least the estimate is signed
+          console.log("estimate not signed");
+          res.send("estimate not signed");
+        } else {
+          console.log(takeoff[0]);
+          res.render("createChangeOrder.html", { takeoff_id: req.body.takeoff_id, change_order_name: "Change Order", takeoff: takeoff[0] });
+        }
+      });
+    });
+
+    app.post('/create-change-order', mid.isAdmin, function (req, res) {
+
+      const takeoff_id = req.body.takeoff_id;
+      const change_order_name = req.body.change_order_name;
+      const change_order_description = req.body.change_order_description;
+      const change_order_total = req.body.change_order_total;
+      const change_order_items = req.body.change_order_items;
+      let change_order_total_amount = 0;
+
+      // Calculate change order total
+      if (Array.isArray(change_order_items) && change_order_items.length > 0) {
+          change_order_total_amount = change_order_items.reduce((sum, item) => sum + (item.quantity * item.cost), 0);
+      }
+
+      // Get change order count
+      db.getChangeOrderCount(takeoff_id, function (err, count) {
+          if (err) {
+              console.error("Error fetching change order count:", err);
+              return res.status(500).json({ error: 'Failed to fetch change order count.' });
+          }
+
+          // Generate change order number
+          const long_id = String(Math.floor(Math.random() * 10000000)) + String(takeoff_id);
+          const changeOrderNumber = `${long_id.padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
+
+          // Insert change order into the database
+          const insertQuery = `INSERT INTO change_orders (takeoff_id, total, change_order_number, change_order_name, change_order_description) VALUES (?, ?, ?, ?, ?); SELECT LAST_INSERT_ID() AS change_order_id;`;
+          db.query(insertQuery, [takeoff_id, change_order_total_amount, changeOrderNumber, change_order_name, change_order_description], function (err, results) {
+              if (err) {
+                  console.error("Error inserting change order:", err);
+                  return res.status(500).json({ error: 'Failed to create change order.' });
+              }
+              const changeOrderId = results[1][0].change_order_id;
+
+              // Insert change order items
+              console.log("Inserting change order items");
+              console.log("change_order_id", changeOrderId);
+              console.log("items", change_order_items);
+              if (change_order_items.length > 0) {
+                  for (var i = 0; i < change_order_items.length; i++) {
+                      const item = change_order_items[i];
+                      if (item.description === "") {
+                          item.description = "N/A";
+                      }
+                      const insertItemQuery = `INSERT INTO change_order_items (change_order_id, description, cost, quantity) VALUES (?, ?, ?, ?)`;
+                      db.query(insertItemQuery, [changeOrderId, item.description, item.cost, item.quantity], function (err) {
+                          if (err) {
+                              console.error("Error inserting change order item:", err);
+                          }
+                      });
+                  }
+                  res.status(201).json({ message: "Change order created and items added.", change_order_id: changeOrderId });
+              } else {
+                  res.status(201).json({ message: "Change order created but no items added." });
+              }
+          });
+      });
+  });
+
+
+    app.get('/viewChangeOrder', mid.isAdmin, function (req, res) {
+
+      const change_order_id = parseInt(req.query.changeOrderId);
+      
+      console.log("viewing change order ", change_order_id);
+
+      db.getChangeOrderById(change_order_id, function (err, change_order) {
+      if (err) {
+        console.log(err);
+        res.send("error retrieving change order");
+      } else if (change_order.length === 0) {
+        res.send("No change order found");
+      } else {
+        db.getChangeOrderItemsById(change_order_id, function (err, change_order_items) {
+        if (err) {
+          console.log(err);
+          res.send("error retrieving change order items");
+        } else {
+          let totalAmount = 0;
+          for (let i = 0; i < change_order_items.length; i++) {
+          totalAmount += parseFloat(change_order_items[i].total);
+          change_order_items[i].total = numbersWithCommas(parseFloat(change_order_items[i].total).toFixed(2));
+          change_order_items[i].number = i + 1;
+          }
+
+          db.getTakeoffById(change_order.takeoff_id, function (err, takeoff) {
+          if (err) {
+            console.log(err);
+            res.send("error retrieving takeoff");
+          } else {
+            console.log(takeoff);
+            console.log(change_order_items);
+            res.render("viewChangeOrder.html", {
+            change_order: change_order,
+            change_order_items: change_order_items,
+            takeoff: takeoff[0],
+            totalAmount: numbersWithCommas(totalAmount.toFixed(2))
+            });
+          }
+          });
+        }
+        });
+      }
+      });
+    });
+
+    app.post('/shareChangeOrder', mid.isAdmin, function (req, res) {
+      console.log("sending email to client ", req.body.takeoff_id);
+      if (req.body.takeoff_id) {
+        console.log("sending email ");
+        emailer.sendChangeOrderEmail(req, res, req.body.takeoff_id, req.body.change_order_id, function (err, response) {
+          if (err) {
+            console.log(err);
+            res.send("email failed");
+          } else {
+            console.log(response);
+            res.send("email sent");
+          }
+        });
+      } else {
+        console.log("");
+      }
+    }
+    );
+
+    app.get('/shareChangeOrder', function (req, res) {
+      const hash = req.query.hash;
+      console.log("sharing change order ", hash);
+      if (!hash || hash.length != 32) {
+        res.redirect("/");
+      }
+      db.getSharedChangeOrder(
+        hash,
+        function (err, change_order, items, takeoff, totalAmount) {
+          if (err || change_order == null) {
+            console.log(err);
+            res.redirect("/");
+          } else {
+            console.log(change_order);
+            console.log(items);
+            console.log(totalAmount);
+            // some renameing to make the change order object render work
+            change_order.change_order_id = change_order.id;
+            change_order.change_orderTotal = change_order.total;
+            res.render("viewChangeOrderClient.html", { change_order: change_order, change_order_items: items, takeoff: takeoff, totalAmount: totalAmount.toFixed(2)});
+          }
+        }
+      );
+    }
+    );
+
+    // this function handles the form to create a new change order
+    app.post("/submitChangeOrder", mid.isAdmin, function (req, res) {
+      console.log("submitting change order");
+      console.log(req.body);
+      db.createChangeOrder(req.body, function (err, change_order_id) {
+        if (err) {
+          console.log(err);
+          res.send("error creating change order");
+        } else {
+          res.send("change order created");
+        }
+      });
+    });
+      
+   
+
+
 
  
 

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Order Details</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Change Order Details</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#change_order}}
+                <tr>
+                    <td>ID</td>
+                    <td>{{id}}</td>
+                </tr>
+                <tr>
+                    <td>Takeoff ID</td>
+                    <td>{{takeoff_id}}</td>
+                </tr>
+                <tr>
+                    <td>Name</td>
+                    <td>{{name}}</td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>{{description}}</td>
+                </tr>
+                <tr>
+                    <td>QB Number</td>
+                    <td>{{qb_number}}</td>
+                </tr>
+                <tr>
+                    <td>CO Number</td>
+                    <td>{{co_number}}</td>
+                </tr>
+                <tr>
+                    <td>Hash</td>
+                    <td>{{hash}}</td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td>{{status}}</td>
+                </tr>
+                <tr>
+                    <td>Change Order Total</td>
+                    <td>{{change_order_total}}</td>
+                </tr>
+                <tr>
+                    <td>Created At</td>
+                    <td>{{created_at}}</td>
+                </tr>
+                {{/change_order}}
+            </tbody>
+        </table>
+
+        <h3>Change Order Items</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Number</th>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Cost</th>
+                    <th>Total</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#change_order_items}}
+                <tr>
+                    <td>{{number}}</td>
+                    <td>{{description}}</td>
+                    <td>{{quantity}}</td>
+                    <td>{{cost}}</td>
+                    <td>{{total}}</td>
+                    <td>{{created_at}}</td>
+                </tr>
+                {{/change_order_items}}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

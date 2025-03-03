@@ -101,55 +101,52 @@ function populatePaymentHistoryTable(takeoff_id) {
 
         });
 
-        // populate the change orders table 
-        const changeOrderTable = document.getElementById('changeOrderTable');
-        changeOrderTable.innerHTML = ''; // Clear existing rows
-        // add the headers
-        const changeOrderHeaderRow = changeOrderTable.insertRow();
-        const changeOrderHeaderCell0 = changeOrderHeaderRow.insertCell(0);
-        const changeOrderHeaderCell1 = changeOrderHeaderRow.insertCell(1);
-        const changeOrderHeaderCell2 = changeOrderHeaderRow.insertCell(2);
-        const changeOrderHeaderCell3 = changeOrderHeaderRow.insertCell(3);
+            // populate the change orders table 
+            const changeOrderTable = document.getElementById('changeOrderTable');
+            changeOrderTable.innerHTML = ''; // Clear existing rows
+            // add the headers
+            const changeOrderHeaderRow = changeOrderTable.insertRow();
+            const changeOrderHeaderCell0 = changeOrderHeaderRow.insertCell(0);
+            const changeOrderHeaderCell1 = changeOrderHeaderRow.insertCell(1);
+            const changeOrderHeaderCell2 = changeOrderHeaderRow.insertCell(2);
+            const changeOrderHeaderCell3 = changeOrderHeaderRow.insertCell(3);
+            const changeOrderHeaderCell4 = changeOrderHeaderRow.insertCell(4);
 
-        changeOrderHeaderCell0.textContent = 'Name';
-        changeOrderHeaderCell1.textContent = 'Number';
-        changeOrderHeaderCell2.textContent = 'Total';
-        changeOrderHeaderCell3.textContent = 'Status';
+            changeOrderHeaderCell0.textContent = 'Name';
+            changeOrderHeaderCell1.textContent = 'Number';
+            changeOrderHeaderCell2.textContent = 'Total';
+            changeOrderHeaderCell3.textContent = 'Status';
+            changeOrderHeaderCell4.textContent = ' ';
 
+            let changeOrders = data.change_orders;
 
-        let changeOrders = data.change_orders;
+            changeOrders.forEach(changeOrder => {
+                const row = changeOrderTable.insertRow();
+                const cell0 = row.insertCell(0);
+                const cell1 = row.insertCell(1);
+                const cell2 = row.insertCell(2);
+                const cell3 = row.insertCell(3);
+                const cell4 = row.insertCell(4);
 
-        changeOrders.forEach(changeOrder => {
-            const row = changeOrderTable.insertRow();
-            const cell0 = row.insertCell(0);
-            const cell1 = row.insertCell(1);
-            const cell2 = row.insertCell(2);
-            const cell3 = row.insertCell(3);
-
-            cell0.textContent = changeOrder.name;
-            cell1.textContent = "CO-"+ changeOrder.co_number;
-            if (changeOrder.status == 0) {
+                cell0.textContent = changeOrder.name;
+                cell1.textContent = "CO-"+ changeOrder.co_number;
+                if (changeOrder.status == 0) {
                 // add a yellow ! icon
                 cell3.innerHTML = 'unpaid <i style="color:orange;" class="fa-solid fa-triangle-exclamation"></i>';
-            }
-            else if (changeOrder.status == 1) {
-               // green circle check icon
+                }
+                else if (changeOrder.status == 1) {
+                   // green circle check icon
                 cell3.innerHTML = `Paid <i style="color:green;" class="fas fa-check-circle"></i>`;
 
-            } else if (changeOrder.status == 2) {
+                } else if (changeOrder.status == 2) {
                 cell3.textContent = 'Due';
                 // add red exclamation icon
                 cell3.innerHTML = `Due <i style="color:red;" class="fas fa-circle-exclamation"></i>`;
-            }
+                }
 
-            totalDue += parseFloat(changeOrder.change_order_total);
-            cell2.textContent = "$"+ changeOrder.change_order_total;
-
-     
-        }
-        );
-
-        // populate the options table
+                totalDue += parseFloat(changeOrder.change_order_total);
+                cell2.textContent = "$"+ changeOrder.change_order_total;
+                cell4.innerHTML = `<a style="text-decoration: none;" href="/viewChangeOrder/?changeOrderId=${changeOrder.id}">View</a>`;   });   // populate the options table
         const optionsTable = document.getElementById('optionsTable');
         optionsTable.innerHTML = ''; // Clear existing rows
         // add the headers

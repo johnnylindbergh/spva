@@ -247,6 +247,32 @@
 
 
         </div>
+
+        <!-- change order that can be added to invoice -->
+         <div class="change-order-container">
+            <h2>Change Orders</h2>
+            <table class="change-order-table">
+                <thead>
+                    <tr>
+                        <th>CO Number</th>
+                        <th>CO Description</th>
+                        <th>CO Total</th>
+                        <th>CO Created At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#change_orders}}
+                    <tr>
+                        <td>{{co_number}}</td>
+                        <td>{{description}}</td>
+                        <td>{{change_order_total}}</td>
+                        <td>{{created_at}}</td>
+                        <td><button onclick="addChangeOrderToInvoice('{{co_number}}')">Add</button></td>
+                    </tr>
+                    {{/change_orders}}
+                </tbody>
+            </table>
 </body>
 
 </html>

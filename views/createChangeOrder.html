@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Change Order</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- floating ui -->
+    <script src="https://cdn.jsdelivr.net/npm/@floating-ui/core@1.6.9"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.13"></script>
+    <!-- fontawesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Create Change Order</h1>
+        <form action="/submitChangeOrder" method="post"></form>
+            <!-- hidden input takeoff_id -->
+            <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
+            <div class="form-group">
+                <label for="customerName">Customer Name:</label>
+                <input type="text" class="form-control" id="customerName" name="customerName" value="{{takeoff.customer_givenName}}" required>
+            </div>
+            <div class="form-group">
+                <label for="customerAddress">Customer Address:</label>
+                <textarea class="form-control" id="customerAddress" name="customerAddress" rows="2" required>{{takeoff.customer_billing_address}}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="amountTable">Amount:</label>
+                <table class="table" id="amountTable">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Cost</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td><input type="text" class="form-control" name="itemDescription[]" required></td>
+                            <td><input type="number" class="form-control quantity" name="quantity[]" required></td>
+                            <td><input type="number" class="form-control cost" name="cost[]" required></td>
+                            <td class="total"></td>
+                            <td><button type="button" class="btn btn-danger remove-row">Remove</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-secondary" id="addRow">Add Row</button>
+            </div>
+
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="clientAgreement" name="clientAgreement" {{#clientAgreement}}checked{{/clientAgreement}}>
+                <label class="form-check-label" for="clientAgreement">Client Agreement Required</label>
+                <button type="button" class="btn btn-link p-0" id="tooltipButton">
+                    <i class="fas fa-question-circle" id="questionMark"></i>
+                </button>
+            </div>
+            <div id="tooltipContent" style="display: none;">
+                The client must agree to the terms and conditions before proceeding.
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Submit</button>
+        </form>
+    </div>
+    <script>
+        $(document).ready(function() {
+            function updateTotal(row) {
+                var quantity = parseFloat(row.find('.quantity').val()) || 0;
+                var cost = parseFloat(row.find('.cost').val()) || 0;
+                var total = quantity * cost;
+                row.find('.total').text(total.toFixed(2));
+            }
+
+            $('#addRow').click(function() {
+                var rowCount = $('#amountTable tbody tr').length + 1;
+                var newRow = `<tr>
+                                <td>${rowCount}</td>
+                                <td><input type="text" class="form-control" name="itemDescription[]" required></td>
+                                <td><input type="number" class="form-control quantity" name="quantity[]" required></td>
+                                <td><input type="number" class="form-control cost" name="cost[]" required></td>
+                                <td class="total"></td>
+                                <td><button type="button" class="btn btn-danger remove-row">Remove</button></td>
+                              </tr>`;
+                $('#amountTable tbody').append(newRow);
+            });
+
+            $(document).on('input', '.quantity, .cost', function() {
+                var row = $(this).closest('tr');
+                updateTotal(row);
+            });
+
+            $(document).on('click', '.remove-row', function() {
+                $(this).closest('tr').remove();
+                updateRowNumbers();
+            });
+
+            function updateRowNumbers() {
+                $('#amountTable tbody tr').each(function(index) {
+                    $(this).find('td:first').text(index + 1);
+                });
+            }
+
+            const questionMark = document.getElementById('questionMark');
+            const tooltipContent = document.getElementById('tooltipContent');
+
+            questionMark.addEventListener('mouseenter', () => {
+                tooltipContent.style.display = 'block';
+                FloatingUIDOM.computePosition(questionMark, tooltipContent, {
+                    placement: 'top',
+                }).then(({ x, y }) => {
+                    Object.assign(tooltipContent.style, {
+                        left: `${x}px`,
+                        top: `${y}px`,
+                    });
+                });
+            });
+
+            questionMark.addEventListener('mouseleave', () => {
+                tooltipContent.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
