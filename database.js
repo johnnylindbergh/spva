@@ -1217,12 +1217,12 @@ module.exports = {
     );
   },
 
-      // change order is invoicable if it is marked as require_client_approval = false, or it is signed ie takeoff status > 4;
+      // change order is invoicable if it is marked as require_client_approval = false, or status > 0; 
   getInvoicableChangeOrdersByTakeoffId: function (takeoff_id, callback) {
     con.query(
       `SELECT * FROM change_orders 
        WHERE takeoff_id = ? 
-       AND (require_client_approval = false OR (SELECT status FROM takeoffs WHERE id = takeoff_id) > 4);`,
+       AND (require_client_approval = 0 OR status > 0); `,
       [takeoff_id],
       function (err, changeOrders) {
         if (err) return callback(err);

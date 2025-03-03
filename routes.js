@@ -2568,7 +2568,7 @@ module.exports = function (app) {
           let totalAmount = 0;
           for (let i = 0; i < change_order_items.length; i++) {
           totalAmount += parseFloat(change_order_items[i].total);
-          change_order_items[i].total = numbersWithCommas(parseFloat(change_order_items[i].total).toFixed(2));
+          change_order_items[i].total = numbersWithCommas((parseFloat(change_order_items[i].cost) * parseFloat(change_order_items[i].quantity)).toFixed(2));
           change_order_items[i].number = i + 1;
           }
 
