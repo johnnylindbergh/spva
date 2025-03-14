@@ -18,6 +18,46 @@
 
 
     <script>
+
+        function updateChangeOrderStatus(){
+            // get the value of the radio button
+            const radioInput = $("input[name='share']:checked").val();
+            const change_order_id = $('#change_order_id').val();
+            console.log(radioInput);
+            let status = 0;
+
+            // post the value to the server
+            // if status is yes, set to 1, if no, set to 0
+            if(radioInput == "yes"){
+                status = 1;
+            } else {
+                status = 0;
+            }
+
+
+            $.post('/updateChangeOrderStatus', {status: status, change_order_id: change_order_id}, function(data) {
+                console.log("data",data);
+                if (data == "success") {
+                    XSAlert({
+                        title: 'Change Order Status Updated',
+                        message: 'The change order status has been updated.',
+                        icon: 'success',
+                    });
+
+                    // hide 
+            
+                    $('#changeOrderConfirmation').hide();
+                } else {
+                    XSAlert({
+                        title: 'Error',
+                        message: 'The change order status could not be updated.',
+                        icon: 'error',
+                    });
+                }
+            });
+
+        }
+
 function shareChangeOrderWithClient(){
     const change_order_id = $('#change_order_id').val();
     console.log(change_order_id);
@@ -54,9 +94,13 @@ function shareChangeOrderWithClient(){
 </head>
 <body>
     <div class="container mt-5">
-        <h2>Change Order Details</h2>
-        <input type="hidden" id="change_order_id" value="{{change_order.id}}">
-        <table class="table table-bordered">
+        {{#change_order}}
+        <h2>Change Order {{co_number}}</h2>
+       
+    </br>
+        <input type="hidden" id="change_order_id" value="{{id}}">
+        {{/change_order}}
+        <!-- <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>Field</th>
@@ -107,9 +151,28 @@ function shareChangeOrderWithClient(){
                 </tr>
                 {{/change_order}}
             </tbody>
-        </table>
+        </table> -->
 
-        <h3>Change Order Items</h3>
+
+        <!-- header section that just has name description, and change_order_total -->
+         {{#change_order}}
+        <div class="card">
+            <div class="card-header">
+                <h3>{{name}}</h3>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title
+                ">Description</h5>
+                <p class="card-text">{{description}}</p>
+                <h5 class="card-title
+                ">Change Order Total</h5>
+                <p class="card-text">{{change_order_total}}</p>
+            </div>
+        </div>
+        {{/change_order}}
+
+    </br>
+
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -138,6 +201,9 @@ function shareChangeOrderWithClient(){
 
         <!--  radio buttons yes, no -->
 
+        <div id="changeOrderConfirmation">
+
+        
         <div class="form-check">
             <input class="form-check
             -input" type="radio" name="share" id="shareYes" value="yes">
@@ -155,9 +221,11 @@ function shareChangeOrderWithClient(){
             </label>
         </div>
 
+        
         <!-- submit button -->
         <button class="btn btn-primary mt-3" id="updateChangeOrderStatus" onclick="updateChangeOrderStatus()">Submit</button>
         <!-- <button class="btn btn-primary mt-3" id="shareWithClient" onclick="shareChangeOrderWithClient()">Share with Client</button> -->
+    </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>

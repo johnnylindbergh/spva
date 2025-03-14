@@ -1282,7 +1282,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
         `SELECT * FROM change_orders WHERE hash = ?; `,
         [hash],
         function (err, changeOrder) {
-          if (err) return callback(err);
+          if (err || changeOrder.length == 0) return callback(err);
           console.log(changeOrder);
           con.query(
             `SELECT * FROM change_order_items WHERE change_order_id = ?; `,
@@ -1304,6 +1304,17 @@ getChangeOrderItemsById: function (change_order_id, callback) {
               callback(null, changeOrder, changeOrderItems);
             }
           );
+        }
+      );
+    },
+
+    updateChangeOrderStatus: function (change_order_id, status, callback) {
+      con.query(
+        "UPDATE change_orders SET status = ? WHERE id = ?;",
+        [status, change_order_id],
+        function (err) {
+          if (err) return callback(err);
+          callback(null);
         }
       );
     },

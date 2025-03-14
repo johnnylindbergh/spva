@@ -2735,6 +2735,21 @@ module.exports = function (app) {
         }
       );
     });
+
+    app.post ("/updateChangeOrderStatus", mid.isAdmin, function (req, res) {
+      console.log("updating change order status");
+      console.log(req.body);
+      db.updateChangeOrderStatus(req.body.change_order_id, parseInt(req.body.status), function (err) {
+        if (err) {
+          console.log(err);
+          res.send("error updating change order status");
+        } else {
+          res.send("success");
+        }
+      });
+    }
+    );
+
   
 
 
