@@ -12,6 +12,7 @@ let material_markup = 0;
 let supervisor_markup = 0;
 let travel_extra = 0;
 let touchups_cost = 0;
+let misc_material_cost = 0;
 let tax = 0;
 let profit = 0;
 
@@ -330,7 +331,7 @@ function changeLaborRate() {
 
 const debounceChangeLaborRate = debounce(function () {
   changeLaborRate();
-}, 500);
+}, 200);
 
 function changeLaborMarkupHelper(value) {
   labor_markup = value / 100;
@@ -340,7 +341,7 @@ function changeLaborMarkupHelper(value) {
 
 const debounceChangeLaborMarkup = debounce(function (value) {
   changeLaborMarkup(value);
-}, 500);
+}, 200);
 
 function changeLaborMarkup(value) {
   labor_markup = value / 100.0;
@@ -412,7 +413,7 @@ function changeMaterialMarkup(value) {
 
 const debounceChangeMaterialMarkup = debounce(function (value) {
   changeMaterialMarkup(value);
-}, 500);
+}, 200);
 
 function updateSupervisorMarkup(value) {
   supervisor_markup = value / 100.0;
@@ -450,7 +451,7 @@ function updateSupervisorMarkupHelper(value) {
 const debounceUpdateSupervisorMarkup = debounce(function (value) {
 
   updateSupervisorMarkup(value);
-}, 500);
+}, 200);
 
 
 function updateTravelExtra(value) {
@@ -487,7 +488,7 @@ function updateTouchupsCostHelper(value) {
 
 const debounceUpdateTouchupsCost = debounce(function (value) {
   updateTouchupsCost(value);
-}, 500);
+}, 200);
 
 function updateTouchupsCost(value) {
   touchups_cost = value;
@@ -550,7 +551,7 @@ function updateProfitHelper(value) {
 
 const debounceUpdateProfit = debounce(function (value) {
   updateProfit(value);
-}, 500);
+}, 200);
 
 
 function updateTaxHelper(value) {
@@ -561,7 +562,7 @@ function updateTaxHelper(value) {
 
 const debounceUpdateTax = debounce(function (value) {
   updateTax(value);
-} , 500);
+} , 200);
 
 function updateTax(value) {
   tax = value;
@@ -590,6 +591,41 @@ function updateTax(value) {
 }
 
 
+function updateMiscMaterialCostHelper(value) {
+  misc_material_cost = value;
+  $('#miscMaterialCostValue').text("$" + misc_material_cost);
+  debounceUpdateMiscMaterialCost(value);
+}
+
+const debounceUpdateMiscMaterialCost = debounce(function (value) {
+  updateMiscMaterialCost(value);
+}  , 200);
+
+function updateMiscMaterialCost(value) {
+  misc_material_cost = value;
+  console.log("Changing misc material cost to: " + misc_material_cost);
+  $("#miscMaterialCost").val(parseFloat(value));
+  $.post("/change-misc-material-cost", { takeoff_id: takeoff_id, misc_material_cost: misc_material_cost })
+    .done(function () {
+      console.log("Misc material cost updated: " + misc_material_cost);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      XSAlert({
+        title: 'Error',
+        message: 'Cannot modify signed takeoff',
+        icon: 'error',
+        hideCancelButton: true
+      }).then((result) => {
+
+        console.log('clicked');
+        // go back one page
+        //window.history.back();
+        console.log("i gonna edit it anyway")
+      });
+    });
+}
+
 
 
 
@@ -616,6 +652,7 @@ function loadTakeoffMaterials(id) {
       supervisor_markup = parseFloat(data.takeoff[0].supervisor_markup);
       travel_extra = parseFloat(data.takeoff[0].travel_cost);
       touchups_cost = parseFloat(data.takeoff[0].touchups_cost);
+      misc_material_cost = parseFloat(data.takeoff[0].misc_materials_cost);
       profit = parseFloat(data.takeoff[0].profit);
       tax = parseFloat(data.takeoff[0].tax);
       paintOrder = [];
@@ -722,7 +759,7 @@ function loadTakeoffMaterials(id) {
           // Wait one sec and then reload the table to reflect changes
           setTimeout(function () {
             loadTakeoffMaterials(takeoff_id);
-          }, 500);
+          }, 200);
         });
 
         measurementUnitInput.on("change", function () {
@@ -732,7 +769,7 @@ function loadTakeoffMaterials(id) {
           // Wait one sec and then reload the table to reflect changes
           setTimeout(function () {
             loadTakeoffMaterials(takeoff_id);
-          }, 500);
+          }, 200);
         });
 
         // Labor price input
@@ -784,6 +821,10 @@ function loadTakeoffMaterials(id) {
                 material.id +
                 ")'>"
               );
+              // append the coverage of the material
+              materialCell.append(" " + material.coverage + " sqft/gal @ ");
+
+
               materialsCell.append(materialCell);
 
               // Parse values and handle NaN
@@ -910,6 +951,9 @@ function loadTakeoffMaterials(id) {
         $("#takeoff_materials_table").append(newRow);
       });
 
+
+      materialTotal += misc_material_cost;
+
       // if labor_markup is not 0 then adjust the labor total
       if (labor_markup != 0) {
         laborTotalAdjusted = laborTotal * (1 + parseFloat(labor_markup));
@@ -917,16 +961,31 @@ function loadTakeoffMaterials(id) {
         laborTotalAdjusted = laborTotal
       }
 
+    
+      
+
+      let materialTotalMarkedUp = materialTotal;
       if (material_markup != 0) {
-        materialTotal = materialTotal * (1 + parseFloat(material_markup));
+        materialTotalMarkedUp = materialTotal * (1 + parseFloat(material_markup));
+      }
+
+      
+
+      let materialTotalTaxed = materialTotalMarkedUp;
+      if (tax != 0) {
+        materialTotalTaxed = (materialTotalTaxed * (1 + parseFloat(tax) / 100));
       }
 
 
-
-      let adjustedTotal = laborTotalAdjusted + materialTotal;
-      let costOfGoodsSold = laborTotal + materialTotal;
+      let adjustedTotal = laborTotalAdjusted + materialTotalMarkedUp + travel_extra;
+      let costOfGoodsSold = laborTotal + materialTotal + travel_extra;
       
 
+      let finalTotal = laborTotalAdjusted + materialTotalTaxed + touchups_cost + travel_extra
+
+
+
+     
 
       if (isNaN(adjustedTotal) || !isFinite(adjustedTotal)) {
         console.log("Total is NaN or Infinite");
@@ -935,7 +994,7 @@ function loadTakeoffMaterials(id) {
 
 
       if (supervisor_markup != 0 || supervisor_markup != null) {
-        adjustedTotal = adjustedTotal * (1 + supervisor_markup);
+        finalTotal = finalTotal * (1 + supervisor_markup);
       }
 
       if (travel_extra != 0 && travel_extra != null) {
@@ -947,12 +1006,10 @@ function loadTakeoffMaterials(id) {
       }
 
       if (profit != 0 && profit != null) {
-        adjustedTotal = adjustedTotal * (1 + (parseFloat(profit)/100));
+        finalTotal = finalTotal * (1 + (parseFloat(profit)/100));
       }
 
-      if (tax != 0 && tax != null) {
-        adjustedTotal = adjustedTotal * (1 + (parseFloat(tax)/100));
-      }
+     
 
 
       if (isNaN(adjustedTotal) || !isFinite(adjustedTotal)) {
@@ -961,14 +1018,15 @@ function loadTakeoffMaterials(id) {
       }
 
 
-      let grossProfit = adjustedTotal - costOfGoodsSold;
-      let grossProfitMargin = (grossProfit / adjustedTotal) * 100;
+      let grossProfit = adjustedTotal-touchups_cost - costOfGoodsSold;
+      let grossProfitMargin = (grossProfit / (adjustedTotal- touchups_cost)) * 100;
 
+      grossProfitMargin += parseFloat(profit);
       $("#grossProfit").text("Gross Profit: $" + numberWithCommas(grossProfit.toFixed(2)));
       $("#grossProfitMargin").text("Gross Profit Margin: " + grossProfitMargin.toFixed(2) + "%");
       
       // Update total sum
-      $("#sum").text("Total Cost: $" + numberWithCommas((adjustedTotal).toFixed(2)));
+      $("#sum").text("Total Cost: $" + numberWithCommas((finalTotal).toFixed(2)));
 
       // Update labor total
       if (laborTotalAdjusted) {
@@ -980,7 +1038,7 @@ function loadTakeoffMaterials(id) {
 
       }
 
-      $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialTotal.toFixed(2)));
+      $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialTotalTaxed.toFixed(2)));
 
 
 
@@ -988,9 +1046,9 @@ function loadTakeoffMaterials(id) {
       //now post the new sums to /updateTakeoffTotal
       $.post("/updateTakeoffTotal", {
         takeoff_id: takeoff_id,
-        total: (adjustedTotal).toFixed(2),
+        total: (finalTotal).toFixed(2),
         laborTotal: (laborTotalAdjusted.toFixed(2) || laborTotal.toFixed(2)),
-        materialTotal: materialTotal.toFixed(2),
+        materialTotal: materialTotalTaxed.toFixed(2),
       })
         .done(function () {
           console.log("Total updated for takeoff: " + takeoff_id);
@@ -1094,6 +1152,7 @@ function laborPriceChange(id) {
     });
 }
 
+/// this function has an error: the id is matched from the first appearance in the page which is not necescarily the correct material. Fix by passing the row id into the function. This new identifier will be unique to each row
 function priceChange(id) {
   //this function doesent actually change the price of the material, it changes the price delta
   //so just get the newPrice and subtract it from the original price
@@ -1126,7 +1185,7 @@ function priceChange(id) {
   // wait 0.5 seconds and then call loadTakeoffMaterials
   setTimeout(function () {
     loadTakeoffMaterials(takeoff_id);
-  }, 500);
+  }, 200);
 }
 
 function renderPaintOrder(paintOrder) {
@@ -1154,7 +1213,7 @@ function createSubjectIntent() {
   // hide the button
   $("#add-subject-button").hide();
 
-  // scroll the page down 500px
+  // scroll the page down 200px
   //window.scrollBy(0, 100);
 
   let name = $("#new_subject_name").val();
@@ -1351,12 +1410,12 @@ $(document).ready(function () {
 
   setTimeout(function () {
     loadTakeoffMaterials(takeoff_id);
-  }, 300);
+  }, 100);
 
 
   // setTimeout(function () {
   //   updateLaborRate();
-  // }, 500);
+  // }, 200);
 
   // setTimeout(function () { // initiates the status check
   //   changeLaborMarkupHelper(labor_markup*100);
@@ -1377,5 +1436,5 @@ $(document).ready(function () {
 
   // setInterval(function () {
   //   loadTakeoffMaterials(takeoff_id);
-  // }, 5000);
+  // }, 2000);
 });

@@ -525,7 +525,7 @@ module.exports = {
     ];
 
     //console.log("the headers of the csv are: ",headers);
-    for (var i = 1; i < results.length; i++) {
+    for (var i = 0; i < results.length; i++) {
       // format all values in the row and set blank values to zero
       for (var j = 0; j < results[i].length; j++) {
         if (
@@ -551,6 +551,10 @@ module.exports = {
       var subjectIndex = headers.indexOf("Subject");
       if (subjectIndex === -1) {
         subjectIndex = headers.indexOf("subject");
+        if (subjectIndex === -1){
+          console.log("Error: could not find subject column in the csv file");
+          return cb("Error: could not find subject column in the csv file");
+        }
       }
       var subject = results[i][subjectIndex];
       
@@ -1115,6 +1119,17 @@ module.exports = {
     );
   },
 
+  changeMiscMaterialCost: function (takeoff_id, misc_material_cost, callback) {
+    console.log("change misc material cost: ", misc_material_cost);
+    con.query(
+      "UPDATE takeoffs SET misc_materials_cost = ? WHERE id = ?;", [misc_material_cost, takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
   changeProfit: function (takeoff_id, profit, callback) {
     console.log("change profit: ", profit);
     con.query(
@@ -1196,11 +1211,15 @@ module.exports = {
 
   getChangeOrderById: function (change_order_id, callback) {
     con.query(
-      "SELECT * FROM change_orders WHERE id = ?; ",
+      `SELECT change_orders.*, customers.primary_email_address AS owner_email 
+       FROM change_orders 
+       JOIN takeoffs ON change_orders.takeoff_id = takeoffs.id 
+       JOIN customers ON takeoffs.customer_id = customers.id 
+       WHERE change_orders.id = ?;`,
       [change_order_id],
       function (err, changeOrder) {
-        if (err) return callback(err);
-        callback(null, changeOrder[0]);
+      if (err) return callback(err);
+      callback(null, changeOrder[0]);
       }
     );
   },
@@ -1255,6 +1274,39 @@ getChangeOrderItemsById: function (change_order_id, callback) {
       }
     );
   },
+
+
+  // get change order and then change_order_items by hash
+  getSharedChangeOrder: function (hash, callback) {
+      con.query(
+        `SELECT * FROM change_orders WHERE hash = ?; `,
+        [hash],
+        function (err, changeOrder) {
+          if (err) return callback(err);
+          console.log(changeOrder);
+          con.query(
+            `SELECT * FROM change_order_items WHERE change_order_id = ?; `,
+            [changeOrder[0].id],
+            function (err, changeOrderItems) {
+              if (err) return callback(err);
+
+              // for each change order item set the total if it is not already set and set the cardinal number
+              for (let i = 0; i < changeOrderItems.length; i++) {
+                let changeOrderItem = changeOrderItems[i];
+                changeOrderItem.total = changeOrderItem.quantity * changeOrderItem.cost;
+                changeOrderItem.total = parseFloat(changeOrderItem.total).toFixed(2)
+
+                changeOrderItem.number = i + 1;
+              }
+
+
+              console.log(changeOrderItems);
+              callback(null, changeOrder, changeOrderItems);
+            }
+          );
+        }
+      );
+    },
 
 
   // this function is used to create a new change order
@@ -1660,7 +1712,8 @@ getChangeOrderItemsById: function (change_order_id, callback) {
           takeoffs.total as estimateTotal, 
           invoices.total as invoiceTotal, 
           invoices.invoice_number,
-          invoices.qb_number
+          invoices.qb_number,
+          invoices.status as invoice_status
         FROM 
           invoices 
         INNER JOIN 
@@ -2112,7 +2165,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
             // also update the signed_at date
             con.query(
               "UPDATE takeoffs SET signed_at = NOW() WHERE id = ?;",
-              [date, takeoff_id],
+              [takeoff_id],
               function (err) {
                 if (err) return callback(err);
                 //callback(true, null);
@@ -2209,9 +2262,9 @@ getChangeOrderItemsById: function (change_order_id, callback) {
               let currentSubject = subjects[i].subject;
               let currentSubjectId = subjects[i].id;
 
-              if (currentSubject == null) {
-                continue;
-              }
+              // if (currentSubject == null) {
+              //   continue;
+              // }
 
              //if the current subject contains "notes" or note, skip it
               // if (currentSubject && (currentSubject.toLowerCase().includes("note")) || currentSubject.toLowerCase().includes("notes")) {
@@ -2974,7 +3027,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
           return cb(err);
         }
         const currentStatus = results[0].status;
-        if (currentStatus < status) {
+        if (currentStatus <= status) {
           con.query(
             "UPDATE takeoffs SET status = ? WHERE id = ?;",
             [status, takeoff_id],

@@ -1,4 +1,4 @@
-
+#!/usr/bin/env node
 /*
   server.js: Main file used to set up server
 */

@@ -69,7 +69,7 @@ async function syncCustomers() {
 
     const values = customers.map((customer) => [
       customer.Id,
-      customer.GivenName + ' ' + (customer.FamilyName || ''),
+      (customer.GivenName || '') + ' ' + (customer.FamilyName || customer.FullyQualifiedName),
       customer.FullyQualifiedName,
       customer.PrimaryEmailAddr?.Address || null,
       customer.PrimaryPhone?.FreeFormNumber || null,
@@ -217,13 +217,13 @@ module.exports = function (app) {
                            authResponse.getToken().access_token,
                            false, // no token secret for OAuth 2.0
                            authResponse.getToken().realmId,
-                           true, // use the Sandbox
+                           false, // use the Sandbox
                            true, // turn debugging on
                            '75', // minorversion
                            '2.0', // OAuth version
                            authResponse.getToken().refresh_token);
       await syncCustomers();
-      // test out account access
+      //test out account access
       // qbo.findAccounts(function(_, accounts) {
       //   accounts.QueryResponse.Account.forEach(function(account) {
       //     console.log(account.Name);
@@ -236,6 +236,10 @@ module.exports = function (app) {
 
       qbo.findInvoices({ }, async function (err, invoices) {
         console.log(invoices.Error);
+        if (err) {
+          console.log(err);
+          return;
+        }
         for (var i = 0; i < invoices.QueryResponse.Invoice.length; i++) {
           let invoice = invoices.QueryResponse.Invoice[i];
           let total = 0;
@@ -504,13 +508,13 @@ module.exports = function (app) {
 
             // Sync invoice to database
             const sql = `
-              INSERT INTO invoices (id, customer_id, total, due_date, invoice_date, status, hash) VALUES ?
+              INSERT INTO invoices (id, customer_id, total, due_date, invoice_date, hash) VALUES ?
               ON DUPLICATE KEY UPDATE
               customer_id = VALUES(customer_id),
               total = VALUES(total),
               due_date = VALUES(due_date),
               invoice_date = VALUES(invoice_date),
-              status = VALUES(status,
+              total = VALUES(total),
               hash = VALUES(hash);
             `;
             const values = [[

@@ -167,15 +167,15 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
                       console.log(err);
                       cb(err);
                     }
-                    cb(null); 
+                    //cb(null); 
                     
-                    // db.matchSubjectsToMaterial(takeoff_id, function(err){
-                    //   if (err) {
-                    //     console.log(err);
-                    //     cb(err);
-                    //   }
-                    //  cb(null);
-                    // });
+                    db.matchSubjectsToMaterial(takeoff_id, function(err){
+                      if (err) {
+                        console.log(err);
+                        cb(err);
+                      }
+                     cb(null);
+                    });
                     
                   }); 
 
@@ -695,6 +695,31 @@ module.exports = function (app) {
         else {
           console.log("Takeoff is signed, cannot change touchups cost");
           res.status(500).send("Takeoff is signed, cannot change touchups cost");
+        }
+      }
+    });
+  });
+
+  app.post("/change-misc-material-cost", mid.isAdmin, function (req, res) {
+    console.log("changing misc material cost ", req.body);
+    db.takeoffGetStatus(req.body.takeoff_id, function (err, status) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving takeoff status");
+      } else {
+        if (status < 4) {
+          db.changeMiscMaterialCost(req.body.takeoff_id, req.body.misc_material_cost, function (err) {
+            if (err) {
+              console.log(err);
+              res.status(500).send("Error updating misc material cost");
+            } else {
+              console.log("updated misc material cost");
+              res.end();
+            }
+          });
+        } else {
+          console.log("Takeoff is signed, cannot change misc material cost");
+          res.status(500).send("Takeoff is signed, cannot change misc material cost");
         }
       }
     });
@@ -2191,8 +2216,13 @@ module.exports = function (app) {
           if (invoice == null || invoice.length == 0) {
             console.log("invoice not found");
             res.render("error.html", { link:'/payment', linkTitle:'enter another invoice number',friendly: "The invoice number you entered was not found. Please check the number and try again." });
+          } else if (parseInt(invoice[0].invoice_status) == 1) {
+            // oh no, are you trying to pay a paid invoice?
+            console.log("invoice already paid");
+            res.render("error.html", { link:'/payment', linkTitle:'enter another invoice number',friendly: "The invoice you are trying to pay has already been paid." });
           } else {
             // remove the hash from the invoice
+            console.log(invoice[0].invoice_status);
             invoice[0].hash = null;
             res.render("invoice.html", { invoice: invoice[0] });
           }
@@ -2295,9 +2325,27 @@ module.exports = function (app) {
     app.post('/create-invoice', mid.isAdmin, (req, res) => {
       console.log("/create-invoice received", req.body);
   
-      const { customer_name, invoice_email_address, takeoff_id, invoice_items } = req.body;
+      const { customer_name, takeoff_id, invoice_items} = req.body;
+      let changeOrderIds = req.body.change_order_ids;
       let invoice_name = req.body.invoice_name || `Invoice for ${customer_name}`;
       let invoiceTotal = 0;
+
+
+      // somtimes an array, sometimes not
+
+      if (Array.isArray(changeOrderIds)) {
+      } else {
+        changeOrderIds = [changeOrderIds];
+      }
+
+      console.log("change order ids", changeOrderIds);
+
+
+      changeOrderIds.forEach((changeOrderId, index) => {
+        changeOrderIds[index] = parseInt(changeOrderId);
+      });
+
+
   
       // Calculate invoice total
       if (Array.isArray(invoice_items) && invoice_items.length > 0) {
@@ -2319,7 +2367,7 @@ module.exports = function (app) {
             }
 
             // Generate invoice number
-            const long_id = String(Math.floor(Math.random() * 10000000)) + String(takeoff_id);
+            const long_id = String(Math.floor(Math.random() * 100000)) + String(takeoff_id);
             const invoiceNumber = `${long_id.padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
 
             // Insert invoice into the database
@@ -2330,31 +2378,87 @@ module.exports = function (app) {
                     console.error("Error inserting invoice:", err);
                     return res.status(500).json({ error: 'Failed to create invoice.' });
                 }
-                console.log(results);
+                //console.log(results);
                 const invoiceId = results[1][0].invoice_id;
 
-                // Insert invoice items
-                console.log("Inserting invoice items");
-                console.log("invoice_id", invoiceId);
-                console.log("items", invoice_items);
-                if (invoice_items.length > 0) {
-                  for (var i = 0; i < invoice_items.length; i++) {
-                    const item = invoice_items[i];
-                    if (item.description === "") {
-                      item.description = "N/A";
-                    }
-                    const insertItemQuery = `INSERT INTO invoice_items (invoice_id, description, cost, quantity) VALUES (?, ?, ?, ?)`;
-                    db.query(insertItemQuery, [invoiceId, item.description, item.cost, item.quantity], function (err) {
-                        if (err) {
-                            console.error("Error inserting invoice item:", err);
-                        }
+                // for each id in the changeOrderIds make insert into invoice_change_orders table
+                // then, query the db for change orders and add them to the invoice_items array
+                if (changeOrderIds.length > 0) {
+                  for (var i = 0; i < changeOrderIds.length; i++) {
+                    const changeOrderId = changeOrderIds[i];
+                    const insertChangeOrderQuery = `INSERT INTO invoice_change_orders (invoice_id, change_order_id) VALUES (?, ?)`;
+                    db.query(insertChangeOrderQuery, [invoiceId, changeOrderId], function (err){
+                      if (err) {
+                        console.error("Error inserting invoice change order:", err);
+                      }
                     });
                   }
-                  res.status(201).json({ message: "Invoice created and items added.", invoice_id: invoiceId });
-
-                } else {
-                    res.status(201).json({ message: "Invoice created but no items added." });
                 }
+
+                let changeOrdersTotal = 0;
+                const changeOrderPromises = changeOrderIds.map(changeOrderId => {
+                  return new Promise((resolve, reject) => {
+                    db.getChangeOrderById(changeOrderId, function (err, changeOrder) {
+                      if (err) {
+                        console.error("Error fetching change order:", err);
+                        reject(err);
+                      } else {
+                        console.log("change order", changeOrder);
+                        invoice_items.push({
+                          description: "CO-" + changeOrder.co_number + " " + changeOrder.description,
+                          cost: changeOrder.change_order_total,
+                          quantity: 1
+                        });
+                        changeOrdersTotal += changeOrder.change_order_total;
+                        resolve();
+                      }
+                    });
+                  });
+                });
+
+
+                Promise.all(changeOrderPromises).then(() => {
+
+                  // first update the invoice total to include the change orders
+                  const updateInvoiceTotalQuery = `UPDATE invoices SET total = total + ? WHERE id = ?`;
+                  db.query(updateInvoiceTotalQuery, [ parseFloat(changeOrdersTotal) + parseFloat(invoiceTotal), invoiceId], function (err) {
+                    if (err) {
+                      console.error("Error updating invoice total:", err);
+                      return res.status(500).json({ error: 'Failed to update invoice total.' });
+                    }
+                  });
+
+                  // Insert invoice items
+                  console.log("Inserting invoice items");
+                  console.log("invoice_id", invoiceId);
+                  console.log("items", invoice_items);
+                  const itemPromises = invoice_items.map(item => {
+                    return new Promise((resolve, reject) => {
+                      if (item.description === "") {
+                        item.description = "N/A";
+                      }
+                      const insertItemQuery = `INSERT INTO invoice_items (invoice_id, description, cost, quantity) VALUES (?, ?, ?, ?)`;
+                      db.query(insertItemQuery, [invoiceId, item.description, item.cost, item.quantity], function (err) {
+                        if (err) {
+                          console.error("Error inserting invoice item:", err);
+                          reject(err);
+                        } else {
+                          resolve();
+                        }
+                      });
+                    });
+                  });
+
+                  Promise.all(itemPromises).then(() => {
+                    res.status(201).json({ message: "Invoice created and items added.", invoice_id: invoiceId });
+                  }).catch(err => {
+                    console.error("Error inserting invoice items:", err);
+                    res.status(500).json({ error: 'Failed to add invoice items.' });
+                  });
+                }).catch(err => {
+                  console.error("Error fetching change orders:", err);
+                  res.status(500).json({ error: 'Failed to fetch change orders.' });
+                });
             });
         });
       
@@ -2593,11 +2697,11 @@ module.exports = function (app) {
       });
     });
 
-    app.post('/shareChangeOrder', mid.isAdmin, function (req, res) {
-      console.log("sending email to client ", req.body.takeoff_id);
-      if (req.body.takeoff_id) {
+    app.post('/shareChangeOrderWithClient', mid.isAdmin, function (req, res) {
+      console.log("sending email to client ", req.body.change_order_id);
+      if (req.body.change_order_id) {
         console.log("sending email ");
-        emailer.sendChangeOrderEmail(req, res, req.body.takeoff_id, req.body.change_order_id, function (err, response) {
+        emailer.sendChangeOrderEmail(req, res, req.body.change_order_id, function (err, response) {
           if (err) {
             console.log(err);
             res.send("email failed");
@@ -2620,23 +2724,19 @@ module.exports = function (app) {
       }
       db.getSharedChangeOrder(
         hash,
-        function (err, change_order, items, takeoff, totalAmount) {
+        function (err, change_order, change_order_items) {
           if (err || change_order == null) {
             console.log(err);
             res.redirect("/");
           } else {
             console.log(change_order);
-            console.log(items);
-            console.log(totalAmount);
-            // some renameing to make the change order object render work
-            change_order.change_order_id = change_order.id;
-            change_order.change_orderTotal = change_order.total;
-            res.render("viewChangeOrderClient.html", { change_order: change_order, change_order_items: items, takeoff: takeoff, totalAmount: totalAmount.toFixed(2)});
+            res.render("viewChangeOrderClient.html", { change_order: change_order, change_order_items: change_order_items });
           }
         }
       );
-    }
-    );
+    });
+  
+
 
     // this function handles the form to create a new change order
     app.post("/submitChangeOrder", mid.isAdmin, function (req, res) {
@@ -2647,7 +2747,7 @@ module.exports = function (app) {
           console.log(err);
           res.send("error creating change order");
         } else {
-          res.send("change order created");
+          res.redirect("/viewChangeOrder?changeOrderId=" + change_order_id);
         }
       });
     });

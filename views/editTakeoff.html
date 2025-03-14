@@ -107,6 +107,13 @@
         <br>
 
         <div style="display: flex; align-items: center;">
+          <label for="miscMaterialCost" style="width: 150px; white-space: nowrap;">Misc Materials:</label>
+          <input type="range" id="miscMaterialCost" name="slider" min="0" max="5000" value="{{misc_materials_cost}}" oninput="updateMiscMaterialCostHelper(this.value)" style="width: 200px;">
+          <span id="miscMaterialCostValue" style="display: inline; width: 70px;">${{misc_materials_cost}}</span>
+        </div>
+        <br>
+
+        <div style="display: flex; align-items: center;">
           <label for="profit" style="width: 150px; white-space: nowrap;">GB Profit:</label>
           <input type="range" id="profit" name="slider" min="0" max="100" value="{{profit}}" oninput="updateProfitHelper(this.value)" style="width: 200px;">
           <span id="profitValue" style="display: inline; width: 70px;">{{profit}}%</span>

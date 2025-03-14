@@ -135,7 +135,29 @@ function shareChangeOrderWithClient(){
             </tbody>
         </table>
 
-        <button class="btn btn-primary mt-3" id="shareWithClient" onclick="shareChangeOrderWithClient()">Share with Client</button>
+
+        <!--  radio buttons yes, no -->
+
+        <div class="form-check">
+            <input class="form-check
+            -input" type="radio" name="share" id="shareYes" value="yes">
+            <label class="form-check
+            -label" for="shareYes">
+                Yes
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check
+            -input" type="radio" name="share" id="shareNo" value="no">
+            <label class="form-check
+            -label" for="shareNo">
+                No
+            </label>
+        </div>
+
+        <!-- submit button -->
+        <button class="btn btn-primary mt-3" id="updateChangeOrderStatus" onclick="updateChangeOrderStatus()">Submit</button>
+        <!-- <button class="btn btn-primary mt-3" id="shareWithClient" onclick="shareChangeOrderWithClient()">Share with Client</button> -->
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>

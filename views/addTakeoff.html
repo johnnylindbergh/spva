@@ -11,6 +11,9 @@
   <!-- Select2 CSS and JS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <!-- Bootstrap CSS and JS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
@@ -25,39 +28,38 @@
       </div>
     </ul>
   </div>
-  {{#auth}} 
-  <div class="container">
-    <h2>
-      {{#message}}
-        <p>{{message}}</p>
-      {{/message}}
-    </h2> </br>
-  {{/auth}}
 
-<div>
-<form action="/uploadTakeoff" method="post" enctype="multipart/form-data">
-  
-  <div class="customer-section">
-    <h3>Select Customer and Project</h3>
+<div class="container mt-4">
+  <form action="/uploadTakeoff" method="post" enctype="multipart/form-data" class="card p-4 shadow-sm">
+    <div class="mb-3">
+      <h3>Select Customer and Project</h3>
+    </div>
     
     <!-- Searchable dropdown for customers -->
-    <label for="customerDropdown">Customer:</label>
-    <select id="customerDropdown" name="customer" class="searchable-dropdown">
-      <option value="" disabled selected>Select a Customer</option>
-    </select>
-    <br><br>
-  </div>
-  
-  <h2></h2>
-  Takeoff Name: <input type="text" name="takeoffName"/> <br>
-  <input type="file" name="takeoff" />
-  <input type="submit" value="Upload">
-</form>
+    <div class="mb-3">
+      <label for="customerDropdown" class="form-label">Customer:</label>
+      <select id="customerDropdown" name="customer" class="form-select searchable-dropdown" style="width: 100%;">
+        <option value="" disabled selected>Select a Customer</option>
+      </select>
+    </div>
+    
+    <div class="mb-3">
+      <label for="takeoffName" class="form-label">Takeoff Name:</label>
+      <input type="text" id="takeoffName" name="takeoffName" class="form-control" />
+    </div>
+    
+    <div class="mb-3">
+      <label for="takeoffFile" class="form-label">Upload File:</label>
+      <input type="file" id="takeoffFile" name="takeoff" class="form-control" />
+    </div>
+    
+    <button type="submit" class="btn btn-primary" style="width:25%; background-color:#0893A1">Upload</button>
+  </form>
 </div>
 
-<div class="container">
-  <form action="/alButton" method="post">
-    <input type="submit" value="AL Button"/>
+<div class="container mt-4">
+  <form action="/alButton" method="post" class="text-center">
+    <button type="submit" class="btn btn-secondary">AL Button</button>
   </form>
 </div>
 
@@ -66,9 +68,7 @@ $(document).ready(function () {
   let customers = {};
 
   // Initialize Select2 for dropdowns with the dropdownParent option
-  $('#customerDropdown, #projectDropdown').select2({
-    dropdownParent: $('.customer-section') // Ensures proper behavior inside the container
-  });
+  $('#customerDropdown, #projectDropdown').select2();
 
   // Fetch customer data
   $.get('/getCustomers')
@@ -80,25 +80,21 @@ $(document).ready(function () {
         const customer = data[i];
         const customerName = customer.givenName || customer.CompanyName;
         
-              // Append customer options to the dropdown
-              $('#customerDropdown').append(
-                $('<option>', {
-                  value: customer.id,
-                  text: customerName
-                })
-              );
-            }
-            // Save customers data to the dropdown for future use
-            $('#customerDropdown').data('customers', customers);
+        // Append customer options to the dropdown
+        $('#customerDropdown').append(
+          $('<option>', {
+            value: customer.id,
+            text: customerName
           })
-          .fail(function (error) {
-            console.error('Error fetching customers:', error);
-          });
-      });
-
-    
-
-
+        );
+      }
+      // Save customers data to the dropdown for future use
+      $('#customerDropdown').data('customers', customers);
+    })
+    .fail(function (error) {
+      console.error('Error fetching customers:', error);
+    });
+});
 </script>
 
 </body>

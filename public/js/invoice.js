@@ -34,7 +34,7 @@ function addChangeOrderToInvoice(id) {
 
     $('#changeOrderAdded').fadeOut(2500);
 
-    $("#invoice-item-table").append('<input type="hidden" name="change_order_id" value="'+id+'">');
+    $("#createInvoiceForm").append('<input type="hidden" name="change_order_ids" id="changeOrderIds" value="'+id+'">');
 
     $('#changeOrderButton').hide();
 }

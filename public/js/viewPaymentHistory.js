@@ -27,7 +27,7 @@ function populatePaymentHistoryTable(takeoff_id) {
         let options = data.options;
         let totalPaid = 0;
         let signed_total = estimate ? parseFloat(estimate.signed_total) || 0 : 0;
-        let totalDue = 0;
+        let totalDue = signed_total;
         // add the header row
         payments.forEach(payment => {
             const row = table.insertRow();
@@ -141,10 +141,10 @@ function populatePaymentHistoryTable(takeoff_id) {
                 } else if (changeOrder.status == 2) {
                 //cell3.textContent = 'Due';
                 // add red exclamation icon
-                cell3.innerHTML = `Approved by Creator <i style="color:orange;" class="fa-solid fa-triangle-exclamation"></i>`;
-                }
+                cell3.innerHTML = `Approved by Creator <i style="color:orange;" class="fas fa-check-circle"></i>`;
 
-                totalDue += parseFloat(changeOrder.change_order_total);
+            }
+
                 cell2.textContent = "$"+ changeOrder.change_order_total;
                 cell4.innerHTML = `<a style="text-decoration: none;" href="/viewChangeOrder/?changeOrderId=${changeOrder.id}">View</a>`;   });   // populate the options table
         const optionsTable = document.getElementById('optionsTable');
@@ -206,6 +206,7 @@ function populatePaymentHistoryTable(takeoff_id) {
         
         // Update the total paid and total due
 
+
        
         const totalPaidElement = document.getElementById('totalPaid');
         const totalDueElement = document.getElementById('totalDue');
@@ -213,8 +214,8 @@ function populatePaymentHistoryTable(takeoff_id) {
         console.log("estimate total",estimate.signed_total);
         totalPaidElement.textContent = "Paid: $"+numberWithCommas(totalPaid.toFixed(2));
         
-        totalDueElement.textContent = "Due: $"+numberWithCommas(signed_total.toFixed(2));
-        totalRemainingElement.textContent = "Remaining: $"+numberWithCommas((signed_total - totalPaid).toFixed(2));
+        totalDueElement.textContent = "Due: $"+numberWithCommas((totalDue).toFixed(2));
+        totalRemainingElement.textContent = "Remaining: $"+numberWithCommas((totalDue - totalPaid).toFixed(2));
 
         const estimateInfo = document.getElementById('estimateInfo');
         // show the estimate info

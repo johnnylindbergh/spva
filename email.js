@@ -313,6 +313,45 @@ async function sendRenewalEmail(user_email, estimate_id, callback) {
   );
 }
 
+async function sendChangeOrderEmail(req, res, change_order_id, callback) {
+  db.getChangeOrderById(change_order_id, (err, change_order) => {
+
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(change_order);
+      if (change_order.owner_email && change_order.name) {
+        const mailOptions = {
+          from: credentials.serverEmail,
+          to: change_order.owner_email,
+          subject: "Your Change Order from Sun Painting",
+          html: `
+            <h3>Hello, ${change_order.name},</h3>
+            <h3>Your change order is ready.</h3>
+            <p>Please click the link below to view it:</p>
+            <a href="${credentials.domain}/shareChangeOrder/?hash=${change_order?.hash}">View Change Order</a></br>
+            <img style="margin:20px;width:140px;"src="${credentials.domain}/SWAM_LOGO.jpg" alt="Swam Logo"></br>
+            <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
+          `,
+        };
+        
+        const info = transporter.sendMail(mailOptions, (err, info) => {
+          if (err) {
+            console.log(err);
+            callback(err, null);
+          } else {
+            console.log("Email sent: " + info.response);
+            callback(null, info.response);
+          }
+        });
+      } else {
+        console.log("Some info is missing from this change order change_order.owner, change_order.owner_email, or change_order.hash");
+        callback("Some info is missing from this change order change_order.owner, change_order.owner_email, or change_order.hash", null);
+      }
+    }
+  }
+  );
+}
 
 
 
@@ -323,5 +362,6 @@ module.exports = {
   sendInvoiceEmail,
   sendExpiredEstimateEmail,
   sendRenewalEmail,
-  sendPaymentConfirmationEmail
+  sendPaymentConfirmationEmail,
+  sendChangeOrderEmail
 };

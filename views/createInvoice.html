@@ -119,6 +119,10 @@
                 const email = document.getElementById('email').value;
                 const takeoffId = document.getElementById('takeoff_id').value;
 
+                
+                const changeOrderIdsElement = document.getElementById('changeOrderIds');
+                const change_order_ids = changeOrderIdsElement ? changeOrderIdsElement.value.split(',').filter(Boolean) : [];
+
                 if (!customerName || !email) {
                     XSAlert.alert('Please fill out all required fields');
                     return;
@@ -154,7 +158,8 @@
                         customer_name: customerName,
                         email: email,
                         takeoff_id: takeoffId,
-                        invoice_items: invoiceItems
+                        invoice_items: invoiceItems,
+                        change_order_ids: change_order_ids
                     }),
                     success: function (invoice) {
                         console.log("Invoice created:", invoice);
@@ -191,7 +196,7 @@
     </div>
     
     <div class="form-container">
-        <form action="/createInvoice" method="POST">
+        <form id= "createInvoiceForm"action="/create-invoice" method="POST">
             {{#takeoff}}
 
 
