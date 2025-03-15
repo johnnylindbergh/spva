@@ -1380,7 +1380,30 @@ module.exports = function (app) {
         console.log(err);
       }
 
-      res.send({ options: options, mutable: mutable, optionsMaterialTax: optionsMaterialTax });
+      // also get the material tax for the takeoff
+      // get the takeoff
+
+      db.getTakeoff(req.body.takeoff_id, function (err, takeoff) {
+
+        if (err) {
+          console.log(err);
+        }
+
+
+
+        
+        // add the material tax to the options
+        let materialTax = 0;
+
+        if (takeoff[0] && takeoff[0].material_cost != null && takeoff[0].material_markup != null && takeoff[0].tax != null) {
+          materialTax = parseFloat(takeoff[0].material_cost) * (1.00 + parseFloat(takeoff[0].material_markup)) * (parseFloat(takeoff[0].tax / 100)); // calculate the tax for just materials
+        } else {
+          console.log("Error calculating material tax")
+          console.log(takeoff[0]);
+        }
+
+      res.send({ options: options, mutable: mutable, optionsMaterialTax: materialTax });
+      });
     });
   });
 

@@ -1876,6 +1876,11 @@ getChangeOrderItemsById: function (change_order_id, callback) {
   },
 
   getOptions: function (takeoff_id, callback) {
+    // get the material tax rate for that takeoff
+    con.query('SELECT tax from takeoffs WHERE id = ?;', [takeoff_id], function (err, tax) {
+      if (err) return callback(err);
+
+      let taxRate = tax[0].tax;
     con.query(
       "SELECT * FROM options WHERE takeoff_id = ?;",
       [takeoff_id],
@@ -1887,14 +1892,17 @@ getChangeOrderItemsById: function (change_order_id, callback) {
           function (err, status) {
             if (err) return callback(err);
 
-            let materialTax = 0;
+            let materialOptionsTotal = 0;
 
               for (let i = 0; i < options.length; i++) {
                 if (options[i].applied){
-                  materialTax += options[i].material_cost * 0.053;
+                  materialOptionsTotal += options[i].material_cost;
 
                 }
               }
+
+              // compute the selected options material tax
+              let materialTax = materialOptionsTotal * (taxRate/100.00);
             
             // if the status is 4, the takeoff is signed and the options should be locked
             if (status[0].status == 4) {
@@ -1912,6 +1920,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
         );
       }
     );
+    });
   },
 
   addOption: function (takeoff_id, description, material_cost, labor_cost, callback) {

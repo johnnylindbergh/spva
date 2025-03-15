@@ -162,6 +162,8 @@ function updateTotals() {
     // $('#subtotal').text("Subtotal: $" + numberWithCommas(subtotal.toFixed(2))); this never changes
     $('#tax').text("Tax: $" + numberWithCommas(materialTax.toFixed(2)));
     $('#total').text("Total: $" + numberWithCommas((total).toFixed(2)));
+    $(('#materialTax')).text("Tax: $" + numberWithCommas(materialTax.toFixed(2)));
+    $('#options-total').text("Options: $" + numberWithCommas(optionsTotal.toFixed(2)));
 
     console.log("Subtotal:", subtotal);
     console.log("Options Total:", optionsTotal);
