@@ -1600,13 +1600,17 @@ getChangeOrderItemsById: function (change_order_id, callback) {
           console.log("The total Labor cost for this group is: ", groupLaborTotals[group_number]);
           console.log("The total Material cost for this group is: ", groupMaterialTotals[group_number]);
 
+          let optionTotal = groupMaterialTotals[group_number] + groupLaborTotals[group_number];
+          console.log("The total for this option is", optionTotal);
+
           con.query(
-            "INSERT INTO options (takeoff_id, description, material_cost, labor_cost) VALUES (?, ?, ?, ?);",
+            "INSERT INTO options (takeoff_id, description, material_cost, labor_cost, total_cost) VALUES (?, ?, ?, ?, ?);",
             [
               takeoff_id,
               groupNames[group_number],
               groupMaterialTotals[group_number],
-              groupLaborTotals[group_number]
+              groupLaborTotals[group_number],
+              optionTotal
             ],
             function (err) {
               console.log(err);

@@ -38,6 +38,15 @@ function populatePaymentHistoryTable(takeoff_id) {
             totalPaid += parseFloat(payment.amount);
         });
 
+        if (payments.length == 0) {
+            const row = table.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            cell1.textContent = "No payments have been made";
+            cell2.textContent = "";
+        }
+            
+
         // // Update the total paid and total due
         // const totalPaidElement = document.getElementById('totalPaid');
         // const totalDueElement = document.getElementById('totalDue');
