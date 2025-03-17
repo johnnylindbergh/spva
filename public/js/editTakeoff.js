@@ -814,12 +814,14 @@ function loadTakeoffMaterials(id) {
         let subsum = 0;
         let laborsum = 0;
 
-        laborsum = parseFloat(row.labor_cost) * parseFloat(row.measurement);
         console.log("item with labor total", laborsum);
         console.log("total labor", laborTotal);
+
+
         if (row.applied == 0) {
           newRow.attr("style", "background-color: #f2f2f2; opacity: 0.5;");
         } else {
+          laborsum = parseFloat(row.labor_cost) * parseFloat(row.measurement);
 
           laborTotal += laborsum;
 
@@ -1412,10 +1414,11 @@ let undoStack = [];
   // This is the refactored "set" function that updates the server with explicit on/off
   // and we always pass the desired final state.
   function setMaterialState(materialId, value) {
-    $.post("/set-material-state", { material_id: materialId, applied: value })
+    $.post("/set-material-state", { material_id: materialId, state: value })
       .done(function() {
          console.log("Updated material " + materialId + " to " + value);
          // then refresh UI or call loadTakeoffMaterials
+          loadTakeoffMaterials(takeoff_id);
       })
       .fail(function() {
          console.log("Failed to update material " + materialId);
