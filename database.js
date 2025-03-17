@@ -1575,7 +1575,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
             if (groupMaterialTotals[group_number] == null) {
               groupMaterialTotals[group_number] = optionMaterialTotal;
             } else {
-              groupMaterialTotals[group_number] = groupTotals[group_number] + optionMaterialTotal;
+              groupMaterialTotals[group_number] = groupMaterialTotals[group_number] + optionMaterialTotal;
             }
 
             if (groupLaborTotals[group_number] == null) {

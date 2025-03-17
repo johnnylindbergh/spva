@@ -31,7 +31,7 @@ CREATE TABLE users (
 );
 
 -- Default admin user
-INSERT INTO users (user_type, name, email, phone_number) VALUES (3, "Johnny","lindberghjohnny@gmail.com", "+14342491362");
+INSERT INTO users (user_type, name, email, phone_number) VALUES (1, "Johnny","lindberghjohnny@gmail.com", "+14342491362");
 
 -- System settings table
 CREATE TABLE system_settings (
@@ -73,9 +73,6 @@ CREATE TABLE customers (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 );
-
---example insert
-INSERT INTO customers (taxable, job, givenName, billing_address, CompanyName, phone, primary_email_address, invoice_email_address) VALUES (1, 0, 'John Doe', '123 Main St, Anytown, USA', 'Doe Construction', '1234567890', 'jdoe@intuit.com', 'test@gmail.com');
 
 -- Estimates table
 CREATE TABLE estimates (
@@ -131,7 +128,7 @@ CREATE TABLE takeoffs (
 );
 
 -- example insert
-INSERT INTO takeoffs (name, creator_id, file_path_of_plans, status, hash, total, travel_cost, tax, labor_cost, labor_rate, material_cost, material_markup, labor_markup, supervisor_markup, payment_method, duration_hours, start_date, end_date, last_updated_by, customer_id) VALUES ('Takeoff 1', 1, 'path/to/plans', 0, 'hash1', 2000.00, 0.00, 5.3, 0.00, 25.00, 0.00, 0.30, 0.40, 0.03, 'card', 40, '2022-01-01 00:00:00', '2022-01-31 00:00:00', 1, 1);
+-- INSERT INTO takeoffs (name, creator_id, file_path_of_plans, status, hash, total, travel_cost, tax, labor_cost, labor_rate, material_cost, material_markup, labor_markup, supervisor_markup, payment_method, duration_hours, start_date, end_date, last_updated_by, customer_id) VALUES ('Takeoff 1', 1, 'path/to/plans', 0, 'hash1', 2000.00, 0.00, 5.3, 0.00, 25.00, 0.00, 0.30, 0.40, 0.03, 'card', 40, '2022-01-01 00:00:00', '2022-01-31 00:00:00', 1, 1);
 -- Customer-Takeoff relationship table
 CREATE TABLE customer_takeoffs (
   id INT NOT NULL AUTO_INCREMENT,
@@ -153,7 +150,7 @@ CREATE TABLE options (
   created_by INT,
   applied TINYINT(1) DEFAULT 0,
   PRIMARY KEY (id),
-  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -201,7 +198,7 @@ CREATE TABLE invoice_items (
 );
 
 -- example insert 
-INSERT INTO invoice_items (invoice_id, cost, quantity, description) VALUES (1, 2000.00, 1, 'Description 1');
+-- INSERT INTO invoice_items (invoice_id, cost, quantity, description) VALUES (1, 2000.00, 1, 'Description 1');
 
 -- Payment history table
 CREATE TABLE payment_history (
@@ -237,7 +234,7 @@ CREATE TABLE change_orders (
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
 );
 
-INSERT INTO change_orders (takeoff_id, name, description, qb_number, co_number, hash, change_order_total) VALUES (1, 'Change Order 1', 'Description 1', 1234, 1, 'hash1', 2000.00);
+-- INSERT INTO change_orders (takeoff_id, name, description, qb_number, co_number, hash, change_order_total) VALUES (1, 'Change Order 1', 'Description 1', 1234, 1, 'hash1', 2000.00);
 
 
 
@@ -252,7 +249,7 @@ CREATE TABLE change_order_items (
   FOREIGN KEY (change_order_id) REFERENCES change_orders(id) ON DELETE CASCADE
 );
 
-INSERT INTO change_order_items (change_order_id, description, cost, quantity) VALUES (1, 'Description 1', 2000.00, 1);
+-- INSERT INTO change_order_items (change_order_id, description, cost, quantity) VALUES (1, 'Description 1', 2000.00, 1);
 
 -- stores the relationship between invoices and change orders
 -- an invoice can have multiple change orders
@@ -267,7 +264,7 @@ CREATE TABLE invoice_change_orders (
 );
 
 -- example insert
-INSERT INTO invoice_change_orders (invoice_id, change_order_id) VALUES (1, 1);
+-- INSERT INTO invoice_change_orders (invoice_id, change_order_id) VALUES (1, 1);
 
 
 
@@ -296,7 +293,7 @@ CREATE TABLE materials (
   FOREIGN KEY (material_type) REFERENCES material_archetypes(id) ON DELETE CASCADE
 );
 
-SOURCE materials.db;
+SOURCE materials.db.sql;
 
 -- Subjects table
 CREATE TABLE subjects (
