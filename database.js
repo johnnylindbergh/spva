@@ -302,7 +302,6 @@ function matchSubjectStrings(currentSubjectId, takeoff_id, callback) {
 
 
 async function copyTakeoff(takeoff_id, callback) {
-
   // just copy the takeoff, applied_materials, and the customer_takeoffs table
 
   // first copy the takeoff
@@ -320,46 +319,120 @@ async function copyTakeoff(takeoff_id, callback) {
       }
     });
 
-    //console.log("takeoff: ", takeoff);
-    //console.log("takeoff[0]: ", takeoff[0]);
-
     // copy the takeoff
-    con.query("INSERT INTO takeoffs (creator_id, name, hash, customer_id) VALUES (?, ?, ?, ?);", [takeoff[0].creator_id, takeoff[0].name + " copy", generateHash(), takeoff[0].customer_id], function (err, result) {
-      if (err) {
-        console.log(err);
-        return callback(err);
-      }
-      const newTakeoffId = result.insertId;
-      console.log("new takeoff id: ", newTakeoffId);
-
-      // copy the applied_materials
-      con.query("SELECT * FROM applied_materials WHERE takeoff_id = ?;", [takeoff_id], async function (err, applied_materials) {
+    con.query(
+      "INSERT INTO takeoffs (creator_id, name, hash, customer_id) VALUES (?, ?, ?, ?);",
+      [takeoff[0].creator_id, takeoff[0].name + " copy", generateHash(), takeoff[0].customer_id],
+      function (err, result) {
         if (err) {
           console.log(err);
           return callback(err);
         }
+        const newTakeoffId = result.insertId;
+        console.log("new takeoff id: ", newTakeoffId);
 
-        for (const material of applied_materials) {
-          con.query("INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?);", [newTakeoffId, material.name, material.measurement, material.measurement_unit, material.color, material.labor_cost, material.top_coat, material.primer], async function (err) {
-            if (err) {
-              console.log(err);
-              return callback(err);
-            }
-          });
-        }
-
-        // copy the customer_takeoffs
-        con.query("INSERT INTO customer_takeoffs (customer_id, takeoff_id) SELECT customer_id, ? FROM customer_takeoffs WHERE takeoff_id = ?;", [newTakeoffId, takeoff_id], function (err) {
+        // copy the applied_materials
+        con.query("SELECT * FROM applied_materials WHERE takeoff_id = ?;", [takeoff_id], async function (err, applied_materials) {
           if (err) {
             console.log(err);
             return callback(err);
           }
-          // callback(null);
+
+          for (const material of applied_materials) {
+            con.query(
+              "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+              [newTakeoffId, material.name, material.measurement, material.measurement_unit, material.color, material.labor_cost, material.top_coat, material.primer],
+              function (err) {
+                if (err) {
+                  console.log(err);
+                  return callback(err);
+                }
+              }
+            );
+          }
+
+          // copy the customer_takeoffs
+          con.query(
+            "INSERT INTO customer_takeoffs (customer_id, takeoff_id) SELECT customer_id, ? FROM customer_takeoffs WHERE takeoff_id = ?;",
+            [newTakeoffId, takeoff_id],
+            function (err) {
+              if (err) {
+                console.log(err);
+                return callback(err);
+              }
+
+              // copy the estimates
+              con.query("SELECT * FROM estimates WHERE takeoff_id = ?;", [takeoff_id], function (err, estimates) {
+                if (err) {
+                  console.log(err);
+                  return callback(err);
+                }
+
+                for (const estimate of estimates) {
+                  con.query(
+                    "INSERT INTO estimates (takeoff_id, signed_total, inclusions, exclusions) VALUES (?, ?, ?, ?);",
+                    [newTakeoffId, estimate.signed_total, estimate.inclusions, estimate.exclusions],
+                    function (err) {
+                      if (err) {
+                        console.log(err);
+                        return callback(err);
+                      }
+                    }
+                  );
+                }
+
+                // copy the invoices
+                con.query("SELECT * FROM invoices WHERE takeoff_id = ?;", [takeoff_id], function (err, invoices) {
+                  if (err) {
+                    console.log(err);
+                    return callback(err);
+                  }
+
+
+                  for (const invoice of invoices) {
+                    con.query(
+                      "INSERT INTO invoices (invoice_number, qb_number, invoice_name, hash, takeoff_id, total, invoice_payment_method, status, payment_confirmation_email_sent, due_date, view_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+                      [invoice.invoice_number, invoice.qb_number, invoice.invoice_name, generateHash(), newTakeoffId, invoice.total, invoice.invoice_payment_method, invoice.status, invoice.payment_confirmation_email_sent, invoice.due_date, invoice.view_count],
+                      function (err, result) {
+                        if (err) {
+                          console.log(err);
+                          return callback(err);
+                        }
+                        const newInvoiceId = result.insertId;
+
+                        // copy the invoice_items
+                        con.query("SELECT * FROM invoice_items WHERE invoice_id = ?;", [invoice.id], function (err, invoice_items) {
+                          if (err) {
+                            console.log(err);
+                            return callback(err);
+                          }
+
+                          for (const item of invoice_items) {
+                            con.query(
+                              "INSERT INTO invoice_items (invoice_id, description, quantity, cost) VALUES (?, ?, ?, ?);",
+                              [newInvoiceId, item.description, item.quantity, item.cost],
+                              function (err) {
+                                if (err) {
+                                  console.log(err);
+                                  return callback(err);
+                                }
+                              }
+                            );
+                          }
+                        });
+                      }
+                    );
+                  }
+                });
+              });
+            }
+          );
         });
-      });
-    });
-  }
-  );
+      }
+    );
+  });
+
+  callback(null);
 }
 
 
@@ -739,7 +812,7 @@ module.exports = {
   // sets the old takeoff hash to null
 
 
-  copyTakeoff: function (takeoff_id, callback) {
+  copyTakeoff: function (takeoff_id, user_id, callback) {
     // call the copyTakeoff function
     copyTakeoff(takeoff_id, callback);
   },
@@ -1023,6 +1096,30 @@ module.exports = {
             callback(queryErr);
           }
         });
+      }
+    );
+  },
+
+  getTakeoffNotes: function (id, callback) {
+    // the id is applied_materials.id
+    con.query(
+      "SELECT notes FROM applied_materials WHERE id = ?;",
+      [id],
+      function (err, notes) {
+        if (err) return callback(err);
+        callback(null, notes);
+      }
+    );
+  },
+
+
+  saveTakeoffNotes: function (id, notes, callback) {
+    con.query(
+      "UPDATE applied_materials SET notes = ? WHERE id = ?;",
+      [notes, id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
       }
     );
   },
@@ -1500,7 +1597,8 @@ getChangeOrderItemsById: function (change_order_id, callback) {
         for (group_number in groupNames) {
           console.log("The group name is: ", groupNames[group_number]);
           console.log("The group number is: ", group_number);
-          console.log("The total cost for this group is: ", groupTotals[group_number]);
+          console.log("The total Labor cost for this group is: ", groupLaborTotals[group_number]);
+          console.log("The total Material cost for this group is: ", groupMaterialTotals[group_number]);
 
           con.query(
             "INSERT INTO options (takeoff_id, description, material_cost, labor_cost) VALUES (?, ?, ?, ?);",
@@ -2920,6 +3018,17 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     con.query(
       "UPDATE invoices SET qb_number = ? WHERE id = ?;",
       [qb_invoice_number, invoice_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
+  deleteInvoice: function (invoice_id, callback) {
+    con.query(
+      "DELETE FROM invoices WHERE id = ?;",
+      [invoice_id],
       function (err) {
         if (err) return callback(err);
         callback(null);

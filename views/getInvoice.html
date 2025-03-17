@@ -87,25 +87,9 @@
         }
     </style>
     <script>
-        function addTimelineEvent(date, label, amount) {
-            const timeline = document.querySelector(".timeline ul");
-            const newEvent = document.createElement("li");
-            newEvent.innerHTML = `<span>${date}</span> - <span>${label}</span> <p>Amount: $${amount}</p>`;
-            timeline.appendChild(newEvent);
-        }
+        
 
-        document.addEventListener("DOMContentLoaded", () => {
-            // Example dynamic data
-            const events = [
-                { date: "2025-01-01", label: "Invoice Issued", amount: "1000" },
-                { date: "2025-01-05", label: "Partial Payment", amount: "500" },
-                { date: "2025-01-10", label: "Final Payment", amount: "500" }
-            ];
-
-            events.forEach(event => {
-                addTimelineEvent(event.date, event.label, event.amount);
-            });
-        });
+       
     </script>
 </head>
 <body>

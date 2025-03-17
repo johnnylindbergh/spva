@@ -5,6 +5,7 @@ module.exports = {
       applied_materials.applied AS applied,
       applied_materials.separate_line_item AS separate_line_item,
       applied_materials.name AS material_name,
+      applied_materials.notes AS notes,
       applied_materials.cost_delta AS cost_delta,
       applied_materials.labor_cost AS labor_cost,
       applied_materials.measurement AS measurement,

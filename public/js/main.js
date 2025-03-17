@@ -8,6 +8,7 @@ $(document).ready(function () {
 
   function createStatusIndicator(statusCode, dateCreated) {
     const statuses = [
+      { code: 0, label: "Takeoff Created" },
       { code: 1, label: "Takeoff Uploaded" },
       { code: 2, label: "Estimate Generated" },
       { code: 3, label: "Estimate Published" },

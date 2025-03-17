@@ -429,117 +429,117 @@ module.exports = function (app) {
 
     
 
-  app.post('/webhook', async (req, res) => {
+  // app.post('/webhook', async (req, res) => {
 
 
     
 
-    let payload = req.body;
-    console.log('Webhook payload:', payload);
+  //   let payload = req.body;
+  //   console.log('Webhook payload:', payload);
 
-    // Verify the signature given by creds.quickbooks.webhooksVerifier
+  //   // Verify the signature given by creds.quickbooks.webhooksVerifier
 
-    if (oauthClient && oauthClient.isAccessTokenValid()) {
-      console.log('The access_token is valid');
-    }
+  //   if (oauthClient && oauthClient.isAccessTokenValid()) {
+  //     console.log('The access_token is valid');
+  //   }
     
-    if (!oauthClient.isAccessTokenValid()) {
-      oauthClient
-        .refresh()
-        .then(function (authResponse) {
-          console.log('Tokens refreshed : ' + JSON.stringify(authResponse.getToken()));
-        })
-        .catch(function (e) {
-          console.error('The error message is :' + e.originalMessage);
-          console.error(e.intuit_tid);
-        });
-    }
+  //   if (!oauthClient.isAccessTokenValid()) {
+  //     oauthClient
+  //       .refresh()
+  //       .then(function (authResponse) {
+  //         console.log('Tokens refreshed : ' + JSON.stringify(authResponse.getToken()));
+  //       })
+  //       .catch(function (e) {
+  //         console.error('The error message is :' + e.originalMessage);
+  //         console.error(e.intuit_tid);
+  //       });
+  //   }
 
   
    
     
-    for (var i = 0; i < payload.eventNotifications.length; i++) {
-      let event = payload.eventNotifications[i];
-      console.log('Event:', event);
-      let realmId = event.realmId;
-      let dataChangeEvent = event.dataChangeEvent;
-      let entities = dataChangeEvent.entities;
-      console.log('Entities:', entities);
+  //   for (var i = 0; i < payload.eventNotifications.length; i++) {
+  //     let event = payload.eventNotifications[i];
+  //     console.log('Event:', event);
+  //     let realmId = event.realmId;
+  //     let dataChangeEvent = event.dataChangeEvent;
+  //     let entities = dataChangeEvent.entities;
+  //     console.log('Entities:', entities);
 
-      for (var j = 0; j < entities.length; j++) {
-        let entity = entities[j];
-        let operation = entity.operation;
-        let changedFields = entity.changedFields;
-        let entityType = entity.name;
-        console.log('Entity:', entity);
+  //     for (var j = 0; j < entities.length; j++) {
+  //       let entity = entities[j];
+  //       let operation = entity.operation;
+  //       let changedFields = entity.changedFields;
+  //       let entityType = entity.name;
+  //       console.log('Entity:', entity);
 
-        if (operation === 'Create' || operation === 'Update') {
-          if (entityType === 'Customer') {
-            let customerID = entity.id;
-            qbo.findCustomers({field:'Id',value:entity.id,operator:'LIKE'}, function (e, customers) {
-              if (e) {
-                console.log(e);
-              } else {
-                console.log('Customer:', customers);
+  //       if (operation === 'Create' || operation === 'Update') {
+  //         if (entityType === 'Customer') {
+  //           let customerID = entity.id;
+  //           qbo.findCustomers({field:'Id',value:entity.id,operator:'LIKE'}, function (e, customers) {
+  //             if (e) {
+  //               console.log(e);
+  //             } else {
+  //               console.log('Customer:', customers);
 
-                req.end();
-              }
-            }
-            );
-           // console.log('Customer:', customers.json.Customer);
-          } else if (entityType === 'Invoice') {
-            let invoiceID = entity.id;
-            // first check if the oauthClient is initialized
-            if (!oauthClient) {
-              initializeOAuthClient();
-            }
-            // make the api call to get the invoice
-            let invoice = await oauthClient.makeApiCall({
-              url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${realmId}/invoice/${invoiceID}`,
-            });
-            console.log('Invoice:', invoice.json.Invoice);
+  //               req.end();
+  //             }
+  //           }
+  //           );
+  //          // console.log('Customer:', customers.json.Customer);
+  //         } else if (entityType === 'Invoice') {
+  //           let invoiceID = entity.id;
+  //           // first check if the oauthClient is initialized
+  //           if (!oauthClient) {
+  //             initializeOAuthClient();
+  //           }
+  //           // make the api call to get the invoice
+  //           let invoice = await oauthClient.makeApiCall({
+  //             url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${realmId}/invoice/${invoiceID}`,
+  //           });
+  //           console.log('Invoice:', invoice.json.Invoice);
 
 
-            // sum the line items to get the total amount
-            let total = 0;
-            for (var k = 0; k < invoice.json.Invoice.Line.length; k++) {
-              total += invoice.json.Invoice.Line[k].Amount;
-            }
+  //           // sum the line items to get the total amount
+  //           let total = 0;
+  //           for (var k = 0; k < invoice.json.Invoice.Line.length; k++) {
+  //             total += invoice.json.Invoice.Line[k].Amount;
+  //           }
 
-            // Sync invoice to database
-            const sql = `
-              INSERT INTO invoices (id, customer_id, total, due_date, invoice_date, hash) VALUES ?
-              ON DUPLICATE KEY UPDATE
-              customer_id = VALUES(customer_id),
-              total = VALUES(total),
-              due_date = VALUES(due_date),
-              invoice_date = VALUES(invoice_date),
-              total = VALUES(total),
-              hash = VALUES(hash);
-            `;
-            const values = [[
-              invoice.json.Invoice.Id,
-              invoice.json.Invoice.CustomerRef.value,
-              total,
-              invoice.json.Invoice.DueDate,
-              invoice.json.Invoice.TxnDate,
-              invoice.json.Invoice.Balance,
-              crypto.createHash('md5').update(JSON.stringify(invoice.json.Invoice)).digest('hex'),
-            ]];
+  //           // Sync invoice to database
+  //           const sql = `
+  //             INSERT INTO invoices (id, customer_id, total, due_date, invoice_date, hash) VALUES ?
+  //             ON DUPLICATE KEY UPDATE
+  //             customer_id = VALUES(customer_id),
+  //             total = VALUES(total),
+  //             due_date = VALUES(due_date),
+  //             invoice_date = VALUES(invoice_date),
+  //             total = VALUES(total),
+  //             hash = VALUES(hash);
+  //           `;
+  //           const values = [[
+  //             invoice.json.Invoice.Id,
+  //             invoice.json.Invoice.CustomerRef.value,
+  //             total,
+  //             invoice.json.Invoice.DueDate,
+  //             invoice.json.Invoice.TxnDate,
+  //             invoice.json.Invoice.Balance,
+  //             crypto.createHash('md5').update(JSON.stringify(invoice.json.Invoice)).digest('hex'),
+  //           ]];
 
-            db.query(sql, [values], (err) => {
-              if (err) {
-                console.error('Error inserting invoice into database:', err);
-                return;
-              }
-              console.log('Invoice synced successfully.');
-            });
+  //           db.query(sql, [values], (err) => {
+  //             if (err) {
+  //               console.error('Error inserting invoice into database:', err);
+  //               return;
+  //             }
+  //             console.log('Invoice synced successfully.');
+  //           });
 
-          }
-        }
-      }
-    }
-  });
+  //         }
+  //       }
+  //     }
+  //   }
+  // });
 
   
 

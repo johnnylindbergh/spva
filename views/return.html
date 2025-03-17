@@ -8,23 +8,41 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="/js/return.js" defer></script>
+  <style>
+    body {
+      background-image: url('/home-image.jpg');
+      background-size: cover;
+      background-attachment: fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .alert {
+      background-color: rgba(255, 255, 255, 0.9); /* Add transparency */
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    /* #success {
+      display: none; /* Hidden by default */
+    } */
+  </style>
 </head>
 <body>
-  <div class="container mt-5">
     <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div id="success" class="alert alert-success hidden" role="alert">
+      <div class="col-md-8 col-sm-12">
+        <div id="success" class="alert alert-success" role="alert">
           <h4 class="alert-heading">Thank you for your order!</h4>
           <p>
             We appreciate your business! A confirmation email will be sent to <span id="customer-email"></span>.
           </p>
           <hr>
           <p class="mb-0">
-            If you have any questions, please email <a href="mailto:orders@example.com" class="alert-link">//some contact email//@sunpaintingva.com</a>.
+            If you have any questions, please email <a href="mailto:sales@example.com" class="alert-link">sales@sunpaintingva.com</a>.
           </p>
         </div>
       </div>
     </div>
-  </div>
 </body>
 </html>

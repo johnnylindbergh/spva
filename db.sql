@@ -111,7 +111,7 @@ CREATE TABLE takeoffs (
   material_cost DECIMAL(10,2),
   material_markup DECIMAL(10,2) DEFAULT 0.30, 
   labor_markup DECIMAL(10,2) DEFAULT 0.40, 
-  touchups_cost DECIMAL(10,2) DEFAULT 0.30,
+  touchups_cost DECIMAL(10,2) DEFAULT 0.00,
   supervisor_markup DECIMAL(10,2) DEFAULT 0.03,
   profit DECIMAL(10,2) DEFAULT 0.00,
   misc_materials_cost DECIMAL(10,2) DEFAULT 0.00,
@@ -151,7 +151,7 @@ CREATE TABLE options (
   material_cost DECIMAL(10,2),
   total_cost DECIMAL(10,2), -- computed server-side
   created_by INT,
-  applied TINYINT(1) DEFAULT 1,
+  applied TINYINT(1) DEFAULT 0,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
@@ -328,6 +328,7 @@ CREATE TABLE applied_materials (
   takeoff_id INT NOT NULL,
   material_id INT,
   name VARCHAR(64) NOT NULL,
+  notes TEXT,
   measurement DECIMAL(10,2),
   measurement_unit VARCHAR(64),
   color VARCHAR(64),

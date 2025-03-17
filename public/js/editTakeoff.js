@@ -708,7 +708,25 @@ function loadTakeoffMaterials(id) {
         // newRow.append($("<td></td>").append(separateLineCheckbox));
 
         // Material name
-        newRow.append("<td >" + row.material_name + "</td>");
+
+        let subjectNameCell = $("<td></td>").text(row.material_name);
+        let notes = row.notes;
+
+        // if the subjectNameCell is clicked, show the notes in an editable modal dialog
+        subjectNameCell.on("click", function () {
+          // show the notes in an editable modal dialog
+          console.log("clicked");
+          console.log(notes);
+          $("#notesModal").modal("show");
+          $("#notesModal").find("#notes").val(notes);
+          $("#notesModal").find("#notes").data("row-id", row.id);
+          setNotes(row.id, notes);
+        });
+        
+        
+       
+
+        newRow.append(subjectNameCell);
 
         // Measurement input
         let measurementInput = $("<input>")
@@ -1187,6 +1205,28 @@ function priceChange(id) {
     loadTakeoffMaterials(takeoff_id);
   }, 200);
 }
+
+let currentNoteId = null; 
+function setNotes(id, notes) {
+  currentNoteId = id;
+  $("#notesTextArea").val(notes);
+  
+}
+
+function saveNotes(id) {
+  let notes = $("#notesTextArea").val();
+  console.log("Saving notes for material: " + currentNoteId);
+  $.post("/save-notes", { id: currentNoteId, notes: notes })
+    .done(function () {
+      console.log("Notes saved for material: " + currentNoteId);
+      $("#notesModal").modal("hide");
+    })
+    .fail(function () {
+      console.log("Failed to save notes for material: " + currentNoteId);
+    });
+}
+
+
 
 function renderPaintOrder(paintOrder) {
   let paintOrderTable = $("#paintOrderTable");
