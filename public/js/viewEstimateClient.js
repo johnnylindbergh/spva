@@ -63,7 +63,7 @@ function populateOptions(takeoff_id) {
         let data = response.options;
 
         materialTax = parseFloat(response.optionsMaterialTax);
-        $('#optionsTax').text("Options Tax: $" + materialTax.toFixed(2));
+        $('#materialTax').text("Tax: $" + materialTax.toFixed(2));
         const table = $('#options-table');
         table.empty(); // Clear any existing content
         for (let i = 0; i < data.length; i++) {

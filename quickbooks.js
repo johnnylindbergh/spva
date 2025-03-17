@@ -44,49 +44,62 @@ async function syncCustomers() {
         ? OAuthClient.environment.sandbox
         : OAuthClient.environment.production;
 
-    const response = await oauthClient.makeApiCall({
-      url: `${url}v3/company/${companyID}/query?query=select * from Customer`,
-    });
-    const customers = response.json.QueryResponse.Customer;
+    let startPosition = 1;
+    const maxResults = 1000; // QuickBooks API cap
+    let totalSynced = 0;
 
-    if (!customers || customers.length === 0) {
-      console.log('No customers found to sync.');
-      return;
+    while (true) {
+      const response = await oauthClient.makeApiCall({
+        url: `${url}v3/company/${companyID}/query?query=select * from Customer startposition ${startPosition} maxresults ${maxResults}`,
+      });
+      const customers = response.json.QueryResponse.Customer;
+
+      if (!customers || customers.length === 0) {
+        console.log('No more customers to sync.');
+        break;
+      }
+
+      console.log(customers.length, 'customers found to sync.');
+
+      const sql = `
+        INSERT INTO customers (id, givenName, CompanyName, primary_email_address, phone, taxable, job, billing_address) VALUES ?
+        ON DUPLICATE KEY UPDATE
+        givenName = VALUES(givenName),
+        CompanyName = VALUES(CompanyName),
+        primary_email_address = VALUES(primary_email_address),
+        phone = VALUES(phone),
+        taxable = VALUES(taxable),
+        job = VALUES(job),
+        billing_address = VALUES(billing_address);
+      `;
+      const values = customers
+        .filter((customer) => customer.Job == false ) 
+        .map((customer) => [
+          customer.Id,
+          (customer.GivenName || '') + ' ' + (customer.FamilyName || customer.FullyQualifiedName),
+          customer.FullyQualifiedName,
+          customer.PrimaryEmailAddr?.Address || null,
+          customer.PrimaryPhone?.FreeFormNumber || null,
+          customer.Taxable,
+          customer.Job,
+          customer.BillAddr?.Line1 && customer.BillAddr?.City && customer.BillAddr?.CountrySubDivisionCode && customer.BillAddr?.PostalCode
+        ? `${customer.BillAddr.Line1}, ${customer.BillAddr.City}, ${customer.BillAddr.CountrySubDivisionCode} ${customer.BillAddr.PostalCode}`
+        : 'Unknown Address',
+        ]);
+
+      db.query(sql, [values], (err) => {
+        if (err) {
+          console.error('Error inserting customers into database:', err);
+          return;
+        }
+        console.log(`${values.length} customers synced successfully.`);
+      });
+
+      totalSynced += customers.length;
+      startPosition += maxResults;
     }
 
-    const sql = `
-      INSERT INTO customers (id, givenName, CompanyName, primary_email_address, phone, taxable, job, billing_address) VALUES ?
-      ON DUPLICATE KEY UPDATE
-      givenName = VALUES(givenName),
-      CompanyName = VALUES(CompanyName),
-      primary_email_address = VALUES(primary_email_address),
-      phone = VALUES(phone),
-      taxable = VALUES(taxable),
-      job = VALUES(job),
-      billing_address = VALUES(billing_address);
-    `;
-    console.log(customers[0]);
-
-    const values = customers.map((customer) => [
-      customer.Id,
-      (customer.GivenName || '') + ' ' + (customer.FamilyName || customer.FullyQualifiedName),
-      customer.FullyQualifiedName,
-      customer.PrimaryEmailAddr?.Address || null,
-      customer.PrimaryPhone?.FreeFormNumber || null,
-      customer.Taxable,
-      customer.Job,
-      customer.BillAddr?.Line1 && customer.BillAddr?.City && customer.BillAddr?.CountrySubDivisionCode && customer.BillAddr?.PostalCode
-      ? `${customer.BillAddr.Line1}, ${customer.BillAddr.City}, ${customer.BillAddr.CountrySubDivisionCode} ${customer.BillAddr.PostalCode}`
-      : 'Unknown Address',
-    ]);
-
-    db.query(sql, [values], (err) => {
-      if (err) {
-        console.error('Error inserting customers into database:', err);
-        return;
-      }
-      console.log(`${values.length} customers synced successfully.`);
-    });
+    console.log(`Total customers synced: ${totalSynced}`);
   } catch (error) {
     console.error('Error syncing customers:', error);
   }
@@ -250,7 +263,7 @@ module.exports = function (app) {
 
           //  get the takeoff with a matching customer_id
 
-          console.log(invoice);
+        //  console.log(invoice);
           db.getTakeoffByCustomerID(invoice.CustomerRef.value, (err, takeoff) => {
           
             if (err || !takeoff) {
