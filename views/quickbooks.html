@@ -34,7 +34,7 @@
             jsonBody.redirectUri = $('#redirectUri').val();
 
             $.get('/authUri', {json:jsonBody}, function (uri) {
-                console.log('The Auth Uris is :'+uri);
+                console.log('The Auth Uri is :'+uri);
             })
             .then(function (authUri) {
                 var parameters = "location=1,width=800,height=650";

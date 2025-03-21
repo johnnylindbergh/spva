@@ -107,6 +107,28 @@ function populateExclusions(exclusions) {
 //         });
 // }
 
+
+function regenChatGPTResponse() {
+    const takeoff_id = $('#takeoff_id').val();
+    console.log('Regenerating ChatGPT response for takeoff:', takeoff_id);
+
+    $.post('/regenChatGPTResponse', {takeoff_id: takeoff_id}, function(data) {
+        console.log('ChatGPT response regenerated:', data);
+        if (data == 'success') {
+            // reload the page
+            location.reload();
+        } else {
+            XSAlert({
+                title: 'Error',
+                message: 'Failed to regenerate ChatGPT response.',
+                icon: 'error',
+            });
+        }
+    }
+    );
+}
+
+
 function populateOptions(takeoff_id) {   
     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
         data = data.options;

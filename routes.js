@@ -973,7 +973,7 @@ module.exports = function (app) {
             takeoff_info[0].labor_total = numbersWithCommas(takeoff_info[0].labor_total);
 
             // console.log(estimate);
-            console.log(takeoff_info[0].estimate_id)
+            console.log(takeoff_info[0])
             if (takeoff_info[0].estimate_id == null) {
               // Build the prompt
               db.separateAlts(takeoff_id, function (err) {
@@ -1031,7 +1031,7 @@ module.exports = function (app) {
                       // set the exclusions to the response
                       exclusions = "";
                     }
-                    db.saveEstimate(takeoff_id, inclusions, exclusions, function (err) {
+                    db.saveEstimate(takeoff_id, inclusions, exclusions, function () {
                       res.render("viewEstimate.html", {
                         inclusions: inclusions,
                         exclusions: exclusions,
@@ -1072,6 +1072,100 @@ module.exports = function (app) {
       });
     });
   });
+
+  app.post("/regenChatGPTResponse", mid.isAdmin, function (req, res) {
+    let takeoff_id = req.body.takeoff_id;
+    console.log("Regenerating ChatGPT for takeoff", takeoff_id);
+
+    // Fetch the ChatGPT prompt dynamically from the database
+    db.getSystemSettingByName("chatgpt_prompt", function (err, prompt) {
+      if (err || !prompt) {
+        console.error("Error fetching ChatGPT prompt, using default.");
+        prompt = sys.PROMPT; // Fallback prompt
+      }
+
+      db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
+        if (err) {
+          console.log(err);
+          res.status(500).send("Error Regenerating estimate");
+        } else {
+          //console.log(takeoff_info);
+
+          // format the totals in takeoff_info  
+          // takeoff_info[0].total = numbersWithCommas(takeoff_info[0].takeoff_total);
+          // takeoff_info[0].material_total = numbersWithCommas(takeoff_info[0].material_total);
+          // takeoff_info[0].labor_total = numbersWithCommas(takeoff_info[0].labor_total);
+
+          // console.log(estimate);
+         // console.log(takeoff_info[0])
+            // Build the prompt
+              prompt = prompt[0].setting_value;
+
+              for (var i = 0; i < estimate.length; i++) {
+                prompt += " subject={ " + estimate[i].material_name;
+                prompt +=
+                  " measurement: " +
+                  estimate[i].measurement +
+                  estimate[i].measurement_unit;
+                " " + estimate[i].measurement_unit;
+                if (estimate[i].selected_materials != null) {
+                  for (var j = 0; j < estimate[i].selected_materials.length; j++) {
+                    //console.log(estimate[i].selected_materials[j]);
+                    prompt +=
+                      " name: " + estimate[i].selected_materials[j].name + "'";
+                    prompt +=
+                      " desc: " + estimate[i].selected_materials[j].description;
+                  }
+                }
+                prompt += "}";
+              }
+
+              // call to  async function callChatGPT with the response as the return value and saves the it to the database
+              let response = "";
+              //console.log("prompt",prompt + JSON.stringify(estimate))
+              chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
+                response = subres;
+                //console.log("Response:", response);
+
+                // process response for render
+                // split into two vars called includes, and exclusions
+                let inclusions = response.split("</br>")[0];
+                let exclusions = response.split("</br>")[1];
+
+                if (inclusions == null || exclusions == null) {
+                  // throw an error
+                  console.log("Error splitting response");
+                  res.send("Error Regenerating estimate. Please try again with assigned materials.");
+
+                } else {
+
+                  // check if the response has been split correctly
+                  console.log("Includes:", inclusions.substring(0, 100) + "...");
+                  console.log("Exclusions:", exclusions.substring(0, 100) + "...");
+                  //nul checking for inclusions and exclusions
+                  if (inclusions == null) {
+                    // set the inclusions to the response
+                    inclusions = response;
+                  }
+                  if (exclusions == null) {
+                    // set the exclusions to the response
+                    exclusions = "";
+                  }
+                  db.setInclusionsExclusions(takeoff_id, inclusions, exclusions, function (err) {
+                    res.send("success");
+                  });
+                }
+              });
+        }
+      });
+    });
+  });
+
+
+            
+
+
+
 
 
 

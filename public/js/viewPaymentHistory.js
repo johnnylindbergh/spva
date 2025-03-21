@@ -27,7 +27,7 @@ function populatePaymentHistoryTable(takeoff_id) {
         let options = data.options;
         let totalPaid = 0;
         let signed_total = estimate ? parseFloat(estimate.signed_total) || 0 : 0;
-        let totalDue = signed_total;
+        let totalDue = 0;
         // add the header row
         payments.forEach(payment => {
             const row = table.insertRow();
@@ -151,6 +151,8 @@ function populatePaymentHistoryTable(takeoff_id) {
                 //cell3.textContent = 'Due';
                 // add red exclamation icon
                 cell3.innerHTML = `Approved by Creator <i style="color:orange;" class="fas fa-check-circle"></i>`;
+
+                totalDue += parseFloat(changeOrder.change_order_total);
 
             }
 

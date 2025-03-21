@@ -1931,6 +1931,23 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     );
   },
 
+  setInclusionsExclusions: function (takeoff_id, inclusions, exclusions, callback) {
+    con.query("SELECT * FROM takeoffs WHERE id = ?;", [takeoff_id], function (err, takeoff) {
+      if (err) return callback(err);
+      if (takeoff.length == 0) {
+        return callback("Takeoff not found");
+      }
+      con.query(
+        "UPDATE estimates SET inclusions = ?, exclusions = ? WHERE id = ?;",
+        [inclusions, exclusions, takeoff[0].estimate_id],
+        function (err) {
+          if (err) return callback(err);
+          callback(null);
+        }
+      );
+    }
+    );
+  },
   saveEstimate: function (takeoff_id, inclusions, exclusions, callback) {
     //console.log("saving estimate function received: ", inclusions, exclusions, takeoff_id);
     if (takeoff_id == null) {
@@ -1958,7 +1975,8 @@ getChangeOrderItemsById: function (change_order_id, callback) {
       // get the estimate_id from the takeoff_id  
       con.query('SELECT estimate_id FROM takeoffs WHERE id = ?;', [takeoff_id], function (err, estimate_id) {
         estimate_id = estimate_id[0].estimate_id;
-        if (estimate_id == null) {
+        if (estimate_id == null || err) {
+          console.log(err);
           console.log("No estimate_id found for takeoff_id: ", takeoff_id);
         }
 

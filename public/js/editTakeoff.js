@@ -6,15 +6,85 @@ let laborTotal = 0;
 let materialTotal = 0;
 
 let labor_rate = 0;
-let labor_markup = 0;
+let labor_markup = 0; // Labor markup as a percentage
 let laborTotalAdjusted = 0;
-let material_markup = 0;
-let supervisor_markup = 0;
+let material_markup = 0; // Material markup as a percentage
+let supervisor_markup = 0; // Supervisor markup as a percentage
 let travel_extra = 0;
-let touchups_cost = 0;
+let touchups_cost = 0; // This should not affect gross profit
 let misc_material_cost = 0;
 let tax = 0;
 let profit = 0;
+
+// Returns the total material cost including miscellaneous material
+function getMaterialTotal() {
+  return materialTotal + misc_material_cost;
+}
+
+// Returns the tax on the material total
+function getMaterialTax() {
+  return getMaterialTotal() * (parseFloat(tax) / 100);
+}
+
+// Returns the material total including tax
+function getMaterialTaxedMaterialTotal() {
+  return getMaterialTotal() + getMaterialTax();
+}
+
+// Returns the material markup amount (part of revenue)
+function getMaterialMarkup() {
+  return materialTotal * (parseFloat(material_markup));
+}
+
+// Returns the labor markup amount (part of revenue)
+function getLaborMarkup() {
+  return (laborTotal) * (parseFloat(labor_markup));
+}
+
+// Returns the touchups cost (this is now treated as an operating expense)
+function getTouchupsCost() {
+  return touchups_cost;
+}
+
+// Returns the labor total including travel (excluding touchups_cost and markup)
+function getLaborWithTravel() {
+  return laborTotal + travel_extra;
+}
+
+// Returns the cost of goods sold (COGS), excluding markups and touchups_cost
+function getCostOfGoodsSold() {
+  return getMaterialTotal() + getLaborWithTravel();
+}
+
+// Returns the revenue including markups, profit, and supervisor markup
+function getRevenue() {
+  const baseCost = getMaterialTotal() + getLaborWithTravel();
+  const totalMarkups = getMaterialMarkup() + getLaborMarkup();
+  const revenue = (baseCost + totalMarkups) * (1 + parseFloat(profit) / 100) * (1 + parseFloat(supervisor_markup));
+  return revenue;
+}
+
+// Returns the gross profit (revenue - COGS, excluding touchups_cost)
+// Ensures gross profit is never negative
+function getGrossProfit() {
+  const revenue = getRevenue();
+  const cogs = getCostOfGoodsSold();
+  const grossProfit = revenue - cogs;
+  return Math.max(grossProfit, 0); // Ensures gross profit is never negative
+}
+
+// Returns the gross profit margin as a percentage
+function getGrossProfitMargin() {
+  const grossProfit = getGrossProfit();
+  const revenue = getRevenue();
+  if (revenue === 0) return 0; // Avoid division by zero
+  return (grossProfit / revenue) * 100;
+}
+
+// Returns the supervision cost (not part of COGS)
+function getSupervisionCost() {
+  return (getLaborWithTravel() + getMaterialTaxedMaterialTotal()) * (parseFloat(supervisor_markup));
+}
 
 // a dic that will hold the paint order
 // materialId, materialName, numberOfGallons
@@ -294,7 +364,7 @@ function updateLaborRate() {
   document.getElementById('laborRateValue').innerText = "$" + labor_rate + "/hr";
   console.log(laborTotal)
 
-  let labor_adjusted = laborTotal / labor_rate;
+  let labor_adjusted = laborTotal / labor_rate;// 8 hours a day
   $('#laborAdjusted').text((labor_adjusted / 8.0).toFixed(2) + " work days (8hrs/day)");
   console.log(labor_adjusted)
 }
@@ -348,10 +418,8 @@ function changeLaborMarkup(value) {
   console.log("Changing labor markup to: " + labor_markup);
   $("#laborMarkupValue").text(parseInt(labor_markup * 100) + "%");
 
-  laborTotalAdjusted = laborTotal * (1.0 + labor_markup);
   $('#laborTotal').text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)));
-  //$('#sum').text("Total Cost: $" + numberWithCommas((laborTotalAdjusted + materialTotal).toFixed(2)));
-  $.post("/change-labor-markup", { takeoff_id: takeoff_id, labor_markup: labor_markup })
+  $.post("/change-labor-markup", { takeoff_id: takeoff_id, labor_markup: (labor_markup.toFixed(2)) })
     .done(function () {
       console.log("Labor markup updated: " + labor_markup);
       loadTakeoffMaterials(takeoff_id);
@@ -387,10 +455,8 @@ function changeMaterialMarkup(value) {
   console.log("Changing material markup to: " + material_markup);
   $("#materialMarkupValue").text(parseInt(material_markup * 100) + "%");
 
-  materialTotal = materialTotal * (1.0 + material_markup);
-  $('#materialTotal').text("Material Cost: $" + numberWithCommas(materialTotal.toFixed(2)));
   //$('#sum').text("Total Cost: $" + numberWithCommas((laborTotalAdjusted + materialTotal).toFixed(2)));
-  $.post("/change-material-markup", { takeoff_id: takeoff_id, material_markup: material_markup })
+  $.post("/change-material-markup", { takeoff_id: takeoff_id, material_markup: material_markup.toFixed(2) })
     .done(function () {
       console.log("Material markup updated: " + material_markup);
       loadTakeoffMaterials(takeoff_id);
@@ -420,7 +486,7 @@ function updateSupervisorMarkup(value) {
   console.log("Changing supervisor markup to: " + supervisor_markup);
   $("#supervisorMarkupValue").text(parseInt(value) + "%");
 
-  $.post("/change-supervisor-markup", { takeoff_id: takeoff_id, supervisor_markup: (parseInt(value)/100).toFixed(2) })
+  $.post("/change-supervisor-markup", { takeoff_id: takeoff_id, supervisor_markup: (supervisor_markup).toFixed(2) })
     .done(function () {
       console.log("Supervisor markup updated: " + supervisor_markup);
       loadTakeoffMaterials(takeoff_id);
@@ -971,104 +1037,43 @@ function loadTakeoffMaterials(id) {
         $("#takeoff_materials_table").append(newRow);
       });
 
+      // Calculate labor total including markup
+      let laborTotalAdjusted = laborTotal + getLaborMarkup() + touchups_cost + travel_extra;
 
-      materialTotal += misc_material_cost;
+      // Calculate material total including markup
+      let materialCost = (getMaterialTotal() + getMaterialMarkup()) * (1 + tax / 100);
 
-      // if labor_markup is not 0 then adjust the labor total
-      if (labor_markup != 0) {
-        laborTotalAdjusted = laborTotal * (1 + parseFloat(labor_markup));
-      } else {
-        laborTotalAdjusted = laborTotal
-      }
+      // Calculate final totals using the existing functions
+      let finalTotal = getRevenue() + touchups_cost + getMaterialTax(); // Revenue already includes markups, profit, and supervisor markup
+      let grossProfit = getGrossProfit();
+      let grossProfitMargin = getGrossProfitMargin();
 
-    
-      
-
-      let materialTotalMarkedUp = materialTotal;
-      if (material_markup != 0) {
-        materialTotalMarkedUp = materialTotal * (1 + parseFloat(material_markup));
-      }
-
-      
-
-      let materialTotalTaxed = materialTotalMarkedUp;
-      if (tax != 0) {
-        materialTotalTaxed = (materialTotalTaxed * (1 + parseFloat(tax) / 100));
-      }
-
-
-      let adjustedTotal = laborTotalAdjusted + materialTotalMarkedUp + travel_extra;
-      let costOfGoodsSold = laborTotal + materialTotal + travel_extra;
-      
-
-      let finalTotal = laborTotalAdjusted + materialTotalTaxed + touchups_cost + travel_extra
+      $("#raw-material-cost").text("Raw Material Cost: $" + numberWithCommas(getMaterialTotal().toFixed(2)));
+      $("#supervision-cost").text("Supervision Cost: $" + numberWithCommas(getSupervisionCost().toFixed(2)));
+      $("cost-of-goods-sold").text("Cost of Goods Sold: $" + numberWithCommas((laborTotalAdjusted + materialCost).toFixed(2)));
 
 
 
-     
-
-      if (isNaN(adjustedTotal) || !isFinite(adjustedTotal)) {
-        console.log("Total is NaN or Infinite");
-        adjustedTotal = 0; // Reset total to 0 if invalid
-      }
-
-
-      if (supervisor_markup != 0 || supervisor_markup != null) {
-        finalTotal = finalTotal * (1 + supervisor_markup);
-      }
-
-      if (travel_extra != 0 && travel_extra != null) {
-        adjustedTotal = adjustedTotal + travel_extra;
-      }
-
-      if (touchups_cost != 0 && touchups_cost != null) {
-        adjustedTotal = adjustedTotal + touchups_cost;
-      }
-
-      if (profit != 0 && profit != null) {
-        finalTotal = finalTotal * (1 + (parseFloat(profit)/100));
-      }
-
-     
-
-
-      if (isNaN(adjustedTotal) || !isFinite(adjustedTotal)) {
-        console.log("Total is NaN or Infinite");
-        adjustedTotal = 0; // Reset total to 0 if invalid
-      }
-
-
-      let grossProfit = adjustedTotal-touchups_cost - costOfGoodsSold;
-      let grossProfitMargin = (grossProfit / (adjustedTotal- touchups_cost)) * 100;
-
-      grossProfitMargin += parseFloat(profit);
+      // Update UI with calculated values
       $("#grossProfit").text("Gross Profit: $" + numberWithCommas(grossProfit.toFixed(2)));
       $("#grossProfitMargin").text("Gross Profit Margin: " + grossProfitMargin.toFixed(2) + "%");
-      
-      // Update total sum
-      $("#sum").text("Total Cost: $" + numberWithCommas((finalTotal).toFixed(2)));
 
-      // Update labor total
-      if (laborTotalAdjusted) {
-        $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)));
-        // make it red 
-       // $("#laborTotal").css("color", "red");
-      } else {
-        $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotal.toFixed(2)));
+      // Update total sum (revenue)
+      $("#sum").text("Total Cost: $" + numberWithCommas(finalTotal.toFixed(2)));
 
-      }
+      // Update labor total (including markup)
+      $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)));
 
-      $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialTotalTaxed.toFixed(2)));
-
-
+      // Update material total (including markup)
+      $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialCost.toFixed(2)));
 
       renderPaintOrder(paintOrder);
       //now post the new sums to /updateTakeoffTotal
       $.post("/updateTakeoffTotal", {
         takeoff_id: takeoff_id,
-        total: (finalTotal).toFixed(2),
-        laborTotal: (laborTotalAdjusted.toFixed(2) || laborTotal.toFixed(2)),
-        materialTotal: materialTotalTaxed.toFixed(2),
+        total: finalTotal.toFixed(2),
+        laborTotal: laborTotal.toFixed(2),
+        materialTotal: materialCost.toFixed(2),
       })
         .done(function () {
           console.log("Total updated for takeoff: " + takeoff_id);
