@@ -802,6 +802,7 @@ module.exports = function (app) {
   );
 
   app.post("/save-notes", mid.isAdmin, function (req, res) {
+    console.log("Changing notes ", req.body);
     db.saveTakeoffNotes(req.body.id, req.body.notes, function (err) {
       if (err) {
         console.log(err);

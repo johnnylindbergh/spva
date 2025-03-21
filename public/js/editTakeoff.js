@@ -1223,7 +1223,7 @@ function setNotes(id, notes) {
 function saveNotes(id) {
   let notes = $("#notesTextArea").val();
   console.log("Saving notes for material: " + currentNoteId);
-  $.post("/save-notes", { id: currentNoteId, notes: notes })
+  $.post("/save-notes", { id: currentNoteId, notes: notes})
     .done(function () {
       console.log("Notes saved for material: " + currentNoteId);
       $("#notesModal").modal("hide");
