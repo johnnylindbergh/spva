@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Amount Calculator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Schedule of Values</h1>
+        <table id="invoiceTable" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Total Invoice Amount</th>
+                    <th>Previous Amount Invoiced</th>
+                    <th>This Invoice Amount</th>
+                    <th>Remaining Balance</th>
+                    <th>Percent Remaining</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be added dynamically here -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Total:</strong></td>
+                    <td></td>
+                    <td id="totalPreviousAmount">0.00</td>
+                    <td id="totalThisInvoiceAmount">0.00</td>
+                    <td id="totalRemainingBalance">0.00</td>
+                    <td id="totalPercentRemaining">0%</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <button id="addRowBtn" class="btn btn-primary mb-3">Add Row</button>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addRowBtn = document.getElementById('addRowBtn');
+            const invoiceTableBody = document.querySelector('#invoiceTable tbody');
+            const totalPreviousAmount = document.getElementById('totalPreviousAmount');
+            const totalThisInvoiceAmount = document.getElementById('totalThisInvoiceAmount');
+            const totalRemainingBalance = document.getElementById('totalRemainingBalance');
+            const totalPercentRemaining = document.getElementById('totalPercentRemaining');
+
+            // Function to add a new row
+            addRowBtn.addEventListener('click', function () {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><input type="text" class="form-control description" placeholder="Enter description"></td>
+                    <td><input type="number" class="form-control total-invoice" placeholder="Enter amount"></td>
+                    <td><input type="number" class="form-control previous-amount" placeholder="Enter amount"></td>
+                    <td><input type="number" class="form-control this-invoice" placeholder="Enter amount"></td>
+                    <td class="remaining-balance">0.00</td>
+                    <td class="percent-remaining">0%</td>
+                `;
+                invoiceTableBody.appendChild(newRow);
+
+                // Add event listeners to the new inputs
+                const inputs = newRow.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.addEventListener('input', updateTotals);
+                });
+            });
+
+            // Function to update totals
+            function updateTotals() {
+                let totalPrevious = 0;
+                let totalThis = 0;
+                let totalRemaining = 0;
+
+                const rows = invoiceTableBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const totalInvoice = parseFloat(row.querySelector('.total-invoice').value) || 0;
+                    const previousAmount = parseFloat(row.querySelector('.previous-amount').value) || 0;
+                    const thisInvoiceAmount = parseFloat(row.querySelector('.this-invoice').value) || 0;
+
+                    const remainingBalance = totalInvoice - (previousAmount + thisInvoiceAmount);
+                    const percentRemaining = totalInvoice > 0 ? ((remainingBalance / totalInvoice) * 100).toFixed(2) : 0;
+
+                    row.querySelector('.remaining-balance').textContent = remainingBalance.toFixed(2);
+                    row.querySelector('.percent-remaining').textContent = `${percentRemaining}%`;
+
+                    totalPrevious += previousAmount;
+                    totalThis += thisInvoiceAmount;
+                    totalRemaining += remainingBalance;
+                });
+
+                totalPreviousAmount.textContent = totalPrevious.toFixed(2);
+                totalThisInvoiceAmount.textContent = totalThis.toFixed(2);
+                totalRemainingBalance.textContent = totalRemaining.toFixed(2);
+                totalPercentRemaining.textContent = `${(totalRemaining / (totalPrevious + totalThis + totalRemaining) * 100).toFixed(2)}%`;
+            }
+        });
+    </script>
+</body>
+</html>

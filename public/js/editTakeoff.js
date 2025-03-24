@@ -778,6 +778,13 @@ function loadTakeoffMaterials(id) {
         let subjectNameCell = $("<td></td>").text(row.material_name);
         let notes = row.notes;
 
+        if (notes != null && notes.length > 0) {
+          // add a notes icon to the cell
+          let notesIcon = $("<i class='fa fa-sticky-note'></i>");
+          subjectNameCell.append(" ");
+          subjectNameCell.append(notesIcon);
+        }
+
         // if the subjectNameCell is clicked, show the notes in an editable modal dialog
         subjectNameCell.on("click", function () {
           // show the notes in an editable modal dialog
@@ -1227,6 +1234,7 @@ function saveNotes(id) {
     .done(function () {
       console.log("Notes saved for material: " + currentNoteId);
       $("#notesModal").modal("hide");
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       console.log("Failed to save notes for material: " + currentNoteId);

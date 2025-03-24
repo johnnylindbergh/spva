@@ -2609,6 +2609,12 @@ module.exports = function (app) {
 
   });
 
+  app.get("/scheduleOfValuesCreator", mid.isAdmin, function (req, res) {
+    console.log("scheduleOfValuesCreator accessed");
+    res.render("scheduleOfValuesCreator.html");
+  }
+  );
+
 
   app.post('/share-invoice', mid.isAdmin, function (req, res) {
     console.log("sending email to client ", req.body.takeoff_id);
