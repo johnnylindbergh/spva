@@ -444,3 +444,42 @@ INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Thursday', 
 INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Friday', 7.1);
 INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Saturday', 3.6);
 INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Sunday', 1.2);
+
+
+
+CREATE TABLE sov (
+  id INT NOT NULL AUTO_INCREMENT,
+  takeoff_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  total DECIMAL(10,2) NOT NULL,
+  hash VARCHAR(64) UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+);
+
+-- example insert
+
+INSERT INTO sov (takeoff_id, name, total, hash) VALUES (1, 'SOV 1', 2000.00, 'lh2489sfuyfu2434879');
+
+
+CREATE TABLE sov_items (
+  id INT NOT NULL AUTO_INCREMENT,
+  sov_id INT NOT NULL,
+  invoice_id INT NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  cost DECIMAL(10,2) NOT NULL,
+  quantity INT NOT NULL,
+  total DECIMAL(10,2) NOT NULL,
+  total_contracted_amount DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (sov_id) REFERENCES sov(id) ON DELETE CASCADE,
+  FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+);
+
+-- example insert 
+INSERT INTO sov_items (sov_id, invoice_id, description, cost, quantity, total, total_contracted_amount) VALUES (1, 2, 'Description 1', 200.00, 1, 200.00, 2000.00);
+INSERT INTO sov_items (sov_id, invoice_id, description, cost, quantity, total, total_contracted_amount) VALUES (1, 2, 'Description 2', 250.00, 10, 2500.00, 5000.00);

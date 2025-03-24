@@ -2609,11 +2609,40 @@ module.exports = function (app) {
 
   });
 
-  app.get("/scheduleOfValuesCreator", mid.isAdmin, function (req, res) {
+  app.get("/sov", mid.isAdmin, function (req, res) {
     console.log("scheduleOfValuesCreator accessed");
-    res.render("scheduleOfValuesCreator.html");
+    // get the takeoff_id from the query params
+    const takeoff_id = req.query.takeoff_id;
+    if (takeoff_id == null) {
+      console.log("takeoff_id is null");
+      res.redirect("/");
+    }
+    // get takeoff
+    db.getTakeoffById(takeoff_id, function (err, takeoff) {
+
+      if (err) {
+        console.log(err);
+        res.send("error fetching takeoff");
+      }
+
+    res.render("scheduleOfValuesCreator.html", { takeoff_id: takeoff_id, takeoff: takeoff[0]});
   }
   );
+});
+
+
+app.get("/retrieveSOV", mid.isAdmin, function (req, res) {
+  console.log("retrieving schedule of values for ", req.query.takeoff_id);
+  db.getSOV(req.query.takeoff_id, function (err, sov) {
+    if (err || sov == null) {
+      console.log(err);
+    }
+    console.log(sov);
+    res.send(sov[0]);
+  }
+  );
+}
+);
 
 
   app.post('/share-invoice', mid.isAdmin, function (req, res) {

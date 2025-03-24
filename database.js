@@ -1886,6 +1886,28 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     });
   },
 
+  getSOV: function (takeoff_id, callback) {
+    con.query(
+      "SELECT * FROM sov WHERE takeoff_id = ?;",
+      [takeoff_id],
+      function (err, sov) {
+        if (err || sov.length == 0) return callback(err);
+
+        // now join the sov_items to the sov
+        con.query(
+          "SELECT * FROM sov_items WHERE sov_id = ?;",
+          [sov[0].id],
+          function (err, sov_items) {
+            if (err) return callback(err);
+            sov[0].sov_items = sov_items;
+            callback(null, sov);
+          }
+        );
+      }
+    );
+  },  
+
+
   updateTakeoffLastUpdatedBy: function (takeoff_id, user_id, callback) {
     if (!takeoff_id || !user_id) {
       return callback("Missing required parameters");

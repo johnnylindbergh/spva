@@ -43,6 +43,47 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     <script>
+
+        // Function to fetch and display data
+        function fetchSOVData() {
+            const takeoffId = "{{takeoff_id}}"; // Replace with actual takeoff ID
+            fetch(`/retrieveSOV?takeoff_id=${takeoffId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const invoiceTableBody = document.querySelector('#invoiceTable tbody');
+                    invoiceTableBody.innerHTML = ''; // Clear existing rows
+                    let sov = data.sov;
+                    let sov_items = data.sov_items;
+
+                    sov_items.forEach(item => {
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td><input type="text" class="form-control description" value="${item.description}" readonly></td>
+                            <td><input type="number" class="form-control total-invoice" value="${item.totalInvoiceAmount}" readonly></td>
+                            <td><input type="number" class="form-control previous-amount" value="${item.previousAmountInvoiced}" readonly></td>
+                            <td><input type="number" class="form-control this-invoice" value="${item.thisInvoiceAmount}" readonly></td>
+                            <td class="remaining-balance">${(item.totalInvoiceAmount - (item.previousAmountInvoiced + item.thisInvoiceAmount)).toFixed(2)}</td>
+                            <td class="percent-remaining">${((item.totalInvoiceAmount > 0 ? ((item.totalInvoiceAmount - (item.previousAmountInvoiced + item.thisInvoiceAmount)) / item.totalInvoiceAmount) * 100 : 0).toFixed(2))}%</td>
+                        `;
+                        invoiceTableBody.appendChild(newRow);
+                    });
+                })
+                .catch(error => console.error('Error fetching SOV data:', error));
+
+            // Add event listeners to the inputs
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateTotals);
+            });
+
+            // Update totals
+            updateTotals();
+
+        }
+
+        // Fetch data on page load
+        document.addEventListener('DOMContentLoaded', fetchSOVData);
+
         document.addEventListener('DOMContentLoaded', function () {
             const addRowBtn = document.getElementById('addRowBtn');
             const invoiceTableBody = document.querySelector('#invoiceTable tbody');
