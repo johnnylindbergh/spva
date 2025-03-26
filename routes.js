@@ -2645,7 +2645,7 @@ app.get("/retrieveSOV", mid.isAdmin, function (req, res) {
 );
 
 
-app.post('/getTerms', mid.isAdmin, function (req, res) {
+app.post('/getTerms', function (req, res) {
   console.log("getting terms");
   db.getTerms(function (err, terms) {
     if (err) {
