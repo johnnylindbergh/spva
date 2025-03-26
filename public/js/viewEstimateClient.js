@@ -8,6 +8,8 @@ var includesTotal = 0;
 var excludesTotal = 0;
 var optionsTotal = 0;
 
+var termsScrolled = false;
+
 // Function to convert markdown-like text to HTML
 function formatTextToHTML(text) {
     if (text == null) {
@@ -176,22 +178,31 @@ function handleSignatureChange() {
         // do nothing if you must
     }
 
+    console.log("termsScrolled:", termsScrolled);
+    if (!termsScrolled){
+        XSAlert({
+            title:'Please read the terms and conditions',
+            icon:'warning',
+        });
+        return;
+    }
+
     const signatureInput = $('#signature').val();
     const dateInput = $('#signedDate').val();
     const prefferedStartDate = $('#startDate').val();
 
     if(prefferedStartDate === '' || prefferedStartDate === null) {
-        alert('Please provide a start date');
+        XSAlert('Please provide a start date');
         return;
     }
 
     if (signatureInput === '') {
-        alert('Please provide a signature');
+        XSAlert('Please provide a signature');
         return;
     }   
 
     if (dateInput === '') {
-        alert('Please provide a date');
+        XSAlert('Please provide a date');
         return;
     }
 
@@ -300,6 +311,31 @@ $(document).ready(function() {
 
 
     const alert = $('#initial-payment-alert');
+
+
+    // get the terms and conditions from the database
+    $.post('/getTerms', function(response) {
+        const termsContainer = $('<div>').css({
+            'max-height': '200px',
+            'overflow-y': 'auto',
+            'border': '1px solid #ccc',
+            'padding': '10px',
+            'margin-top': '10px'
+        }).attr('id', 'terms-container');
+
+
+        console.log(response);
+        termsContainer.html(formatTextToHTML(response));
+        $('#terms').html(termsContainer);
+
+
+        termsContainer.on('scroll', function() {
+            if (this.scrollTop + this.clientHeight >= (this.scrollHeight-40)) {
+                termsScrolled = true;
+                console.log('Terms fully scrolled:', termsScrolled);
+            }
+        });
+    });
 
    // addEditableListeners();
 });

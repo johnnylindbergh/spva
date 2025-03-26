@@ -7,12 +7,16 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    
 
     <!-- jquery-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <!-- XSAlert -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/themes/light-theme.css">
+
+    <!-- navbar -->
+    <link rel="stylesheet" href="/css/navbar.css">
 
     <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
 
@@ -56,6 +60,24 @@ function shareChangeOrderWithClient(){
     </script>
 </head>
 <body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <ul>
+            <li><a href="javascript:history.back()">Back</a></li>
+            <li><a href="/">{{defaults.sysName}}</a></li>
+            <div style="float:right">
+                <li><a href="/auth/google">Log In</a></li>
+                <li><a href="/logout">Log Out</a></li>
+            </div>
+
+
+        </ul>
+    </div>
+</br>
+</br>
+
+
     <div class="container mt-5">
         <h2>Change Order Details</h2>
         <input type="hidden" id="change_order_id" value="{{change_order.id}}">
@@ -108,7 +130,6 @@ function shareChangeOrderWithClient(){
                     <th>Quantity</th>
                     <th>Cost</th>
                     <th>Total</th>
-                    <th>Created At</th>
                 </tr>
             </thead>
             <tbody>
@@ -119,7 +140,6 @@ function shareChangeOrderWithClient(){
                     <td>{{quantity}}</td>
                     <td>{{cost}}</td>
                     <td>{{total}}</td>
-                    <td>{{created_at}}</td>
                 </tr>
                 {{/change_order_items}}
             </tbody>

@@ -2645,6 +2645,19 @@ app.get("/retrieveSOV", mid.isAdmin, function (req, res) {
 );
 
 
+app.post('/getTerms', mid.isAdmin, function (req, res) {
+  console.log("getting terms");
+  db.getTerms(function (err, terms) {
+    if (err) {
+      console.log(err);
+    }
+    console.log(terms);
+    res.send(terms);
+  }
+  );
+}
+);
+
   app.post('/share-invoice', mid.isAdmin, function (req, res) {
     console.log("sending email to client ", req.body.takeoff_id);
     if (req.body.takeoff_id) {

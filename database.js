@@ -2065,6 +2065,15 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     });
   },
 
+  getTerms: function (callback) {
+    // query the settings table for the terms
+    con.query("SELECT setting_value FROM system_settings WHERE setting_name = 'terms';", function (err, terms) {
+      if (err) return callback(err);
+      callback(null, terms[0].setting_value);
+    }
+    );
+  },
+
   addOption: function (takeoff_id, description, material_cost, labor_cost, callback) {
     // first check if the row_id is null, if it is, insert a new row
     // if it is not, update the existing row
