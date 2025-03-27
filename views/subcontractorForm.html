@@ -171,10 +171,15 @@
                         });
                     }
                 });
-                console.log(data);
+                //console.log(data);
                 $.post('/subcontractor/submit', { data: data, form_name: formName }, function (response) {
-                    if (response.success) {
+
+                    console.log('response:', response);
+                    if (response == 'success') {
                         alert('Data submitted successfully');
+                        // Redirect to the view form page
+                        window.location.href = '/subcontractor/viewForm?id=' + response.form_id;
+                        
                     } else {
                         alert('Error submitting data');
                     }
