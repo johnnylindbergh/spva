@@ -8,110 +8,290 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/themes/light-theme.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
+    <!-- navbar.css -->
+    <link rel="stylesheet" type="text/css" href="/css/navbar.css">
+    <!-- invoice.css -->
+    <link rel="stylesheet" type="text/css" href="/css/invoice.css">
     <script src="/js/invoice.js"></script>
     <title>Invoice Creator</title>
+
+    <script>
+
+    let rowCount = 0;
+
+    function addRow() {
+    const table = document.getElementById("invoice-item-table").querySelector("tbody");
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td>${++rowCount}</td>
+        <td><input style="width:150px" type="number" name="invoice_items[${rowCount}][quantity]"></td>
+        <td><input style="width:150px" type="number" step="0.01" name="invoice_items[${rowCount}][cost]"></td>
+        <td><input style="width:150px" type="text" name="invoice_items[${rowCount}][description]"></td>
+    `;
+    table.appendChild(row);
+    }
+
+        function pushInvoiceToQuickbooks(invoice_id) {
+            console.log('push invoice to quickbooks clicked');
+
+            $.ajax({
+                url: '/pushInvoiceToQuickbooks',
+                method: 'POST',
+                contentType: 'application/json', // Set content type
+                data: JSON.stringify({
+                    invoice_id: invoice_id,
+                    takeoff_id: document.getElementById('takeoff_id').value,
+                }),
+                success: function (response) {
+                    XSAlert({
+                        title: 'Success',
+                        message: 'Invoice pushed to Quickbooks',
+                        icon: 'success',
+                    });
+                },
+                error: function (error) {
+                    XSAlert({
+                        title: 'Error',
+                        message: 'Failed to push invoice to Quickbooks.',
+                        icon: 'error',
+                        hideCancelButton: true
+                    }).then((result) => {
+
+                        console.log('clicked');
+                        window.location.href = '/quickbooks';
+                    });
+                    //window.location.href = '/quickbooks';
+                },
+            });
+        }
+
+        function shareInvoiceWithCustomer(invoiceId) {
+            console.log('share with customer clicked');
+
+            const takeoffId = document.getElementById('takeoff_id').value;
+
+            if (!invoiceId || !takeoffId) {
+                XSAlert.alert('Invoice ID or Takeoff ID not defined');
+                return;
+            }
+
+            $.ajax({
+                url: '/share-invoice',
+                method: 'POST',
+                contentType: 'application/json', // Set content type
+                data: JSON.stringify({
+                    invoice_id: invoiceId,
+                    takeoff_id: takeoffId,
+                }),
+                success: function (response) {
+                    XSAlert({
+                        title: 'Success',
+                        message: 'Email sent to customer',
+                        icon: 'success',
+                    });
+                },
+                error: function (error) {
+                    XSAlert({
+                        title: 'Error',
+                        message: 'Failed to send email to customer.',
+                        icon: 'error',
+                    });
+                },
+            });
+
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form');
+
+            // hide the invoce initially
+            document.querySelector('.invoice-container').style.display = 'none';
+
+            // add row initially
+            addRow();
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();  // Prevents normal form submission
+
+                const customerName = document.getElementById('customer-name').value;
+                const email = document.getElementById('email').value;
+                const takeoffId = document.getElementById('takeoff_id').value;
+
+                
+                const changeOrderIdsElement = document.getElementById('changeOrderIds');
+                const change_order_ids = changeOrderIdsElement ? changeOrderIdsElement.value.split(',').filter(Boolean) : [];
+
+                if (!customerName || !email) {
+                    XSAlert.alert('Please fill out all required fields');
+                    return;
+                }
+
+                if (!takeoffId) {
+                    XSAlert.alert('Takeoff ID not defined');
+                    return;
+                }
+
+                const invoiceItems = [];
+                const rows = document.querySelectorAll("#invoice-item-table tbody tr");
+
+                rows.forEach(row => {
+                    const quantity = row.querySelector("input[name^='invoice_items'][name$='[quantity]']").value;
+                    const cost = row.querySelector("input[name^='invoice_items'][name$='[cost]']").value;
+                    const description = row.querySelector("input[name^='invoice_items'][name$='[description]']").value;
+
+                    if (quantity && cost && description) {
+                        invoiceItems.push({
+                            quantity: quantity,
+                            cost: cost,
+                            description: description
+                        });
+                    }
+                });
+
+                $.ajax({
+                    url: '/create-invoice',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        customer_name: customerName,
+                        email: email,
+                        takeoff_id: takeoffId,
+                        invoice_items: invoiceItems,
+                        change_order_ids: change_order_ids
+                    }),
+                    success: function (invoice) {
+                        console.log("Invoice created:", invoice);
+
+                        // redirect to /viewInvoice/:invoice_id
+                        window.location.href = `/viewInvoice/?invoice_id=${invoice.invoice_id}`;
+                    },
+                    error: function (error) {
+                        XSAlert.alert('Failed to create invoice. Please try again.');
+                    },
+                });
+            });
+
+
+        });
+
+    </script>
 </head>
 
-<body class="bg-light">
+<body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #0893A1;">
-        <div class="container">
-            <a class="navbar-brand text-white" href="/">{{defaults.sysName}}</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link text-white" href="javascript:history.back()">Back</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="/auth/google">Log In</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="/logout">Log Out</a></li>
-                </ul>
+    <!-- navbar here -->
+    <div class="navbar">
+        <ul>
+            <li><a href="javascript:history.back()">Back</a></li>
+            <li><a href="/">{{defaults.sysName}}</a></li>
+            <div style="float:right">
+                <li><a href="/auth/google">Log In</a></li>
+                <li><a href="/logout">Log Out</a></li>
             </div>
-        </div>
-    </nav>
 
-    <div class="container mt-5">
-        <form id="createInvoiceForm" action="/create-invoice" method="POST" class="card p-4 shadow-sm">
+
+        </ul>
+    </div>
+    
+    <div class="form-container">
+        <form id= "createInvoiceForm"action="/create-invoice" method="POST">
             {{#takeoff}}
-            <input type="hidden" id="hidden-input" name="invoice_name" value="{{invoice_name}}">
+
+
+            <input type="input" id="hidden-input" name="invoice_name" value="{{invoice_name}}">
+
             <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
+            <label for="customer-name">Customer Name</label>
+            <input type="text" id="customer-name" name="customer_name" value="{{customer_givenName}}" required>
 
-            <div class="mb-3">
-                <label for="customer-name" class="form-label">Customer Name</label>
-                <input type="text" id="customer-name" name="customer_name" class="form-control" value="{{customer_givenName}}" required>
-            </div>
+            <label for="email">Invoice Email</label>
+            <input type="email" id="email" name="invoice_email" value="{{takeoff.customer_invoice_email_address}}"
+                required>
+            <!-- 
+            <label for="invoice-date">Invoice Date</label>
+            <input type="date" id="invoice-date" name="invoice_date" value="2024-11-26" required>
 
-            <div class="mb-3">
-                <label for="email" class="form-label">Invoice Email</label>
-                <input type="email" id="email" name="invoice_email" class="form-control" value="{{takeoff.customer_invoice_email_address}}" required>
-            </div>
+            <label for="time">Time</label>
+            <input type="time" id="time" name="time" value="13:00"> -->
 
-            <div class="table-responsive">
-                <table class="table table-bordered" id="invoice-item-table">
-                    <thead style="background-color: #F48847;" class="text-white"></thead>
+            <!-- <label for="payment-amount">Payment Amount</label>
+            <input type="text" id="custom-amount" name="custom_amount" placeholder="Enter custom amount" min="0"> -->
+
+            <!-- a table with columns number, quantity, cost, description -->
+            <div style="overflow-x:auto;">
+                <table id="invoice-item-table">
+                    <thead>
                         <tr>
-                            <th>#</th>
+                            <th></th>
                             <th>Quantity</th>
                             <th>Cost</th>
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody> <!-- Make sure this exists -->
+                    </tbody>
                 </table>
+            </br>
+
+                <!-- add row button -->
+                <button style = "width: 25%" type="button" onclick="addRow()">Add Row</button>
             </div>
-
-            <button type="button" class="btn text-white mb-3" style="background-color: #0893A1;" onclick="addRow()">Add Row</button>
-
-            <div class="text-center">
-                <button type="submit" class="btn text-white" style="background-color: #0893A1;">Create Invoice</button>
+        </br>
+            <div style="text-align:center;">
+                <button style="background-color: rgb(1, 152, 1);" type="submit">Create Invoice</button>
             </div>
             {{/takeoff}}
         </form>
+    </br>
 
-        <div id="changeOrderAdded" class="alert mt-3 d-none" style="background-color: #F48847; color: white;" role="alert">
-            Change Order Added
+
+        <div id="changeOrderAdded" style="display:none; max-height:5px; float:right; background-color: rgba(1, 152, 1, 0.36); border-radius: 5px; padding: 15px; text-align: center;">
+            <h5 style="margin: 0;">Change Order Added</h5>
+        </div>
+        <!-- change order that can be added to invoice -->
+     <div class="change-order-container">
+        <h2>Change Orders</h2>
+        <table class="change-order-table">
+            <thead>
+                <tr>
+                    <th>CO Number</th>
+                    <th>CO Description</th>
+                    <th>CO Total</th>
+                    <th>CO Created At</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#change_orders}}
+                <tr>
+                    <td>{{co_number}}</td>
+                    <td>{{description}}</td>
+                    <td>{{change_order_total}}</td>
+                    <td>{{created_at}}</td>
+                    <td><button style="width:100%;" class="btn btn-primary" onclick="addChangeOrderToInvoice('{{id}}')">Add</button></td>
+                </tr>
+                {{/change_orders}}
+            </tbody>
+        </table>
         </div>
 
-        <div class="card mt-5 shadow-sm">
-            <div class="card-header text-white" style="background-color: #0893A1;"></div>
-                <h5 class="mb-0">Change Orders</h5>
-            </div>
-            <div class="card-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>CO Number</th>
-                            <th>CO Description</th>
-                            <th>CO Total</th>
-                            <th>CO Created At</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#change_orders}}
-                        <tr>
-                            <td>{{co_number}}</td>
-                            <td>{{description}}</td>
-                            <td>{{change_order_total}}</td>
-                            <td>{{created_at}}</td>
-                            <td><button class="btn text-white w-100" style="background-color: #0893A1;" onclick="addChangeOrderToInvoice('{{id}}')">Add</button></td>
-                        </tr>
-                        {{/change_orders}}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="text-center mt-4">
-            <a href="/sov?takeoff_id={{takeoff_id}}" class="btn text-white" style="background-color: #F48847;">
-                View SOV
-            </a>
-        </div>
     </div>
 
+    
+       
+
+    <div class="invoice-container">
+        <h1>Invoice</h1>
+
+        <div class="invoice-info">
+
+
+
+        </div>
+
+    
 </body>
 
 </html>

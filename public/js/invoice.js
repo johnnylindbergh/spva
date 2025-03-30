@@ -1,4 +1,6 @@
 
+
+
 function createPaymentIntentInvoice(method) {
     if (method && ['card','us_bank_account'].includes(method)) {
         const takeoff_id = parseInt($('#takeoff_id').val());

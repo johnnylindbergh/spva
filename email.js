@@ -5,13 +5,16 @@ const { response } = require("express");
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
   auth: {
+    type: "OAuth2",
     user: credentials.serverEmail,
-    pass: credentials.emailPassword,
+    clientId: credentials.clientId,
+    clientSecret: credentials.clientSecret,
+    refreshToken: credentials.refreshToken,
+    accessToken: credentials.accessToken, 
   },
+  connectionTimeout: 30000, // 30 seconds
+  socketTimeout: 30000, // 30 seconds
 });
 
 // async..await is not allowed in global scope, must use a wrapper
@@ -36,7 +39,7 @@ async function sendEstimateEmail(req, res, takeoff_id, callback) {
           `,
         };
         
-        const info = transporter.sendMail(mailOptions, (err, info) => {
+        transporter.sendMail(mailOptions, (err, info) => {
           if (err) {
             console.log(err);
             callback(err, null);
@@ -44,9 +47,9 @@ async function sendEstimateEmail(req, res, takeoff_id, callback) {
             console.log("Email sent: " + info.response);
 
             
-            db.logEmailSent(takeoff_id, req.user.local.id, takeoff[0].customer_primary_email_address, "Estimate", info.response, (err, result) => {
+            db.logEmailSent(takeoff_id, req.user.local.id, takeoff[0].customer_primary_email_address, "Estimate", info.response, (err) => {
               if (err) { console.log(err); } 
-               callback(null, info.response);
+              callback(null, info.response);
             });
 
 
