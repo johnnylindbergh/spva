@@ -576,27 +576,6 @@ module.exports = {
   loadTakeoffData: function (takeoff_id, results, headers, cb) {
 
 
-    [
-      'Group',
-      'I-002 - FINISH LEGEND / SCHEDULE',
-      '9/11/2024 10:59',
-      0,
-      '#FF0000',
-      '0',
-      0,
-      '0',
-      0,
-      '0',
-      0,
-      0,
-      0,
-      '0',
-      '1',
-      'Count',
-      '2',
-      '1'
-    ];
-
     //console.log("the headers of the csv are: ",headers);
     for (var i = 0; i < results.length; i++) {
       // format all values in the row and set blank values to zero
@@ -615,6 +594,7 @@ module.exports = {
       // determine whuch column is Labled "Date"
       var dateIndex = headers.indexOf("Date");
       if (dateIndex === -1) {
+        console.log("missing the date column");
         dateIndex = headers.indexOf("date");
       } else {
         results[i][dateIndex] = moment(results[i][2]).format("YYYY-MM-DD HH:mm:ss");
@@ -624,6 +604,7 @@ module.exports = {
       var subjectIndex = headers.indexOf("Subject");
       if (subjectIndex === -1) {
         subjectIndex = headers.indexOf("subject");
+        console.log("missing subject column")
         if (subjectIndex === -1){
           console.log("Error: could not find subject column in the csv file");
           return cb("Error: could not find subject column in the csv file");
@@ -683,12 +664,12 @@ module.exports = {
       var wallAreaUnit = parseFloat(results[i][wallAreaUnitIndex]);
 
       if (parseFloat(wallArea) !== 0) { // if the wall area is not zero, use the wall area and wall area unit
-        measurement = parseFloat(results[i][9]);
-        measurementUnit = results[i][10];
+        measurement = parseFloat(results[i][wallAreaIndex]);
+        measurementUnit = results[i][wallAreaUnitIndex];
 
         // if also linear ft, warn the user that the measurement is in linear ft
         if (measurementUnit === "ft' in") {
-          console.log("the original measurement unit is ")
+          console.log("the original measurement unit is in sqft ")
           measurementUnit = "sqft";
         }
       }
@@ -2139,14 +2120,14 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     });
   },
 
-  addMaterial: function (name, desc, cost, coverage, type, callback) {
+  addMaterial: function (name, desc, cost, laborCost, datasheet, coverage, type, callback) {
     type = parseInt(type);
     if (type == 0 || type == null || isNaN(type)) {
       type = 6; // the default for paint
     }
     con.query(
-      "INSERT INTO materials (name, description, cost, coverage, material_type) VALUES (?,?,?,?,?);",
-      [name, desc, cost, coverage, type],
+      "INSERT INTO materials (name, description, cost, labor_cost, datasheet, coverage, material_type) VALUES (?,?,?,?,?,?,?);",
+      [name, desc, cost, laborCost, datasheet, coverage, type],
       function (err) {
         if (err) return callback(err);
         callback(null);

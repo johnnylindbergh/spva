@@ -75,26 +75,34 @@
     <h2 class="mt-4">Add/Edit Material</h2>
     <form id="add_material_form">
       <div class="form-row">
-        <div class="form-group col-md-6">
-          <input type="text" class="form-control" id="name" name="name" placeholder="Material Name">
-        </div>
-        <div class="form-group col-md-6">
-          <input type="text" class="form-control" id="desc" name="desc" placeholder="Material Description">
-        </div>
+      <div class="form-group col-md-6">
+        <input type="text" class="form-control" id="name" name="name" placeholder="Material Name">
+      </div>
+      <div class="form-group col-md-6">
+        <input type="text" class="form-control" id="desc" name="desc" placeholder="Material Description">
+      </div>
       </div>
       <div class="form-row">
-        <div class="form-group col-md-6">
-          <input type="text" class="form-control" id="cost" name="cost" placeholder="Material Cost">
-        </div>
-        <div class="form-group col-md-6">
-          <input type="text" class="form-control" id="coverage" name="coverage" placeholder="Material Coverage">
-        </div>
+      <div class="form-group col-md-6">
+        <input type="text" class="form-control" id="cost" name="cost" placeholder="Material Cost">
+      </div>
+      <div class="form-group col-md-6">
+        <input type="text" class="form-control" id="coverage" name="coverage" placeholder="Material Coverage">
+      </div>
+      </div>
+      <div class="form-row">
+      <div class="form-group col-md-6">
+        <input type="text" class="form-control" id="labor_cost" name="labor_cost" placeholder="Material Labor Cost">
+      </div>
+      <div class="form-group col-md-6">
+        <input type="text" class="form-control" id="spec_sheet" name="datasheet" placeholder="Link to Spec Sheet">
+      </div>
       </div>
       <div class="form-group">
-        <select class="form-control" id="material_type" name="material_type">
-          <option value="6">Paint</option>
-          <option value="7">Misc</option>
-        </select>
+      <select class="form-control" id="material_type" name="material_type">
+        <option value="6">Paint</option>
+        <option value="7">Misc</option>
+      </select>
       </div>
       <button type="button" class="btn btn-success" onclick="addMaterial()">Add Material</button>
     </form>

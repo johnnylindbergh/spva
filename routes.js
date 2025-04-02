@@ -1314,6 +1314,8 @@ module.exports = function (app) {
       req.body.name,
       req.body.desc,
       req.body.cost,
+      req.body.labor_cost,
+      req.body.datasheet,
       req.body.coverage,
       req.body.type,
       function (err) {
