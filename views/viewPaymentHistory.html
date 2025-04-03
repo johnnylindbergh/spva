@@ -97,6 +97,29 @@
                 </form>
             </div>
 
+            <!-- sov creator button -->
+            <!-- GET /sov?takeoff_id = x -->
+             <button id="createSOVBtn" class="btn btn-primary mb-3">
+                <a href="/sov?takeoff_id={{takeoff_id}}" style="color: white; text-decoration: none;">Create Schedule of Values</a>
+            </button>
+            <!-- a section of past sovs -->
+            <div id="sovHistory">
+                <h3 class="mb-4">Schedule of Values History</h2>
+                    <table id="sovHistoryTable" class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>QuickBooks ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+            </div>
+
             <!-- invoices section -->
             <div id="invoices">
                 <h3 class="mb-4">Invoices</h2>

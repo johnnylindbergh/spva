@@ -717,7 +717,7 @@ module.exports = {
   createNewTakeoff: function (req, res, cb) {
     let lastInsertId;
     con.query(
-      "INSERT INTO takeoffs (creator_id, name, hash) VALUES (?, ?, ?); SELECT LAST_INSERT_ID() as last;",
+      "INSERT INTO takeoffs (creator_id, name, type, hash) VALUES (?, ?, ?); SELECT LAST_INSERT_ID() as last;",
       [req.user.local.id, req.body.takeoffName, generateHash().toString()],
       function (err, result) {
         if (err) {
@@ -747,8 +747,8 @@ module.exports = {
         let lastInsertId = result[1][0].last;
         // insert new blank takeoff into the takeoffs table
         con.query(
-          "INSERT INTO takeoffs (creator_id, name, hash, customer_id) VALUES (?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;",
-          [req.user.local.id, "New Takeoff", generateHash().toString(), result[1][0].last],
+          "INSERT INTO takeoffs (creator_id, name, hash, isAlTakeoff customer_id) VALUES (?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;",
+          [req.user.local.id, "New Takeoff", generateHash().toString(), true, result[1][0].last],
           function (err, result) {
             if (err) {
               return cb(err);
@@ -1887,6 +1887,132 @@ getChangeOrderItemsById: function (change_order_id, callback) {
       }
     );
   },  
+
+
+  createSOV: function (takeoff_id, callback) {
+    // for each invoice, get the sov
+    // get all the sov_items. 
+    // get the total paid for the sov_items and also set amount_remaining to the total paid
+    // get the total amount for the sov 
+    // the sov that this function returns should be all the items that have not been paid for completely, and their payment history as well
+
+    con.query(
+      "SELECT * FROM invoices WHERE takeoff_id = ? ORDER BY created_at DESC LIMIT 1;",
+      [takeoff_id],
+      function (err, invoice) {
+        if (err) return callback(err);
+        if (invoice.length == 0) {
+          return callback("No invoices found for this takeoff");
+        } else {
+          // get the sov from the invoice
+          con.query(
+            "SELECT * FROM sov WHERE invoice_id = ?;",
+            [invoice[0].id],
+            function (err, sov) {
+              if (err) return callback(err);
+              if (sov.length == 0) {
+                return callback("No SOV found for this invoice");
+              } else {
+                // now join the sov_items to the sov
+                con.query(
+                  "SELECT * FROM sov_items WHERE sov_id = ?;",
+                  [sov[0].id],
+                  function (err, sov_items) {
+                    if (err) return callback(err);
+                    if (sov_items.length == 0) {
+                      return callback("No SOV items found for this SOV");
+                    }
+                    // now create a new sov
+                    con.query(
+                      "INSERT INTO sov (takeoff_id, invoice_id) VALUES (?, ?); SELECT LAST_INSERT_ID() as last;",
+                      [takeoff_id, invoice[0].id],
+                      function (err, result) {
+                        if (err) return callback(err);
+                        let new_sov_id = result[1][0].last;
+                        // now insert the sov_items into the new_sov
+                        for (let i = 0; i < sov_items.length; i++) {
+                          con.query(
+                            "INSERT INTO sov_items (sov_id, description, quantity, unit_cost) VALUES (?, ?, ?, ?);",
+                            [new_sov_id, sov_items[i].description, sov_items[i].quantity, sov_items[i].unit_cost],
+                            function (err) {
+                              if (err) return callback(err);
+                            }
+                          );
+                        }
+                        callback(null);
+                      }
+                    );
+                    
+                  }
+                );
+              }
+            }
+          );
+        }
+      }
+    );
+  },
+
+
+  addItemToSOV: function (sov_id, description, quantity, unit_cost, callback) {
+    con.query(
+      "INSERT INTO sov_items (sov_id, description, quantity, unit_cost) VALUES (?, ?, ?, ?);",
+      [sov_id, description, quantity, unit_cost],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+  updateSOVItem: function (sov_item_id, description, quantity, unit_cost, callback) {
+    con.query(
+      "UPDATE sov_items SET description = ?, quantity = ?, unit_cost = ? WHERE id = ?;",
+      [description, quantity, unit_cost, sov_item_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+  deleteSOVItem: function (sov_item_id, callback) {
+    con.query(
+      "DELETE FROM sov_items WHERE id = ?;",
+      [sov_item_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
+
+  getSOVHistoryByTakeoffId: function (takeoff_id, callback) {
+    
+    con.query("SELECT *  FROM sov WHERE takeoff_id = ?;", [takeoff_id], function (err, sov) {
+      if (err) return callback(err);
+      if (sov.length == 0) {
+        return callback("No SOV found for this takeoff");
+      } else {
+        // now join the sov_items to the sov
+        con.query(
+          "SELECT * FROM sov_items WHERE sov_id = ?;",
+          [sov[0].id],
+          function (err, sov_items) {
+            if (err) return callback(err);
+            if (sov_items.length == 0) {
+              return callback("No SOV items found for this SOV");
+            }
+            sov[0].sov_items = sov_items;
+            callback(null, sov);
+          }
+        );
+      }
+    }
+    );
+  },
+  
+
+      
 
 
   updateTakeoffLastUpdatedBy: function (takeoff_id, user_id, callback) {

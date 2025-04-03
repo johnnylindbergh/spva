@@ -25,6 +25,7 @@ function populatePaymentHistoryTable(takeoff_id) {
         let invoices = data.invoices;
         let estimate = data.estimate;
         let options = data.options;
+        let sov_history = data.sov_history;
         let totalPaid = 0;
         let signed_total = estimate ? parseFloat(estimate.signed_total) || 0 : 0;
         let totalDue = 0;
@@ -109,6 +110,28 @@ function populatePaymentHistoryTable(takeoff_id) {
             cell5.innerHTML = `<a style="text-decoration: none;" href="/viewInvoice/?invoice_id=${invoice.id}">View</a>`;
 
         });
+
+        // populate the sov_history table
+        const sovHistoryTable = document.getElementById('sovHistoryTable');
+        sovHistoryTable.innerHTML = ''; // Clear existing rows
+        // add the headers
+        const sovHistoryHeaderRow = sovHistoryTable.insertRow();
+        const sovHistoryHeaderCell0 = sovHistoryHeaderRow.insertCell(0);
+        const sovHistoryHeaderCell1 = sovHistoryHeaderRow.insertCell(1);
+        const sovHistoryHeaderCell2 = sovHistoryHeaderRow.insertCell(2);
+
+        sov_history.forEach(sov => {
+            const row = sovHistoryTable.insertRow();
+            const cell0 = row.insertCell(0);
+            const cell1 = row.insertCell(1);
+            const cell2 = row.insertCell(2);
+            cell0.textContent = sov.sov_name;
+            cell1.textContent = "$"+ sov.sov_total;
+            //  a view button that posts to /sov with the id of the sov
+            cell2.innerHTML = `<a style="text-decoration: none;" href="/sovHistory/?sov_id=${sov.id}">View</a>`;
+        });
+        // add a header to the table
+
 
             // populate the change orders table 
             const changeOrderTable = document.getElementById('changeOrderTable');

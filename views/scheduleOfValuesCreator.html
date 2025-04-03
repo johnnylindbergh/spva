@@ -29,7 +29,7 @@
                     <td><strong>Total:</strong></td>
                     <td></td>
                     <td id="totalPreviousAmount">0.00</td>
-                    <td id="totalThisInvoiceAmount">0.00</td>
+                    <td id="totalthis_invoice_amount">0.00</td>
                     <td id="totalRemainingBalance">0.00</td>
                     <td id="totalPercentRemaining">0%</td>
                 </tr>
@@ -56,14 +56,16 @@
                     let sov_items = data.sov_items;
 
                     sov_items.forEach(item => {
+
+                        console.log(item);
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
                             <td><input type="text" class="form-control description" value="${item.description}" readonly></td>
-                            <td><input type="number" class="form-control total-invoice" value="${item.totalInvoiceAmount}" readonly></td>
-                            <td><input type="number" class="form-control previous-amount" value="${item.previousAmountInvoiced}" readonly></td>
-                            <td><input type="number" class="form-control this-invoice" value="${item.thisInvoiceAmount}" readonly></td>
-                            <td class="remaining-balance">${(item.totalInvoiceAmount - (item.previousAmountInvoiced + item.thisInvoiceAmount)).toFixed(2)}</td>
-                            <td class="percent-remaining">${((item.totalInvoiceAmount > 0 ? ((item.totalInvoiceAmount - (item.previousAmountInvoiced + item.thisInvoiceAmount)) / item.totalInvoiceAmount) * 100 : 0).toFixed(2))}%</td>
+                            <td><input type="number" class="form-control total-invoice" value="${item.total_contracted_amount}" readonly></td>
+                            <td><input type="number" class="form-control previous-amount" value="${item.previous_invoiced_amount}" readonly></td>
+                            <td><input type="number" class="form-control this-invoice" value="${item.this_invoiced_amount}" readonly></td>
+                            <td class="remaining-balance">${(item.total_contracted_amount - (item.previous_invoiced_amount + item.this_invoice_amount)).toFixed(2)}</td>
+                            <td class="percent-remaining">${((item.total_contracted_amount > 0 ? ((item.total_contracted_amount - (item.previous_invoiced_amount + item.this_invoice_amount)) / item.total_contracted_amount) * 100 : 0).toFixed(2))}%</td>
                         `;
                         invoiceTableBody.appendChild(newRow);
                     });
@@ -84,13 +86,44 @@
         // Fetch data on page load
         document.addEventListener('DOMContentLoaded', fetchSOVData);
 
+        // Function to update totals
+        function updateTotals() {
+            const invoiceTableBody = document.querySelector('#invoiceTable tbody');
+            const totalPreviousAmount = document.getElementById('totalPreviousAmount');
+            const totalthis_invoice_amount = document.getElementById('totalthis_invoice_amount');
+            const totalRemainingBalance = document.getElementById('totalRemainingBalance');
+            const totalPercentRemaining = document.getElementById('totalPercentRemaining');
+
+            let totalPrevious = 0;
+            let totalThis = 0;
+            let totalRemaining = 0;
+
+            const rows = invoiceTableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const totalInvoice = parseFloat(row.querySelector('.total-invoice').value) || 0;
+                const previousAmount = parseFloat(row.querySelector('.previous-amount').value) || 0;
+                const this_invoice_amount = parseFloat(row.querySelector('.this-invoice').value) || 0;
+
+                const remainingBalance = totalInvoice - (previousAmount + this_invoice_amount);
+                const percentRemaining = totalInvoice > 0 ? ((remainingBalance / totalInvoice) * 100).toFixed(2) : 0;
+
+                row.querySelector('.remaining-balance').textContent = remainingBalance.toFixed(2);
+                row.querySelector('.percent-remaining').textContent = `${percentRemaining}%`;
+
+                totalPrevious += previousAmount;
+                totalThis += this_invoice_amount;
+                totalRemaining += remainingBalance;
+            });
+
+            totalPreviousAmount.textContent = totalPrevious.toFixed(2);
+            totalthis_invoice_amount.textContent = totalThis.toFixed(2);
+            totalRemainingBalance.textContent = totalRemaining.toFixed(2);
+            totalPercentRemaining.textContent = `${(totalRemaining / (totalPrevious + totalThis + totalRemaining) * 100).toFixed(2)}%`;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const addRowBtn = document.getElementById('addRowBtn');
             const invoiceTableBody = document.querySelector('#invoiceTable tbody');
-            const totalPreviousAmount = document.getElementById('totalPreviousAmount');
-            const totalThisInvoiceAmount = document.getElementById('totalThisInvoiceAmount');
-            const totalRemainingBalance = document.getElementById('totalRemainingBalance');
-            const totalPercentRemaining = document.getElementById('totalPercentRemaining');
 
             // Function to add a new row
             addRowBtn.addEventListener('click', function () {
@@ -111,35 +144,6 @@
                     input.addEventListener('input', updateTotals);
                 });
             });
-
-            // Function to update totals
-            function updateTotals() {
-                let totalPrevious = 0;
-                let totalThis = 0;
-                let totalRemaining = 0;
-
-                const rows = invoiceTableBody.querySelectorAll('tr');
-                rows.forEach(row => {
-                    const totalInvoice = parseFloat(row.querySelector('.total-invoice').value) || 0;
-                    const previousAmount = parseFloat(row.querySelector('.previous-amount').value) || 0;
-                    const thisInvoiceAmount = parseFloat(row.querySelector('.this-invoice').value) || 0;
-
-                    const remainingBalance = totalInvoice - (previousAmount + thisInvoiceAmount);
-                    const percentRemaining = totalInvoice > 0 ? ((remainingBalance / totalInvoice) * 100).toFixed(2) : 0;
-
-                    row.querySelector('.remaining-balance').textContent = remainingBalance.toFixed(2);
-                    row.querySelector('.percent-remaining').textContent = `${percentRemaining}%`;
-
-                    totalPrevious += previousAmount;
-                    totalThis += thisInvoiceAmount;
-                    totalRemaining += remainingBalance;
-                });
-
-                totalPreviousAmount.textContent = totalPrevious.toFixed(2);
-                totalThisInvoiceAmount.textContent = totalThis.toFixed(2);
-                totalRemainingBalance.textContent = totalRemaining.toFixed(2);
-                totalPercentRemaining.textContent = `${(totalRemaining / (totalPrevious + totalThis + totalRemaining) * 100).toFixed(2)}%`;
-            }
         });
     </script>
 </body>

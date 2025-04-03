@@ -2329,7 +2329,16 @@ module.exports = function (app) {
 
                   console.log("change orders retrieved: ", change_orders);
                   console.log(takeoff[0]);
-                  res.send({ payments: payments, takeoff: takeoff[0], estimate: estimate, options: options, invoices: invoices, change_orders: change_orders });
+
+                  db.getSOVHistoryByTakeoffId(req.body.takeoff_id, function (err, sov_history) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    console.log("sov history retrieved: ", sov_history);
+                    
+                    res.send({ payments: payments, takeoff: takeoff[0], estimate: estimate, options: options, invoices: invoices, change_orders: change_orders, sov_history: sov_history });
+                 
+                  });
                 });
               });
             }
@@ -2615,21 +2624,32 @@ module.exports = function (app) {
     console.log("scheduleOfValuesCreator accessed");
     // get the takeoff_id from the query params
     const takeoff_id = req.query.takeoff_id;
+    const isNew = req.query.isNew;
+
+
     if (takeoff_id == null) {
       console.log("takeoff_id is null");
       res.redirect("/");
-    }
-    // get takeoff
-    db.getTakeoffById(takeoff_id, function (err, takeoff) {
-
-      if (err) {
-        console.log(err);
-        res.send("error fetching takeoff");
+    } else if (isNew == null) {
+      db.getSOV(takeoff_id, function (err, sov) {
+        if (err || sov == null) {
+          console.log(err);
+        }
+        console.log(sov);
+        res.render("scheduleOfValuesCreator.html", { takeoff_id: takeoff_id, takeoff: sov[0] });
       }
-
-    res.render("scheduleOfValuesCreator.html", { takeoff_id: takeoff_id, takeoff: takeoff[0]});
-  }
-  );
+      );
+    } else if (isNew == 1) {
+      console.log("creating new schedule of values");
+      db.createSOV(takeoff_id, function (err, sov) {
+        if (err || sov == null) {
+          console.log(err);
+        }
+        console.log(sov);
+        res.render("scheduleOfValuesCreator.html", { takeoff_id: takeoff_id, takeoff: sov[0] });
+      }
+      );
+    }
 });
 
 
