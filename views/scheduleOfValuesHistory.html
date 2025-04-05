@@ -1,0 +1,103 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule of Values History</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css"></script>
+    <link rel="stylesheet" href="/css/defaults.css">
+</head>
+
+<body class="bg-light">
+
+    <div class="navbar">
+        <ul>
+            <li><a href="/admin">back</a></li>
+            {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}}
+            <div style="float:right"></div>
+        </ul>
+    </div>
+    <br><br>
+
+    <div class="container mt-5">
+   
+        <!-- sov Table -->
+        <table id="sovTable" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Total Contracted Amount</th>
+                    <th>Previous Amount Invoiced</th>
+                    <th>This Invoice Amount</th>
+                    <th>Remaining Balance</th>
+                    <th>Percent Remaining</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be added dynamically here -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Total:</strong></td>
+                    <td></td>
+                    <td id="totalPreviousAmount">0.00</td>
+                    <td id="totalthis_invoice_amount">0.00</td>
+                    <td id="totalRemainingBalance">0.00</td>
+                    <td id="totalPercentRemaining">0%</td>
+                </tr>
+            </tfoot>
+        </table>
+        <br>
+    </div>
+
+    <script>
+    $(document).ready(function () {
+        const sovId = parseInt('{{sov_id}}'); // Replace with the actual sov_id if needed
+
+
+        const tbody = document.querySelector('#sovTable');
+        // Fetch data by posting sov_id
+        $.post('/retrieveSOV', { sov_id: sovId }, function (sov) {
+            // Populate the page with data
+
+            console.log(sov);
+
+            let sov_items = sov.sov_items;
+
+
+            sov_items.forEach(item => {
+                const remainingBalance = parseFloat(item.total_contracted_amount) - parseFloat(item.previous_invoiced_amount) - parseFloat(item.this_invoiced_amount);
+                const percentRemaining = ((remainingBalance / parseFloat(item.total_contracted_amount)) * 100).toFixed(2);
+
+                const row = `
+                    <tr>
+                        <td>${item.description}</td>
+                        <td>${item.total_contracted_amount}</td>
+                        <td>${item.previous_invoiced_amount}</td>
+                        <td>${item.this_invoiced_amount}</td>
+                        <td>${remainingBalance.toFixed(2)}</td>
+                        <td>${percentRemaining}%</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+
+                totalPrevious += parseFloat(item.previous_invoiced_amount);
+                totalThisInvoice += parseFloat(item.this_invoiced_amount);
+                totalRemaining += remainingBalance;
+            });
+
+            document.getElementById('totalPreviousAmount').textContent = totalPrevious.toFixed(2);
+            document.getElementById('totalthis_invoice_amount').textContent = totalThisInvoice.toFixed(2);
+            document.getElementById('totalRemainingBalance').textContent = totalRemaining.toFixed(2);
+            document.getElementById('totalPercentRemaining').textContent = `${((totalRemaining / parseFloat(data.total)) * 100).toFixed(2)}%`;
+        }).fail(function () {
+            alert('Failed to retrieve data.');
+        });
+    });
+</script>
+
+    </script>
+</body>
+</html>

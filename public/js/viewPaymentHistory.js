@@ -125,8 +125,8 @@ function populatePaymentHistoryTable(takeoff_id) {
             const cell0 = row.insertCell(0);
             const cell1 = row.insertCell(1);
             const cell2 = row.insertCell(2);
-            cell0.textContent = sov.sov_name;
-            cell1.textContent = "$"+ sov.sov_total;
+            cell0.textContent = sov.name;
+            cell1.textContent = "$"+ sov.total;
             //  a view button that posts to /sov with the id of the sov
             cell2.innerHTML = `<a style="text-decoration: none;" href="/sovHistory/?sov_id=${sov.id}">View</a>`;
         });
