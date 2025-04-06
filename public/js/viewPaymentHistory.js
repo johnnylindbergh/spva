@@ -121,7 +121,7 @@ function populatePaymentHistoryTable(takeoff_id) {
         const sovHistoryHeaderCell2 = sovHistoryHeaderRow.insertCell(2);
 
         // if there aint no history, show a message
-        if (sov_history.length == 0) {
+        if (sov_history.length == 0 || !sov_history) {
             const row = sovHistoryTable.insertRow();
             const cell0 = row.insertCell(0);
             const cell1 = row.insertCell(1);
