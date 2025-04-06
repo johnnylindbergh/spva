@@ -72,6 +72,7 @@ function populateOptions(takeoff_id) {
             const newRow = $('<tr>').attr('data-row-id', data[i].id);
             const descriptionCell = $('<td>').text(data[i].description);
             const amountCell = $('<td id= "amount">').text("$"+data[i].total_cost);
+            const isRequired = data[i].required;
             
             const radioCell = $('<td >');
             radioCell.css('width', '105px');
@@ -113,7 +114,7 @@ function populateOptions(takeoff_id) {
                 }
             });
 
-            if (!mutable) {
+            if (!mutable || isRequired) {
                 yesRadio.prop('disabled', true);
                 noRadio.prop('disabled', true);
             }

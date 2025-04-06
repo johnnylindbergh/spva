@@ -122,6 +122,7 @@ CREATE TABLE takeoffs (
   id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(64) DEFAULT 'Untitled',
   type ENUM('commercial', 'residential'),
+  isArchived TINYINT(1) DEFAULT 0,
   isAlTakeoff TINYINT(1) DEFAULT 0,
   creator_id INT NOT NULL,
   file_path_of_plans VARCHAR(255),
