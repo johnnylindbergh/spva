@@ -11,6 +11,20 @@ const db = require('./database.js');
 const { name } = require('ejs');
 require('dotenv').config();
 
+function getBidsData(form_id) {
+  return new Promise((resolve, reject) => {
+    db.query('SELECT * FROM form_bid WHERE form_id = ?;', [form_id], (err, results) => {
+      if (err) {
+        console.error(err);
+        reject(err);
+        return;
+      }
+      resolve(results);
+    });
+  }
+  );
+}
+
 
 
 module.exports = function (app) {
@@ -92,7 +106,22 @@ module.exports = function (app) {
         }
         grouped[item.job_name].push(item);
       }
-      res.send(grouped);
+
+      // also get the bids data
+      getBidsData(form_id).then((bids) => {
+        console.log('bids data:', bids);
+        // add the bids data to the grouped object
+        // for (var i = 0; i < bids.length; i++) {
+        //   let item = bids[i];
+        //   if (grouped[item.job_name] == undefined) {
+        //     grouped[item.job_name] = [];
+        //   }
+        //   grouped[item.job_name].push(item);
+        // }
+        // send the grouped object and the bids data
+        res.send({ timesheetData: grouped, bidData: bids });
+      });
+     // res.send(grouped);
 
 
     });
@@ -222,4 +251,23 @@ module.exports = function (app) {
     }
   }
   );
+
+
+  app.get('/subcontractor/profile', mid.isAuth, mid.isSubcontractor, async (req, res) => {
+    db.query('SELECT * FROM users WHERE id = ?;', [req.user.local.id], (err, results) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error retrieving profile.');
+        return;
+      }
+      console.log(results);
+      if (results == null || results.length === 0) {
+        res.send('sowwy, no user found with that id');
+        return;
+      }
+      res.render('subcontractorProfile.html', results[0] );
+    });
+  }
+  );
+
 };

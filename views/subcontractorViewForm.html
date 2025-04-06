@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/navbar.css">
+
 
     <script>
         // on document ready
@@ -21,16 +24,23 @@
             // get the form id from the query string
             const formId = $('#formId').val();
 
-            // get the timesheet data
+            // get the formData timesheetData and bidData
             $.get(`/subcontractor/getFormData/?id=${formId}`, function (data) {
-            console.log(data);
 
-            // populate the table with the data
+            const timesheetData = data.timesheetData;
+
+            // bid data is sometime not an array so we need to check if it is an array
+            const bidData = Array.isArray(data.bidData) ? data.bidData : [data.bidData];
+
+            console.log(timesheetData);
+            console.log(bidData);
+
+            // populate the table with the timesheetData
             const table = $('#timesheet');
-            const keys = Object.keys(data);
+            const keys = Object.keys(timesheetData);
 
             for (let i = 0; i < keys.length; i++) {
-                const element = data[keys[i]];
+                const element = timesheetData[keys[i]];
                 console.log(element);
 
                 var newRow = $('<tr></tr>');
@@ -70,8 +80,64 @@
 
                 table.append(newRow);
             }
+
+            // Populate the bid table
+            const bidTable = $('#bid');
+            if (!bidData || bidData.length === 0) {
+                // If bidData is null or an empty array, display a message
+                bidTable.append('<tr><td colspan="4" class="text-center">No bid data reported.</td></tr>');
+            } else {
+
+
+                bidData.forEach(element => {
+                    console.log(element);
+                
+                    var newRow = $('<tr></tr>');
+                
+                    // Append job name cell
+                    var jobNameCell = $('<td></td>');
+                    jobNameCell.text(element.job_name || 'N/A'); // Handle missing job_name
+                    newRow.append(jobNameCell);
+                
+                    // Append bid cell
+                    var bidCell = $('<td></td>');
+                    bidCell.text(element.bid ? parseFloat(element.bid).toFixed(2) : '0.00'); // Handle missing bid
+                    newRow.append(bidCell);
+                
+                    // Append request cell
+                    var requestCell = $('<td></td>');
+                    requestCell.text(element.request ? parseFloat(element.request).toFixed(2) : '0.00'); // Handle missing request
+                    newRow.append(requestCell);
+                
+                
+                
+                    bidTable.append(newRow);
+                });
+            }
+
+            // Add a click event to the table rows
+            $('#timesheet tbody tr').click(function () {
+                $(this).toggleClass('selected');
+                // Get the selected row data
+                const selectedRowData = $(this).children('td').map(function () {
+                    return $(this).text();
+                }).get();
+                console.log('Selected Row Data:', selectedRowData);
             });
+            $('#bid tbody tr').click(function () {
+                $(this).toggleClass('selected');
+                // Get the selected row data
+                const selectedRowData = $(this).children('td').map(function () {
+                    return $(this).text();
+                }).get();
+                console.log('Selected Row Data:', selectedRowData);
+                
+            });
+            
         });
+    }
+        );
+        
 
     </script>
 
@@ -90,6 +156,24 @@
 
 <body>
 
+    <!-- nav bar that has a back button that redirects to /subcontractor -->
+
+    <div class="navbar">
+        <ul>
+            <!-- back button to /subcontractor -->
+          <li><a href="/subcontractor">Back</a></li>
+          <div style="float:right">
+            <!-- log out -->
+           <li>  <a href="/logout">Log Out</a></li>
+            <!-- profile -->
+             <!-- <li><a href="/subcontractor/profile">Profile</a></li> -->
+          </div>
+        </ul>
+      </div>
+    </br>
+
+    <!-- add some padding for the nav bar -->
+    
     <div class="container">
         <div class="well text-center">
             <h1>Subcontractor Form</h1>
@@ -148,6 +232,23 @@ duration: '0.000'
         </div>
     </div>
 
+    <!-- bid container dynamically populated -->
+    <div class="timesheet-container">
+        <div class="col-md-12">
+            <table id="bid" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Job Name</th>
+                        <th>Bid</th>
+                        <th>Request</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- dynamically populated -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 
 
 </body>

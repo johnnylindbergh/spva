@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/css/navbar.css">
+
+    <title>Subcontractor Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, button {
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color:  rgb(8, 148, 161);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: rgb(8, 148, 161);
+        }
+    </style>
+</head>
+<body>
+    <h1>Subcontractor Profile</h1>
+    <form id="profileForm">
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+        </div>
+        <button type="button" onclick="updateProfile()">Update Profile</button>
+    </form>
+
+    <h2>Profile Details</h2>
+    <div id="profileDetails">
+        <p><strong>Name:</strong> {{name}}</p>
+        <p><strong>Email:</strong> {{email}}</p>
+        <p><strong>Phone:</strong> {{phone_number}}</p>
+    </div>
+
+    <script>
+        function updateProfile() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+
+            const profileDetails = {
+                name: name,
+                email: email,
+                phone_number: phone
+            };
+
+            document.getElementById('profileDetails').innerHTML = `
+                <p><strong>Name:</strong> ${profileDetails.name}</p>
+                <p><strong>Email:</strong> ${profileDetails.email}</p>
+                <p><strong>Phone:</strong> ${profileDetails.phone_number}</p>
+            `;
+
+            alert('Profile updated successfully!');
+        }
+    </script>
+</body>
+</html>
