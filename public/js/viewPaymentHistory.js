@@ -25,7 +25,7 @@ function populatePaymentHistoryTable(takeoff_id) {
         let invoices = data.invoices;
         let estimate = data.estimate;
         let options = data.options;
-        let sov_history = data.sov_history;
+        let sov_history = data.sov_history || [];
         let totalPaid = 0;
         let signed_total = estimate ? parseFloat(estimate.signed_total) || 0 : 0;
         let totalDue = 0;
