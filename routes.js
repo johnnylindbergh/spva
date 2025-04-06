@@ -1476,6 +1476,7 @@ module.exports = function (app) {
       req.body.description,
       req.body.material_cost,
       req.body.labor_cost,
+      req.body.isRequired,
       function (err, new_row_id) {
         if (err) {
           console.error("Error adding option:", err);

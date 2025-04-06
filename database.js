@@ -2182,7 +2182,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     );
   },
 
-  addOption: function (takeoff_id, description, material_cost, labor_cost, callback) {
+  addOption: function (takeoff_id, description, material_cost, labor_cost, isRequired, callback) {
     // first check if the row_id is null, if it is, insert a new row
     // if it is not, update the existing row
 
@@ -2196,8 +2196,8 @@ getChangeOrderItemsById: function (change_order_id, callback) {
       let optionTotal = parseFloat(material_cost) + parseFloat(labor_cost);
 
       con.query(
-        "INSERT INTO options (takeoff_id, description, material_cost, labor_cost, total_cost) VALUES (?,?,?,?,?); SELECT LAST_INSERT_ID() as last;",
-        [takeoff_id, description, material_cost, labor_cost, optionTotal],
+        "INSERT INTO options (takeoff_id, description, material_cost, labor_cost, required, total_cost) VALUES (?,?,?,?,?,?); SELECT LAST_INSERT_ID() as last;",
+        [takeoff_id, description, material_cost, labor_cost, isRequired, optionTotal],
         function (err, last) {
           if (err) return callback(err);
           callback(null, last[1][0].last);

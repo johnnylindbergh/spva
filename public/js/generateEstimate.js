@@ -133,6 +133,8 @@ function populateOptions(takeoff_id) {
     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
         data = data.options;
 
+        console.log('Options data:', data);
+
         if (data.length === 0) {
             console.log('No options found for takeoff:', takeoff_id);
             const table = $('#options-table');
@@ -148,10 +150,12 @@ function populateOptions(takeoff_id) {
         const descriptionHeader = $('<th>').text('Description');
         const laborCostHeader = $('<th>').text('Labor Cost');
         const materialCostHeader = $('<th>').text('Material Cost');
+        const requiredHeader = $('<th>').text('Required');
         headerRow.append(deleteHeader);
         headerRow.append(descriptionHeader);
         headerRow.append(laborCostHeader);
         headerRow.append(materialCostHeader);
+        headerRow.append(requiredHeader);
         table.append(headerRow);
         
 
@@ -160,6 +164,8 @@ function populateOptions(takeoff_id) {
             const descriptionCell = $('<td contenteditable="false" class="editable">').text(data[i].description);
             const laborCostCell = $('<td contenteditable="false" class="editable">').text(numberWithCommas(data[i].labor_cost));
             const materialCostCell = $('<td contenteditable="false" class="editable">').text(numberWithCommas(data[i].material_cost));
+
+            const requiredCell = $('<td contenteditable="false" class="editable">').text(data[i].required == 1 ? "Yes" : "No");
             // delete cell with a fontawesome trashcan
             const deleteCell = $('<td>').html('<i class="fa fa-trash"></i>');
 
@@ -179,6 +185,7 @@ function populateOptions(takeoff_id) {
             newRow.append(descriptionCell);
             newRow.append(laborCostCell);
             newRow.append(materialCostCell);
+            newRow.append(requiredCell);
             table.append(newRow);
 
         }
@@ -196,6 +203,7 @@ function postToAddOption(event) {
     const description = $('#description').val();
     let laborCost = $('#laborCost').val();
     let materialCost = $('#materialCost').val();
+    let isRequired = $('#isRequired').is(':checked') ? 1 : 0;
 
     // Clean and validate the cost inputs
     laborCost = laborCost.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
@@ -213,6 +221,7 @@ function postToAddOption(event) {
         description: description,
         material_cost: materialCost, // Consistent naming with backend
         labor_cost: laborCost,
+        isRequired:isRequired,
         takeoff_id: takeoff_id,
     };
 
@@ -228,6 +237,7 @@ function postToAddOption(event) {
                     $('#description').val('');
                     $('#laborCost').val('');
                     $('#materialCost').val('');
+                    $('#isRequired').prop('checked', false); // uncheck the checkbox
                 
             }
         })

@@ -138,6 +138,19 @@
                             <label for="materialCost" class="sr-only">Material Cost:</label>
                             <input type="text" id="materialCost" name="materialCost" class="form-control" placeholder="Material Cost">
                         </div>
+                        <!-- checkbow if the option is required -->
+                        <div class="form-group mx-sm-3 mb-2">
+                            <label for="isRequired">Is Required:</label>
+                            <input type="checkbox" id="isRequired" name="isRequired" class="form-control">
+                            <i class="fa fa-question-circle" style="cursor: pointer;" onclick="showCheckboxInfo()" title="What does this mean?"></i>
+                        </div>
+                        <script>
+                            function showCheckboxInfo() {
+                                alert("Checking this box means the option is required and cannot be omitted by the customer. \n\n" +
+                                    "Unchecking this box means the option is optional and can be omitted by the customer.");
+                            }
+                        </script>
+
                         <input type="submit" class="img-button-client" value="Add Option" style="background-color: rgb(31, 193, 31);">
                     </form>
                 </div>

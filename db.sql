@@ -178,6 +178,7 @@ CREATE TABLE options (
   material_cost DECIMAL(10,2),
   total_cost DECIMAL(10,2), -- computed server-side
   created_by INT,
+  required TINYINT(1) DEFAULT 0,
   applied TINYINT(1) DEFAULT 0,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
