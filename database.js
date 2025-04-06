@@ -1893,28 +1893,39 @@ getChangeOrderItemsById: function (change_order_id, callback) {
   createSOV: function (takeoff_id, callback) {
     // get the most recent SOV for this takeoff and add the items to a new SOV
     // finally, return the id of the newly created SOV
+    console.log("createSOV called");
     con.query("SELECT * FROM sov WHERE takeoff_id = ? ORDER BY id DESC LIMIT 1;", [takeoff_id], function (err, sov) {
-      if (err) return callback(err);
+      if (err) {
+        console.log(err); 
+        return callback(err);
+      }
+      console.log("sov: ", sov);
       if (sov.length == 0) {
         // create a new SOV
         con.query(
           "INSERT INTO sov (takeoff_id, name, total, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;",
           [takeoff_id, "SOV", 0, generateHash()],
           function (err, result) {
-            if (err) return callback(err);
+            if (err) {
+              console.log(err);
+              return callback(err);
+            }
             callback(null, result[1][0].last);
           }
         );
       } else if (sov[0].length > 0) {
         // create a new SOV based on the previous one
-    
+        console.log("previous SOV found: ", sov[0]);
         // get the previous sov_items
 
         con.query(
           "INSERT INTO sov (takeoff_id, name, total, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;",
           [takeoff_id, "SOV", 0, generateHash()],
           function (err, result) {
-            if (err) return callback(err);
+            if (err) {
+              console.log(err);
+              return callback(err);
+            }
             let new_sov_id = result[1][0].last;
 
             // now copy the items from the old SOV to the new SOV
@@ -1928,6 +1939,21 @@ getChangeOrderItemsById: function (change_order_id, callback) {
             );
           }
         );
+      } else {
+        console.log("no SOV found");
+        // create a new SOV
+        con.query(
+          "INSERT INTO sov (takeoff_id, name, total, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;",
+          [takeoff_id, "SOV", 0, generateHash()],
+          function (err, result) {
+            if (err) {
+              console.log(err);
+              return callback(err);
+            }
+            callback(null, result[1][0].last);
+          }
+        );
+
       }
     });
   },
@@ -1943,6 +1969,8 @@ getChangeOrderItemsById: function (change_order_id, callback) {
       }
     );
   },
+
+  
   updateSOVItem: function (sov_item_id, description, quantity, unit_cost, callback) {
     con.query(
       "UPDATE sov_items SET description = ?, quantity = ?, unit_cost = ? WHERE id = ?;",
@@ -1953,6 +1981,51 @@ getChangeOrderItemsById: function (change_order_id, callback) {
       }
     );
   },
+  updateSOVItems: function (sov_id, items, callback) {
+    // items is an array of objects
+    
+    if (items.length == 0) {
+      return callback("No items to update");
+    }
+    // loop through the items and update them
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      con.query(
+        "UPDATE sov_items SET description = ?, quantity = ?, cost = ? WHERE id = ?;",
+        [item.description, item.quantity, item.unit_cost, item.id],
+        function (err) {
+          if (err) {
+            console.log(err);
+            return callback(err);
+          }
+        }
+      );
+    }
+    // now get the total for the SOV
+    con.query(
+      "SELECT SUM(quantity * cost) as total FROM sov_items WHERE sov_id = ?;",
+      [sov_id],
+      function (err, result) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
+        // now update the SOV total
+        con.query(
+          "UPDATE sov SET total = ? WHERE id = ?;",
+          [result[0].total, sov_id],
+          function (err) {
+            if (err) {
+              console.log(err);
+              return callback(err);
+            }
+            callback(null);
+          }
+        );
+      }
+    );
+  },
+  
   deleteSOVItem: function (sov_item_id, callback) {
     con.query(
       "DELETE FROM sov_items WHERE id = ?;",

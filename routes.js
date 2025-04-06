@@ -2700,6 +2700,27 @@ app.get('/createSOV', mid.isAdmin, function (req, res) {
 }
 );
 
+app.post('/updateSOV', mid.isAdmin, function (req, res) {
+  console.log("updating schedule of values for ", req.body);
+  // get the takeoff_id from the body
+  const takeoff_id = req.body.takeoff_id;
+  const sov_id = req.body.sov_id;
+  const items = req.body.items;
+  db.updateSOVItems(sov_id, items, function (err) {
+    if (err) {
+      console.log(err);
+      res.status(500).send("error updating schedule of values");
+    } else {
+      console.log("updated schedule of values");
+      res.send("updated");
+    }
+  }
+  );
+}
+);
+
+  
+
 
 // app.post('/updateSOV', mid.isAdmin, function (req, res) {
 

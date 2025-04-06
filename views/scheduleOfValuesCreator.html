@@ -14,7 +14,7 @@
             <thead>
                 <tr>
                     <th>Description</th>
-                    <th>Total Invoice Amount</th>
+                    <th>Total Contracted Amount</th>
                     <th>Previous Amount Invoiced</th>
                     <th>This Invoice Amount</th>
                     <th>Remaining Balance</th>
@@ -43,8 +43,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     <script>
-
-        // Function to fetch and display data
         function fetchSOVData() {
             const takeoffId = "{{takeoff_id}}"; // Replace with actual takeoff ID
             fetch(`/retrieveSOV?takeoff_id=${takeoffId}`)
@@ -56,8 +54,6 @@
                     let sov_items = data.sov_items;
 
                     sov_items.forEach(item => {
-
-                        console.log(item);
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
                             <td><input type="text" class="form-control description" value="${item.description}" readonly></td>
@@ -72,21 +68,11 @@
                 })
                 .catch(error => console.error('Error fetching SOV data:', error));
 
-            // Add event listeners to the inputs
-            const inputs = document.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.addEventListener('input', updateTotals);
-            });
-
-            // Update totals
             updateTotals();
-
         }
 
-        // Fetch data on page load
         document.addEventListener('DOMContentLoaded', fetchSOVData);
 
-        // Function to update totals
         function updateTotals() {
             const invoiceTableBody = document.querySelector('#invoiceTable tbody');
             const totalPreviousAmount = document.getElementById('totalPreviousAmount');
@@ -99,7 +85,10 @@
             let totalRemaining = 0;
 
             const rows = invoiceTableBody.querySelectorAll('tr');
+            const items = [];
+
             rows.forEach(row => {
+                const description = row.querySelector('.description').value;
                 const totalInvoice = parseFloat(row.querySelector('.total-invoice').value) || 0;
                 const previousAmount = parseFloat(row.querySelector('.previous-amount').value) || 0;
                 const this_invoice_amount = parseFloat(row.querySelector('.this-invoice').value) || 0;
@@ -113,19 +102,50 @@
                 totalPrevious += previousAmount;
                 totalThis += this_invoice_amount;
                 totalRemaining += remainingBalance;
+
+                items.push({
+                    description,
+                    total_contracted_amount: totalInvoice,
+                    previous_invoiced_amount: previousAmount,
+                    this_invoiced_amount: this_invoice_amount
+                });
             });
 
             totalPreviousAmount.textContent = totalPrevious.toFixed(2);
             totalthis_invoice_amount.textContent = totalThis.toFixed(2);
             totalRemainingBalance.textContent = totalRemaining.toFixed(2);
             totalPercentRemaining.textContent = `${(totalRemaining / (totalPrevious + totalThis + totalRemaining) * 100).toFixed(2)}%`;
+
+            // Post updated data to /updateSOV
+            const takeoffId = "{{takeoff_id}}"; // Replace with actual takeoff ID
+            const sovId = "{{sov_id}}"; // Replace with actual SOV ID
+            fetch('/updateSOV', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sov_id: sovId,
+                    takeoff_id: takeoffId,
+                    items: items
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update SOV');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('SOV updated successfully:', data);
+            })
+            .catch(error => console.error('Error updating SOV:', error));
         }
 
         document.addEventListener('DOMContentLoaded', function () {
             const addRowBtn = document.getElementById('addRowBtn');
             const invoiceTableBody = document.querySelector('#invoiceTable tbody');
 
-            // Function to add a new row
             addRowBtn.addEventListener('click', function () {
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
@@ -138,7 +158,6 @@
                 `;
                 invoiceTableBody.appendChild(newRow);
 
-                // Add event listeners to the new inputs
                 const inputs = newRow.querySelectorAll('input');
                 inputs.forEach(input => {
                     input.addEventListener('input', updateTotals);
