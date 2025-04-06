@@ -15,65 +15,61 @@
         $(function () {
 
             const decimalPlaces = 1;
+            const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const placeholderValue = '-'; // Placeholder for undefined days
+
             // get the form id from the query string
             const formId = $('#formId').val();
 
             // get the timesheet data
             $.get(`/subcontractor/getFormData/?id=${formId}`, function (data) {
-                console.log(data);
+            console.log(data);
 
+            // populate the table with the data
+            const table = $('#timesheet');
+            const keys = Object.keys(data);
 
-                // populate the table with the data
-                // data is an array of rows
+            for (let i = 0; i < keys.length; i++) {
+                const element = data[keys[i]];
+                console.log(element);
 
+                var newRow = $('<tr></tr>');
 
-                // get the table
-                const table = $('#timesheet');
+                var jobNameCell = $('<td></td>');
+                jobNameCell.text(element[0].job_name);
+                newRow.append(jobNameCell);
 
+                // Create a map for quick lookup of days
+                const dayMap = {};
+                element.forEach(day => {
+                dayMap[day.day] = parseFloat(day.duration).toFixed(decimalPlaces);
+                });
 
-                const keys = Object.keys(data);
+                // Loop through all days of the week
+                daysOfWeek.forEach(day => {
+                var dayCell = $('<td></td>');
+                dayCell.text(dayMap[day] || placeholderValue); // Use placeholder if day is not defined
+                newRow.append(dayCell);
+                });
 
-                for (let i = 0; i < keys.length; i++) {
-                    const element = data[keys[i]];
-                    console.log(element);
+                // Calculate the total
+                var total = 0;
+                element.forEach(day => {
+                total += parseFloat(day.duration) || 0;
+                });
 
-                    var newRow = $('<tr></tr>');
+                // Append the total cell
+                var totalCell = $('<td></td>');
+                totalCell.text(total.toFixed(decimalPlaces));
+                newRow.append(totalCell);
 
-                    var jobNameCell = $('<td></td>');
-                    jobNameCell.text(element[0].job_name);
+                // Append the description cell
+                var descriptionCell = $('<td></td>');
+                descriptionCell.text(element[0].item_description);
+                newRow.append(descriptionCell);
 
-                    newRow.append(jobNameCell);
-
-                    element.forEach(day => {
-                        console.log(day);
-                        var dayCell = $('<td></td>');
-                        dayCell.text(parseFloat(day.duration).toFixed(decimalPlaces));
-                        newRow.append(dayCell);
-
-                    });
-
-
-                    // calculate the total
-                    var total = 0;
-                    element.forEach(day => {
-                        total += parseFloat(day.duration) || 0;
-                    });
-                    // append the total cell
-                    var totalCell = $('<td></td>');
-                    totalCell.text(total.toFixed(decimalPlaces));
-                    newRow.append(totalCell);
-
-                    // append the description cell
-                    var descriptionCell = $('<td></td>');
-                    descriptionCell.text(element[0].item_description);
-                    newRow.append(descriptionCell);
-
-
-                    table.append(newRow);
-
-
-                }
-
+                table.append(newRow);
+            }
             });
         });
 

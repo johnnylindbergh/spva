@@ -151,8 +151,12 @@
 
             $('#submit').click(function () {
                 const data = [];
-                // append the formName
+                const bidsData = [];
+                
+                // Append the formName
                 const formName = $('#formName').val();
+                
+                // Collect timesheet data
                 timesheet.find('tr').each(function () {
                     const row = $(this);
                     if (row.find('input[type="text"]').length > 0) {
@@ -171,22 +175,68 @@
                         });
                     }
                 });
-                //console.log(data);
-                $.post('/subcontractor/submit', { data: data, form_name: formName }, function (response) {
 
+                // Collect jobsWithBids data
+                $('.jobsWithBids tbody tr').each(function () {
+                    const row = $(this);
+                    const jobName = row.find('input[type="text"]').val();
+                    const bid = row.find('input[type="number"]').eq(0).val();
+                    const requestedAmount = row.find('input[type="number"]').eq(1).val();
+                    bidsData.push({
+                        jobName,
+                        bid,
+                        requestedAmount
+                    });
+                });
+
+                if (bidsData.length === 0) {
+                    alert('Please add at least one job with bid data.');
+                    return;
+                }
+                if (data.length === 0) {
+                    alert('Please add at least one timesheet row.');
+                    return;
+                }
+
+                // validate bidsData 
+                for (let i = 0; i < bidsData.length; i++) {
+                    if (!bidsData[i].jobName || !bidsData[i].bid) {
+                        alert('Please fill all fields in bid table. If you do not know the bid, please enter 0.'); 
+                        return;
+                    }
+                }
+
+                // // validate the timesheet data
+                // for (let i = 0; i < data.length; i++) {
+                //     if (!data[i].jobName || !Array.isArray(data[i].days) || !data[i].days.some(day => day !== '')) {
+                //         alert('Please fill all fields in timesheet table. If you do not know the hours, please enter 0.'); 
+                //         return;
+                //     }
+                // }
+                // validate the form name
+                if (!formName) {
+                    alert('Please enter a form name.');
+                    return;
+                }
+                
+                // Post data to the server
+                $.post('/subcontractor/submit', { 
+                    timesheetData: data, 
+                    bidsData: bidsData, 
+                    form_name: formName 
+                }, function (response) {
                     console.log('response:', response);
-                    if (response == 'success') {
+                    if (response.status == 'success') {
                         alert('Data submitted successfully');
                         // Redirect to the view form page
                         window.location.href = '/subcontractor/viewForm?id=' + response.form_id;
-                        
                     } else {
                         alert('Error submitting data');
                     }
-                    
                 });
             });
         });
+    
     </script>
 
     <style>

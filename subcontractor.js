@@ -105,10 +105,13 @@ module.exports = function (app) {
   });
 
   app.post('/subcontractor/submit', mid.isAuth, mid.isSubcontractor, async (req, res) => {
+
     try {
       let form = req.body;
       let user_id = req.user.local.id;
       let form_id = null;
+
+      let bid_data = req.body.bidsData
 
       console.log(form);
 
@@ -139,7 +142,7 @@ module.exports = function (app) {
 
 
           // Insert items into form_items
-          const items = form.data || [];
+          const items = form.timesheetData || [];
           for (const item of items) {
             // if and of the fields are empty, skip this item
             if (item.jobName.trim() === '') {
@@ -170,10 +173,47 @@ module.exports = function (app) {
             });
           }
           console.log('form submit process done');
-          
+
+          // start inserting the bids data
+
+          // check if the bidsData is not empty
+          if (bid_data == undefined || bid_data.length == 0) {
+            console.log('no bids data found');
+            res.status(200).send('success');
+            return;
+          } else {
+            
+            console.log('bids data found');
+
+            for (const item of bid_data) {
+              // if and of the fields are empty, skip this item
+              if (item.jobName.trim() === '') {
+                continue;
+              }
+              console.log(item);
+              db.query('INSERT INTO form_bid (form_id, job_name, bid, request) VALUES (?, ?, ?, ?);', [form_id, item.jobName, item.bid | 0, item.requestedAmount], (err) => {
+                if (err) {
+                  console.log('bids insert error', err);
+                  res.status(500).send('Error submitting form.');
+                  return;
+                }
+              });
+            }
+            console.log('bids data insert done');
+
+          }
+
           // send success status
-          res.status(200).send('success');
+         // res.status(200).send('success');
            //res.redirect('/subcontractor');
+
+           // send user to the viewForm page
+           // res.redirect('/subcontractor/viewForm?id=' + form_id);
+
+           res.send({
+            status: 'success',
+            form_id: form_id
+           });
         });
       });
     } catch (err) {
