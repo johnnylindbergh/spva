@@ -748,7 +748,7 @@ module.exports = {
         let lastInsertId = result[1][0].last;
         // insert new blank takeoff into the takeoffs table
         con.query(
-          "INSERT INTO takeoffs (creator_id, name, hash, isAlTakeoff customer_id) VALUES (?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;",
+          "INSERT INTO takeoffs (creator_id, name, hash, isAlTakeoff, customer_id) VALUES (?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;",
           [req.user.local.id, "New Takeoff", generateHash().toString(), true, result[1][0].last],
           function (err, result) {
             if (err) {
