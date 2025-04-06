@@ -4,14 +4,11 @@ const db = require("./database.js");
 const { response } = require("express");
 
 const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: credentials.serverEmail,
-    pass: credentials.emailPassword,
-  },
+    service: "Gmail",
+    auth: {
+          user: credentials.serverEmail,
+          pass: credentials.emailPassword,
+        }
 });
 // async..await is not allowed in global scope, must use a wrapper
 async function sendEstimateEmail(req, res, takeoff_id, callback) {
