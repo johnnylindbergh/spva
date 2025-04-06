@@ -716,9 +716,10 @@ module.exports = {
 
   createNewTakeoff: function (req, res, cb) {
     let lastInsertId;
+    const type = req.body.type;
     con.query(
-      "INSERT INTO takeoffs (creator_id, name, type, hash) VALUES (?, ?, ?); SELECT LAST_INSERT_ID() as last;",
-      [req.user.local.id, req.body.takeoffName, generateHash().toString()],
+      "INSERT INTO takeoffs (creator_id, name, type, hash) VALUES (?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;",
+      [req.user.local.id, req.body.takeoffName, type, generateHash().toString()],
       function (err, result) {
         if (err) {
           return cb(err);
