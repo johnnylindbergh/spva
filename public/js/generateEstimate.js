@@ -114,9 +114,22 @@ function regenChatGPTResponse() {
 
     $.post('/regenChatGPTResponse', {takeoff_id: takeoff_id}, function(data) {
         console.log('ChatGPT response regenerated:', data);
-        if (data == 'success') {
+        if (data.status== 'success') {
             // reload the page
-            location.reload();
+            // location.reload();
+            // set the content of the includesList to the items
+            const includesList = $('#proposal-includes');
+            includesList.empty(); // Clear any existing content
+            includesList.html(formatTextToHTML(data.inclusions));
+            // set the content of the exclusionsList to the items
+            const exclusionsList = $('#exclusions');
+            exclusionsList.empty(); // Clear any existing content
+            exclusionsList.html(formatTextToHTML(data.exclusions));
+            XSAlert({
+                title: 'Success',
+                message: 'ChatGPT response has been successfully regenerated.',
+                icon: 'success',
+            });
         } else {
             XSAlert({
                 title: 'Error',
@@ -341,8 +354,8 @@ function addEditableListeners() {
             }
 
             // determine if the element is in the includes or excludes section
-            const includes = $('#proposal-includes').text(); // weird naming convention
-            const exclusions = $('#exclusions').text();
+            const includes = $('#proposal-includes').html(); // weird naming convention
+            const exclusions = $('#exclusions').html();
 
             // Send POST request with the new content
             var takeoff_id = $('#takeoff_id').val(); // not super safe, but just for example

@@ -1153,7 +1153,7 @@ module.exports = function (app) {
                     exclusions = "";
                   }
                   db.setInclusionsExclusions(takeoff_id, inclusions, exclusions, function (err) {
-                    res.send("success");
+                    res.send({status: "success", inclusions: inclusions, exclusions: exclusions});
                   });
                 }
               });
