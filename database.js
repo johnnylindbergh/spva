@@ -716,7 +716,7 @@ module.exports = {
 
   createNewTakeoff: function (req, res, cb) {
     let lastInsertId;
-    const type = req.body.type;
+    const type = req.body.type ? 'commercial' : 'residential';
     con.query(
       "INSERT INTO takeoffs (creator_id, name, type, hash) VALUES (?, ?, ?, ?); SELECT LAST_INSERT_ID() as last;",
       [req.user.local.id, req.body.takeoffName, type, generateHash().toString()],
