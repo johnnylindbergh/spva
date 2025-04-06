@@ -120,16 +120,31 @@ function populatePaymentHistoryTable(takeoff_id) {
         const sovHistoryHeaderCell1 = sovHistoryHeaderRow.insertCell(1);
         const sovHistoryHeaderCell2 = sovHistoryHeaderRow.insertCell(2);
 
-        sov_history.forEach(sov => {
+        // if there aint no history, show a message
+        if (sov_history.length == 0) {
             const row = sovHistoryTable.insertRow();
             const cell0 = row.insertCell(0);
             const cell1 = row.insertCell(1);
             const cell2 = row.insertCell(2);
-            cell0.textContent = sov.name;
-            cell1.textContent = "$"+ sov.total;
-            //  a view button that posts to /sov with the id of the sov
-            cell2.innerHTML = `<a style="text-decoration: none;" href="/sovHistory/?sov_id=${sov.id}">View</a>`;
-        });
+            cell0.textContent = "No SOV history found";
+            cell1.textContent = "";
+            cell2.textContent = "";
+        } else {
+            // otherwise, holler bout them sovs
+            sov_history.forEach(sov => {
+                const row = sovHistoryTable.insertRow();
+                const cell0 = row.insertCell(0);
+                const cell1 = row.insertCell(1);
+                const cell2 = row.insertCell(2);
+                cell0.textContent = sov.name;
+                cell1.textContent = "$"+ sov.total;
+                //  a view button that posts to /sov with the id of the sov
+                cell2.innerHTML = `<a style="text-decoration: none;" href="/sovHistory/?sov_id=${sov.id}">View</a>`;
+            });
+
+        }
+
+       
         // add a header to the table
 
 
