@@ -81,6 +81,8 @@ module.exports = function (app) {
     });
   });
 
+
+
   app.get('/subcontractor/getFormData/', mid.isAuth, mid.isSubcontractor, async (req, res) => {
     let form_id = req.query.id;
     console.log('viewing form', form_id);
@@ -270,4 +272,40 @@ module.exports = function (app) {
   }
   );
 
+  app.post('/subcontractor/updateProfile', mid.isAuth, mid.isSubcontractor, async (req, res) => {
+    let profile = req.body;
+    let user_id = req.user.local.id;
+    console.log(profile);
+
+    if (profile.name != undefined && profile.name.trim() != '') {
+      db.query('UPDATE users SET name = ? WHERE id = ?;', [profile.name, user_id], (err, results) => {
+        if (err) {
+          console.log('update error:', err);
+          res.status(500).send('Error updating profile.');
+          return;
+        }
+        console.log("Profile updated");
+      });
+    }
+    if (profile.email != undefined && profile.email.trim() != '') {
+      db.query('UPDATE users SET email = ? WHERE id = ?;', [profile.email, user_id], (err, results) => {
+        if (err) {
+          console.log('update error:', err);
+          res.status(500).send('Error updating profile.');
+          return;
+        }
+        console.log("Profile updated");
+      });
+    }
+    if (profile.phone != undefined && profile.phone.trim() != '') {
+      db.query('UPDATE users SET phone = ? WHERE id = ?;', [profile.phone, user_id], (err, results) => {
+        if (err) {
+          console.log('update error:', err);
+          res.status(500).send('Error updating profile.');
+          return;
+        }
+        console.log("Profile updated");
+      });
+    }
+  });
 };

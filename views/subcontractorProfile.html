@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="/css/navbar.css">
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 
-    <title>Subcontractor Profile</title>
+    <title>Subcontractor Profile Mock</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -70,6 +72,20 @@
                 email: email,
                 phone_number: phone
             };
+
+            $.post('/subcontractor/updateProfile', profileDetails, function(response) {
+                if (response.success) {
+                    alert('Profile updated successfully!');
+                    document.getElementById('profileDetails').innerHTML = `
+                        <p><strong>Name:</strong> ${profileDetails.name}</p>
+                        <p><strong>Email:</strong> ${profileDetails.email}</p>
+                        <p><strong>Phone:</strong> ${profileDetails.phone_number}</p>
+                    `;
+                } else {
+                    alert('Error updating profile. Please try again.');
+                }
+            });
+        
 
             document.getElementById('profileDetails').innerHTML = `
                 <p><strong>Name:</strong> ${profileDetails.name}</p>
