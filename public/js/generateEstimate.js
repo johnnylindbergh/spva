@@ -264,7 +264,7 @@ function shareClient(){
     console.log(takeoff_id);
     XSAlert({
         title: 'Email Confirmation',
-        message: 'Are you sure you want to share this estimate with the client?',
+        message: 'Are you sure you want to share this estimate with the client? email:'+ $('#owner_email_address').val(),
         icon: 'warning',
      }).then((value) => {
         console.log("dialogue output",value);

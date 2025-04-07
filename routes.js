@@ -2642,6 +2642,28 @@ module.exports = function (app) {
     }
 });
 
+app.get("/shareSOV", mid.isAdmin, function (req, res) {
+  console.log("sharing schedule of values for ", req.query.hash);
+
+  if (!req.query.hash || req.query.hash.length != 32) {
+    res.redirect("/");
+  } else {
+    db.getSOVByHash(
+      req.query.hash,
+      function (err, sov) {
+        if (err || sov == null) {
+          console.log(err);
+          res.redirect("/");
+        } else {
+          console.log(sov);
+          res.render("scheduleOfValuesCreator.html", { sov: sov });
+        }
+      }
+    );
+  }
+}
+);
+
 
 // app.get("/retrieveSOV", mid.isAdmin, function (req, res) {
 //   console.log("retrieving schedule of values for ", req.query.takeoff_id);
@@ -2702,8 +2724,6 @@ app.get('/createSOV', mid.isAdmin, function (req, res) {
 
 app.post('/updateSOV', mid.isAdmin, function (req, res) {
   console.log("updating schedule of values for ", req.body);
-  // get the takeoff_id from the body
-  const takeoff_id = req.body.takeoff_id;
   const sov_id = req.body.sov_id;
   const items = req.body.items;
   db.updateSOVItems(sov_id, items, function (err) {
@@ -2829,8 +2849,17 @@ app.post('/getTerms', function (req, res) {
               // some renameing to make the invoice object render work
               invoice.invoice_id = invoice.id;
               invoice.invoiceTotal = invoice.total;
-              res.render("viewInvoiceClient.html", { invoice: invoice, invoice_items: items, takeoff: takeoff, totalAmount: totalAmount.toFixed(2) });
 
+              // also get the most recent sov hash
+              db.getSOVHashByTakeoffId(invoice.takeoff_id, function (err, sov) {
+                if (err) {
+                  console.log(err);
+                } else {
+                  console.log("sov hash", sov);
+                  // render the invoice
+                  res.render("viewInvoiceClient.html", { invoice: invoice, invoice_items: items, takeoff: takeoff, totalAmount: totalAmount.toFixed(2), sov_hash: sov });
+                }
+              });
 
             }
           }
@@ -2839,6 +2868,7 @@ app.post('/getTerms', function (req, res) {
       }
     );
   });
+
 
   app.post('/deleteInvoice', mid.isAdmin, function (req, res) {
     console.log("deleting invoice ", req.body);
