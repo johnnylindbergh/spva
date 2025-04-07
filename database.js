@@ -1868,301 +1868,6 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     });
   },
 
-  getSOV: function (sov_id,  callback) {
-    con.query(
-      "SELECT * FROM sov WHERE id = ?;",
-      [sov_id],
-      function (err, sov) {
-        if (err || sov.length == 0) return callback(err);
-
-        // now join the sov_items to the sov
-        con.query(
-          "SELECT * FROM sov_items WHERE sov_id = ?;",
-          [sov[0].id],
-          function (err, sov_items) {
-            if (err) return callback(err);
-            sov[0].sov_items = sov_items;
-            callback(null, sov[0]);
-          }
-        );
-      }
-    );
-  },  
-
-
-  createSOV: function (takeoff_id, callback) {
-    // get the most recent SOV for this takeoff and add the items to a new SOV
-    // finally, return the id of the newly created SOV
-    console.log("createSOV called");
-    con.query("SELECT * FROM sov WHERE takeoff_id = ? ORDER BY id DESC LIMIT 1;", [takeoff_id], function (err, sov) {
-      if (err) {
-        console.log(err); 
-        return callback(err);
-      }
-      console.log("sov: ", sov);
-      if (sov.length == 0) {
-        // create a new SOV
-        con.query(
-          "INSERT INTO sov (takeoff_id, name, total, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;",
-          [takeoff_id, "SOV", 0, generateHash()],
-          function (err, result) {
-            if (err) {
-              console.log(err);
-              return callback(err);
-            }
-            callback(null, result[1][0].last);
-          }
-        );
-      } else if (sov[0].length > 0) {
-        // create a new SOV based on the previous one
-        console.log("previous SOV found: ", sov[0]);
-        // get the previous sov_items
-
-        con.query(
-          "INSERT INTO sov (takeoff_id, name, total, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;",
-          [takeoff_id, "SOV", 0, generateHash()],
-          function (err, result) {
-            if (err) {
-              console.log(err);
-              return callback(err);
-            }
-            let new_sov_id = result[1][0].last;
-
-            // now copy the items from the old SOV to the new SOV
-            con.query(
-              "INSERT INTO sov_items (sov_id, description, quantity, unit_cost) SELECT ?, description, quantity, unit_cost FROM sov_items WHERE sov_id = ?;",
-              [new_sov_id, sov[0].id],
-              function (err) {
-                if (err) return callback(err);
-                callback(null, new_sov_id);
-              }
-            );
-          }
-        );
-      } else {
-        console.log("no SOV found");
-        // create a new SOV
-        con.query(
-          "INSERT INTO sov (takeoff_id, name, total, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;",
-          [takeoff_id, "SOV", 0, generateHash()],
-          function (err, result) {
-            if (err) {
-              console.log(err);
-              return callback(err);
-            }
-            callback(null, result[1][0].last);
-          }
-        );
-
-      }
-    });
-  },
-
-
-  addItemToSOV: function (sov_id, description, quantity, unit_cost, callback) {
-    con.query(
-      "INSERT INTO sov_items (sov_id, description, quantity, unit_cost) VALUES (?, ?, ?, ?);",
-      [sov_id, description, quantity, unit_cost],
-      function (err) {
-        if (err) return callback(err);
-        callback(null);
-      }
-    );
-  },
-
-  
-  updateSOVItem: function (sov_item_id, description, quantity, unit_cost, callback) {
-    con.query(
-      "UPDATE sov_items SET description = ?, quantity = ?, unit_cost = ? WHERE id = ?;",
-      [description, quantity, unit_cost, sov_item_id],
-      function (err) {
-        if (err) return callback(err);
-        callback(null);
-      }
-    );
-  },
-  updateSOVItems: function (sov_id, items, callback) {
-    if (!Array.isArray(items) || items.length === 0) {
-      return callback("No items to update");
-    }
-
-    let totalContractedAmount = 0;
-    let totalInvoicedAmount = 0;
-
-    // Loop through the items and update them
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      totalContractedAmount += parseFloat(item.total_contracted_amount || 0);
-      totalInvoicedAmount += parseFloat(item.this_invoiced_amount || 0);
-
-      con.query(
-        "UPDATE sov_items SET description = ?, total_contracted_amount = ?, previous_invoiced_amount = ?, this_invoiced_amount = ? WHERE id = ?;",
-        [
-          item.description,
-          item.total_contracted_amount,
-          item.previous_invoiced_amount,
-          item.this_invoiced_amount,
-          item.id,
-        ],
-        function (err) {
-          if (err) {
-            console.log(err);
-            return callback(err);
-          }
-        }
-      );
-    }
-
-    // Update the SOV total
-    con.query(
-      "UPDATE sov SET total = ? WHERE id = ?;",
-      [totalContractedAmount, sov_id],
-      function (err) {
-        if (err) {
-          console.log(err);
-          return callback(err);
-        }
-        callback(null, { totalContractedAmount, totalInvoicedAmount });
-      }
-    );
-  },
-  //   // items is an array of objects
-    
-  //   if (items.length == 0) {
-  //     return callback("No items to update");
-  //   }
-
-  //   console.log(items);
-  //   // loop through the items and update them
-  //   for (let i = 0; i < items.length; i++) {
-  //     const item = items[i];
-  //     con.query(
-  //       "UPDATE sov_items SET description = ?, quantity = ?, cost = ? WHERE id = ?;",
-  //       [item.description, item.quantity, item.unit_cost, item.id],
-  //       function (err) {
-  //         if (err) {
-  //           console.log(err);
-  //           return callback(err);
-  //         }
-  //       }
-  //     );
-  //   }
-  //   // now get the total for the SOV
-  //   con.query(
-  //     "SELECT this_invoiced_amount as total FROM sov_items WHERE sov_id = ?;",
-  //     [sov_id],
-  //     function (err, result) {
-  //       if (err) {
-  //         console.log(err);
-  //         return callback(err);
-  //       }
-  //       // now update the SOV total
-  //       con.query(
-  //         "UPDATE sov SET total = ? WHERE id = ?;",
-  //         [result[0].total, sov_id],
-  //         function (err) {
-  //           if (err) {
-  //             console.log(err);
-  //             return callback(err);
-  //           }
-  //           callback(null);
-  //         }
-  //       );
-  //     }
-  //   );
-  // },
-  
-  deleteSOVItem: function (sov_item_id, callback) {
-    con.query(
-      "DELETE FROM sov_items WHERE id = ?;",
-      [sov_item_id],
-      function (err) {
-        if (err) return callback(err);
-        callback(null);
-      }
-    );
-  },
-
-
-  getSOVHistoryByTakeoffId: function (takeoff_id, callback) {
-    
-    con.query("SELECT *  FROM sov WHERE takeoff_id = ?;", [takeoff_id], function (err, sov) {
-      if (err) return callback(err);
-      if (sov.length == 0) {
-        return callback("No SOV found for this takeoff");
-      } else {
-        // now join the sov_items to the sov
-        con.query(
-          "SELECT * FROM sov_items WHERE sov_id = ?;",
-          [sov[0].id],
-          function (err, sov_items) {
-            if (err) return callback(err);
-            if (sov_items.length == 0) {
-              return callback("No SOV items found for this SOV");
-            }
-            sov[0].sov_items = sov_items;
-            callback(null, sov);
-          }
-        );
-      }
-    }
-    );
-  },
-
-  getSOVHistory: function (sov_id, callback) {
-    con.query("SELECT * FROM sov WHERE id = ?;", [sov_id], function (err, sov) {  
-      if (err) return callback(err);
-      if (sov.length == 0) {
-        return callback("No SOV found for this id");
-      } else {
-        // now join the sov_items to the sov
-        con.query(
-          "SELECT * FROM sov_items WHERE sov_id = ?;",
-          [sov[0].id],
-          function (err, sov_items) {
-            if (err) return callback(err);
-            if (sov_items.length == 0) {
-              return callback("No SOV items found for this SOV");
-            }
-            sov[0].sov_items = sov_items;
-            callback(null, sov[0]);
-          }
-        );
-      }
-    });
-  },
-  
-
-  getSOVHashByTakeoffId: function (takeoff_id, callback) {
-
-    // get the most recent SOV for this takeoff and then get its hash
-    con.query("SELECT * FROM sov WHERE takeoff_id = ? ORDER BY id DESC LIMIT 1;", [takeoff_id], function (err, sov) {
-      if (err) {
-        console.log(err);
-        return callback(err);
-      }
-      if (sov.length == 0) {
-        return callback("No SOV found for this takeoff");
-      } else {
-        callback(null, sov[0].hash);
-      }
-    });
-  },
-  getSOVByHash: function (hash, callback) {
-    con.query(
-      "SELECT * FROM sov WHERE hash = ?;",
-      [hash],
-      function (err, sov) {
-        if (err || sov.length == 0) return callback(err);
-        callback(null, sov[0]);
-      }
-    );
-  },
-  
-
-      
-
-
   updateTakeoffLastUpdatedBy: function (takeoff_id, user_id, callback) {
     if (!takeoff_id || !user_id) {
       return callback("Missing required parameters");
@@ -2225,6 +1930,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     }
     );
   },
+
   saveEstimate: function (takeoff_id, inclusions, exclusions, callback) {
     //console.log("saving estimate function received: ", inclusions, exclusions, takeoff_id);
     if (takeoff_id == null) {
@@ -3435,6 +3141,176 @@ getChangeOrderItemsById: function (change_order_id, callback) {
   //     }
   //   );
   // },
+
+
+/*
+
+sov stuff
+
+*/
+
+
+
+
+createNewSov: function (takeoff_id, callback) {
+  // get the previous sov
+  // if none exists, the new sov will be initially 0 for the total, and have no items
+  // if one exists, get the associated sov_items and copy them onto the new sov
+  con.query("SELECT * FROM sov WHERE takeoff_id = ? ORDER BY id DESC LIMIT 1;", [takeoff_id], function (err, sov) {
+    if (err) return callback(err);
+    if (sov.length == 0) {
+      // create a new sov with no items
+      con.query("INSERT INTO sov (takeoff_id, name, total, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;", [takeoff_id, 'SOV', 0, generateHash()], function (err, results) {
+        if (err) return callback(err);
+        let sov_id = results[1][0].last;
+        console.log("new sov id: ", sov_id);
+        callback(null, sov_id);
+      });
+    } else {
+      // create a new sov with the same items as the previous one
+      let previousSovId = sov[0].id;
+      con.query("INSERT INTO sov (takeoff_id, name, total, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;", [takeoff_id, 'SOV',0, generateHash()], function (err, results) {
+        if (err) return callback(err);
+        let sov_id = results[1][0].last;
+        console.log("new sov id: ", sov_id);
+        // get the items from the previous sov
+
+        let newSovTotal = 0;
+        con.query("SELECT * FROM sov_items WHERE sov_id = ?;", [previousSovId], function (err, items) {
+          if (err) return callback(err);
+          // insert the items into the new sov
+
+          for (var i = 0; i < items.length; i++) {
+            newSovTotal += items[i].this_invoiced_amount;
+            con.query("INSERT INTO sov_items (sov_id, previous_invoiced_amount) VALUES (?,?);", [sov_id, items[i].this_invoiced_amount], function (err) {
+              if (err) return callback(err);
+            });
+          }
+          // update the new sov with the newSovTotal
+
+          con.query("UPDATE sov SET total = ? WHERE id = ?;", [newSovTotal, sov_id], function (err) {
+            if (err) return callback(err);
+            console.log("new sov total: ", newSovTotal);
+            // update the previous sov with the new total
+
+          });
+
+        });
+        callback(null, sov_id);
+      });
+    }
+  });
+},
+
+
+getMostRecentSOV: function (takeoff_id, callback) {
+  con.query(
+    "SELECT * FROM sov WHERE takeoff_id = ? ORDER BY id DESC LIMIT 1;",
+    [takeoff_id],
+    function (err, sov) {
+      if (err) return callback(err);
+      if (sov.length == 0) {
+        return callback(null, null);
+      } else {
+        return callback(null, sov[0]);
+      }
+    }
+  );
+},
+getSOVById: function (sov_id, callback) {
+  con.query(
+    "SELECT * FROM sov WHERE id = ?;",
+    [sov_id],
+    function (err, sov) {
+      if (err) return callback(err);
+      if (sov.length == 0) {
+        return callback(null, null);
+      } else {
+        return callback(null, sov[0]);
+      }
+    }
+  );
+},
+
+getSOVHashByTakeoffId: function (takeoff_id, callback) {
+  con.query(
+    "SELECT hash FROM sov WHERE takeoff_id = ?;",
+    [takeoff_id],
+    function (err, sov) {
+      if (err) return callback(err);
+      if (sov.length == 0) {
+        return callback(null, null);
+      } else {
+        return callback(null, sov[0].hash);
+      }
+    }
+  );
+},
+
+getSOVHistoryByTakeoffId: function (takeoff_id, callback) {
+  con.query(
+    "SELECT * FROM sov WHERE takeoff_id = ? ORDER BY id DESC;",
+    [takeoff_id],
+    function (err, sov) {
+      if (err) return callback(err);
+      if (sov.length == 0) {
+        return callback(null, null);
+      } else {
+        return callback(null, sov);
+      }
+    }
+  );
+},
+
+// used by the view function
+getSOVHistoryById: function (sov_id, callback) {
+  con.query(
+    "SELECT * FROM sov WHERE id = ?;",
+    [sov_id],
+    function (err, sov) {
+      if (err) return callback(err);
+      if (sov.length == 0) {
+        return callback(null, null);
+      } else {
+        return callback(null, sov[0]);
+      }
+    }
+  );
+},
+
+updateSOVItems: function (sov_id, items, callback) {
+
+
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].id == null) {
+      console.log("aaaah! the sov_items id is null");
+    } else {
+      con.query(
+        "UPDATE sov_items SET description = ?, total_contracted_amount = ?, previous_invoiced_amount = ?, this_invoiced_amount = ? WHERE id = ?;",
+        [items[i].description, items[i].total_contracted_amount, items[i].previous_invoiced_amount, items[i].this_invoiced_amount, items[i].id],
+        function (err) {
+          if (err) return callback(err);
+        }
+      );
+    }
+  }
+},
+
+// add item to sov, and return the id
+addSOVItem: function (sov_id, callback) {
+  if (sov_id == null || sov_id == NaN) {
+    console.log("sov_id is null");
+  }
+  con.query(
+    "INSERT INTO sov_items (sov_id, description) VALUES (?, ''); SELECT LAST_INSERT_ID() as last;",
+    [sov_id],
+    function (err, results) {
+      if (err) return callback(err);
+      let id = results[1][0].last;
+      callback(null, id);
+    }
+  );
+},
 
   takeoffGetStatus: function (takeoff_id, callback) {
     if (takeoff_id == null) {

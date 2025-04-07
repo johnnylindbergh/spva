@@ -2621,126 +2621,215 @@ module.exports = function (app) {
 
   });
 
+  app.get('/createSOV', mid.isAdmin, function (req, res) {
+    console.log("creating schedule of values for ", req.query.takeoff_id);
+    const takeoff_id = req.query.takeoff_id;
+    if (takeoff_id == null) {
+      console.log("takeoff_id is null");
+      res.redirect("/");
+    } else {
+      console.log("creating new SOV for takeoff_id", takeoff_id);
+      db.createNewSov(takeoff_id, function (err, sov_id) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("new sov_id:", sov_id);
+          res.redirect("/sov?sov_id=" + sov_id);
+        }
+      }
+      );
+    }
+  });
+
   app.get("/sov", mid.isAdmin, function (req, res) {
     console.log("scheduleOfValuesCreator accessed");
     // get the sov_id from the query params
-    
     const sov_id = req.query.sov_id;
-
-
     if (sov_id == null) {
-      console.log("takeoff_id is null");
+      console.log("sov_id is null");
       res.redirect("/");
-    } else  {
-      db.getSOV(sov_id, function (err, sov) {
+    } else {
+      db.getSOVById(sov_id, function (err, sov) {
         if (err || sov == null) {
           console.log(err);
         }
         console.log(sov);
-        res.render("scheduleOfValuesCreator.html", {sov: sov });
+        res.render("scheduleOfValuesCreator.html", { sov: sov });
       });
     }
-});
+  });
 
-app.get("/shareSOV", mid.isAdmin, function (req, res) {
-  console.log("sharing schedule of values for ", req.query.hash);
-
-  if (!req.query.hash || req.query.hash.length != 32) {
-    res.redirect("/");
-  } else {
-    db.getSOVByHash(
-      req.query.hash,
-      function (err, sov) {
-        if (err || sov == null) {
-          console.log(err);
-          res.redirect("/");
-        } else {
-          console.log(sov);
-          res.render("scheduleOfValuesCreator.html", { sov: sov });
-        }
+  app.get('/sovHistory', mid.isAdmin, function (req, res) {
+    if (!req.query.sov_id) {
+      return res.status(400).send("sov_id is required");
+    }
+    console.log("sovHistory accessed");
+    db.getSOVById(req.query.sov_id, function (err, sov) {
+      if (err) {
+        console.log(err);
+        res.send("error retrieving schedule of values history");
+      } else {
+        console.log(sov);
+        res.render('scheduleOfValuesHistory.html', { sov: sov });
       }
+    }
     );
-  }
-}
-);
+  });
+
+  
 
 
-// app.get("/retrieveSOV", mid.isAdmin, function (req, res) {
-//   console.log("retrieving schedule of values for ", req.query.takeoff_id);
-//   db.getSOV(req.query.takeoff_id, function (err, sov) {
-//     if (err || sov == null) {
-//       console.log(err);
+
+
+//   app.get("/sov", mid.isAdmin, function (req, res) {
+//     console.log("scheduleOfValuesCreator accessed");
+//     // get the sov_id from the query params
+    
+//     const sov_id = req.query.sov_id;
+
+
+//     if (sov_id == null) {
+//       console.log("takeoff_id is null");
+//       res.redirect("/");
+//     } else  {
+//       db.getSOV(sov_id, function (err, sov) {
+//         if (err || sov == null) {
+//           console.log(err);
+//         }
+//         console.log(sov);
+//         res.render("scheduleOfValuesCreator.html", {sov: sov });
+//       });
 //     }
-//     console.log(sov);
-//     res.send(sov[0]);
+// });
+
+// app.get("/shareSOV", mid.isAdmin, function (req, res) {
+//   console.log("sharing schedule of values for ", req.query.hash);
+
+//   if (!req.query.hash || req.query.hash.length != 32) {
+//     res.redirect("/");
+//   } else {
+//     db.getSOVByHash(
+//       req.query.hash,
+//       function (err, sov) {
+//         if (err || sov == null) {
+//           console.log(err);
+//           res.redirect("/");
+//         } else {
+//           console.log(sov);
+//           res.render("scheduleOfValuesCreator.html", { sov: sov });
+//         }
+//       }
+//     );
 //   }
-//   );
 // }
 // );
 
 
-app.get('/sovHistory', mid.isAdmin, function (req, res) {
-  console.log("sovHistory accessed");
-  res.render('scheduleOfValuesHistory.html', {
-    sov_id: req.query.sov_id
-  });
-}
-);
+// // app.get("/retrieveSOV", mid.isAdmin, function (req, res) {
+// //   console.log("retrieving schedule of values for ", req.query.takeoff_id);
+// //   db.getSOV(req.query.takeoff_id, function (err, sov) {
+// //     if (err || sov == null) {
+// //       console.log(err);
+// //     }
+// //     console.log(sov);
+// //     res.send(sov[0]);
+// //   }
+// //   );
+// // }
+// // );
+// // /sovHistory route - add error handling for missing sov_id
+// app.get('/sovHistory', mid.isAdmin, function (req, res) {
+//   if (!req.query.sov_id) {
+//     return res.status(400).send("sov_id is required");
+//   }
+//   console.log("sovHistory accessed");
+//   res.render('scheduleOfValuesHistory.html', {
+//     sov_id: req.query.sov_id
+//   });
+// });
 
+// // /retrieveSOV route - improve error handling
 app.post('/retrieveSOV', mid.isAdmin, function (req, res) {
-  // get sovHistory
+  if (!req.body.sov_id) {
+    return res.status(400).send("sov_id is required");
+  }
+  
   console.log("retrieving schedule of values for ", req.body.sov_id);
-  db.getSOV(req.body.sov_id, function (err, sov) {
-    if (err || sov == null) {
-      console.log(err);
-      
-      res.status(500).send("error retrieving schedule of values");
-
+  db.getSOVById(req.body.sov_id, function (err, sov) {
+    if (err) {
+      console.error("Error retrieving SOV:", err);
+      return res.status(500).send("error retrieving schedule of values");
+    }
+    if (!sov) {
+      return res.status(404).send("schedule of values not found");
     }
     console.log(sov);
     res.send(sov);
-  }
-  );
-}
-);
+  });
+});
+
+// // /createSOV route - add proper error response
+// app.get('/createSOV', mid.isAdmin, function (req, res) {
+//   if (!req.query.takeoff_id) {
+//     return res.status(400).send("takeoff_id is required");
+//   }
+  
+//   console.log("creating schedule of values for ", req.query.takeoff_id);
+//   db.createSOV(req.query.takeoff_id, function (err, sov_id) {
+//     if (err) {
+//       console.error("Error creating SOV:", err);
+//       return res.status(500).send("error creating schedule of values");
+//     }
+//     if (!sov_id) {
+//       return res.status(500).send("failed to create schedule of values");
+//     }
+
+//     console.log("new sov_id:", sov_id);
+//     res.redirect("/sov?sov_id=" + sov_id);
+//   });
+// });
+
+// // /updateSOV route - validate input
 
 
+app.post('/addSOVItem', mid.isAdmin, function (req, res) {
+  const sov_id = req.body.sov_id;
 
-app.get('/createSOV', mid.isAdmin, function (req, res) {
-  console.log("creating schedule of values for ", req.query.takeoff_id);
-  db.createSOV(req.query.takeoff_id, function (err, sov_id) {
-    if (err || sov_id == null) {
-      console.log(err);
+  db.addSOVItem(sov_id, function (err, sov_item_id) {
+    if (err) {
+      console.error("Error adding SOV item:", err);
+      return res.status(500).send("error adding schedule of values item");
     }
+    if (!sov_item_id) {
+      return res.status(500).send("failed to add schedule of values item");
+    }
+    console.log("added schedule of values item");
+    res.send({status:'success', sov_item_id: sov_item_id});
+  });
+});
 
-    console.log("new sov_id:", sov_id);
-  //  console.log(sov);
-    // redirect to the schedule of values page
-    res.redirect("/sov?sov_id=" + sov_id);
-  }
-  );
-}
-);
 
 app.post('/updateSOV', mid.isAdmin, function (req, res) {
   console.log("updating schedule of values for ", req.body);
   const sov_id = req.body.sov_id;
   const items = req.body.items;
+  
+  if (!sov_id) {
+    return res.status(400).send("sov_id is required");
+  }
+  if (!Array.isArray(items)) {
+    return res.status(400).send("items must be an array");
+  }
+
   db.updateSOVItems(sov_id, items, function (err) {
     if (err) {
-      console.log(err);
-      res.status(500).send("error updating schedule of values");
-    } else {
-      console.log("updated schedule of values");
-      res.send("updated");
+      console.error("Error updating SOV:", err);
+      return res.status(500).send("error updating schedule of values");
     }
-  }
-  );
-}
-);
-
-  
-
+    console.log("updated schedule of values");
+    res.send("updated");
+  });
+});
 
 // app.post('/updateSOV', mid.isAdmin, function (req, res) {
 

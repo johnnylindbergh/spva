@@ -264,10 +264,10 @@ function shareClient(){
     console.log(takeoff_id);
     XSAlert({
         title: 'Email Confirmation',
-        message: 'Are you sure you want to share this estimate with the client? email:'+ $('#owner_email_address').val(),
+        message: 'Are you sure you want to share this estimate with the client? ('+ $('#owner_email_address').val() + ')',
         icon: 'warning',
      }).then((value) => {
-        console.log("dialogue output",value);
+        console.log("dialogue output", value);
         if(value == "ok"){
 
             $.post('/shareClient', {takeoff_id: takeoff_id}, function(data) {

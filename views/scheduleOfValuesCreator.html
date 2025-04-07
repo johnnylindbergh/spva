@@ -7,10 +7,9 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Jquery -->
-    <script   src="https://code.jquery.com/jquery-3.7.1.min.js"   integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="   crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 </head>
 <body>
-    <input type="hidden" id="takeoff_id" value="{{takeoff.id}}">
     <input type="hidden" id="sov_id" value="{{sov.id}}">
     <div class="container mt-5">
         <h1 class="mb-4">Schedule of Values</h1>
@@ -31,7 +30,7 @@
             <tfoot>
                 <tr>
                     <td><strong>Total:</strong></td>
-                    <td></td>
+                    <td id="totalContractedAmount">0.00</td>
                     <td id="totalPreviousAmount">0.00</td>
                     <td id="totalthis_invoice_amount">0.00</td>
                     <td id="totalRemainingBalance">0.00</td>
@@ -48,34 +47,64 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     <script>
         function fetchSOVData() {
-            const takeoffId = "{{takeoff_id}}"; // Replace with actual takeoff ID
-            fetch(`/retrieveSOV?takeoff_id=${takeoffId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const invoiceTableBody = document.querySelector('#invoiceTable tbody');
-                    invoiceTableBody.innerHTML = ''; // Clear existing rows
-                    let sov = data.sov;
-                    let sov_items = data.sov_items;
+            const sovId = parseInt(document.getElementById('sov_id').value);
+            const tbody = document.querySelector('#invoiceTable tbody');
+            let totalPrevious = 0;
+            let totalThisInvoice = 0;
+            let totalRemaining = 0;
+            let totalContracted = 0;
 
-                    sov_items.forEach(item => {
-                        const newRow = document.createElement('tr');
-                        newRow.innerHTML = `
-                            <td><input type="text" class="form-control description" value="${item.description}" readonly></td>
-                            <td><input type="number" class="form-control total-invoice" value="${item.total_contracted_amount}" readonly></td>
-                            <td><input type="number" class="form-control previous-amount" value="${item.previous_invoiced_amount}" readonly></td>
-                            <td><input type="number" class="form-control this-invoice" value="${item.this_invoiced_amount}" readonly></td>
-                            <td class="remaining-balance">${(item.total_contracted_amount - (item.previous_invoiced_amount + item.this_invoice_amount)).toFixed(2)}</td>
-                            <td class="percent-remaining">${((item.total_contracted_amount > 0 ? ((item.total_contracted_amount - (item.previous_invoiced_amount + item.this_invoice_amount)) / item.total_contracted_amount) * 100 : 0).toFixed(2))}%</td>
-                        `;
-                        invoiceTableBody.appendChild(newRow);
-                    });
-                })
-                .catch(error => console.error('Error fetching SOV data:', error));
+            // Clear existing rows
+            tbody.innerHTML = '';
 
-            updateTotals();
+            // Fetch data by posting sov_id
+            $.post('/retrieveSOV', { sov_id: sovId }, function (data) {
+                console.log(data);
+
+                let sov_items = data.sov_items || [];
+
+                sov_items.forEach(item => {
+                    const remainingBalance = parseFloat(item.total_contracted_amount || 0) - 
+                                           parseFloat(item.previous_invoiced_amount || 0) - 
+                                           parseFloat(item.this_invoiced_amount || 0);
+                    const percentRemaining = parseFloat(item.total_contracted_amount || 0) > 0 ? 
+                        ((remainingBalance / parseFloat(item.total_contracted_amount || 0)) * 100) : 0;
+
+                    const row = `
+                        <tr data-id="${item.id}">
+                            <td><input type="text" class="form-control description" value="${item.description || ''}"></td>
+                            <td><input type="number" class="form-control total-invoice" value="${item.total_contracted_amount || 0}"></td>
+                            <td><input type="number" class="form-control previous-amount" value="${item.previous_invoiced_amount || 0}"></td>
+                            <td><input type="number" class="form-control this-invoice" value="${item.this_invoiced_amount || 0}"></td>
+                            <td class="remaining-balance">${remainingBalance.toFixed(2)}</td>
+                            <td class="percent-remaining">${percentRemaining.toFixed(2)}%</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+
+                    totalPrevious += parseFloat(item.previous_invoiced_amount || 0);
+                    totalThisInvoice += parseFloat(item.this_invoiced_amount || 0);
+                    totalRemaining += remainingBalance;
+                    totalContracted += parseFloat(item.total_contracted_amount || 0);
+                });
+
+                // Update totals
+                document.getElementById('totalPreviousAmount').textContent = totalPrevious.toFixed(2);
+                document.getElementById('totalthis_invoice_amount').textContent = totalThisInvoice.toFixed(2);
+                document.getElementById('totalRemainingBalance').textContent = totalRemaining.toFixed(2);
+                document.getElementById('totalContractedAmount').textContent = totalContracted.toFixed(2);
+                document.getElementById('totalPercentRemaining').textContent = 
+                    totalContracted > 0 ? `${((totalRemaining / totalContracted) * 100).toFixed(2)}%` : '0%';
+
+                // Add event listeners to all inputs
+                const inputs = tbody.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.addEventListener('input', updateTotals);
+                });
+            }).fail(function () {
+                alert('Failed to retrieve data.');
+            });
         }
-
-        document.addEventListener('DOMContentLoaded', fetchSOVData);
 
         function updateTotals() {
             const invoiceTableBody = document.querySelector('#invoiceTable tbody');
@@ -83,15 +112,19 @@
             const totalthis_invoice_amount = document.getElementById('totalthis_invoice_amount');
             const totalRemainingBalance = document.getElementById('totalRemainingBalance');
             const totalPercentRemaining = document.getElementById('totalPercentRemaining');
+            const totalContractedAmount = document.getElementById('totalContractedAmount');
 
             let totalPrevious = 0;
             let totalThis = 0;
             let totalRemaining = 0;
+            let totalContracted = 0;
 
             const rows = invoiceTableBody.querySelectorAll('tr');
             const items = [];
 
             rows.forEach(row => {
+
+                const row_id = row.getAttribute('data-id');
                 const description = row.querySelector('.description').value;
                 const totalInvoice = parseFloat(row.querySelector('.total-invoice').value) || 0;
                 const previousAmount = parseFloat(row.querySelector('.previous-amount').value) || 0;
@@ -106,22 +139,26 @@
                 totalPrevious += previousAmount;
                 totalThis += this_invoice_amount;
                 totalRemaining += remainingBalance;
+                totalContracted += totalInvoice;
 
                 items.push({
+                    id: row_id, // Assuming each row has a data-id attribute
                     description,
                     total_contracted_amount: totalInvoice,
                     previous_invoiced_amount: previousAmount,
                     this_invoiced_amount: this_invoice_amount
+                    
                 });
             });
 
             totalPreviousAmount.textContent = totalPrevious.toFixed(2);
             totalthis_invoice_amount.textContent = totalThis.toFixed(2);
             totalRemainingBalance.textContent = totalRemaining.toFixed(2);
-            totalPercentRemaining.textContent = `${(totalRemaining / (totalPrevious + totalThis + totalRemaining) * 100).toFixed(2)}%`;
+            totalContractedAmount.textContent = totalContracted.toFixed(2);
+            totalPercentRemaining.textContent = totalContracted > 0 ? 
+                `${((totalRemaining / totalContracted) * 100).toFixed(2)}%` : '0%';
 
             // Post updated data to /updateSOV
-            const takeoffId = "{{takeoff_id}}"; // Replace with actual takeoff ID
             const sov_id = $('#sov_id').val();
             fetch('/updateSOV', {
                 method: 'POST',
@@ -149,23 +186,45 @@
             const addRowBtn = document.getElementById('addRowBtn');
             const invoiceTableBody = document.querySelector('#invoiceTable tbody');
 
-            addRowBtn.addEventListener('click', function () {
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td><input type="text" class="form-control description" placeholder="Enter description"></td>
-                    <td><input type="number" class="form-control total-invoice" placeholder="Enter amount"></td>
-                    <td><input type="number" class="form-control previous-amount" placeholder="Enter amount"></td>
-                    <td><input type="number" class="form-control this-invoice" placeholder="Enter amount"></td>
-                    <td class="remaining-balance">0.00</td>
-                    <td class="percent-remaining">0%</td>
-                `;
-                invoiceTableBody.appendChild(newRow);
+            const sovId = parseInt(document.getElementById('sov_id').value);
 
-                const inputs = newRow.querySelectorAll('input');
-                inputs.forEach(input => {
-                    input.addEventListener('input', updateTotals);
+            if (sovId == null || isNaN(sovId)) {
+                alert('SOV ID is not set.');
+                return;
+            }
+
+            addRowBtn.addEventListener('click', function () {
+                $.post('/addSOVItem', { sov_id: sovId }, function (data) {
+                    console.log(data);
+                
+                    if (data.status !== 'success') {
+                        alert('Failed to add new row.');
+                        return;
+                    } else {
+                        const newRow = document.createElement('tr');
+                        newRow.setAttribute('data-id', parseInt(data.sov_item_id)); // Assuming the server returns the new item ID
+                    newRow.innerHTML = `
+                        <td><input type="text" class="form-control description" placeholder="Enter description"></td>
+                        <td><input type="number" class="form-control total-invoice" placeholder="Enter amount"></td>
+                        <td><input type="number" class="form-control previous-amount" placeholder="Enter amount"></td>
+                        <td><input type="number" class="form-control this-invoice" placeholder="Enter amount"></td>
+                        <td class="remaining-balance">0.00</td>
+                        <td class="percent-remaining">0%</td>
+                    `;
+                    invoiceTableBody.appendChild(newRow);
+
+                    const inputs = newRow.querySelectorAll('input');
+                    inputs.forEach(input => {
+                        input.addEventListener('input', updateTotals);
+                    });
+
+                    }
+                   
                 });
             });
+
+            // Initial data load
+            fetchSOVData();
         });
     </script>
 </body>

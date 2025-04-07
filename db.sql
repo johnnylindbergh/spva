@@ -499,18 +499,14 @@ INSERT INTO sov (takeoff_id, name, total, hash) VALUES (1, 'SOV 1', 2000.00, 'lh
 CREATE TABLE sov_items (
   id INT NOT NULL AUTO_INCREMENT,
   sov_id INT NOT NULL,
-  invoice_id INT,
-  description VARCHAR(255) NOT NULL,
-  total_contracted_amount DECIMAL(10,2) NOT NULL,
-  previous_invoiced_amount DECIMAL(10,2) NOT NULL,
-  cost DECIMAL(10,2) NOT NULL,
-  quantity INT NOT NULL,
-  this_invoiced_amount DECIMAL(10,2) NOT NULL,
+  description VARCHAR(255),
+  total_contracted_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  previous_invoiced_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  this_invoiced_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  FOREIGN KEY (sov_id) REFERENCES sov(id) ON DELETE CASCADE,
-  FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+  FOREIGN KEY (sov_id) REFERENCES sov(id) ON DELETE CASCADE
 );
 
 -- example insert 
