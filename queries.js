@@ -9,6 +9,7 @@ module.exports = {
       applied_materials.cost_delta AS cost_delta,
       applied_materials.labor_cost AS labor_cost,
       applied_materials.measurement AS measurement,
+      applied_materials.notes AS notes,
       applied_materials.measurement_unit AS measurement_unit,
       applied_materials.color AS color,
       materials.name AS material_name_from_materials

@@ -996,11 +996,14 @@ module.exports = function (app) {
                         " name: " + estimate[i].selected_materials[j].name + "'";
                       prompt +=
                         " desc: " + estimate[i].selected_materials[j].description;
+                        prompt +=
+                        " notes: " + estimate[i].selected_materials[j].notes;
                     }
                   }
                   prompt += "}";
                 }
 
+                console.log("prompt",prompt + JSON.stringify(estimate))
                 // call to  async function callChatGPT with the response as the return value and saves the it to the database
                 let response = "";
                 //console.log("prompt",prompt + JSON.stringify(estimate))
@@ -1116,6 +1119,8 @@ module.exports = function (app) {
                       " name: " + estimate[i].selected_materials[j].name + "'";
                     prompt +=
                       " desc: " + estimate[i].selected_materials[j].description;
+                      prompt +=
+                      " notes: " + estimate[i].selected_materials[j].notes;
                   }
                 }
                 prompt += "}";
