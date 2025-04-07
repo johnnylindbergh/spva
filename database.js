@@ -2133,6 +2133,33 @@ getChangeOrderItemsById: function (change_order_id, callback) {
   },
   
 
+  getSOVHashByTakeoffId: function (takeoff_id, callback) {
+
+    // get the most recent SOV for this takeoff and then get its hash
+    con.query("SELECT * FROM sov WHERE takeoff_id = ? ORDER BY id DESC LIMIT 1;", [takeoff_id], function (err, sov) {
+      if (err) {
+        console.log(err);
+        return callback(err);
+      }
+      if (sov.length == 0) {
+        return callback("No SOV found for this takeoff");
+      } else {
+        callback(null, sov[0].hash);
+      }
+    });
+  },
+  getSOVByHash: function (hash, callback) {
+    con.query(
+      "SELECT * FROM sov WHERE hash = ?;",
+      [hash],
+      function (err, sov) {
+        if (err || sov.length == 0) return callback(err);
+        callback(null, sov[0]);
+      }
+    );
+  },
+  
+
       
 
 
