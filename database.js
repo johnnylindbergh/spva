@@ -2267,7 +2267,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
   },
 
 
-
+// this function does not take the options into account );
   updateSignature: function (takeoff_id, signature, date, callback) {
     // first get the owner_name in takeoffs
     con.query(
@@ -2312,6 +2312,15 @@ getChangeOrderItemsById: function (change_order_id, callback) {
                 if (err) return callback(err);
                 let invoiceTotal = parseFloat(takeoff[0].total) * 0.2;
                 let invoiceNumber = Math.floor(Math.random() * 1000000000);
+
+                con.query("SELECT SUM(total) from options where id = ? OR required = 1;", [takeoff_id], function (err, total) {
+                  if (err) return callback(err);
+                  //console.log("total: ", total[0].total);
+                  if (total[0].total != null) {
+                    invoiceTotal += (parseFloat(total[0].total) * 0.2);
+                  }
+
+                
                 con.query(
                   "INSERT INTO invoices (takeoff_id, total, invoice_number, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;",
                   [takeoff_id, invoiceTotal, invoiceNumber, generateHash()],
@@ -2338,6 +2347,8 @@ getChangeOrderItemsById: function (change_order_id, callback) {
 
 
                   });
+
+                });
 
               }
             );
