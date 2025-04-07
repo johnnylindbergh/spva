@@ -2763,8 +2763,18 @@ app.post('/retrieveSOV', mid.isAdmin, function (req, res) {
     if (!sov) {
       return res.status(404).send("schedule of values not found");
     }
-    console.log(sov);
-    res.send(sov);
+
+    db.getSOVItemsById(req.body.sov_id, function (err, items) {
+      if (err) {
+        console.error("Error retrieving SOV items:", err);
+        return res.status(500).send("error retrieving schedule of values items");
+      } else {
+        sov.sov_items = items;
+        console.log("items", items);
+        res.send(sov);
+      }
+    });
+
   });
 });
 

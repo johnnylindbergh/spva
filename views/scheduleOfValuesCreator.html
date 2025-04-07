@@ -106,7 +106,16 @@
             });
         }
 
-        function updateTotals() {
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+
+        const updateTotals = debounce(function () {
             const invoiceTableBody = document.querySelector('#invoiceTable tbody');
             const totalPreviousAmount = document.getElementById('totalPreviousAmount');
             const totalthis_invoice_amount = document.getElementById('totalthis_invoice_amount');
@@ -124,31 +133,31 @@
 
             rows.forEach(row => {
 
-                const row_id = row.getAttribute('data-id');
-                const description = row.querySelector('.description').value;
-                const totalInvoice = parseFloat(row.querySelector('.total-invoice').value) || 0;
-                const previousAmount = parseFloat(row.querySelector('.previous-amount').value) || 0;
-                const this_invoice_amount = parseFloat(row.querySelector('.this-invoice').value) || 0;
+            const row_id = row.getAttribute('data-id');
+            const description = row.querySelector('.description').value;
+            const totalInvoice = parseFloat(row.querySelector('.total-invoice').value) || 0;
+            const previousAmount = parseFloat(row.querySelector('.previous-amount').value) || 0;
+            const this_invoice_amount = parseFloat(row.querySelector('.this-invoice').value) || 0;
 
-                const remainingBalance = totalInvoice - (previousAmount + this_invoice_amount);
-                const percentRemaining = totalInvoice > 0 ? ((remainingBalance / totalInvoice) * 100).toFixed(2) : 0;
+            const remainingBalance = totalInvoice - (previousAmount + this_invoice_amount);
+            const percentRemaining = totalInvoice > 0 ? ((remainingBalance / totalInvoice) * 100).toFixed(2) : 0;
 
-                row.querySelector('.remaining-balance').textContent = remainingBalance.toFixed(2);
-                row.querySelector('.percent-remaining').textContent = `${percentRemaining}%`;
+            row.querySelector('.remaining-balance').textContent = remainingBalance.toFixed(2);
+            row.querySelector('.percent-remaining').textContent = `${percentRemaining}%`;
 
-                totalPrevious += previousAmount;
-                totalThis += this_invoice_amount;
-                totalRemaining += remainingBalance;
-                totalContracted += totalInvoice;
+            totalPrevious += previousAmount;
+            totalThis += this_invoice_amount;
+            totalRemaining += remainingBalance;
+            totalContracted += totalInvoice;
 
-                items.push({
-                    id: row_id, // Assuming each row has a data-id attribute
-                    description,
-                    total_contracted_amount: totalInvoice,
-                    previous_invoiced_amount: previousAmount,
-                    this_invoiced_amount: this_invoice_amount
-                    
-                });
+            items.push({
+                id: row_id, // Assuming each row has a data-id attribute
+                description,
+                total_contracted_amount: totalInvoice,
+                previous_invoiced_amount: previousAmount,
+                this_invoiced_amount: this_invoice_amount
+                
+            });
             });
 
             totalPreviousAmount.textContent = totalPrevious.toFixed(2);
@@ -156,31 +165,31 @@
             totalRemainingBalance.textContent = totalRemaining.toFixed(2);
             totalContractedAmount.textContent = totalContracted.toFixed(2);
             totalPercentRemaining.textContent = totalContracted > 0 ? 
-                `${((totalRemaining / totalContracted) * 100).toFixed(2)}%` : '0%';
+            `${((totalRemaining / totalContracted) * 100).toFixed(2)}%` : '0%';
 
             // Post updated data to /updateSOV
             const sov_id = $('#sov_id').val();
             fetch('/updateSOV', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    sov_id: sov_id,
-                    items: items
-                })
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sov_id: sov_id,
+                items: items
+            })
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to update SOV');
-                }
-                return response.json();
+            if (!response.ok) {
+                throw new Error('Failed to update SOV');
+            }
+            return response.json();
             })
             .then(data => {
-                console.log('SOV updated successfully:', data);
+            console.log('SOV updated successfully:', data);
             })
             .catch(error => console.error('Error updating SOV:', error));
-        }
+        }, 300);
 
         document.addEventListener('DOMContentLoaded', function () {
             const addRowBtn = document.getElementById('addRowBtn');

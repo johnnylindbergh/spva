@@ -23,6 +23,8 @@
 
     <div class="container mt-5">
    
+        <!--  hidden input of sov.id -->
+        <input type="hidden" id="sov_id" value="{{sov.id}}">
         <!-- sov Table -->
         <table id="sovTable" class="table table-bordered">
             <thead>
@@ -54,8 +56,12 @@
 
     <script>
     $(document).ready(function () {
-        const sovId = parseInt('{{sov.id}}'); // Replace with the actual sov_id if needed
 
+        let totalPrevious = 0;
+        let totalThisInvoice = 0;
+        let totalRemaining = 0;
+        
+        const sovId = $('#sov_id').val(); // Get the SOV ID from the hidden input
 
         const tbody = document.querySelector('#sovTable');
         // Fetch data by posting sov_id

@@ -3232,6 +3232,22 @@ getSOVById: function (sov_id, callback) {
   );
 },
 
+getSOVItemsById: function (sov_id, callback) {
+  con.query(
+    "SELECT * FROM sov_items WHERE sov_id = ?;",
+    [sov_id],
+    function (err, items) {
+      if (err) return callback(err);
+      if (items.length == 0) {
+        return callback(null, null);
+      } else {
+        return callback(null, items);
+      }
+    }
+  );
+},
+
+
 getSOVHashByTakeoffId: function (takeoff_id, callback) {
   con.query(
     "SELECT hash FROM sov WHERE takeoff_id = ?;",
@@ -3294,6 +3310,25 @@ updateSOVItems: function (sov_id, items, callback) {
       );
     }
   }
+
+  // update the total for the sov
+  con.query(
+    "SELECT SUM(this_invoiced_amount) as total FROM sov_items WHERE sov_id = ?;",
+    [sov_id],
+    function (err, results) {
+      if (err) return callback(err);
+      let total = results[0].total;
+      con.query(
+        "UPDATE sov SET total = ? WHERE id = ?;",
+        [total, sov_id],
+        function (err) {
+          if (err) return callback(err);
+          callback(null);
+        }
+      );
+    }
+  );
+
 },
 
 // add item to sov, and return the id
