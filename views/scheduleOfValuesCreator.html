@@ -6,8 +6,12 @@
     <title>Invoice Amount Calculator</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Jquery -->
+    <script   src="https://code.jquery.com/jquery-3.7.1.min.js"   integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="   crossorigin="anonymous"></script>
 </head>
 <body>
+    <input type="hidden" id="takeoff_id" value="{{takeoff.id}}">
+    <input type="hidden" id="sov_id" value="{{sov.id}}">
     <div class="container mt-5">
         <h1 class="mb-4">Schedule of Values</h1>
         <table id="invoiceTable" class="table table-bordered">
@@ -118,15 +122,14 @@
 
             // Post updated data to /updateSOV
             const takeoffId = "{{takeoff_id}}"; // Replace with actual takeoff ID
-            const sovId = "{{sov_id}}"; // Replace with actual SOV ID
+            const sov_id = $('#sov_id').val();
             fetch('/updateSOV', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    sov_id: sovId,
-                    takeoff_id: takeoffId,
+                    sov_id: sov_id,
                     items: items
                 })
             })
