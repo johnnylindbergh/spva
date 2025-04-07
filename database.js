@@ -2267,7 +2267,6 @@ getChangeOrderItemsById: function (change_order_id, callback) {
   },
 
 
-// this function does not take the options into account );
   updateSignature: function (takeoff_id, signature, date, callback) {
     // first get the owner_name in takeoffs
     con.query(
@@ -2313,40 +2312,40 @@ getChangeOrderItemsById: function (change_order_id, callback) {
                 let invoiceTotal = parseFloat(takeoff[0].total) * 0.2;
                 let invoiceNumber = Math.floor(Math.random() * 1000000000);
 
-                con.query("SELECT SUM(total) from options where id = ? OR required = 1;", [takeoff_id], function (err, total) {
+                con.query("SELECT SUM(total) from options where takeoff_id = ? OR required = 1;", [takeoff_id], function (err, total) {
                   if (err) return callback(err);
                   //console.log("total: ", total[0].total);
                   if (total[0].total != null) {
                     invoiceTotal += (parseFloat(total[0].total) * 0.2);
                   }
 
-                
-                con.query(
-                  "INSERT INTO invoices (takeoff_id, total, invoice_number, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;",
-                  [takeoff_id, invoiceTotal, invoiceNumber, generateHash()],
-                  function (err, results) {
-                    if (err) return callback(err);
-                    console.log(results);
-                    let invoice_id = results[1][0].last;
-                    console.log("invoice id in update sig", invoice_id);
-                    // insert into invoice_items
-                    con.query(
-                      "INSERT INTO invoice_items (invoice_id, cost, quantity, description) VALUES (?,?,?,?);",
-                      [invoice_id, invoiceTotal, 1, "Initial Deposit"],
-                      function (err) {
-                        if (err){
-                          console.log(err);
-                          return callback(err);
-                        }
-                        // return the invoice_id
-                        console.log(`passing new invoice id ${invoice_id}`);
-                        callback(true, invoice_id, null);
-                      });
 
-             
+                  con.query(
+                    "INSERT INTO invoices (takeoff_id, total, invoice_number, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;",
+                    [takeoff_id, invoiceTotal, invoiceNumber, generateHash()],
+                    function (err, results) {
+                      if (err) return callback(err);
+                      console.log(results);
+                      let invoice_id = results[1][0].last;
+                      console.log("invoice id in update sig", invoice_id);
+                      // insert into invoice_items
+                      con.query(
+                        "INSERT INTO invoice_items (invoice_id, cost, quantity, description) VALUES (?,?,?,?);",
+                        [invoice_id, invoiceTotal, 1, "Initial Deposit"],
+                        function (err) {
+                          if (err) {
+                            console.log(err);
+                            return callback(err);
+                          }
+                          // return the invoice_id
+                          console.log(`passing new invoice id ${invoice_id}`);
+                          callback(true, invoice_id, null);
+                        });
 
 
-                  });
+
+
+                    });
 
                 });
 
