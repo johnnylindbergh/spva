@@ -2163,6 +2163,9 @@ module.exports = function (app) {
                 // unit_amount: takeoff.total,
               });
 
+              if (invoice.payment_method){
+                invoice.invoice_payment_method = invoice.payment_method;
+              }
 
               // apply offsets according to the payment method
               if (invoice.invoice_payment_method == 'us_bank_account') {
