@@ -2312,7 +2312,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
                 let invoiceTotal = parseFloat(takeoff[0].total) * 0.2;
                 let invoiceNumber = Math.floor(Math.random() * 1000000000);
 
-                con.query("SELECT SUM(total) from options where takeoff_id = ? OR required = 1;", [takeoff_id], function (err, total) {
+                con.query("SELECT SUM(total_cost) from options where takeoff_id = ? OR required = 1;", [takeoff_id], function (err, total) {
                   if (err) return callback(err);
                   //console.log("total: ", total[0].total);
                   if (total[0].total != null) {
