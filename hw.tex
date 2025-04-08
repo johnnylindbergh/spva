@@ -1,0 +1,43 @@
+Consider a Turing machine for computing Majority (i.e., for a given input bit string, are there more \onesym s than \zerosym s?). The behavior of this Turing Machine, informally, is as follows.
+\begin{enumerate}
+    \item Start from the beginning of the tape where a ``start of tape'' symbol (the $\triangleright$) precedes the input 
+    \item Move right through the tape, looking for a \zerosym.
+    \item If a \zerosym\ is found, write over it with an $x$, then go back to the $\triangleright$ (start of tape)
+    \item Move right through tape, looking for a \onesym.
+    \item If a \onesym\ is found, write over it with an $x$, then go back to the $\triangleright$ (start of tape)
+    \item Repeat the "look for \zerosym, mark if found, look for \onesym, mark if found" steps until a blank cell (the $\null$ symbol) is reached (meaning there are either no more \zerosym s or no more \onesym s)
+    \item Go back to the beginning of the tape, looking for \onesym s
+    \item if a \onesym\ is found along the way, return 1. Otherwise, return 0.
+\end{enumerate}
+
+The following image depicts one potential implementation of the machine described above:
+
+\begin{center}
+\includegraphics[scale=0.5]{maj_machine.png}
+\end{center}
+
+In this machine, each transition is a triple, where the first value is the symbol read from the tape when taking that transition, the second is the symbol to write onto the tape in its place, and the third symbol is a control instruction ($L$ for move left in the tape, $R$ for move right in the tape, $S$ for stay put in the tape, and $H$ for halt).
+
+\clearpage
+
+Consider that this machine is given each of the inputs describe below, all of which are $n$ bits long. Give a $\Theta$ bound on the total number of transitions this machine would take before halting as a function of the input length $n$.
+
+\begin{enumerate}[(a)]
+    \item A string of $n$ \onesym s
+    \item A string of $n$ \zerosym s
+    \item A string of $\frac{n}{2}$ copies of \zerosym\onesym ~pairs (e.g. \zerosym\onesym\zerosym\onesym\zerosym\onesym...). You may assume $n$ is even.
+    \item A \onesym ~followed by $\frac{n-1}{2}$ copies of \zerosym\onesym ~pairs (e.g. \onesym\zerosym\onesym\zerosym\onesym\zerosym\onesym...). You may assume $n$ is odd.
+    \item A string of $\frac{n}{2}$ \zerosym s followed by $\frac{n}{2}$ \onesym s (e.g. \zerosym\zerosym\zerosym\zerosym\onesym\onesym\onesym\onesym). You may assume $n$ is even.
+\end{enumerate}
+}
+
+
+\paragraph{Answer:}
+% Enter your answer for this problem here:
+\begin{enumerate}[(a)]
+    \item $\Theta(n^{2}/2 +n) $
+    \item $\Theta(n^{2}/2 +n) $
+    \item $\Theta(n^{2})$
+    \item $\Theta(n^{2} +)$
+    \item $\Theta(n^{2}\frac{n}{2})$
+\end{enumerate}

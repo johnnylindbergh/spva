@@ -3170,6 +3170,7 @@ createNewSov: function (takeoff_id, callback) {
     if (err) return callback(err);
     if (sov.length == 0) {
       // create a new sov with no items
+      console.log('This is the first SOV for this takeoff');
       con.query("INSERT INTO sov (takeoff_id, name, total, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;", [takeoff_id, 'SOV', 0, generateHash()], function (err, results) {
         if (err) return callback(err);
         let sov_id = results[1][0].last;
@@ -3177,6 +3178,8 @@ createNewSov: function (takeoff_id, callback) {
         callback(null, sov_id);
       });
     } else {
+      console.log('This is not the first SOV for this takeoff');
+      console.log('the previous sov id: ', sov[0].id);
       // create a new sov with the same items as the previous one
       let previousSovId = sov[0].id;
       con.query("INSERT INTO sov (takeoff_id, name, total, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;", [takeoff_id, 'SOV',0, generateHash()], function (err, results) {
@@ -3189,10 +3192,11 @@ createNewSov: function (takeoff_id, callback) {
         con.query("SELECT * FROM sov_items WHERE sov_id = ?;", [previousSovId], function (err, items) {
           if (err) return callback(err);
           // insert the items into the new sov
-
+          console.log("the previous sov items: ", items);
           for (var i = 0; i < items.length; i++) {
-            newSovTotal += items[i].this_invoiced_amount;
-            con.query("INSERT INTO sov_items (sov_id, previous_invoiced_amount) VALUES (?,?);", [sov_id, items[i].this_invoiced_amount], function (err) {
+            newSovTotal += parseFloat(items[i].this_invoiced_amount);
+            let new_previous_invoiced_amount = parseFloat(items[i].this_invoiced_amount) + parseFloat(items[i].previous_invoiced_amount);
+            con.query("INSERT INTO sov_items (sov_id, total_contracted_amount, description, previous_invoiced_amount) VALUES (?,?,?,?);", [sov_id, items[i].total_contracted_amount, items[i].description, new_previous_invoiced_amount], function (err) {
               if (err) return callback(err);
             });
           }
