@@ -197,7 +197,12 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
 // number formatting 
 
 function numbersWithCommas(x) {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  if (x == null) {
+    return "0.00";
+  } else {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
 }
 // main page stuff
 module.exports = function (app) {
