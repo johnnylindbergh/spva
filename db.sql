@@ -388,6 +388,31 @@ CREATE TABLE emails (
   FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE jobs (
+  id INT NOT NULL AUTO_INCREMENT,
+  isArchived TINYINT(1) DEFAULT 0,
+  job_name VARCHAR(255) NOT NULL,
+  bid DECIMAL(10,2),
+  job_description TEXT,
+  job_location VARCHAR(255),
+  job_start_date TIMESTAMP,
+  job_end_date TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+);
+
+
+CREATE TABLE subcontractor_jobs_assignment (
+  id INT NOT NULL AUTO_INCREMENT,
+  job_id INT NOT NULL,
+  user_id INT NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY (job_id, user_id), -- Prevent duplicate assignments
+  FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 
 -- Forms Table
 CREATE TABLE forms (
@@ -421,30 +446,32 @@ INSERT INTO subcontractor_forms (form_id, user_id) VALUES (1, 1);
 CREATE TABLE form_items (
   id INT NOT NULL AUTO_INCREMENT,
   form_id INT NOT NULL,
-  job_name VARCHAR(255) NOT NULL, -- Job
-  job_id VARCHAR(64), -- Job ID (made nullable for flexibility)
+  job_id INT, -- Job
   item_description VARCHAR(255), -- Description (made nullable for flexibility)
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  UNIQUE KEY (form_id, job_id), -- Prevent duplicate items for the same job
+  FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
   FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
 );
 
 CREATE TABLE form_bid (
   id INT NOT NULL AUTO_INCREMENT,
   form_id INT NOT NULL,
-  job_name VARCHAR(255) NOT NULL, -- Job
-  bid DECIMAL(10,2),
+  job_id INT,
   request DECIMAL(10,2),
   PRIMARY KEY (id),
+  UNIQUE KEY (form_id, job_id), -- Prevent duplicate bids for the same job
+  FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
   FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
 );
 
-INSERT INTO form_bid (form_id, job_name, bid, request) VALUES (1, 'Job 1', 20000.00, 1200.00);
+INSERT INTO form_bid (form_id, job_id, bid, request) VALUES (1, 1, 20000.00, 1200.00);
 -- example insert
-INSERT INTO form_items (form_id, job_name, item_description) VALUES (1, 'Job 1', 'Description 1');
+INSERT INTO form_items (form_id, job_id, item_description) VALUES (1, 1, 'Description 1');
 
-INSERT INTO form_items (form_id, job_name, item_description) VALUES (1, 'Job 2', 'Description 2');
+INSERT INTO form_items (form_id, job_id, item_description) VALUES (1, 1, 'Description 2');
 
 
 -- Form Item Days Table
@@ -476,6 +503,8 @@ INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Thursday', 
 INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Friday', 7.1);
 INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Saturday', 3.6);
 INSERT INTO form_item_days (form_item_id, day, duration) VALUES (2, 'Sunday', 1.2);
+
+
 
 
 -- sovs with a given takeoff_id are associated

@@ -45,7 +45,7 @@ function updateTakeoffOwnerEmailAddress(){
 // Function to convert markdown-like text to HTML
 function formatTextToHTML(text) {
     if (text == null) {
-        return "Chat GPT ERROR: No text provided";
+        return "";
     }
     return text
         .replace(/### (.+)/g, '<h3>$1</h3>')        // Replace ### with <h3> for headings

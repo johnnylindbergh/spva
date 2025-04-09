@@ -761,7 +761,25 @@ module.exports = {
                 return cb(err);
               }
 
-              cb(null, result[1][0].last);
+              // insert a blank estimate, get its id and update the takeoffs table set estimate_id where id = new takeoff id
+              con.query("INSERT INTO estimates (takeoff_id) VALUES (?); SELECT LAST_INSERT_ID() as last;", [result[1][0].last], function (err, estimateResult) {
+                if (err) {
+                  console.log(err);
+                  return cb(err);
+                }
+
+                console.log("created estimate", estimateResult[1][0].last);
+
+                con.query("UPDATE takeoffs SET estimate_id = ? WHERE id = ?;", [estimateResult[1][0].last, result[1][0].last], function (err) {
+                  if (err) {
+                    console.log(err);
+                    return cb(err);
+                  }
+                  cb(null, result[1][0].last);
+
+                });
+              });
+
             });
           }
         );

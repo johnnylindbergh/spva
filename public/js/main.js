@@ -136,12 +136,22 @@ $(document).ready(function () {
         clientCell.css("width", "160px");
         row.append(clientCell);
         
+        let editForm;
   
-        // Create the 'Edit' form
-        let editForm = $("<form>", {
-          action: "/editTakeoff", // Edit URL
-          method: "POST",        // POST request
-        });
+        if (!takeoff.isAlTakeoff) {
+          // Create the 'Edit' form
+          editForm = $("<form>", {
+            action: "/editTakeoff", // Edit URL
+            method: "POST",        // POST request
+          });
+
+        } else if (takeoff.isAlTakeoff){
+          editForm = $("<form>", {
+            action: "/generateEstimate", // Edit URL
+            method: "POST",        // POST request
+          });
+        }
+          
         editForm.append(
           $("<input>", { type: "hidden", name: "takeoff_id", value: takeoff.id }),
           $("<input>", { type: "submit", value: "Edit" })
