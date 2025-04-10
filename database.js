@@ -1134,6 +1134,23 @@ module.exports = {
   },
 
   updateTakeoffTotal: function (takeoff_id, total, materialTotal, laborTotal, callback) {
+
+    // if any of the fields are null, replace with zero
+    if (total === null || total === undefined) {
+      total = 0;
+    } 
+    if (materialTotal === null || materialTotal === undefined) {
+      materialTotal = 0;
+    }
+
+    if (laborTotal === null || laborTotal === undefined) {
+      laborTotal = 0;
+    }
+
+    console.log("update takeoff total: ", total);
+    console.log("update takeoff material total: ", materialTotal);
+    console.log("update takeoff labor total: ", laborTotal);
+    // update the takeoffs table set total = total, material_cost = materialTotal, labor_cost = laborTotal
     con.query(
       "UPDATE takeoffs SET total = ?, material_cost = ?, labor_cost = ? WHERE id = ?;",
       [total, materialTotal, laborTotal, takeoff_id],
@@ -2154,8 +2171,12 @@ getChangeOrderItemsById: function (change_order_id, callback) {
               "SELECT setting_value FROM system_settings WHERE setting_name = 'sales_tax';",
               function (err, salesTax) {
                 if (err) return callback(err);
-                callback(null, estimate, takeoff, salesTax[0].setting_value);
 
+                con.query("SELECT * FROM inclusions_presets;", function (err, inclusionsPresets) {
+                  if (err) return callback(err);
+
+                  callback(null, estimate, takeoff, salesTax[0].setting_value, inclusionsPresets);
+                });
               }
             );
           }

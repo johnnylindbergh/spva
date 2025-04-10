@@ -86,6 +86,18 @@ VALUES
             </ul>
         ");
 
+CREATE TABLE inclusions_presets (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL UNIQUE,
+  preset TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+);
+-- example insert
+INSERT INTO inclusions_presets (name, preset) VALUES ('Default', 'This is a default preset for inclusions.');
+INSERT INTO inclusions_presets (name, preset) VALUES ('Custom', 'This is a custom preset for inclusions.');
+
 -- Customers table
 CREATE TABLE customers (
   id INT NOT NULL AUTO_INCREMENT, -- QB ID

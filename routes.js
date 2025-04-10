@@ -785,7 +785,7 @@ module.exports = function (app) {
   });
 
   app.post("/updateTakeoffTotal", mid.isAdmin, function (req, res) {
-    //console.log("updating takeoff total ", req.body);
+    console.log("updating takeoff total ", req.body);
     db.updateTakeoffTotal(req.body.takeoff_id, req.body.total, req.body.materialTotal, req.body.laborTotal, function (err) {
       if (err) {
         console.log(err);
@@ -1060,7 +1060,7 @@ module.exports = function (app) {
               console.log("No estimate generated, just retrieved");
 
               // get the inclusions and exclusions from the database
-              db.getEstimateData(takeoff_id, function (err, estimate, takeoff_info) {
+              db.getEstimateData(takeoff_id, function (err, estimate, takeoff_info, sales_tax, inclusions_presets) {
                 if (err) {
                   console.log(err);
                 } else {
@@ -1070,6 +1070,7 @@ module.exports = function (app) {
                     takeoff: takeoff_info,
                     takeoff_id: takeoff_id,
                     email: req.user.local.email,
+                    inclusions_presets: inclusions_presets
                   });
                 }
               });
@@ -1559,11 +1560,11 @@ module.exports = function (app) {
 
   app.post("/getEstimateData", function (req, res) {
     console.log("just viewing takeoff id: ", req.body.takeoff_id);
-    db.getEstimateData(req.body.takeoff_id, function (err, estimate, takeoff) {
+    db.getEstimateData(req.body.takeoff_id, function (err, estimate, takeoff, sales_tax, inclusions_presets) {
       if (err) {
         console.log(err);
       } else {
-        res.send({ estimate: estimate, takeoff: takeoff });
+        res.send({ estimate: estimate, takeoff: takeoff, inclusions_presets: inclusions_presets });
       }
     });
   });

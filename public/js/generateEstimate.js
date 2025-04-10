@@ -428,6 +428,40 @@ function deleteOption(id){
 }
 
 
+function makeAlFriendly(takeoff_id) {
+    // make the inclusions total editable and restyle to be bigger
+    const inclusionsTotal = $('#includes-total');
+    inclusionsTotal.attr('contenteditable', 'true');
+    inclusionsTotal.addClass('editable');
+    inclusionsTotal.css('font-size', '24px');
+    inclusionsTotal.css('font-weight', 'bold');
+    inclusionsTotal.css('color', '#000000');
+    inclusionsTotal.css('background-color', '#ffffff');
+
+    // add an onclick listener to the inclusions total that posts the includes_total to the server
+
+    inclusionsTotal.on('focusout', function() {
+        let newTotal = inclusionsTotal.text();
+
+        // srip the dollar sign and commas
+         newTotal = newTotal.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
+        console.log('New inclusions total:', newTotal);
+        $.post('/updateTakeoffTotal', { takeoff_id: takeoff_id, total: newTotal, materialTotal: 0, laborTotal: 0 })
+            .done(function(response) {
+                console.log('Inclusions total updated successfully:', response);
+
+                // also change the takeoffTotal 
+                let takeoffTotal = $('#takeoffTotal');
+
+                takeoffTotal.text("$"+numberWithCommas(newTotal.toFixed(2)));
+            })
+            .fail(function(error) {
+                console.error('Error updating inclusions total:', error);
+            });
+    });
+}
+
+
    
 
 // Example to dynamically populate content on page load
@@ -436,6 +470,8 @@ $(document).ready(function() {
     // post takeoff_id to getEstimateData to set includesItems and exclusionsItems
     
     var takeoff_id = parseInt($('#takeoff_id').val());
+    var isAlTakeoff = false;
+    var inclusions_presets;
 
     $.post('/getEstimateData', {takeoff_id: takeoff_id}, function(data) {
         console.log(data)
@@ -444,14 +480,61 @@ $(document).ready(function() {
         populateProposalIncludes(data.estimate[0].inclusions);
         populateExclusions(data.estimate[0].exclusions);
         populateOptions(takeoff_id);
-        console.log(data.takeoff[0].total);
-
+        console.log(data.takeoff[0].takeoff_total);
+        isAlTakeoff = parseInt(data.takeoff[0].isAlTakeoff) == 1;
+        inclusions_presets = data.inclusions_presets;
+        console.log(isAlTakeoff);
+        console.log(inclusions_presets);
         $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].takeoff_total));
         $('#materialTotal').text("Material   : $"+numberWithCommas(data.takeoff[0].material_total));
         $('#laborTotal').text("Labor   : $"+numberWithCommas(data.takeoff[0].labor_total));
         $('#takeoffTax').text("Tax: %"+numberWithCommas(data.takeoff[0].takeoff_tax));
+        
+        
+        // add commas to the total
+        $('#takeoffTotal').text("$"+numberWithCommas(parseFloat(data.takeoff[0].takeoff_total).toFixed(2)));
+
+
+        if (isAlTakeoff) {
+            console.log("isAlTakeoff");
+            makeAlFriendly(takeoff_id);
+            const inclusionsDropdown = $('#inclusions-presets-dropdown');
+            inclusionsDropdown.show();
+            console.log("inclusions_presets", inclusions_presets);
+            // Add options to the dropdown
+            inclusions_presets.forEach(preset => {
+                console.log(preset);
+                const option = $('<option></option>').val(preset.preset).text(preset.name);
+                inclusionsDropdown.append(option);
+            });
+    
+            // On change, update the inclusions section
+            inclusionsDropdown.on('change', function() {
+                const selectedKey = $(this).val();
+                console.log("selectedKey", selectedKey);
+
+                $('#proposal-includes').html(formatTextToHTML(selectedKey));
+                // update the inclusions in the database
+                $.post('/update-content', { id: estimate_id, includes: selectedKey, excludes: $('#exclusions').html()})
+                    .done(function(response) {
+                        console.log('Content updated successfully:', response);
+                    })
+                    .fail(function(error) {
+                        console.error('Error updating content:', error);
+                    });
+
+            });
+        }
  
     });
+
+
+
+
+    // if isAlTakeoff, then populate the inclusions_presets dropdown with the keys of the inclusions_presets object
+    // then when the user selects an option, populate the inclusions with the value of the selected key
+   
+
 
     $(document).keydown(function(event) {
         if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
