@@ -381,17 +381,30 @@ module.exports = function (app) {
     });
   });
 
-  app.post("/alButton", mid.isAdmin, function (req, res) {
+  app.post("/createALTakeoff", mid.isAdmin, function (req, res) {
     console.log("alButton");
+    console.log(req.body)
     // if the user name is al, res.send "Hello AL!" otherwise, say you are not al
     if (req.user.local.name == "AL" || req.user.local.name == "Johnny") {
       // create a blank Takeoff
+
+      // get the form data, customer_id, takeoff_type, takeoff_name
+      let customer_id = req.body.customerId;
+      let takeoff_type = req.body.projectType;
+      let takeoff_name = req.body.takeoffName;
+
+      if (customer_id == null || takeoff_type == null || takeoff_name == null) {
+        console.log('Some of the fields are null');
+
+        res.status(500).send("Error: Some of the fields are null");
+      }
+
       db.createNewBlankTakeoff(req, res, function (err, takeoff_id) {
         if (err) {
           console.log(err);
         } else {
           console.log("takeoff created");
-          res.redirect("/");
+         // res.redirect("/");
         }
       });
 

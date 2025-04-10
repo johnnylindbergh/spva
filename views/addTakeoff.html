@@ -70,9 +70,42 @@
   </form>
 
 
-  <form action="/alButton" method="post" class="card p-4 shadow-sm mt-4" style="background-color: #f5f5f5; width:25%;" title="An AL takeoff overrides the bluebeam markup stage and allows the user to add surfaces and products to job manually.">
-    <button type="submit" class="btn btn-secondary" title="An AL takeoff overrides the bluebeam markup stage and allows the user to add surfaces and products to job manually.">AL Button</button>
-  </form>
+  <div class="card p-4 shadow-sm mt-4" style="background-color: #f5f5f5; width:25%;" title="An AL takeoff overrides the bluebeam markup stage and allows the user to add surfaces and products to job manually.">
+    <button type="button" class="btn btn-secondary" onclick="handleALButtonClick()" title="An AL takeoff overrides the bluebeam markup stage and allows the user to add surfaces and products to job manually.">AL Button</button>
+  </div>
+
+  <script>
+    function handleALButtonClick() {
+      // Add your JavaScript logic here
+      // get the customer_id
+      const customerId = $('#customerDropdown').val();
+      // get the projectType
+      const projectType = $('input[name="projectType"]:checked').val();
+
+      // get the takeoffName
+      const takeoffName = $('#takeoffName').val();
+
+      // post to the server
+      $.post('/createALTakeoff', {
+        customerId: customerId,
+        projectType: projectType,
+        takeoffName: takeoffName
+      })
+      .done(function (response) {
+        // Handle success
+        
+        if (response.success) {
+          alert('AL Takeoff created successfully!');
+          //  make a post to /generateEstimate with the data {takeoff_id: response.takeoff_id}
+          $.post('/generateEstimate', {
+            takeoff_id: response.takeoff_id
+          })
+        } else {
+          alert('Error creating AL Takeoff: ' + response.message);
+        }
+      })
+    }
+  </script>
 
 
 </div>

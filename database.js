@@ -737,26 +737,23 @@ module.exports = {
   createNewBlankTakeoff: function (req, res, cb) {
 
     // insert new blank customer into the customers table
-    con.query(
-      "INSERT INTO customers (givenName) VALUES (?); SELECT LAST_INSERT_ID() as last;",
-      ["New Customer"],
-      function (err, result) {
-        if (err) {
-          return cb(err);
-        }
-        console.log("created customer", result[1][0].last);
-        let lastInsertId = result[1][0].last;
+
+
+        let customer_id = req.body.customerId;
+        let takeoff_type = req.body.projectType ? 'commercial' : 'residential';
+        let takeoff_name = req.body.takeoffName;
+        console.log("settig the type to", takeoff_type);
         // insert new blank takeoff into the takeoffs table
         // UPDATE takeoffs SET total = ?, material_cost = ?, labor_cost = ? WHERE id = ?;
         con.query(
-          "INSERT INTO takeoffs (creator_id, name, hash, isAlTakeoff, customer_id, total, material_cost,labor_cost) VALUES (?, ?, ?, ?, ?,0,0,0); SELECT LAST_INSERT_ID() as last;",
-          [req.user.local.id, "New Takeoff", generateHash().toString(), true, result[1][0].last],
+          "INSERT INTO takeoffs (creator_id, name, hash, type, isAlTakeoff, customer_id, total, material_cost, labor_cost) VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0); SELECT LAST_INSERT_ID() as last;",
+          [req.user.local.id, takeoff_name, generateHash().toString(),  takeoff_type, true, customer_id],
           function (err, result) {
             if (err) {
               return cb(err);
             }
             console.log("created takeoff", result[1][0].last);
-            con.query("INSERT INTO customer_takeoffs (customer_id, takeoff_id) VALUES (?, ?);", [lastInsertId, result[1][0].last], function (err) {
+            con.query("INSERT INTO customer_takeoffs (customer_id, takeoff_id) VALUES (?, ?);", [customer_id, result[1][0].last], function (err) {
               if (err) {
                 console.log(err);
                 return cb(err);
@@ -776,6 +773,8 @@ module.exports = {
                     console.log(err);
                     return cb(err);
                   }
+                  res.status(200).json({'success': true, 'message': 'Takeoff created successfully', 'takeoff_id': result[1][0].last});
+                  
                   cb(null, result[1][0].last);
 
                 });
@@ -784,8 +783,7 @@ module.exports = {
             });
           }
         );
-      }
-    );
+  
   },
 
 
