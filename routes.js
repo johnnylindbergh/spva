@@ -1352,6 +1352,23 @@ module.exports = function (app) {
     );
   });
 
+  app.post("/update-material-coverage", mid.isAdmin, function (req, res) {
+    console.log("changing material coverage ", req.body);
+    db.changeMaterialCoverage(
+      req.body.material_id,
+      req.body.coverage,
+      function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("updated material coverage");
+          res.end();
+        }
+      }
+    );
+  });
+
+
   app.post("/change-material-price", mid.isAdmin, function (req, res) {
     console.log("changing material price ", req.body);
     db.changeMaterialPrice(
@@ -2686,6 +2703,72 @@ module.exports = function (app) {
     }
   });
 
+  app.get("/sovPdf", mid.isAdmin, function (req, res) {
+    console.log("scheduleOfValuesPdf accessed");
+    // get the sov_id from the query params
+
+    var render = defaultRender(req);
+    const sov_id = req.query.sov_id;
+    if (sov_id == null) {
+      console.log("sov_id is null");
+      res.redirect("/");
+    } else {
+
+      db.getSOVById(sov_id, function (err, sov) {
+        if (err || sov == null) {
+          console.log(err);
+        }
+        console.log(sov);
+
+        // get the customer of sov.takeoff_id
+        db.getCustomerInfoByTakeoffId(sov.takeoff_id, function (err, customer) {
+          if (err) {
+            console.log(err);
+          } else {
+            render.customer = customer;
+            console.log(customer)
+
+
+            db.getSOVItemsById(sov_id, function (err, items) {
+              if (err) {
+                console.log(err);
+              } else {
+                let totalRemaining = 0;
+                let totalPercent = 0;
+
+                // format the dates of the payments and calculate totals
+                for (let i = 0; i < items.length; i++) {
+                  items[i].created_at = moment(items[i].created_at).format('MMMM Do YYYY, h:mm:ss a');
+                  items[i].updated_at = moment(items[i].updated_at).format('MMMM Do YYYY, h:mm:ss a');
+
+                  // Calculate remaining and percentRemaining
+                  items[i].remaining = parseFloat(items[i].total_contracted_amount) - parseFloat(items[i].previous_invoiced_amount) - parseFloat(items[i].this_invoiced_amount);
+                  items[i].percentRemaining = ((items[i].remaining / parseFloat(items[i].total_contracted_amount)) * 100).toFixed(2);
+
+
+                  totalRemaining += items[i].remaining;
+                }
+
+                console.log(items);
+
+                sov.total = numbersWithCommas(parseFloat(sov.total).toFixed(2));
+                sov.totalRemaining = numbersWithCommas(totalRemaining.toFixed(2));
+
+                render.sov = sov;
+                render.sov_items = items;
+
+                console.log({ sov: sov, sov_items: items });
+                res.render("scheduleOfValuesPdf.html", render);
+              }
+            });
+          }
+        });
+      });
+    }
+  });
+
+
+
   app.get('/sovHistory', mid.isAdmin, function (req, res) {
     if (!req.query.sov_id) {
       return res.status(400).send("sov_id is required");
@@ -3261,6 +3344,8 @@ function defaultRender(req) {
       },
       defaults: {
         sysName: sys.SYSTEM_NAME,
+        companyName: creds.companyName,
+        companyAddress: creds.companyAddress
       },
     };
   } else {

@@ -2710,6 +2710,60 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     );
   },
 
+  changeMaterialCoverage: function (applied_material_id, coverage, callback) {
+
+    // get the applied_materials row
+    // get the material_id
+    // get the coverage from the materials table
+    // get the difference in the costs, and set the coverage_delta
+    // update the applied_materials row with the new coverage
+
+    con.query("SELECT * FROM applied_materials WHERE id = ?;", [applied_material_id], function (err, applied_material) {
+      if (err) {
+        console.log(err);
+        return callback(err);
+      }
+      if (applied_material.length == 0) {
+        console.log("Material not found");
+      }
+
+      console.log(applied_material);
+      let material_id = applied_material[0].material_id;
+
+      con.query("SELECT * FROM materials WHERE id = ?;", [material_id], function (err, material) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
+        if (material.length == 0) {
+          console.log("Material not found");
+        }
+
+        let materialCost = material[0].cost;
+        let materialCoverage = material[0].coverage;
+        let appliedMaterialCoverage = applied_material[0].coverage;
+        let coverageDelta = materialCoverage - coverage;
+
+        con.query(
+          "UPDATE applied_materials SET  coverage_delta = ? WHERE id = ?;",
+          [coverageDelta, applied_material_id],
+          function (err) {
+            if (err) {
+              console.log(err);
+              return callback(err);
+            }
+            callback(null);
+          }
+        );
+      }
+      );
+    }
+    );
+
+
+  },
+
+
   changeMaterialPrice: function (takeoff_id, material_id, price, callback) {
     con.query(
       "SELECT * FROM applied_materials WHERE material_id = ? AND takeoff_id = ?;",
@@ -3253,6 +3307,22 @@ createNewSov: function (takeoff_id, callback) {
     }
   });
 },
+
+getCustomerInfoByTakeoffId: function (takeoff_id, callback) {
+  con.query(
+    "SELECT customers.* FROM takeoffs JOIN customers ON takeoffs.customer_id = customers.id WHERE takeoffs.id = ?;",
+    [takeoff_id],
+    function (err, customer) {
+      if (err) return callback(err);
+      if (customer.length == 0) {
+        return callback(null, null);
+      } else {
+        return callback(null, customer[0]);
+      }
+    }
+  );
+},
+
 
 
 getMostRecentSOV: function (takeoff_id, callback) {

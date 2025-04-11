@@ -11,16 +11,18 @@
     <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
 
-    <!-- bootstrap -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        
+    <!-- bootstrap modern-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bs5-toast@1.0.0/dist/bs5-toast.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bs5-toast@1.0.0/dist/bs5-toast.min.css">
+    
+    
     <!-- <script src="/js/checkout.js" defer></script> -->
     <link rel="stylesheet" type="text/css" href="/css/reset.css">
     <link rel="stylesheet" href="/css/estimateStyle.css">
     <link rel="stylesheet" href="/css/bottomNavbar.css">
-    <link rel="stylesheet" type="text/css" href="/css/defaults.css">
+    <!-- <link rel="stylesheet" type="text/css" href="/css/defaults.css"> -->
     <link rel="stylesheet" href="/css/navbar.css">
     <script src="/js/generateEstimate.js"></script>
 </head>
@@ -39,8 +41,8 @@
         </div>
         <nav class="bottom-navbar">
             <!-- <input type="button" value="send to my email: {{email}}" onclick="shareSelf()" class="img-button-client"> -->
-            <input type="button" value="Share With Client" onclick="shareClient()" class="img-button-client">
-            <input type="button" value="Toggle Numbers" onclick="toggleNumbers()" class="img-button-client">
+            <input type="button" value="Share With Client" onclick="shareClient()" class="btn btn-primary">
+            <input type="button" value="Toggle Numbers" onclick="toggleNumbers()" class="btn btn-primary">
             <!-- Add Google Translate Widget -->
             <!-- <input type="button" value="Select Language" onclick="toggleTranslateMenu()" class="img-button-client"> -->
         </nav>
@@ -78,8 +80,15 @@
 
             <!-- regen chatGPT response button -->
             <input type="button" value="Regenerate ChatGPT Response" onclick="regenChatGPTResponse()"
-                class="img-button-client">
+                class="btn btn-primary">
             </br>
+        </br>
+
+
+            <form action="/settings" method="POST">
+                <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+                <input type="submit" class="btn btn-primary" value="Settings">
+              </form>
             </br>
 
                 <!-- dynamically populated dropdown -->
@@ -122,42 +131,43 @@
                     {{/takeoff}}
                 </div>
             </div>
-
-
-            <!-- horizontal break -->
-
+            
+            <!-- Horizontal break -->
+            <hr class="my-4">
             <div class="options-container">
-                <div class="addOption">
-                    <form id="addOptionForm" onsubmit="postToAddOption(event)" class="form-inline">
-                        <div class="form-group mb-2">
-                            <label for="description" class="sr-only">Description:</label>
-                            <textarea id="description" name="description" class="form-control" placeholder="Description" required style="font-size: 1.5rem; padding: 10px;"></textarea>
+                <div class="add-option">
+                    <form id="addOptionForm" onsubmit="postToAddOption(event)" class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="description" class="form-label">Description:</label>
+                            <textarea id="description" name="description" class="form-control" placeholder="Enter description" required></textarea>
                         </div>
-                        <div class="form-group mx-sm-3 mb-2">
-                            <label for="laborCost" class="sr-only">Labor Cost:</label>
-                            <input type="text" id="laborCost" name="laborCost" class="form-control" placeholder="Labor Cost" required>
+                        <div class="col-md-2 mb-3">
+                            <label for="laborCost" class="form-label">Labor Cost:</label>
+                            <input type="text" id="laborCost" name="laborCost" class="form-control" placeholder="Enter labor cost" required>
                         </div>
-                        <div class="form-group mx-sm-3 mb-2">
-                            <label for="materialCost" class="sr-only">Material Cost:</label>
-                            <input type="text" id="materialCost" name="materialCost" class="form-control" placeholder="Material Cost">
+                        <div class="col-md-2 mb-3">
+                            <label for="materialCost" class="form-label">Material Cost:</label>
+                            <input type="text" id="materialCost" name="materialCost" class="form-control" placeholder="Enter material cost">
                         </div>
-                        <!-- checkbow if the option is required -->
-                        <div class="form-group mx-sm-3 mb-2">
-                            <label for="isRequired">Is Required:</label>
-                            <input type="checkbox" id="isRequired" name="isRequired" class="form-control">
-                            <i class="fa fa-question-circle" style="cursor: pointer;" onclick="showCheckboxInfo()" title="What does this mean?"></i>
+                        <div class="col-md-2 mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" id="isRequired" name="isRequired" class="form-check-input">
+                                <label for="isRequired" class="form-check-label">Is Required</label>
+                                <i class="fa fa-question-circle ms-2 text-muted" style="cursor: pointer;" onclick="showCheckboxInfo()" title="What does this mean?"></i>
+                            </div>
                         </div>
-                        <script>
-                            function showCheckboxInfo() {
-                                alert("Checking this box means the option is required and cannot be omitted by the customer. \n\n" +
-                                    "Unchecking this box means the option is optional and can be omitted by the customer.");
-                            }
-                        </script>
-
-                        <input type="submit" class="img-button-client" value="Add Option" style="background-color: rgb(31, 193, 31);">
+                        <div class="col-md-2 mb-3"></div>
+                            <button type="submit" class="btn btn-success w-100">Add Option</button>
+                        </div>
                     </form>
                 </div>
             </div>
+            <script>
+                function showCheckboxInfo() {
+                    alert("Checking this box means the option is required and cannot be omitted by the customer. \n\n" +
+                        "Unchecking this box means the option is optional and can be omitted by the customer.");
+                }
+            </script>
 
 
 

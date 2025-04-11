@@ -377,6 +377,7 @@ CREATE TABLE applied_materials (
   top_coat INT NOT NULL,
   primer INT,
   cost_delta DECIMAL(10,2) DEFAULT 0,
+  coverage_delta DECIMAL(10,2) DEFAULT 0,
   labor_cost DECIMAL(10,2) DEFAULT 0.40,
   applied TINYINT(1) DEFAULT 1,
   separate_line_item TINYINT(1) DEFAULT 0,

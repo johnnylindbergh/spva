@@ -908,29 +908,54 @@ function loadTakeoffMaterials(id) {
                 " </i> "
               );
               let materialCell = $(
-                "<i class='fa fa-trash' onclick='removeMaterial(" +
+                "</br><i class='fa fa-trash' onclick='removeMaterial(" +
                 row.id +
                 ", " +
                 material.id +
-                ")'>"
+                ")'></i>"
               );
-              // append the coverage of the material
-              materialCell.append(" " + material.coverage + " sqft/gal @ ");
-
 
               materialsCell.append(materialCell);
+
+                // append the coverage of the material as an editable field
+
+                console.log("computing coverage");
+                console.log(material.coverage);
+                console.log(row.coverage_delta);
+
+                let adjustedCoverage = parseFloat(material.coverage) - parseFloat(row.coverage_delta) || 1; // Default to 1 to avoid division by zero
+                let coverageInput = $("<input>")
+                .attr("type", "number")
+                .attr("value", adjustedCoverage)
+                .attr("step", "any")
+                .attr("min", "0")
+                .addClass("coverage-input")
+                .attr("style", "width: 70px;")
+                .data("material-id", material.id)
+                .on("change", function () {
+                  let newCoverage = $(this).val();
+                  let materialId = $(this).data("material-id");
+                  console.log(row);
+                  updateMaterialCoverage(row.id, newCoverage);
+
+                });
+
+                materialsCell.append(" ").append(coverageInput).append(" sqft/gal @ ");
+
+
+            
 
               // Parse values and handle NaN
               let materialCost = parseFloat(material.cost) || 0;
               let measurement = parseFloat(row.measurement) || 0;
-              let coverage = parseFloat(material.coverage) || 1; // Default to 1 to avoid division by zero
+
               console.log(
                 "Material cost: " +
                 materialCost +
                 " Measurement: " +
                 measurement +
                 " Coverage: " +
-                coverage
+                adjustedCoverage
               );
               let newCost = materialCost;
 
@@ -979,17 +1004,18 @@ function loadTakeoffMaterials(id) {
 
 
               if (row.measurement_unit === "sf") {
-                subsum += newCost * Math.ceil(adjustedMeasurement / coverage);
+                subsum += newCost * Math.ceil(adjustedMeasurement / adjustedCoverage);
+                console.log('subsum', subsum);
               }
 
               if (row.measurement_unit === "ft' in\"") {
-                subsum += newCost * Math.ceil(adjustedMeasurement / coverage);
+                subsum += newCost * Math.ceil(adjustedMeasurement / adjustedCoverage);
 
               }
 
               if (row.measurement_unit === "Count") {
                 
-                subsum += newCost * Math.ceil((adjustedMeasurement) / coverage); // not divided by coverage
+                subsum += newCost * Math.ceil((adjustedMeasurement) / adjustedCoverage); // not divided by coverage
               }
 
               // update the paint order
@@ -1002,11 +1028,11 @@ function loadTakeoffMaterials(id) {
                 paintOrder.push({
                   materialId: material.id,
                   materialName: material.name,
-                  numberOfGallons: Math.ceil(adjustedMeasurement / coverage),
+                  numberOfGallons: Math.ceil(adjustedMeasurement / adjustedCoverage),
                 });
               } else {
                 paintOrder[paintOrderIndex].numberOfGallons += Math.ceil(
-                  adjustedMeasurement / coverage
+                  adjustedMeasurement / adjustedCoverage
                 );
               }
 
@@ -1184,6 +1210,19 @@ function laborPriceChange(id) {
     });
 }
 
+function updateMaterialCoverage(materialId, newCoverage) {
+  console.log("Updating material coverage for material: " + materialId);
+  $.post("/update-material-coverage", { material_id: materialId, coverage: newCoverage })
+    .done(function () {
+      console.log("Material coverage updated successfully for material: " + materialId);
+      loadTakeoffMaterials(takeoff_id); // Reload the materials to reflect changes
+    })
+    .fail(function () {
+      console.log("Failed to update material coverage for material: " + materialId);
+    });
+
+
+}
 /// this function has an error: the id is matched from the first appearance in the page which is not necescarily the correct material. Fix by passing the row id into the function. This new identifier will be unique to each row
 function priceChange(id) {
   //this function doesent actually change the price of the material, it changes the price delta
