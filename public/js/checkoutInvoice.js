@@ -7,6 +7,7 @@ $(document).ready(function() {
   initialize();
 });
 
+
 var takeoff_id = $('#takeoff_id').val();
 var invoice_id = $('#invoice_id').val();
 
