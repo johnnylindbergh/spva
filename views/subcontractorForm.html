@@ -5,37 +5,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subcontractor</title>
-    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            padding: 20px;
+        }
+
+        .timesheet-container,
+        .jobsWithBids {
+            margin-bottom: 20px;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .btn {
+            margin-top: 10px;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        header h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 
 <body>
     <header>
         <h1>Subcontractor Page</h1>
     </header>
-    <p>Welcome to the subcontractor page.</p>
-    <!-- form name input field -->
+    <p class="text-center">Welcome to the subcontractor page.</p>
     <div class="timesheet-container">
-
-        <input type="text" id="formName" placeholder="My timesheet">
-        <hr
-            style="width:40%;text-align:left;margin-left:0; color: #000000; background-color: #000000; height: 1px; border: none;">
-        <table id="timesheet" class="timesheet">
+        <input type="text" id="formName" class="form-control" placeholder="My timesheet">
+        <hr>
+        <table id="timesheet" class="table table-bordered">
             <!-- Header will be dynamically added -->
         </table>
     </div>
     <button id="addTimesheetRowButton" class="btn btn-primary">Add Row</button>
-    </br>
-    </br>
-    <hr />
-    </br>
-
-
-
-    <!-- other table to enter job name, bid, requested amount  -->
-    <table class="jobsWithBids">
+    <br><br>
+    <hr>
+    <br>
+    <table class="jobsWithBids table table-bordered">
         <thead>
             <tr>
                 <th>Job Name</th>
@@ -45,288 +80,203 @@
         </thead>
         <tbody>
             <tr>
-                <td><input type="text" placeholder="Job Name"></td>
-                <td><input type="number" placeholder="Bid"></td>
-                <td><input type="number" placeholder="Requested Amount"></td>
+                <td>
+                    <select class="job-dropdown form-control">
+                        <option value="">Select Job</option>
+                    </select>
+                </td>
+                <td><input type="number" id="bidAmount" class="form-control" placeholder="Bid"></td>
+                <td><input type="number" class="form-control" placeholder="Requested Amount"></td>
             </tr>
         </tbody>
     </table>
     <button onclick="addBidRow()" class="btn btn-primary">Add Row</button>
-
-
     <div class="submit-container">
-
-        <button id="submit" class="btn btn-primary">Submit</button>
+        <button id="submit" class="btn btn-success">Submit</button>
     </div>
     <hr>
     <footer></footer>
 
     <script>
+             let jobList = [];
 
+function fetchJobs() {
+    $.get('/subcontractor/jobs', function (response) {
+        console.log(response)
+        jobList = response || [];
+        console.log('Jobs fetched:', jobList);
+        populateJobDropdowns();
+    });
+}
 
+function populateJobDropdowns() {
+    const dropdowns = $('.job-dropdown');
+    dropdowns.each(function () {
+        const dropdown = $(this);
+        dropdown.empty();
+        dropdown.append('<option value="">Select Job</option>');
+        jobList.forEach(job => {
+            dropdown.append(`<option value="${job.id}" data-bid="${job.bid}">${job.job_name}</option>`);
+        });
 
-        function addBidRow() {
-            const newRow = $('<tr></tr>');
-            const jobNameCell = $('<td></td>');
-            const jobNameInput = $('<input type="text" placeholder="Job Name">');
-            jobNameCell.append(jobNameInput);
-            newRow.append(jobNameCell);
+        // Add change event listener to update bidAmount
+        dropdown.change(function () {
+            const selectedOption = $(this).find('option:selected');
+            const bidAmount = selectedOption.data('bid') || '';
+            $(this).closest('tr').find('#bidAmount').val(bidAmount);
+        });
+    });
+}
 
-            const bidCell = $('<td></td>');
-            const bidInput = $('<input type="number" placeholder="Bid">');
-            bidCell.append(bidInput);
-            newRow.append(bidCell);
+function addBidRow() {
+    const newRow = $('<tr></tr>');
+    const jobNameCell = $('<td></td>');
+    const jobDropdown = $('<select class="job-dropdown"><option value="">Select Job</option></select>');
+    jobList.forEach(job => {
+        jobDropdown.append(`<option value="${job.id}">${job.name}</option>`);
+    });
+    jobNameCell.append(jobDropdown);
+    newRow.append(jobNameCell);
 
-            const requestedAmountCell = $('<td></td>');
-            const requestedAmountInput = $('<input type="number" placeholder="Requested Amount">');
-            requestedAmountCell.append(requestedAmountInput);
-            newRow.append(requestedAmountCell);
+    const bidCell = $('<td></td>');
+    const bidInput = $('<input type="number" placeholder="Bid">');
+    bidCell.append(bidInput);
+    newRow.append(bidCell);
 
-            $('.jobsWithBids tbody').append(newRow);
-        }
+    const requestedAmountCell = $('<td></td>');
+    const requestedAmountInput = $('<input type="number" placeholder="Requested Amount">');
+    requestedAmountCell.append(requestedAmountInput);
+    newRow.append(requestedAmountCell);
 
-        function addTimesheetRow(timesheet) {
-            const newRow = $('<tr></tr>');
+    $('.jobsWithBids tbody').append(newRow);
+}
 
-            // Job Name column
-            const jobNameCell = $('<td></td>');
-            const jobNameInput = $('<input type="text" placeholder="Job Name">');
-            jobNameCell.attr('class', 'jobNameInput');
-            jobNameCell.append(jobNameInput);
-            newRow.append(jobNameCell);
+function addTimesheetRow(timesheet) {
+    const newRow = $('<tr></tr>');
 
-            // Input fields for each day of the week
-            for (let i = 0; i < 7; i++) {
-                const timesheetCell = $('<td></td>');
-                const durationInput = $('<input id ="duration" type="number" min="0" placeholder="Hours">');
-                timesheetCell.append(durationInput);
-                newRow.append(timesheetCell);
+    // Job Name column
+    const jobNameCell = $('<td></td>');
+    const jobDropdown = $('<select class="job-dropdown"><option value="">Select Job</option></select>');
+    jobList.forEach(job => {
+        jobDropdown.append(`<option value="${job.id}">${job.name}</option>`);
+    });
+    jobNameCell.append(jobDropdown);
+    newRow.append(jobNameCell);
+
+    // Input fields for each day of the week
+    for (let i = 0; i < 7; i++) {
+        const timesheetCell = $('<td></td>');
+        const durationInput = $('<input id="duration" type="number" min="0" placeholder="Hours">');
+        timesheetCell.append(durationInput);
+        newRow.append(timesheetCell);
+    }
+
+    // On change of duration input, calculate total
+    newRow.find('input[type="number"]').change(function () {
+        let total = 0;
+        newRow.find('input[type="number"]').each(function () {
+            total += parseFloat($(this).val()) || 0;
+        });
+        newRow.find('.total').text(total);
+    });
+
+    timesheet.append(newRow);
+
+    // Append the total cell
+    const totalCell = $('<td class="total"></td>');
+    newRow.append(totalCell);
+
+    // Append the description cell
+    const descriptionCell = $('<td></td>');
+    const descriptionInput = $('<textarea placeholder="Description"></textarea>');
+    descriptionCell.append(descriptionInput);
+    newRow.append(descriptionCell);
+}
+
+$(document).ready(function () {
+    const timesheet = $('#timesheet');
+
+    // Fetch jobs from the server
+    fetchJobs();
+
+    // Add table headers
+    const headers = ['Job Name', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Total', 'Description'];
+    const headerRow = $('<tr></tr>');
+    headers.forEach(header => {
+        const headerCell = $('<th></th>').text(header);
+        headerRow.append(headerCell);
+    });
+    timesheet.append(headerRow);
+
+    const initialRows = 5;
+    for (let i = 0; i < initialRows; i++) {
+        addTimesheetRow(timesheet);
+    }
+
+    // Add row button functionality
+    $('#addTimesheetRowButton').click(function () {
+        addTimesheetRow(timesheet);
+    });
+
+    $('#submit').click(function () {
+        const data = [];
+        const bidsData = [];
+
+        const formName = $('#formName').val();
+
+        // Collect timesheet data
+        timesheet.find('tr').each(function () {
+            const row = $(this);
+            if (row.find('select').length > 0) {
+                const jobId = row.find('select').val();
+                const days = [];
+                row.find('input[type="number"]').each(function () {
+                    days.push($(this).val());
+                });
+                const total = row.find('.total').text();
+                const description = row.find('textarea').val();
+                data.push({
+                    jobId,
+                    days,
+                    total,
+                    description
+                });
             }
+        });
 
-            // On change of duration input, calculate total
-            newRow.find('input[type="number"]').change(function () {
-                let total = 0;
-                newRow.find('input[type="number"]').each(function () {
-                    total += parseFloat($(this).val()) || 0;
-                });
-                newRow.find('.total').text(total);
-            });
-
-            timesheet.append(newRow);
-
-            // Append the total cell
-            const totalCell = $('<td class="total"></td>');
-            newRow.append(totalCell);
-
-            // Append the description cell
-            const descriptionCell = $('<td></td>');
-            const descriptionInput = $('<textarea placeholder="Description"></textarea>');
-            descriptionCell.append(descriptionInput);
-            newRow.append(descriptionCell);
-
-        }
-
-        $(document).ready(function () {
-            const timesheet = $('#timesheet');
-
-            // Add table headers
-            const headers = ['Job Name', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Total', 'Description'];
-            const headerRow = $('<tr></tr>');
-            headers.forEach(header => {
-                const headerCell = $('<th></th>').text(header);
-                headerRow.append(headerCell);
-            });
-            timesheet.append(headerRow);
-
-
-            var initialRows = 5;
-            for (let i = 0; i < initialRows; i++) {
-                addTimesheetRow(timesheet);
-            }
-            // Add row button functionality
-            $('#addTimesheetRowButton').click(function () {
-                addTimesheetRow(timesheet);
-            });
-
-
-            $('#submit').click(function () {
-                const data = [];
-                const bidsData = [];
-                
-                // Append the formName
-                const formName = $('#formName').val();
-                
-                // Collect timesheet data
-                timesheet.find('tr').each(function () {
-                    const row = $(this);
-                    if (row.find('input[type="text"]').length > 0) {
-                        const jobName = row.find('input[type="text"]').val();
-                        const days = [];
-                        row.find('input[type="number"]').each(function () {
-                            days.push($(this).val());
-                        });
-                        const total = row.find('.total').text();
-                        const description = row.find('textarea').val();
-                        data.push({
-                            jobName,
-                            days,
-                            total,
-                            description
-                        });
-                    }
-                });
-
-                // Collect jobsWithBids data
-                $('.jobsWithBids tbody tr').each(function () {
-                    const row = $(this);
-                    const jobName = row.find('input[type="text"]').val();
-                    const bid = row.find('input[type="number"]').eq(0).val();
-                    const requestedAmount = row.find('input[type="number"]').eq(1).val();
-                    bidsData.push({
-                        jobName,
-                        bid,
-                        requestedAmount
-                    });
-                });
-
-                if (bidsData.length === 0) {
-                    alert('Please add at least one job with bid data.');
-                    return;
-                }
-                if (data.length === 0) {
-                    alert('Please add at least one timesheet row.');
-                    return;
-                }
-
-                // validate bidsData 
-                for (let i = 0; i < bidsData.length; i++) {
-                    if (!bidsData[i].jobName || !bidsData[i].bid) {
-                        alert('Please fill all fields in bid table. If you do not know the bid, please enter 0.'); 
-                        return;
-                    }
-                }
-
-                // // validate the timesheet data
-                // for (let i = 0; i < data.length; i++) {
-                //     if (!data[i].jobName || !Array.isArray(data[i].days) || !data[i].days.some(day => day !== '')) {
-                //         alert('Please fill all fields in timesheet table. If you do not know the hours, please enter 0.'); 
-                //         return;
-                //     }
-                // }
-                // validate the form name
-                if (!formName) {
-                    alert('Please enter a form name.');
-                    return;
-                }
-                
-                // Post data to the server
-                $.post('/subcontractor/submit', { 
-                    timesheetData: data, 
-                    bidsData: bidsData, 
-                    form_name: formName 
-                }, function (response) {
-                    console.log('response:', response);
-                    if (response.status == 'success') {
-                        alert('Data submitted successfully');
-                        // Redirect to the view form page
-                        window.location.href = '/subcontractor/viewForm?id=' + response.form_id;
-                    } else {
-                        alert('Error submitting data');
-                    }
-                });
+        // Collect jobsWithBids data
+        $('.jobsWithBids tbody tr').each(function () {
+            const row = $(this);
+            const jobId = row.find('select').val();
+            const bid = row.find('input[type="number"]').eq(0).val();
+            const requestedAmount = row.find('input[type="number"]').eq(1).val();
+            bidsData.push({
+                jobId,
+                bid,
+                requestedAmount
             });
         });
-    
+
+        if (!formName) {
+            alert('Please enter a form name.');
+            return;
+        }
+
+        $.post('/subcontractor/submit', {
+            timesheetData: data,
+            bidsData: bidsData,
+            form_name: formName
+        }, function (response) {
+            if (response.status === 'success') {
+                alert('Data submitted successfully');
+                window.location.href = '/subcontractor/viewForm?id=' + response.form_id;
+            } else {
+                alert('Error submitting data');
+            }
+        });
+    });
+});
     </script>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding-left: 5%;
-        }
-
-
-        th,
-        .table td {
-            padding: 10px;
-            margin: 20px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .btn-primary {
-            margin-top: 10px;
-            margin-left: 10%;
-            margin-right: 15%;
-        }
-
-        input[type="number"] {
-            width: 85px;
-            padding: 8px;
-            margin: 5px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        #formName {
-            width: 150px;
-            padding: 8px;
-            margin: 5px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        .timesheet-container {
-            width: 100%;
-            overflow: scroll;
-            padding: 5%;
-            padding-right: 5%;
-            margin: auto;
-            background-color: #f2f2f2;
-        }
-
-        .jobNameInput {
-            width: 150px;
-            padding: 8px;
-            margin: 5px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        .submit-container {
-            text-align: right;
-            margin-top: 20px;
-        }
-
-        .jobsWithBids input[type="text"] {
-            width: 150px;
-            padding: 8px;
-            margin: 5px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        /* Sticky first column */
-        .timesheet th:first-child,
-        .timesheet td:first-child {
-            position: sticky;
-            left: 0;
-            background-color: #1c01011c;
-            z-index: 1;
-            opacity: 0.9;
-        }
-    </style>
 </body>
 
 </html>

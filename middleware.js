@@ -80,6 +80,18 @@ module.exports = {
     }
   },
 
+  isSubcontractorAdmin: (req, res, next) => {
+    if (req.isAuthenticated() && req.user.local.user_type == 4) {
+      return next();
+    } else {
+      res.render("error.html", {
+        friendly: "You are unable to access this resource. Subcontractor Admins only", 
+        link: "/",
+        linkTitle: "I am an admin"
+      });
+    }
+  }
+
   //  isAdmin: (req, res, next)=> {
   //   // if authenticated
   //   if (req.isAuthenticated()) {

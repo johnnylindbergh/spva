@@ -258,36 +258,51 @@ function postToAddOption(event) {
             console.error('Error adding/updating row:', error);
         });
 }
+function confirmSendAutoDeposit() {
+    // Close the modal dialog
+    $('#auto-initial-deposit-dialog').modal('hide');
+    // Get the checkbox value
+    const sendAutoDeposit = $('#send-auto-deposit').is(':checked');
+    console.log("Send Auto Deposit:", sendAutoDeposit);
 
-function shareClient(){
+    // Show the email confirmation modal dialog
+    $('#email-confirmation-dialog').modal('show');
+
+    // When the confirmation button in the modal is clicked
+    $('#confirm-email-send').off('click').on('click', function () {
+        $('#email-confirmation-dialog').modal('hide'); // Close the confirmation dialog
+        $.post('/shareClient', { takeoff_id: takeoff_id, sendAutoDeposit: sendAutoDeposit }, function (data) {
+            console.log("twas the email sent?", data);
+            if (data == "email sent") {
+                $('#success-dialog').modal('show'); // Show success modal
+            } else {
+                $('#error-dialog').modal('show'); // Show error modal
+            }
+        });
+    });
+}
+
+
+function closeAutoInitialDepositDialog() {
+    // Hide the modal dialog
+    $('#auto-initial-deposit-dialog').modal('hide');
+    // Reset the checkbox state
+}
+
+function shareClient() {
     const takeoff_id = $('#takeoff_id').val();
     console.log(takeoff_id);
-    XSAlert({
-        title: 'Email Confirmation',
-        message: 'Are you sure you want to share this estimate with the client? ('+ $('#owner_email_address').val() + ')',
-        icon: 'warning',
-     }).then((value) => {
-        console.log("dialogue output", value);
-        if(value == "ok"){
 
-            $.post('/shareClient', {takeoff_id: takeoff_id}, function(data) {
-                console.log("twas the email sent?",data);
-                if (data == "email sent") {
-                    XSAlert({
-                        title: 'Email Sent',
-                        message: 'The estimate has been sent to the client.',
-                        icon: 'success',
-                    });
-                } else {
-                    XSAlert({
-                        title: 'Error',
-                        message: "The estimate could not be sent. Please set an owner email.",
-                        icon: 'error',
-                    });
-                }
-            });
+    // Show the modal dialog
+    $('#auto-initial-deposit-dialog').modal('show');
 
-        }
+    // When the modal is confirmed
+    $('#confirm-auto-deposit').click(function () {
+        const sendAutoDeposit = $('#send-auto-deposit').is(':checked'); // Get the checkbox value
+        console.log("Send Auto Deposit:", sendAutoDeposit);
+
+        // Close the modal dialog'
+        $('#auto-initial-deposit-dialog').modal('hide');
     });
 }
 
@@ -317,6 +332,35 @@ function shareSelf(){
                         icon: 'error',
                     });
                 }
+            });
+        }
+    });
+}
+
+function confirmEmailSend(){
+    // Close the modal dialog
+    $('#email-confirmation-dialog').modal('hide');
+    // Get the checkbox value
+    const sendAutoDeposit = $('#send-auto-deposit').is(':checked');
+    console.log("Send Auto Deposit:", sendAutoDeposit);
+
+
+    const takeoff_id = $('#takeoff_id').val();
+
+    // post to the server
+    $.post('/shareClient', { takeoff_id: takeoff_id, sendAutoDeposit: sendAutoDeposit }, function (data) {
+        console.log("twas the email sent?", data);
+        if (data == "email sent") {
+            XSAlert({
+                title: 'Email Sent',
+                message: 'The estimate has been sent to your email.',
+                icon: 'success',
+            });
+        } else {
+            XSAlert({
+                title: 'Error',
+                message: "The estimate could not be sent. Please update server email credentials.",
+                icon: 'error',
             });
         }
     });

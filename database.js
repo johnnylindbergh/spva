@@ -3013,6 +3013,8 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     );
   },
 
+
+
   getInvoiceItemsById: function (invoice_id, callback) {
     con.query(
       "SELECT * FROM invoices WHERE id = ?;",
@@ -3034,6 +3036,21 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     );
   },
 
+
+  getInvoiceAndItemsById: function (invoice_id, callback) {
+    con.query(
+      "SELECT * FROM invoices WHERE id = ?;",
+      [invoice_id],
+      function (err, invoice) {
+        if (err) return callback(err);
+        con.query("SELECT * FROM invoice_items WHERE invoice_id = ?;", [invoice_id], function (err, items) {
+          if (err) return callback(err);
+          callback(null, invoice[0], items);
+        });
+      }
+    );
+  },
+  
 
 
   getInvoicesByTakeoffId: function (takeoff_id, callback) {
@@ -3346,6 +3363,7 @@ getSOVById: function (sov_id, callback) {
     function (err, sov) {
       if (err) return callback(err);
       if (sov.length == 0) {
+        console.log("sov not found");
         return callback(null, null);
       } else {
         return callback(null, sov[0]);
@@ -3353,6 +3371,51 @@ getSOVById: function (sov_id, callback) {
     }
   );
 },
+
+getSOVByHash: function (hash, callback) {
+
+  var render = {};
+  con.query(
+    "SELECT * FROM sov WHERE hash = ?;",
+    [hash],
+    function (err, sov) {
+      if (err) return callback(err);
+      if (sov.length == 0) {
+        console.log("sov not found");
+        return callback(null, null);
+      } else {
+
+        render.sov = sov[0];
+
+        // append to this item the items and the customer
+
+        con.query("select * from sov_items where sov_id = ?;", [sov[0].id], function (err, items) {
+          if (err) return callback(err);
+          if (items.length == 0) {
+            console.log("sov items not found");
+          } else {
+            render.items = items;
+          }
+          // get the customer info
+          con.query("SELECT customers.* FROM takeoffs JOIN customers ON takeoffs.customer_id = customers.id WHERE takeoffs.id = ?;", [sov[0].takeoff_id], function (err, customer) {
+            if (err) return callback(err);
+            if (customer.length == 0) {
+              console.log("customer not found");
+              render.customer = null;
+            } else {
+              render.customer = customer[0];
+            }
+            console.log(render);
+            return callback(null, render);
+          });
+        });
+        // return callback(null, sov[0]);      
+        }
+
+    }
+  );
+},
+
 
 getSOVItemsById: function (sov_id, callback) {
   con.query(

@@ -12,7 +12,7 @@ CREATE TABLE user_types (
 );
 
 -- Pre-populate user roles
-INSERT INTO user_types (title) VALUES ('Admin'), ('User'), ('subcontractor');
+INSERT INTO user_types (title) VALUES ('Admin'), ('User'), ('subcontractor'), ('subcontractor_admin');
 
 -- Users table
 CREATE TABLE users (
@@ -193,7 +193,7 @@ CREATE TABLE options (
   total_cost DECIMAL(10,2), -- computed server-side
   created_by INT,
   required TINYINT(1) DEFAULT 0,
-  applied TINYINT(1) DEFAULT 0,
+  applied TINYINT(1) DEFAULT 1,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
@@ -377,7 +377,7 @@ CREATE TABLE applied_materials (
   top_coat INT NOT NULL,
   primer INT,
   cost_delta DECIMAL(10,2) DEFAULT 0,
-  coverage_delta DECIMAL(10,2) DEFAULT 0,
+  coverage_delta DECIMAL(10,2) DEFAULT 0.00,
   labor_cost DECIMAL(10,2) DEFAULT 0.40,
   applied TINYINT(1) DEFAULT 1,
   separate_line_item TINYINT(1) DEFAULT 0,
@@ -406,6 +406,7 @@ CREATE TABLE jobs (
   id INT NOT NULL AUTO_INCREMENT,
   isArchived TINYINT(1) DEFAULT 0,
   job_name VARCHAR(255) NOT NULL,
+  takeoff_id INT,
   bid DECIMAL(10,2),
   job_description TEXT,
   job_location VARCHAR(255),
@@ -413,8 +414,12 @@ CREATE TABLE jobs (
   job_end_date TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
 );
+
+-- example insert
+INSERT INTO jobs (job_name, takeoff_id, job_description, job_location, job_start_date, job_end_date) VALUES ('Job 1', 1, 'Description of Job 1', 'Location of Job 1', '2023-01-01 00:00:00', '2023-12-31 00:00:00');
 
 
 CREATE TABLE subcontractor_jobs_assignment (
@@ -481,7 +486,7 @@ CREATE TABLE form_bid (
   FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
 );
 
-INSERT INTO form_bid (form_id, job_id, bid, request) VALUES (1, 1, 20000.00, 1200.00);
+INSERT INTO form_bid (form_id, job_id, request) VALUES (1, 1, 1200.00);
 -- example insert
 INSERT INTO form_items (form_id, job_id, item_description) VALUES (1, 1, 'Description 1');
 

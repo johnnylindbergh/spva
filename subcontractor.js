@@ -13,7 +13,7 @@ require('dotenv').config();
 
 function getBidsData(form_id) {
   return new Promise((resolve, reject) => {
-    db.query('SELECT * FROM form_bid WHERE form_id = ?;', [form_id], (err, results) => {
+    db.query('SELECT * FROM form_bid JOIN jobs on form_bid.job_id = jobs.id WHERE form_id = ?;', [form_id], (err, results) => {
       if (err) {
         console.error(err);
         reject(err);
@@ -176,14 +176,16 @@ module.exports = function (app) {
           const items = form.timesheetData || [];
           for (const item of items) {
             // if and of the fields are empty, skip this item
-            if (item.jobName.trim() === '') {
+
+            console.log(item);
+            if (item.jobId == '') {
               continue;
             }
 
 
 
 
-            db.query('INSERT INTO form_items (form_id, job_name, item_description) VALUES (?, ?, ?);', [form_id, item.jobName, item.description], (err, itemResult) => {
+            db.query('INSERT INTO form_items (form_id, job_id, item_description) VALUES (?, ?, ?);', [form_id, item.jobId, item.description], (err, itemResult) => {
               if (err) {
                 console.log('form_items insert error', err);
                 res.status(500).send('Error submitting form.');
@@ -218,11 +220,11 @@ module.exports = function (app) {
 
             for (const item of bid_data) {
               // if and of the fields are empty, skip this item
-              if (item.jobName.trim() === '') {
+              if (item.jobId == '') {
                 continue;
               }
               console.log(item);
-              db.query('INSERT INTO form_bid (form_id, job_name, bid, request) VALUES (?, ?, ?, ?);', [form_id, item.jobName, item.bid | 0, item.requestedAmount], (err) => {
+              db.query('INSERT INTO form_bid (form_id, job_id, request) VALUES (?, ?, ?);', [form_id, item.jobId | 0, item.requestedAmount], (err) => {
                 if (err) {
                   console.log('bids insert error', err);
                   res.status(500).send('Error submitting form.');

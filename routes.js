@@ -25,6 +25,8 @@ const emailer = require("./email.js");
 const creds = require("./credentials.js");
 const querystring = require("querystring");
 const schedule = require('node-schedule');
+const pdf = require("./pdf.js");
+
 
 // execute every day at 12:30pm
 const job = schedule.scheduleJob('47 14 * * *', function () {
@@ -128,6 +130,9 @@ const uploadPlans = multer({
 
 // csv parsing stuff
 
+
+
+
 function readTakeoff(req, res, takeoff_id, filename, cb) {
   console.log("parsing ", filename);
   var results = [];
@@ -214,6 +219,8 @@ module.exports = function (app) {
       res.redirect("/user");
     } else if (req.user.local.user_type == "3") {
       res.redirect("/subcontractor");
+    } else if (req.user.local.user_type == "4"){
+      res.redirect("/subcontractorAdmin");
     } else {
       res.redirect("/login");
     }
@@ -861,13 +868,20 @@ module.exports = function (app) {
                     console.log("sending email to ", takeoff);
                     console.log("for invoice_id", invoice_id);
 
-                    emailer.sendInvoiceEmail(req, res, req.body.takeoff_id, invoice_id, function (err) {
-                      if (err) {
-                        console.log(err);
-                      } else {
-                        res.send(valid);
-                      }
-                    });
+                    if (takeoff.autoSendDeposit){
+                      emailer.sendInvoiceEmail(req, res, req.body.takeoff_id, invoice_id, function (err) {
+                        if (err) {
+                          console.log(err);
+                        } else {
+                          res.send(valid);
+                        }
+                      });
+                      
+                    } else {
+                      res.send(valid);
+                    }
+
+                    
                   }
                 }
                 );
@@ -1999,12 +2013,14 @@ module.exports = function (app) {
         //   console.log('total is null');
         //   total = 50.00;
         // }
-        if (invoice.invoice_payment_method == 'us_bank_account') {
-          invoice.invoiceTotal = invoice.invoiceTotal + (15.00 * 100);
-        }
-        if (invoice.invoice_payment_method == 'card') {
-          invoice.invoiceTotal = invoice.invoiceTotal * 1.03 + 30;
-        }
+        // if (invoice.invoice_payment_method == 'us_bank_account') {
+        //   invoice.invoiceTotal = invoice.invoiceTotal + (15.00 * 100);
+        // }
+        // if (invoice.invoice_payment_method == 'card') {
+        //   invoice.invoiceTotal = invoice.invoiceTotal * 1.03 + 30;
+        // }
+
+        invoice.invoiceTotal = invoice.invoiceTotal * 1.03;
 
 
         // create a stripe price_id
@@ -2195,7 +2211,7 @@ module.exports = function (app) {
 
               // create a product
               const product = await stripe.products.create({
-                name: sys.COMPANY_NAME + " Invoice",
+                name: creds.companyName + " Invoice",
                 // unit_amount: takeoff.total,
               });
 
@@ -2209,7 +2225,7 @@ module.exports = function (app) {
               } else if (invoice.invoice_payment_method == 'card') {
                 invoice.invoiceTotal = invoice.invoiceTotal * 1.03 + 0.30;
               } else {
-                invoice.invoiceTotal = invoice.invoiceTotal + 15;
+                invoice.invoiceTotal = invoice.invoiceTotal * 1.03;
               }
 
               console.log("invoice offset total is ", invoice.invoiceTotal);
@@ -2717,52 +2733,105 @@ module.exports = function (app) {
       db.getSOVById(sov_id, function (err, sov) {
         if (err || sov == null) {
           console.log(err);
-        }
-        console.log(sov);
+          res.send("error retrieving schedule of values");
+        } else {
 
-        // get the customer of sov.takeoff_id
-        db.getCustomerInfoByTakeoffId(sov.takeoff_id, function (err, customer) {
-          if (err) {
-            console.log(err);
-          } else {
-            render.customer = customer;
-            console.log(customer)
+        
+          console.log("sov:",sov);
 
-
-            db.getSOVItemsById(sov_id, function (err, items) {
-              if (err) {
-                console.log(err);
-              } else {
-                let totalRemaining = 0;
-                let totalPercent = 0;
-
-                // format the dates of the payments and calculate totals
-                for (let i = 0; i < items.length; i++) {
-                  items[i].created_at = moment(items[i].created_at).format('MMMM Do YYYY, h:mm:ss a');
-                  items[i].updated_at = moment(items[i].updated_at).format('MMMM Do YYYY, h:mm:ss a');
-
-                  // Calculate remaining and percentRemaining
-                  items[i].remaining = parseFloat(items[i].total_contracted_amount) - parseFloat(items[i].previous_invoiced_amount) - parseFloat(items[i].this_invoiced_amount);
-                  items[i].percentRemaining = ((items[i].remaining / parseFloat(items[i].total_contracted_amount)) * 100).toFixed(2);
+          // get the customer of sov.takeoff_id
+          db.getCustomerInfoByTakeoffId(sov.takeoff_id, function (err, customer) {
+            if (err) {
+              console.log(err);
+            } else {
+              render.customer = customer;
+              console.log("customer", customer)
 
 
-                  totalRemaining += items[i].remaining;
-                }
+              db.getSOVItemsById(sov_id, function (err, items) {
+                if (err || items == null) {
+                  console.log(err);
+                  res.send("error retrieving schedule of values items");
+                } else {
+                  let totalRemaining = 0;
+                  let totalPercent = 0;
 
-                console.log(items);
+      
 
-                sov.total = numbersWithCommas(parseFloat(sov.total).toFixed(2));
-                sov.totalRemaining = numbersWithCommas(totalRemaining.toFixed(2));
+                  // format the dates of the payments and calculate totals
+                  for (let i = 0; i < items.length; i++) {
+                    items[i].created_at = moment(items[i].created_at).format('MMMM Do YYYY, h:mm:ss a');
+                    items[i].updated_at = moment(items[i].updated_at).format('MMMM Do YYYY, h:mm:ss a');
 
-                render.sov = sov;
-                render.sov_items = items;
+                    // Calculate remaining and percentRemaining
+                    items[i].remaining = parseFloat(items[i].total_contracted_amount) - parseFloat(items[i].previous_invoiced_amount) - parseFloat(items[i].this_invoiced_amount);
+                    items[i].percentRemaining = ((items[i].remaining / parseFloat(items[i].total_contracted_amount)) * 100).toFixed(2);
 
-                console.log({ sov: sov, sov_items: items });
-                res.render("scheduleOfValuesPdf.html", render);
+
+                    totalRemaining += items[i].remaining;
+                  }
+
+                  console.log(items);
+
+                  sov.total = numbersWithCommas(parseFloat(sov.total).toFixed(2));
+                  sov.totalRemaining = numbersWithCommas(totalRemaining.toFixed(2));
+
+                  render.sov = sov;
+                  render.sov_items = items;
+
+                  console.log({ sov: sov, sov_items: items });
+                  res.render("scheduleOfValuesPdf.html", render);
+                
               }
+              
             });
           }
         });
+      }
+      });
+    }
+  });
+
+  app.get("/sovPdfDownload", mid.isAdmin, function (req, res) {
+    // get the hash
+
+    const hash = req.query.hash;
+    console.log("scheduleOfValuesPdf accessed");
+    // get the sov_id from the hash
+    if (hash == null) {
+      console.log("hash is null");
+      res.redirect("/");
+    } else {
+      db.getSOVByHash(hash, function (err, sov) {
+        if (err || sov == null) {
+          console.log(err);
+          res.send("error retrieving schedule of values");
+        } else {
+
+        sov.defaults = defaultRender(req).defaults;
+          
+        console.log(sov);
+
+          pdf.generateSOVPDF(sov, function (err, pdfBuffer) { 
+            if (err) {
+              console.error("Error generating PDF:", err);
+              return res.status(500).send("Error generating PDF");
+            }
+            if (!pdfBuffer || !Buffer.isBuffer(pdfBuffer)) {
+              console.error("PDF generation returned invalid data");
+              return res.status(500).send("Failed to generate valid PDF");
+            }
+            try {
+              res.setHeader('Content-Type', 'application/pdf');
+              res.setHeader('Content-Disposition', 'attachment; filename=sov.pdf');
+              res.end(pdfBuffer, 'binary');
+            } catch (sendError) {
+              console.error("Error sending PDF:", sendError);
+              res.status(500).send("Error sending PDF");
+            }
+          });
+      
+        }
       });
     }
   });
@@ -3001,7 +3070,7 @@ app.post('/getTerms', function (req, res) {
         res.send("error retrieving invoice");
       } else {
         console.log(invoice);
-        emailer.sendInvoiceEmail(req, res, req.body.takeoff_id, req.body.invoice_id, function (err, response) {
+        emailer.sendInvoiceEmail( req.body.takeoff_id, req.body.invoice_id, function (err, response) {
           if (err) {
             console.log(err);
             res.send("email failed");
