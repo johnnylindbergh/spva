@@ -42,14 +42,14 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleCreateJob(e) {
         e.preventDefault();
 
-        const jobName = document.getElementById('job_name').value;
-        const bidAmount = document.getElementById('bid').value;
+        const jobName = document.getElementById('jobName').value;
+        const bidAmount = document.getElementById('bidAmount').value;
 
         try {
             const response = await fetch('/api/jobs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: jobName, bidAmount })
+                body: JSON.stringify({ job_name: jobName, bid_amount:bidAmount })
             });
 
             if (response.ok) {
@@ -109,7 +109,6 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
 
             row.innerHTML = `
-                <td>${job.id}</td>
                 <td>${job.job_name}</td>
                 <td>$${job.bid}</td>
                 <td>${job.job_description}</td>

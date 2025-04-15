@@ -72,16 +72,16 @@ module.exports = function (app) {
   
 
     app.post('/api/jobs', mid.isSubcontractorAdmin, function (req, res) {
-        const { job_name, bid, job_description, job_location, job_start_date, job_end_date } = req.body;
+        const { job_name, bid_amount, job_description, job_location, job_start_date, job_end_date } = req.body;
         db.query(
             "INSERT INTO jobs (job_name, bid, job_description, job_location, job_start_date, job_end_date) VALUES (?, ?, ?, ?, ?, ?)",
-            [job_name, bid, job_description, job_location, job_start_date, job_end_date],
+            [job_name, bid_amount, job_description, job_location, job_start_date, job_end_date],
             function (error, result) {
                 if (error) {
                     console.error('Error creating job:', error);
                     return res.status(500).json({ error: 'Internal server error' });
                 }
-                const newJob = { id: result.insertId, job_name, bid, job_description, job_location, job_start_date, job_end_date };
+                const newJob = { id: result.insertId, job_name, bid_amount, job_description, job_location, job_start_date, job_end_date };
                 res.status(201).json(newJob);
             }
         );
