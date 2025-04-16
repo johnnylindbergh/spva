@@ -45,3 +45,30 @@ update inclusions_presets set preset = "
 where id = 2;
 ```
 
+
+update inclusions_presets set preset = "
+
+<h4>0020-Proposal Includes</h4>
+
+<ul>
+    <li><b>Interior painting</b> of the 1st, 2nd, & 3rd floors of new house.</li>
+    <li><b>Exterior painting</b> of siding, trim, shutters, doors, porch ceilings, columns, and garage doors of new house & garage.</li>
+    <li><b>Option to prime</b> siding & trim to aid in paint coverage.</li>
+    <li><b>Option to paint</b> exterior Chippendale rails.</li>
+    <li><b>Option to prime/prep/paint</b> primary closet built-ins.</li>
+    <li><b>Interior drywall</b> will receive one (1) coat of Sherwin-Williams High Build primer.</li>
+    <li><b>Joints in trim</b> (interior/exterior) will be caulked with top-quality SW Pristine brand.</li>
+    <li><b>Nail holes</b> (interior/exterior) will be filled with wood filler.</li>
+    <li><b>Exterior siding/trim</b> may receive one (1) coat of SW PrepRite ProBlock primer to help with paint coverage.</li>
+    <li><b>PVC surfaces</b> will receive a coat of STIX bonding primer.</li>
+    <li><b>Areas to receive wallpaper</b> will receive one (1) coat of the Zinsser Shieldz Wallpaper Primer.</li>
+    <li><b>Exterior siding/trim</b> will receive two (2) coats of top-quality Ben Moore Aura Exterior paint in the client's preferred color/sheen.</li>
+    <li><b>Both sides of front door, storm door, and 1st floor/2nd floor stair treads</b> will receive two (2) coats of Fine Paints of Europe paint in the client's preferred color/sheen.</li>
+    <li><b>Most interior ceilings</b> will receive two (2) coats of BM Ultra Flat.</li>
+    <li><b>Bathroom ceilings</b> will receive two (2) coats of BM Aura Bath & Spa.</li>
+    <li><b>Dining room ceiling & some drywall areas of the Bar</b> will receive two (2) spray coats of BM Advance High Gloss paint in the client's preferred color/sheen.</li>
+    <li><b>Interior walls & trim</b> will receive two (2) coats of Ben Moore Aura in the client's preferred color/sheen.</li>
+</ul>"
+where id = 3;
+
+

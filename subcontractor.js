@@ -89,7 +89,7 @@ module.exports = function (app) {
       res.send('sowwy, no form_id found in query');
       return;
     }
-    db.query('SELECT * FROM form_items JOIN form_item_days ON form_items.id = form_item_days.form_item_id JOIN jobs ON form_items.job_id = jobs.id WHERE form_items.form_id = ?;', [form_id], (err, results) => {
+    db.query('SELECT * FROM form_items JOIN form_item_days ON form_items.id = form_item_days.form_item_id JOIN jobs ON form_items.job_id = jobs.id JOIN subcontractor_jobs_assignment on subcontractor_jobs_assignment.job_id = form_items.job_id WHERE form_items.form_id = ?;', [form_id], (err, results) => {
       console.log(results);
       // group by job 
       let grouped = {};

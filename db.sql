@@ -558,5 +558,5 @@ CREATE TABLE sov_items (
 );
 
 -- example insert 
-INSERT INTO sov_items (sov_id, invoice_id, description, total_contracted_amount, previous_invoiced_amount, cost, quantity, this_invoiced_amount) VALUES (1, 1, 'Description 1', 2000.00, 0.00, 2000.00, 1, 2000.00);
-INSERT INTO sov_items (sov_id, invoice_id, description, total_contracted_amount, previous_invoiced_amount, cost, quantity, this_invoiced_amount) VALUES (1, 1, 'Description 2', 3000.00, 0.00, 3000.00, 1, 3000.00);
+INSERT INTO sov_items (sov_id, description, total_contracted_amount, previous_invoiced_amount, cost, quantity, this_invoiced_amount) VALUES (1, 'Description 1', 2000.00, 0.00, 2000.00, 1, 2000.00);
+INSERT INTO sov_items (sov_id, description, total_contracted_amount, previous_invoiced_amount, cost, quantity, this_invoiced_amount) VALUES (1, 'Description 2', 3000.00, 0.00, 3000.00, 1, 3000.00);
