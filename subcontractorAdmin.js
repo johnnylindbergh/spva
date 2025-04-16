@@ -60,7 +60,7 @@ module.exports = function (app) {
     });
 
     app.get('/api/forms', mid.isSubcontractorAdmin, function (req, res) {
-        db.query("SELECT * FROM forms", function (error, results) {
+        db.query("SELECT *, forms.id as form_id, users.id as user_id FROM forms JOIN users ON forms.user_id = users.id;", function (error, results) {
             if (error) {
                 console.error('Error fetching forms:', error);
                 return res.status(500).json({ error: 'Internal server error' });
@@ -69,6 +69,20 @@ module.exports = function (app) {
         });
     });
 
+    app.get('/api/payments', mid.isSubcontractorAdmin, function (req, res) {
+        // the sum of all form_bid.requests for each subcontractor using subcontractor_forms to get user_id
+        db.query(
+            "SELECT users.id as user_id, users.name as subcontractorName, SUM(form_bid.request) as total_requests, form_bid.status, jobs.job_name FROM form_bid JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id JOIN users ON subcontractor_forms.user_id = users.id JOIN jobs ON form_bid.job_id = jobs.id WHERE form_bid.status = 'pending' GROUP BY users.id, jobs.job_name;",
+            function (error, results) {
+            if (error) {
+                console.error('Error fetching payments:', error);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+            res.json(results);
+            }
+        );
+    });
+    
   
 
     app.post('/api/jobs', mid.isSubcontractorAdmin, function (req, res) {

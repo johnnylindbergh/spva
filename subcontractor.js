@@ -50,7 +50,7 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/subcontractor/viewForm/', mid.isAuth, mid.isSubcontractor, async (req, res) => {
+  app.get('/subcontractor/viewForm/', mid.isAuth, async (req, res) => {
     let id = req.query.id;
     console.log(id);
     if (id == undefined) {
@@ -68,22 +68,20 @@ module.exports = function (app) {
         res.send('sowwy, no form found with that id');
         return;
       }
-      //console.log(results);
+
+      const form = results[0];
+      if (form.user_id !== req.user.local.id && req.user.local.user_type !== 4) {
+        res.status(403).send('Unauthorized access to this form.');
+        return;
+      }
 
       res.render('subcontractorViewForm.html', { form: results });
-
-      // db.query('SELECT * FROM form_items JOIN form_item_days ON form_items.id = form_item_days.form_item_id WHERE form_items.form_id = ?;', [id], (fields) => {
-      //   console.log(fields);
-
-      //   res.render('subcontractorViewForm.html', {form: results[0], data: fields});
-      // });
-
     });
   });
 
 
 
-  app.get('/subcontractor/getFormData/', mid.isAuth, mid.isSubcontractor, async (req, res) => {
+  app.get('/subcontractor/getFormData/', mid.isAuth, async (req, res) => {
     let form_id = req.query.id;
     console.log('viewing form', form_id);
     let user_id = req.user.local.id;
@@ -91,13 +89,19 @@ module.exports = function (app) {
       res.send('sowwy, no form_id found in query');
       return;
     }
-    db.query('SELECT * FROM form_items JOIN form_item_days ON form_items.id = form_item_days.form_item_id WHERE form_items.form_id = ?;', [form_id], (err, results) => {
+    db.query('SELECT * FROM form_items JOIN form_item_days ON form_items.id = form_item_days.form_item_id JOIN jobs ON form_items.job_id = jobs.id WHERE form_items.form_id = ?;', [form_id], (err, results) => {
       console.log(results);
       // group by job 
       let grouped = {};
 
       if (results == null || results.length === 0) {
         res.send('sowwy, no form found with that id');
+        return;
+      }
+
+      // check if the user_id is the same as the form_id
+      if (results[0].user_id !== user_id && req.user.local.user_type !== 4) {
+        res.status(403).send('Unauthorized access to this form.');
         return;
       }
 

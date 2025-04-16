@@ -20,13 +20,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetch('/api/jobs').then(res => res.json()),
                 fetch('/api/subcontractors').then(res => res.json()),
                 fetch('/api/forms').then(res => res.json()),
+                fetch('/api/payments').then(res => res.json())
             ]);
 
             renderJobSelect(jobsData);
             renderJobsTable(jobsData);
             renderSubcontractorSelect(subcontractorsData);
             renderFormsTable(formsData);
-            // renderPaymentsTable(paymentsData);
+            renderPaymentsTable(paymentsData);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -44,12 +45,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const jobName = document.getElementById('jobName').value;
         const bidAmount = document.getElementById('bidAmount').value;
+        const jobDescription = document.getElementById('jobDescription').value;
+        const jobLocation = document.getElementById('jobLocation').value;
+        const jobStartDate = document.getElementById('jobStartDate').value;
+        const jobEndDate = document.getElementById('jobEndDate').value;
 
         try {
             const response = await fetch('/api/jobs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ job_name: jobName, bid_amount:bidAmount })
+                body: JSON.stringify({
+                    job_name: jobName,
+                    bid_amount: bidAmount,
+                    job_description: jobDescription,
+                    job_location: jobLocation,
+                    job_start_date: jobStartDate,
+                    job_end_date: jobEndDate
+                })
             });
 
             if (response.ok) {
@@ -155,10 +167,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         forms.forEach(form => {
             const row = document.createElement('tr');
+
+            console.log("form:", form);
             row.innerHTML = `
-                <td>${form.id}</td>
-                <td>${form.subcontractorName}</td>
-                <td>${form.details}</td>
+                <td>${form.form_id}</td>
+                <td>${form.name}</td>
+                <td><a href="/subcontractor/viewForm/?id=${form.form_id}" target="_blank">${form.form_name}</a></td>
             `;
             subcontractorFormsTable.appendChild(row);
         });
@@ -166,6 +180,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Render payments table with action buttons
     function renderPaymentsTable(payments) {
+
+        console.log("payments:", payments);
         paymentsTable.innerHTML = '';
         if (payments.length === 0) {
             const row = document.createElement('tr');
@@ -177,12 +193,12 @@ document.addEventListener('DOMContentLoaded', function() {
         payments.forEach(payment => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${payment.id}</td>
+                <td>${payment.job_name}</td>
                 <td>${payment.subcontractorName}</td>
-                <td>$${payment.amount}</td>
+                <td>$${payment.total_requests}</td>
                 <td>${payment.status}</td>
                 <td>
-                    ${payment.status === 'Pending' ? 
+                    ${payment.status === 'pending' ? 
                         `<button class="btn btn-sm btn-success me-2" data-id="${payment.id}" data-action="approve">Approve</button>
                          <button class="btn btn-sm btn-danger" data-id="${payment.id}" data-action="reject">Reject</button>` : 
                         '<span class="text-muted">Completed</span>'}

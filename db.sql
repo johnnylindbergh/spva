@@ -470,7 +470,6 @@ CREATE TABLE form_items (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY (form_id, job_id), -- Prevent duplicate items for the same job
   FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
   FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
 );
@@ -480,6 +479,7 @@ CREATE TABLE form_bid (
   form_id INT NOT NULL,
   job_id INT,
   request DECIMAL(10,2),
+  status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
   PRIMARY KEY (id),
   UNIQUE KEY (form_id, job_id), -- Prevent duplicate bids for the same job
   FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,

@@ -133,7 +133,9 @@ function addBidRow() {
     const jobNameCell = $('<td></td>');
     const jobDropdown = $('<select class="job-dropdown"><option value="">Select Job</option></select>');
     jobList.forEach(job => {
-        jobDropdown.append(`<option value="${job.id}">${job.name}</option>`);
+        console.log("Job ID:", job.id);
+        console.log("Job Name:", job.job_name);
+        jobDropdown.append(`<option value="${job.id}">${job.job_name}</option>`);
     });
     jobNameCell.append(jobDropdown);
     newRow.append(jobNameCell);
@@ -158,9 +160,11 @@ function addTimesheetRow(timesheet) {
     const jobNameCell = $('<td></td>');
     const jobDropdown = $('<select class="job-dropdown"><option value="">Select Job</option></select>');
     jobList.forEach(job => {
-        jobDropdown.append(`<option value="${job.id}">${job.name}</option>`);
+        jobDropdown.append(`<option value="${job.id}">${job.job_name}</option>`);
     });
     jobNameCell.append(jobDropdown);
+
+    jobNameCell.attr('width', '200px');
     newRow.append(jobNameCell);
 
     // Input fields for each day of the week
