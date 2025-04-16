@@ -17,7 +17,7 @@ const path = require('path');
 var html_to_pdf = require('html-pdf-node');
 
 
-// use puppeteer-html-pdf to generate pdf of sov-template.ejs
+// use html-pdf-node to generate pdf of sov-template.ejs
 const generateSOVPDF = (data, callback) => {
     const templatePath = path.join(__dirname, 'views', 'sov_template.ejs');
 
