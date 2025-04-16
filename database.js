@@ -2528,7 +2528,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
 
         if (fieldToUpdate) {
           // Construct the SQL query dynamically
-          const sql = `UPDATE applied_materials SET ${fieldToUpdate} = NULL WHERE id = ? AND ${fieldToUpdate} = ? LIMIT 1;`;
+          const sql = `UPDATE applied_materials SET ${fieldToUpdate} = NULL coverage_delta = 0, cost_delta = 0 WHERE id = ? AND ${fieldToUpdate} = ? LIMIT 1;`;
           con.query(sql, [subject_id, material_id], function (err, result) {
             if (err) {
               console.error("Error updating material slot:", err);
