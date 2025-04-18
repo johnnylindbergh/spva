@@ -48,7 +48,7 @@ where id = 2;
 
 update inclusions_presets set preset = "
 
-<h4>0020-Proposal Includes</h4>
+<h4>Proposal Includes</h4>
 
 <ul>
     <li><b>Interior painting</b> of the 1st, 2nd, & 3rd floors of new house.</li>

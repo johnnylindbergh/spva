@@ -220,6 +220,7 @@ CREATE TABLE invoices (
   invoice_name VARCHAR(64),
   hash VARCHAR(64),
   takeoff_id INT NOT NULL,
+  sov_id INT,
   total DECIMAL(10,2),
   invoice_payment_method VARCHAR(64),
   status TINYINT(1) DEFAULT 0,
@@ -230,6 +231,7 @@ CREATE TABLE invoices (
   view_count INT DEFAULT 0,
   PRIMARY KEY (id),
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+  FOREIGN KEY (sov_id) REFERENCES sov(id) ON DELETE CASCADE
 );
 
 CREATE TABLE invoice_items (

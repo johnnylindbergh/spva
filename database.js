@@ -456,7 +456,32 @@ async function copyEstimateItemData(table, estimate_items, con) {
   }
 }
 
+function createInvoice(takeoff_id, invoice, callback) {
+  // First, get the count of invoices to generate a unique invoice number
+  con.query("SELECT COUNT(*) as count FROM invoices;", function (err, result) {
+    if (err) {
+      console.log(err);
+      return callback(err);
+    }
 
+    const invoiceCount = String(result[0].count + 1).padStart(4, '0'); // Pad the count with at least 4 zeros
+    const randomDigits = Math.floor(100000 + Math.random() * 900000); // Generate 6 random digits
+    const generatedInvoiceNumber = `${randomDigits}-${invoiceCount}`;
+
+    // Create a new invoice with the generated invoice number
+    con.query(
+      "INSERT INTO invoices (invoice_number, qb_number, invoice_name, hash, takeoff_id, total, invoice_payment_method, status, payment_confirmation_email_sent, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+      [generatedInvoiceNumber, invoice.qb_number, invoice.invoice_name, generateHash(), takeoff_id, invoice.total, invoice.invoice_payment_method, invoice.status, invoice.payment_confirmation_email_sent, invoice.due_date],
+      function (err) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
+        callback(null);
+      }
+    );
+  });
+}
 
 
 
@@ -2184,6 +2209,23 @@ getChangeOrderItemsById: function (change_order_id, callback) {
 
   },
 
+  updateSendAutoDeposit: function (takeoff_id, autoDeposit, callback) {
+    if (autoDeposit == "true") {
+      autoDeposit = 1;
+    } else {
+      autoDeposit = 0;
+    }
+    con.query(
+      "UPDATE takeoffs SET autoSendDeposit = ? WHERE id = ?;",
+      [autoDeposit, takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
+
   getSharedEstimate: function (hash, callback) {
     con.query(
       queries.getCustomerTakeoffByHash,
@@ -3530,6 +3572,56 @@ addSOVItem: function (sov_id, callback) {
       callback(null, id);
     }
   );
+},
+
+
+createInvoiceFromSOV: function (sov_id, callback) {
+  // get the sov and all its items
+  con.query("SELECT * FROM sov JOIN sov_items ON sov.id = sov_items.sov_id WHERE sov.id = ?;", [sov_id], function (err, sov) {
+    if (err) return callback(err);
+    if (sov.length == 0) {
+      console.log("sov not found");
+      return callback(null, null);
+    } else {
+      // Prepare the invoice object
+      const invoice = {
+        qb_number: null,
+        invoice_name: sov[0].name + "Invoice",
+        hash: generateHash(),
+        total: sov[0].total,
+        invoice_payment_method: null,
+        status: 0,
+        payment_confirmation_email_sent: 0,
+        due_date: null,
+      };
+
+      // Use the createInvoice function to create the invoice
+      createInvoice(sov[0].takeoff_id, invoice, function (err) {
+        if (err) return callback(err);
+
+        // Get the newly created invoice ID
+        con.query("SELECT LAST_INSERT_ID() as last;", function (err, result) {
+          if (err) return callback(err);
+          const invoice_id = result[0].last;
+
+          // Insert the items into the invoice_items table
+          for (let i = 0; i < sov.length; i++) {
+            console.log("inserting item: ", sov[i].description);
+            console.log("item has a cost of", sov[i].this_invoiced_amount);
+
+            con.query(
+              "INSERT INTO invoice_items (invoice_id, description, cost, quantity) VALUES (?,?,?,?);",
+              [invoice_id, sov[i].description, sov[i].this_invoiced_amount, 1],
+              function (err) {
+                if (err) return callback(err);
+              }
+            );
+          }
+          callback(null, invoice_id);
+        });
+      });
+    }
+  });
 },
 
   takeoffGetStatus: function (takeoff_id, callback) {

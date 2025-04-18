@@ -1751,30 +1751,39 @@ module.exports = function (app) {
 
   app.post("/shareClient", mid.isAdmin, function (req, res) {
     console.log("sending email to client ", req.body.takeoff_id);
-    if (req.body.takeoff_id) {
-      console.log("sending email ");
-      emailer.sendEstimateEmail(req, res, req.body.takeoff_id, function (err, response) {
-        if (err) {
-          console.log(err);
-          res.send("email failed");
-        } else {
-          console.log(response);
-          db.takeoffSetStatus(req.body.takeoff_id, 3, function (err) {
+
+    console.log("autoSendDeposit: ", req.body.sendAutoDeposit);
+
+    db.updateSendAutoDeposit(req.body.takeoff_id, req.body.sendAutoDeposit, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        if (req.body.takeoff_id) {
+          console.log("sending email ");
+          emailer.sendEstimateEmail(req, res, req.body.takeoff_id, function (err, response) {
             if (err) {
               console.log(err);
+              res.send("email failed");
             } else {
+              console.log(response);
+              db.takeoffSetStatus(req.body.takeoff_id, 3, function (err) {
+                if (err) {
+                  console.log(err);
+                } else {
 
 
-              res.send("email sent");
+                  res.send("email sent");
+                }
+              }
+              );
             }
-          }
-          );
-        }
-      }); // how do we get the response from this function
+          }); // how do we get the response from this function
 
-    } else {
-      console.log("");
-    }
+        } else {
+          console.log("");
+        }
+      }
+    });
   });
 
   app.post("/shareSelf", mid.isAdmin, function (req, res) {
@@ -2855,8 +2864,25 @@ module.exports = function (app) {
     );
   });
 
-  
+  app.post('/createInvoiceFromSOV', mid.isAdmin, function (req, res) {
+    const sov_id = req.body.sov_id;
+    console.log("creating invoice from schedule of values for ", req.body.sov_id);
+    db.createInvoiceFromSOV(sov_id, function (err, invoice_id) {
+      if (err) {
+        console.log(err);
+        res.send("error creating invoice");
+      } else {
+        console.log("new invoice_id:", invoice_id);
+        //res.redirect("/viewInvoice?invoice_id=" + invoice_id);
 
+        res.send({
+          status: 'success',
+          id: invoice_id
+        });
+      }
+    }
+    );
+  });
 
 
 

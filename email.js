@@ -180,8 +180,10 @@ async function sendInvoiceEmail(takeoff_id, invoice_id, callback) {
     invoiceData.totalAmount = numbersWithCommas((invoiceData.totalAmount).toFixed(2));
 
     invoiceData.invoice_items.forEach((item) => {
+      item.total = numbersWithCommas((parseFloat(item.cost) * parseFloat(item.quantity)).toFixed(2));
+
       item.cost = numbersWithCommas(item.cost);
-      item.total = numbersWithCommas((item.cost * item.quantity).toFixed(2));
+
     });
 
     // Wrap pdf.generateInvoicePdf in a promise
@@ -207,7 +209,7 @@ async function sendInvoiceEmail(takeoff_id, invoice_id, callback) {
         <h3>Hello, ${takeoff[0].customer_givenName},</h3>
         <h3>Your invoice is ready.</h3>
         <p>Please click the link below to view it:</p>
-        <a href="${credentials.domain}/shareInvoice/?hash=${invoice?.invoice_hash}">View Invoice</a></br>
+        <a href="${credentials.domain}/shareInvoice/?hash=${invoice?.hash}">View Invoice</a></br>
         <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
       `,
       attachments: [

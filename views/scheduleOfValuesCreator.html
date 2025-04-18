@@ -143,12 +143,42 @@
         </table>
 
         <button id="addRowBtn" class="btn btn-primary mb-3">Add Row</button>
+        <hr class ="my-4">
+        <!-- Create invoice from sov button -->
+        <button id="createInvoiceBtn" class="btn btn-primary mb-3" onclick = "createInvoiceFromSov()">Create Invoice from SOV</button>
+
+        <!-- button on right side that says save changes -->
+        <button id="saveChangesBtn" class="btn btn-success mb-3 float-end" onclick = "saveChanges()">Save Changes</button>
     </div>
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     <script>
+
+        function createInvoiceFromSov() {
+            const sovId = parseInt(document.getElementById('sov_id').value);
+            if (sovId == null || isNaN(sovId)) {
+                alert('SOV ID is not set.');
+                return;
+            }
+            $.post('/createInvoiceFromSOV', { sov_id: sovId }, function (data) {
+                console.log(data);
+                if (data.status === 'success') {
+                    alert('Invoice created successfully!');
+                    window.location.href = '/viewInvoice?invoice_id='+data.id; // Redirect to the invoices page
+                } else {
+                    alert('Failed to create invoice.');
+                }
+            }).fail(function () {
+                alert('Failed to create invoice.');
+            });
+        }
+
+        function saveChanges(){
+            // just display a message for now
+            alert('Changes saved successfully!');
+        }
         function fetchSOVData() {
             const sovId = parseInt(document.getElementById('sov_id').value);
             const tbody = document.querySelector('#invoiceTable tbody');
