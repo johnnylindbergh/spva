@@ -212,6 +212,19 @@ CREATE TABLE statements (
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
 );
 
+-- sovs with a given takeoff_id are associated
+CREATE TABLE sov (
+  id INT NOT NULL AUTO_INCREMENT,
+  takeoff_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  total DECIMAL(10,2) NOT NULL,
+  hash VARCHAR(64) UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+);
+
 -- Invoices table
 CREATE TABLE invoices (
   id INT NOT NULL AUTO_INCREMENT,
@@ -230,7 +243,7 @@ CREATE TABLE invoices (
   last_viewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   view_count INT DEFAULT 0,
   PRIMARY KEY (id),
-  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
   FOREIGN KEY (sov_id) REFERENCES sov(id) ON DELETE CASCADE
 );
 
