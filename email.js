@@ -1,9 +1,20 @@
 const credentials = require("./credentials");
 const nodemailer = require("nodemailer");
 const db = require("./database.js");
+const creds = require("./credentials.js");
 const { response } = require("express");
 
 const pdf = require("./pdf.js");
+
+function getCompanyDefaults(callback) {
+ return {
+    companyName:creds.companyName,
+    companyAddress: creds.companyAddress,
+    companyPhone: creds.companyPhone,
+    companyEmail: creds.companyEmail,
+}
+}
+
 
 const transporter = nodemailer.createTransport({
     service: "Gmail",
@@ -161,6 +172,7 @@ async function sendInvoiceEmail(takeoff_id, invoice_id, callback) {
       invoice,
       invoice_items: items,
       totalAmount: total,
+      defaults: getCompanyDefaults(),
     };
 
     console.log(invoiceData)
@@ -210,7 +222,6 @@ async function sendInvoiceEmail(takeoff_id, invoice_id, callback) {
         <h3>Your invoice is ready.</h3>
         <p>Please click the link below to view it:</p>
         <a href="${credentials.domain}/shareInvoice/?hash=${invoice?.hash}">View Invoice</a></br>
-        <img style="margin:20px;width:140px;"src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo">
       `,
       attachments: [
         {

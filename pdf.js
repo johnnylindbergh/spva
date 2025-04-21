@@ -91,24 +91,74 @@ const generateInvoicePdf = (data, callback) => {
             });
         });
 
-        // Build the PDF content
-        doc.fontSize(20).text('Invoice', { align: 'center' });
-        doc.moveDown();
+        doc.font("Helvetica");
 
-        doc.fontSize(12).text(`Invoice Number: ${data.invoice.invoice_number || 'N/A'}`);
+        // Add header
+        doc.fontSize(20).text(data.invoice.invoice_name, { align: 'center', underline: true });
+
+        // add logo
+        const logoPath = path.join(__dirname, 'public/sunpainting_logo_blue.png');
+        if (fs.existsSync(logoPath)) {
+            doc.image(logoPath, { align: 'center', width: 256 });
+        } else {
+            console.error('Logo file not found:', logoPath);
+        }
+
+        // Add company details if available
+        if (data.defaults && data.defaults.companyName) {
+            doc.fontSize(16).text(data.defaults.companyName, { align: 'center', bold: true });
+        }
+
+        if (data.defaults && data.defaults.companyAddress) {
+            doc.fontSize(12).text(data.defaults.companyAddress, { align: 'center' });
+        }
+        doc.moveDown();
+        // Add invoice details
+        doc.fontSize(12).text(`Invoice Number: ${data.invoice.invoice_number || 'N/A'}`, { continued: true })
+            .text(`   Date: ${new Date(data.invoice.created_at).toLocaleDateString() || 'N/A'}`);
+        doc.moveDown();
         doc.text(`Customer Name: ${data.takeoff[0].customer_givenName || 'N/A'}`);
         doc.text(`Customer Company: ${data.takeoff[0].customer_CompanyName || 'N/A'}`);
         doc.text(`Billing Address: ${data.takeoff[0].customer_billing_address || 'N/A'}`);
-        doc.text(`Date: ${new Date(data.invoice.created_at).toLocaleDateString() || 'N/A'}`);
-        doc.moveDown();
+        doc.moveDown(2);
 
-        doc.text('Items:', { underline: true });
-        data.invoice_items.forEach((item, index) => {
-            doc.text(`${index + 1}. ${item.description} - ${item.quantity} x $${item.cost} = $${item.total}`);
+        // Add items table
+        doc.fontSize(14).text('Items', { underline: true });
+        doc.moveDown();
+        // Define table headers
+        const tableTop = doc.y;
+        const itemWidth = 200;
+        const quantityWidth = 70;
+        const costWidth = 100;
+        const totalWidth = 300;
+
+        doc.fontSize(12).text('Description', 50, tableTop, { bold: true });
+        doc.text('Quantity', 50 + itemWidth, tableTop, { bold: true });
+        doc.text('Cost per Unit', 50 + itemWidth + quantityWidth, tableTop, { bold: true });
+        doc.text('Total', 50 + itemWidth + quantityWidth + costWidth, tableTop, { bold: true });
+
+        // Draw a line under the headers
+        doc.moveTo(50, tableTop + 15)
+            .lineTo(50 + itemWidth + quantityWidth + costWidth + totalWidth, tableTop + 15)
+            .stroke();
+
+        // Add table rows
+        let rowTop = tableTop + 25;
+        data.invoice_items.forEach((item) => {
+            doc.fontSize(12).text(item.description, 50, rowTop);
+            doc.text(item.quantity, 50 + itemWidth, rowTop);
+            doc.text(`$${item.cost}`, 50 + itemWidth + quantityWidth, rowTop);
+            doc.text(`$${item.total}`, 50 + itemWidth + quantityWidth + costWidth, rowTop);
+            rowTop += 20; // Move to the next row
         });
-        doc.moveDown();
 
-        doc.text(`Total Amount: $${data.totalAmount}`, { align: 'right', bold: true });
+        // Add total amount
+        doc.moveDown(2);
+        doc.fontSize(14).text(`Total Amount: $${data.totalAmount}`, { align: 'right', bold: true });
+        doc.moveDown(2);
+
+        // Add footer
+        doc.fontSize(10).text('Thank you for your business!', { align: 'center', italic: true });
         doc.end();
     } catch (err) {
         console.error('Error generating PDF:', err);
