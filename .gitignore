@@ -1,3 +1,6 @@
+# pdf files
+/output/*.pdf
+
 #csv files
 *.csv
 # Credentials file
