@@ -25,20 +25,35 @@ const generateSOVPDF = (data, callback) => {
             callback(null, pdfBuffer);
         });
 
+
+        // set style
+        doc.font("Times-Roman");
+        doc.fontSize(12);
+        // add logo
+        const logoPath = path.join(__dirname, 'public/sunpainting_logo_blue.png');
+        if (fs.existsSync(logoPath)) {
+            const imageX = (doc.page.width - 128) / 2; // Center the image horizontally
+            doc.image(logoPath, imageX, 0, { width: 128 });
+        } else {
+            console.error('Logo file not found:', logoPath);
+        }
+        doc.moveDown(4);
+        // Add company details if available
+
         // Add header
         doc.fontSize(20).text(creds.companyName, { align: 'center', bold: true });
         doc.fontSize(12).text(creds.companyAddress, { align: 'center' });
         doc.moveDown(2);
 
         // Add SOV details
-        doc.fontSize(16).text('Schedule of Values (SOV)', { align: 'center', underline: true });
+        doc.fontSize(16).text('Schedule of Values', { align: 'center', underline: true });
         doc.moveDown();
         doc.fontSize(12).text(`SOV Name: ${data.sov.name}`, { continued: true }).text(`   SOV ID: ${data.sov.id}`);
         doc.text(`Total: $${data.sov.total}`, { continued: true }).text(`   Created At: ${new Date(data.sov.created_at).toLocaleDateString()}`);
         doc.moveDown(2);
 
         // Add customer details
-        doc.fontSize(14).text('Customer Details', { underline: true });
+        doc.fontSize(14).text('Bill To', { underline: true });
         doc.moveDown();
         doc.fontSize(12).text(`Name: ${data.customer.givenName}`);
         doc.text(`Company: ${data.customer.CompanyName}`);
@@ -50,12 +65,37 @@ const generateSOVPDF = (data, callback) => {
         // Add items table
         doc.fontSize(14).text('Items', { underline: true });
         doc.moveDown();
-        data.items.forEach((item, index) => {
-            doc.fontSize(12).text(`${index + 1}. ${item.description}`, { bold: true });
-            doc.text(`   Total Contracted Amount: $${item.total_contracted_amount}`);
-            doc.text(`   Previous Invoiced Amount: $${item.previous_invoiced_amount}`);
-            doc.text(`   This Invoiced Amount: $${item.this_invoiced_amount}`);
-            doc.moveDown();
+        // Define table headers
+        const tableTop = doc.y;
+        const descriptionWidth = 100;
+        const contractedWidth = 120;
+        const thisWidth = 100;
+        const remainingWidth = 100;
+        const percentWidth = 80;
+
+
+        doc.fontSize(9).text('Description', 50, tableTop, { bold: true });
+        doc.text('Total Contracted Amount', 50 + descriptionWidth, tableTop, { bold: true });
+        doc.text('This Invoiced Amount', 50 + descriptionWidth + contractedWidth , tableTop, { bold: true });
+        doc.text('Remaining', 50 + descriptionWidth + contractedWidth+ thisWidth , tableTop, { bold: true });
+        doc.text('Percent Remaining', 50 + descriptionWidth + contractedWidth + thisWidth+ remainingWidth, tableTop, { bold: true });
+        // Draw a line under the headers
+        doc.moveTo(50, tableTop + 15)
+            .lineTo(50 + descriptionWidth + contractedWidth + thisWidth + remainingWidth + percentWidth, tableTop + 15)
+            .stroke();
+
+        // Add table rows
+        let rowTop = tableTop + 25;
+        data.items.forEach((item) => {
+            doc.fontSize(12).text(item.description, 50, rowTop);
+            doc.text(`$${item.total_contracted_amount}`, 50 + descriptionWidth, rowTop);
+            doc.text(`$${item.this_invoiced_amount}`, 50 + descriptionWidth + contractedWidth, rowTop);
+
+            const remaining = parseFloat(item.total_contracted_amount) - parseFloat(item.this_invoiced_amount);
+            const percentRemaining = (remaining / parseFloat(item.total_contracted_amount)) * 100;
+            doc.text(`$${remaining}`, 50 + descriptionWidth + contractedWidth  + thisWidth, rowTop);
+            doc.text(`${percentRemaining.toFixed(2)}%`, 50 + descriptionWidth + contractedWidth+thisWidth+ remainingWidth, rowTop);
+            rowTop += 20; // Move to the next row
         });
 
         // Add footer
