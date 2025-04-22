@@ -2596,10 +2596,14 @@ module.exports = function (app) {
       const long_id = String(Math.floor(Math.random() * 100000)) + String(takeoff_id);
       const invoiceNumber = `${long_id.padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
 
+      
+
       // Insert invoice into the database
-      const insertQuery = `INSERT INTO invoices (takeoff_id, total, invoice_number, invoice_name, hash) VALUES (?, ?, ?, ?, ?); SELECT LAST_INSERT_ID() AS invoice_id;`;
+      const insertQuery = `INSERT INTO invoices (takeoff_id, total, invoice_number, invoice_name, due_date, hash) VALUES (?, ?, ?, ?, ?, ?); SELECT LAST_INSERT_ID() AS invoice_id;`;
       const hashValue = db.generateHash();
-      db.query(insertQuery, [takeoff_id, invoiceTotal, invoiceNumber, invoice_name, hashValue], function (err, results) {
+      
+      const dueDate = req.body.due_date || moment().add(30, 'days').format('YYYY-MM-DD');
+      db.query(insertQuery, [takeoff_id, invoiceTotal, invoiceNumber, invoice_name, dueDate, hashValue], function (err, results) {
         if (err) {
           console.error("Error inserting invoice:", err);
           return res.status(500).json({ error: 'Failed to create invoice.' });
@@ -2801,7 +2805,9 @@ module.exports = function (app) {
     }
   });
 
-  app.get("/sovPdfDownload", mid.isAdmin, function (req, res) {
+
+  // open to users with the hash
+  app.get("/sovPdfDownload", function (req, res) {
     // get the hash
 
     const hash = req.query.hash;

@@ -25,6 +25,21 @@ function getBidsData(form_id) {
   );
 }
 
+function getTotalRequestedAmount(jobId, userId, callback) {
+    db.query(
+        "SELECT SUM(form_bid.request) as total_requested FROM form_bid JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id WHERE form_bid.job_id = ? AND subcontractor_forms.user_id = ?",
+        [jobId, userId],
+        function (error, results) {
+            if (error) {
+                console.error('Error fetching total requested amount:', error);
+                return callback(error);
+            }
+            const totalRequested = results[0].total_requested || 0;
+            callback(null, totalRequested);
+        }
+    );
+}
+
 
 
 module.exports = function (app) {
@@ -36,7 +51,7 @@ module.exports = function (app) {
   // notify me when form is submitted
 
   app.get('/subcontractor', mid.isAuth, mid.isSubcontractor, async (req, res) => {
-    console.log(req.user.local.id);
+    console.log(req.user.local.name, "accessing subcontractor page");
     db.query('SELECT * FROM subcontractor_forms JOIN forms ON subcontractor_forms.form_id = forms.id WHERE subcontractor_forms.user_id = ?;', [req.user.local.id], (err, results) => {
       console.log(results);
       if (results == null) {

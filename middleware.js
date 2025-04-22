@@ -81,7 +81,7 @@ module.exports = {
   },
 
   isSubcontractorAdmin: (req, res, next) => {
-    if (req.isAuthenticated() && req.user.local.user_type == 4) {
+    if (req.isAuthenticated() && req.user.local.user_type == 4 || req.user.local.user_type == 1) {
       return next();
     } else {
       res.render("error.html", {
