@@ -26,8 +26,8 @@ const generateSOVPDF = (data, callback) => {
         });
 
         // Add header
-        doc.fontSize(20).text(data.defaults.companyName, { align: 'center', bold: true });
-        doc.fontSize(12).text(data.defaults.companyAddress, { align: 'center' });
+        doc.fontSize(20).text(creds.companyName, { align: 'center', bold: true });
+        doc.fontSize(12).text(creds.companyAddress, { align: 'center' });
         doc.moveDown(2);
 
         // Add SOV details
@@ -91,34 +91,43 @@ const generateInvoicePdf = (data, callback) => {
             });
         });
 
-        doc.font("Helvetica");
+        doc.font("Times-Roman");
+        doc.fontSize(12);
 
         // Add header
-        doc.fontSize(20).text(data.invoice.invoice_name, { align: 'center', underline: true });
+       // doc.fontSize(20).text(data.invoice.invoice_name, { align: 'center', underline: true });
 
+        doc.moveDown(2);
         // add logo
         const logoPath = path.join(__dirname, 'public/sunpainting_logo_blue.png');
         if (fs.existsSync(logoPath)) {
-            doc.image(logoPath, { align: 'center', width: 256 });
+            const imageX = (doc.page.width - 128) / 2; // Center the image horizontally
+            doc.image(logoPath, imageX, 0, { width: 128 });
         } else {
             console.error('Logo file not found:', logoPath);
         }
 
+        doc.moveDown(2);
+
         // Add company details if available
         if (data.defaults && data.defaults.companyName) {
-            doc.fontSize(16).text(data.defaults.companyName, { align: 'center', bold: true });
+            doc.fontSize(16).text(creds.companyName, { align: 'center', bold: true });
         }
 
-        if (data.defaults && data.defaults.companyAddress) {
+        if (data.defaults && creds.companyAddress) {
             doc.fontSize(12).text(data.defaults.companyAddress, { align: 'center' });
         }
         doc.moveDown();
         // Add invoice details
         doc.fontSize(12).text(`Invoice Number: ${data.invoice.invoice_number || 'N/A'}`, { continued: true })
             .text(`   Date: ${new Date(data.invoice.created_at).toLocaleDateString() || 'N/A'}`);
+            // Add invoice due date
+            if (data.invoice.due_date) {
+                doc.text(`   Due Date: ${new Date(data.invoice.due_date).toLocaleDateString() || 'N/A'}`);
+            }
         doc.moveDown();
-        doc.text(`Customer Name: ${data.takeoff[0].customer_givenName || 'N/A'}`);
-        doc.text(`Customer Company: ${data.takeoff[0].customer_CompanyName || 'N/A'}`);
+        doc.text(`To: ${data.takeoff[0].customer_givenName || 'N/A'}`);
+        doc.text(`Company: ${data.takeoff[0].customer_CompanyName || 'N/A'}`);
         doc.text(`Billing Address: ${data.takeoff[0].customer_billing_address || 'N/A'}`);
         doc.moveDown(2);
 

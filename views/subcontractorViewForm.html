@@ -14,133 +14,105 @@
 
 
     <script>
-        // on document ready
         $(function () {
-
             const decimalPlaces = 1;
             const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-            const placeholderValue = '-'; // Placeholder for undefined days
-
-            // get the form id from the query string
+            const placeholderValue = '-';
+    
             const formId = $('#formId').val();
-
-            // get the formData timesheetData and bidData
+    
             $.get(`/subcontractor/getFormData/?id=${formId}`, function (data) {
-
-            const timesheetData = data.timesheetData;
-
-            // bid data is sometime not an array so we need to check if it is an array
-            const bidData = Array.isArray(data.bidData) ? data.bidData : [data.bidData];
-
-            console.log(timesheetData);
-            console.log(bidData);
-
-            // populate the table with the timesheetData
-            const table = $('#timesheet');
-            const keys = Object.keys(timesheetData);
-
-            for (let i = 0; i < keys.length; i++) {
-                const element = timesheetData[keys[i]];
-                console.log(element);
-
-                var newRow = $('<tr></tr>');
-
-                var jobNameCell = $('<td></td>');
-                jobNameCell.text(element[0].job_name);
-                newRow.append(jobNameCell);
-
-                // Create a map for quick lookup of days
-                const dayMap = {};
-                element.forEach(day => {
-                dayMap[day.day] = parseFloat(day.duration).toFixed(decimalPlaces);
+                console.log('Form Data:', data);
+                const timesheetData = data.timesheetData;
+                const bidData = Array.isArray(data.bidData) ? data.bidData : [data.bidData];
+                const table = $('#timesheet');
+                const bidTable = $('#bid');
+    
+                // Handle timesheet data
+                if (!timesheetData || Object.keys(timesheetData).length === 0) {
+                    table.find('tbody').append('<tr><td colspan="10" class="text-center">No timesheet data available.</td></tr>');
+                } else {
+                    const keys = Object.keys(timesheetData);
+    
+                    for (let i = 0; i < keys.length; i++) {
+                        const element = timesheetData[keys[i]];
+                        var newRow = $('<tr></tr>');
+    
+                        var jobNameCell = $('<td></td>');
+                        jobNameCell.text(element[0].job_name);
+                        newRow.append(jobNameCell);
+    
+                        const dayMap = {};
+                        element.forEach(day => {
+                            dayMap[day.day] = parseFloat(day.duration).toFixed(decimalPlaces);
+                        });
+    
+                        daysOfWeek.forEach(day => {
+                            var dayCell = $('<td></td>');
+                            dayCell.text(dayMap[day] || placeholderValue);
+                            newRow.append(dayCell);
+                        });
+    
+                        var total = 0;
+                        element.forEach(day => {
+                            total += parseFloat(day.duration) || 0;
+                        });
+    
+                        var totalCell = $('<td></td>');
+                        totalCell.text(total.toFixed(decimalPlaces));
+                        newRow.append(totalCell);
+    
+                        var descriptionCell = $('<td></td>');
+                        descriptionCell.text(element[0].item_description);
+                        newRow.append(descriptionCell);
+    
+                        table.append(newRow);
+                    }
+                }
+    
+                // Handle bid data
+                if (!bidData || bidData.length === 0) {
+                    bidTable.append('<tr><td colspan="4" class="text-center">No bid data reported.</td></tr>');
+                } else {
+                    bidData.forEach(element => {
+                        var newRow = $('<tr></tr>');
+    
+                        var jobNameCell = $('<td></td>');
+                        jobNameCell.text(element.job_name || 'N/A');
+                        newRow.append(jobNameCell);
+    
+                        var bidCell = $('<td></td>');
+                        bidCell.text(element.bid ? parseFloat(element.bid).toFixed(2) : '0.00');
+                        newRow.append(bidCell);
+    
+                        var requestCell = $('<td></td>');
+                        requestCell.text(element.request ? parseFloat(element.request).toFixed(2) : '0.00');
+                        newRow.append(requestCell);
+    
+                        bidTable.append(newRow);
+                    });
+                }
+    
+                // Add click events for row selection
+                $('#timesheet tbody tr').click(function () {
+                    $(this).toggleClass('selected');
+                    const selectedRowData = $(this).children('td').map(function () {
+                        return $(this).text();
+                    }).get();
+                    console.log('Selected Row Data:', selectedRowData);
                 });
-
-                // Loop through all days of the week
-                daysOfWeek.forEach(day => {
-                var dayCell = $('<td></td>');
-                dayCell.text(dayMap[day] || placeholderValue); // Use placeholder if day is not defined
-                newRow.append(dayCell);
+    
+                $('#bid tbody tr').click(function () {
+                    $(this).toggleClass('selected');
+                    const selectedRowData = $(this).children('td').map(function () {
+                        return $(this).text();
+                    }).get();
+                    console.log('Selected Row Data:', selectedRowData);
                 });
-
-                // Calculate the total
-                var total = 0;
-                element.forEach(day => {
-                total += parseFloat(day.duration) || 0;
-                });
-
-                // Append the total cell
-                var totalCell = $('<td></td>');
-                totalCell.text(total.toFixed(decimalPlaces));
-                newRow.append(totalCell);
-
-                // Append the description cell
-                var descriptionCell = $('<td></td>');
-                descriptionCell.text(element[0].item_description);
-                newRow.append(descriptionCell);
-
-                table.append(newRow);
-            }
-
-            // Populate the bid table
-            const bidTable = $('#bid');
-            if (!bidData || bidData.length === 0) {
-                // If bidData is null or an empty array, display a message
-                bidTable.append('<tr><td colspan="4" class="text-center">No bid data reported.</td></tr>');
-            } else {
-
-
-                bidData.forEach(element => {
-                    console.log(element);
-                
-                    var newRow = $('<tr></tr>');
-                
-                    // Append job name cell
-                    var jobNameCell = $('<td></td>');
-                    jobNameCell.text(element.job_name || 'N/A'); // Handle missing job_name
-                    newRow.append(jobNameCell);
-                
-                    // Append bid cell
-                    var bidCell = $('<td></td>');
-                    bidCell.text(element.bid ? parseFloat(element.bid).toFixed(2) : '0.00'); // Handle missing bid
-                    newRow.append(bidCell);
-                
-                    // Append request cell
-                    var requestCell = $('<td></td>');
-                    requestCell.text(element.request ? parseFloat(element.request).toFixed(2) : '0.00'); // Handle missing request
-                    newRow.append(requestCell);
-                
-                
-                
-                    bidTable.append(newRow);
-                });
-            }
-
-            // Add a click event to the table rows
-            $('#timesheet tbody tr').click(function () {
-                $(this).toggleClass('selected');
-                // Get the selected row data
-                const selectedRowData = $(this).children('td').map(function () {
-                    return $(this).text();
-                }).get();
-                console.log('Selected Row Data:', selectedRowData);
             });
-            $('#bid tbody tr').click(function () {
-                $(this).toggleClass('selected');
-                // Get the selected row data
-                const selectedRowData = $(this).children('td').map(function () {
-                    return $(this).text();
-                }).get();
-                console.log('Selected Row Data:', selectedRowData);
-                
-            });
-            
         });
-    }
-        );
-        
-
     </script>
-
+    
     <style>
         .timesheet-container {
             width: 100%;

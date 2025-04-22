@@ -468,10 +468,23 @@ function createInvoice(takeoff_id, invoice, callback) {
     const randomDigits = Math.floor(100000 + Math.random() * 900000); // Generate 6 random digits
     const generatedInvoiceNumber = `${randomDigits}-${invoiceCount}`;
 
+    // get the system setting invoice_due_date
+    con.query("SELECT setting_value FROM system_settings WHERE setting_name = 'invoice_due_date';", function (err, result) {
+      if (err) {
+        console.log(err);
+        return callback(err);
+      }
+      if (result.length === 0) {
+        console.log("No invoice_due_date setting found");
+        return callback("No invoice_due_date setting found");
+      }
+
+      // due dat 30 days from now
+      const dueDate = moment().add(parseInt(result[0].setting_value), 'days').format("YYYY-MM-DD");
     // Create a new invoice with the generated invoice number
     con.query(
       "INSERT INTO invoices (invoice_number, qb_number, invoice_name, hash, takeoff_id, total, invoice_payment_method, status, payment_confirmation_email_sent, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-      [generatedInvoiceNumber, invoice.qb_number, invoice.invoice_name, generateHash(), takeoff_id, invoice.total, invoice.invoice_payment_method, invoice.status, invoice.payment_confirmation_email_sent, invoice.due_date],
+      [generatedInvoiceNumber, invoice.qb_number, invoice.invoice_name, generateHash(), takeoff_id, invoice.total, invoice.invoice_payment_method, invoice.status, invoice.payment_confirmation_email_sent, dueDate],
       function (err) {
         if (err) {
           console.log(err);
@@ -481,6 +494,8 @@ function createInvoice(takeoff_id, invoice, callback) {
       }
     );
   });
+
+});
 }
 
 
@@ -2399,10 +2414,17 @@ getChangeOrderItemsById: function (change_order_id, callback) {
                     invoiceTotal += (parseFloat(total[0].total) * 0.2);
                   }
 
+                  // get the invoice_due_date setting
+                  con.query("SELECT setting_value FROM system_settings WHERE setting_name = 'invoice_due_date';", function (err, invoiceDueDate) {
+                    if (err) return callback(err);
+                    //console.log("invoiceDueDate: ", invoiceDueDate[0].setting_value);
+                    let dueDate = moment().add(invoiceDueDate[0].setting_value, "days").format("YYYY-MM-DD");
+                    //console.log("due date: ", dueDate);
 
+                
                   con.query(
-                    "INSERT INTO invoices (takeoff_id, total, invoice_number, hash) VALUES (?,?,?,?); SELECT LAST_INSERT_ID() as last;",
-                    [takeoff_id, invoiceTotal, invoiceNumber, generateHash()],
+                    "INSERT INTO invoices (takeoff_id, total, invoice_number, due_date, hash) VALUES (?,?,?,?,?); SELECT LAST_INSERT_ID() as last;",
+                    [takeoff_id, invoiceTotal, invoiceNumber, dueDate, generateHash()],
                     function (err, results) {
                       if (err) return callback(err);
                       console.log(results);
@@ -2426,6 +2448,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
 
 
                     });
+                  });
 
                 });
 

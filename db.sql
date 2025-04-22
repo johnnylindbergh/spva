@@ -86,6 +86,9 @@ VALUES
             </ul>
         ");
 
+
+INSERT INTO system_settings (setting_name, setting_value) VALUES ('invoice_due_date', '30');
+
 CREATE TABLE inclusions_presets (
   id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL UNIQUE,
@@ -422,7 +425,7 @@ CREATE TABLE jobs (
   isArchived TINYINT(1) DEFAULT 0,
   job_name VARCHAR(255) NOT NULL,
   takeoff_id INT,
-  bid DECIMAL(10,2),
+  -- bid DECIMAL(10,2),
   job_description TEXT,
   job_location VARCHAR(255),
   job_start_date TIMESTAMP,
@@ -441,6 +444,7 @@ CREATE TABLE subcontractor_jobs_assignment (
   id INT NOT NULL AUTO_INCREMENT,
   job_id INT NOT NULL,
   user_id INT NOT NULL,
+  alloted_bid DECIMAL(10,2),
   PRIMARY KEY (id),
   UNIQUE KEY (job_id, user_id), -- Prevent duplicate assignments
   FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,

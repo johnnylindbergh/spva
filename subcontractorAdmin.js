@@ -11,6 +11,10 @@ const querystring = require("querystring");
 const schedule = require('node-schedule');
 const pdf = require("./pdf.js");
 
+
+
+
+
 module.exports = function (app) {
 
     app.get('/subcontractorAdmin', mid.isSubcontractorAdmin, function (req, res) {
@@ -36,13 +40,15 @@ module.exports = function (app) {
         console.log("subcontractor userId:", user.id);
         console.log("Looking for jobs assigned to userId:",  user.id);
         db.query(
-            "SELECT jobs.* FROM jobs INNER JOIN subcontractor_jobs_assignment ON jobs.id = subcontractor_jobs_assignment.job_id WHERE subcontractor_jobs_assignment.user_id = ? AND jobs.isArchived = 0;",
+            "SELECT jobs.*, subcontractor_jobs_assignment.alloted_bid as bid FROM jobs INNER JOIN subcontractor_jobs_assignment ON jobs.id = subcontractor_jobs_assignment.job_id WHERE subcontractor_jobs_assignment.user_id = ? AND jobs.isArchived = 0;",
             [user.id],
             function (error, results) {
                 if (error) {
                     console.error('Error fetching assigned jobs:', error);
                     return res.status(500).json({ error: 'Internal server error' });
                 }
+
+                // get the total of previous form_bid requests for each job
                 console.log(results);
                 res.json(results);
             }
@@ -50,7 +56,7 @@ module.exports = function (app) {
     });
 
     app.get('/api/subcontractors', mid.isSubcontractorAdmin, function (req, res) {
-        db.query("SELECT * FROM users WHERE user_type = 4;", function (error, results) {
+        db.query("SELECT * FROM users WHERE user_type = 3;", function (error, results) {
             if (error) {
                 console.error('Error fetching subcontractors:', error);
                 return res.status(500).json({ error: 'Internal server error' });
@@ -86,26 +92,26 @@ module.exports = function (app) {
   
 
     app.post('/api/jobs', mid.isSubcontractorAdmin, function (req, res) {
-        const { job_name, bid_amount, job_description, job_location, job_start_date, job_end_date } = req.body;
+        const { job_name, job_description, job_location, job_start_date, job_end_date } = req.body;
         db.query(
-            "INSERT INTO jobs (job_name, bid, job_description, job_location, job_start_date, job_end_date) VALUES (?, ?, ?, ?, ?, ?)",
-            [job_name, bid_amount, job_description, job_location, job_start_date, job_end_date],
+            "INSERT INTO jobs (job_name, job_description, job_location, job_start_date, job_end_date) VALUES (?, ?, ?, ?, ?)",
+            [job_name, job_description, job_location, job_start_date, job_end_date],
             function (error, result) {
                 if (error) {
                     console.error('Error creating job:', error);
                     return res.status(500).json({ error: 'Internal server error' });
                 }
-                const newJob = { id: result.insertId, job_name, bid_amount, job_description, job_location, job_start_date, job_end_date };
+                const newJob = { id: result.insertId, job_name, job_description, job_location, job_start_date, job_end_date };
                 res.status(201).json(newJob);
             }
         );
     });
 
     app.post('/api/assignments', mid.isSubcontractorAdmin, function (req, res) {
-        const { jobId, subcontractorId } = req.body;
+        const { jobId, subcontractorId, allotedBid } = req.body;
         db.query(
-            "INSERT INTO subcontractor_jobs_assignment (job_id, user_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE user_id = VALUES(user_id)",
-            [jobId, subcontractorId],
+            "INSERT INTO subcontractor_jobs_assignment (job_id, user_id, alloted_bid) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE user_id = VALUES(user_id)",
+            [jobId, subcontractorId, allotedBid],
             function (error) {
                 if (error) {
                     console.error('Error assigning job:', error);

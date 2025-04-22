@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const assignJobForm = document.getElementById('assignJobForm');
     const jobSelect = document.getElementById('jobSelect');
     const subcontractorSelect = document.getElementById('subcontractorSelect');
+    const allotedBidInput = document.getElementById('allotedBid');
     const subcontractorFormsTable = document.getElementById('subcontractorFormsTable');
     const paymentsTable = document.getElementById('paymentsTable');
 
@@ -44,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
 
         const jobName = document.getElementById('jobName').value;
-        const bidAmount = document.getElementById('bidAmount').value;
         const jobDescription = document.getElementById('jobDescription').value;
         const jobLocation = document.getElementById('jobLocation').value;
         const jobStartDate = document.getElementById('jobStartDate').value;
@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     job_name: jobName,
-                    bid_amount: bidAmount,
                     job_description: jobDescription,
                     job_location: jobLocation,
                     job_start_date: jobStartDate,
@@ -82,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const jobId = parseInt(jobSelect.value);
         const subcontractorId = parseInt(subcontractorSelect.value);
+        const allotedBid = parseFloat(allotedBidInput.value);
 
         try {
             const response = await fetch('/api/assignments', {
@@ -122,7 +122,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             row.innerHTML = `
                 <td>${job.job_name}</td>
-                <td>$${job.bid}</td>
+                <td>${job.job_location}</td>
+        
                 <td>${job.job_description}</td>
                 
             `;
@@ -139,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const option = document.createElement('option');
             console.log("job:", job);
             option.value = job.id;
-            option.textContent = `${job.id}, ${job.job_name} ($${job.bid})`;
+            option.textContent = `${job.job_name} `;
             jobSelect.appendChild(option);
         });
     }
