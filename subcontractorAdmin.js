@@ -12,20 +12,7 @@ const schedule = require('node-schedule');
 const pdf = require("./pdf.js");
 
 
-function getTotalRequestedAmount(jobId, userId, callback) {
-    db.query(
-        "SELECT SUM(form_bid.request) as total_requested FROM form_bid JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id WHERE form_bid.job_id = ? AND subcontractor_forms.user_id = ?",
-        [jobId, userId],
-        function (error, results) {
-            if (error) {
-                console.error('Error fetching total requested amount:', error);
-                return callback(error);
-            }
-            const totalRequested = results[0].total_requested || 0;
-            callback(null, totalRequested);
-        }
-    );
-}
+
 
 
 module.exports = function (app) {

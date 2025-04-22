@@ -7,6 +7,10 @@
     <title>Subcontractor</title>
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+    <!-- popper -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script> -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
         body {
@@ -248,12 +252,29 @@ $(document).ready(function () {
             }
         });
 
+        // use popper
+
+    
         // Collect jobsWithBids data
         $('.jobsWithBids tbody tr').each(function () {
             const row = $(this);
             const jobId = row.find('select').val();
             const bid = row.find('input[type="number"]').eq(0).val();
             const requestedAmount = row.find('input[type="number"]').eq(1).val();
+
+            // if the requested amount is greater than the bid, show an alert
+            if (parseFloat(requestedAmount) > parseFloat(bid)) {
+                Swal.Fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Requested amount cannot be greater than the bid amount!'
+                });
+                return;
+            }
+            if (!jobId || !bid || !requestedAmount) {
+                alert('Please fill all fields in the jobs with bids section.');
+                return;
+            }
             bidsData.push({
                 jobId,
                 bid,

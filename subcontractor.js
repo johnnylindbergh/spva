@@ -13,31 +13,51 @@ require('dotenv').config();
 
 function getBidsData(form_id) {
   return new Promise((resolve, reject) => {
-    db.query('SELECT * FROM form_bid JOIN jobs on form_bid.job_id = jobs.id WHERE form_id = ?;', [form_id], (err, results) => {
-      if (err) {
-        console.error(err);
-        reject(err);
-        return;
+    db.query(
+      `SELECT form_bid.*, jobs.*, subcontractor_jobs_assignment.alloted_bid as bid 
+       FROM form_bid 
+       JOIN jobs ON form_bid.job_id = jobs.id 
+       JOIN subcontractor_jobs_assignment ON form_bid.job_id = subcontractor_jobs_assignment.job_id 
+       WHERE form_bid.form_id = ?;`,
+      [form_id],
+      (err, results) => {
+        if (err) {
+          console.error(err);
+          reject(err);
+          return;
+        }
+        resolve(results);
       }
-      resolve(results);
-    });
-  }
-  );
+    );
+  });
 }
 
 function getTotalRequestedAmount(jobId, userId, callback) {
-    db.query(
-        "SELECT SUM(form_bid.request) as total_requested FROM form_bid JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id WHERE form_bid.job_id = ? AND subcontractor_forms.user_id = ?",
+  db.query(
+    "SELECT SUM(form_bid.request) as total_requested FROM form_bid JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id WHERE form_bid.job_id = ? AND subcontractor_forms.user_id = ? AND form_bid.status IN ('Approved', 'Pending')",
+    [jobId, userId],
+    function (error, results) {
+      if (error) {
+        console.error('Error fetching total requested amount:', error);
+        return callback(error);
+      }
+      const totalRequested = results[0].total_requested || 0;
+
+      // Fetch totalAllotted from subcontractor_jobs_assignment
+      db.query(
+        "SELECT alloted_bid FROM subcontractor_jobs_assignment WHERE job_id = ? AND user_id = ?",
         [jobId, userId],
         function (error, results) {
-            if (error) {
-                console.error('Error fetching total requested amount:', error);
-                return callback(error);
-            }
-            const totalRequested = results[0].total_requested || 0;
-            callback(null, totalRequested);
+          if (error) {
+            console.error('Error fetching total allotted amount:', error);
+            return callback(error);
+          }
+          const totalAllotted = results.length > 0 ? results[0].total_allotted : 0;
+          callback(null, totalRequested, totalAllotted);
         }
-    );
+      );
+    }
+  );
 }
 
 
@@ -100,53 +120,56 @@ module.exports = function (app) {
     let form_id = req.query.id;
     console.log('viewing form', form_id);
     let user_id = req.user.local.id;
+    let user_type = req.user.local.user_type;
+
     if (form_id == undefined) {
       res.send('sowwy, no form_id found in query');
       return;
     }
-    db.query('SELECT * FROM form_items JOIN form_item_days ON form_items.id = form_item_days.form_item_id JOIN jobs ON form_items.job_id = jobs.id JOIN subcontractor_jobs_assignment on subcontractor_jobs_assignment.job_id = form_items.job_id WHERE form_items.form_id = ?;', [form_id], (err, results) => {
-      console.log(results);
-      // group by job 
-      let grouped = {};
+
+    // Check if the user owns the form or is user_type 4 or 1
+    db.query('SELECT * FROM forms WHERE id = ?;', [form_id], (err, results) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error retrieving form.');
+        return;
+      }
 
       if (results == null || results.length === 0) {
         res.send('sowwy, no form found with that id');
         return;
       }
 
-      // check if the user_id is the same as the form_id
-      if (results[0].user_id !== user_id && req.user.local.user_type !== 4) {
+      const form = results[0];
+      if (form.user_id !== user_id && user_type !== 4 && user_type !== 1) {
         res.status(403).send('Unauthorized access to this form.');
         return;
       }
 
-      for (var i = 0; i < results.length; i++) {
-        let item = results[i];
-        if (grouped[item.job_name] == undefined) {
-          grouped[item.job_name] = [];
+      // Proceed to fetch form data
+      db.query('SELECT * FROM form_items JOIN form_item_days ON form_items.id = form_item_days.form_item_id JOIN jobs ON form_items.job_id = jobs.id JOIN subcontractor_jobs_assignment on subcontractor_jobs_assignment.job_id = form_items.job_id WHERE form_items.form_id = ?;', [form_id], (err, results) => {
+        console.log(results);
+        // group by job 
+        let grouped = {};
+
+        if (results != null && results.length > 0) {
+          for (var i = 0; i < results.length; i++) {
+            let item = results[i];
+            if (grouped[item.job_name] == undefined) {
+              grouped[item.job_name] = [];
+            }
+            grouped[item.job_name].push(item);
+          }
         }
-        grouped[item.job_name].push(item);
-      }
 
-      // also get the bids data
-      getBidsData(form_id).then((bids) => {
-        console.log('bids data:', bids);
-        // add the bids data to the grouped object
-        // for (var i = 0; i < bids.length; i++) {
-        //   let item = bids[i];
-        //   if (grouped[item.job_name] == undefined) {
-        //     grouped[item.job_name] = [];
-        //   }
-        //   grouped[item.job_name].push(item);
-        // }
-        // send the grouped object and the bids data
-        res.send({ timesheetData: grouped, bidData: bids });
+        // also get the bids data
+        getBidsData(form_id).then((bids) => {
+          console.log('bids data:', bids);
+          // send the grouped object and the bids data
+          res.send({ timesheetData: grouped, bidData: bids });
+        });
       });
-     // res.send(grouped);
-
-
     });
-
   });
 
   app.get('/subcontractor/createForm', mid.isAuth, mid.isSubcontractor, async (req, res) => {
@@ -242,14 +265,33 @@ module.exports = function (app) {
               if (item.jobId == '') {
                 continue;
               }
-              console.log(item);
-              db.query('INSERT INTO form_bid (form_id, job_id, request) VALUES (?, ?, ?);', [form_id, item.jobId | 0, item.requestedAmount], (err) => {
+
+              // use getTotalRequestedAmount to validate the requested amount
+              getTotalRequestedAmount(item.jobId, user_id, (err, totalRequested, totalAllotted) => {
                 if (err) {
-                  console.log('bids insert error', err);
+                  console.error('Error fetching total requested amount:', err);
                   res.status(500).send('Error submitting form.');
                   return;
                 }
+                console.log('Total requested amount:', totalRequested);
+
+
+                if (totalRequested + item.requestedAmount > totalAllotted) {
+                  console.log('Requested amount exceeds allotted amount');
+                  res.status(400).send('Requested amount exceeds allotted amount');
+                  return;
+                }
+                console.log('Requested amount is within limits');
+                console.log(item);
+                db.query('INSERT INTO form_bid (form_id, job_id, request) VALUES (?, ?, ?);', [form_id, item.jobId | 0, item.requestedAmount], (err) => {
+                  if (err) {
+                    console.log('bids insert error', err);
+                    res.status(500).send('Error submitting form.');
+                    return;
+                  }
+                });
               });
+             
             }
             console.log('bids data insert done');
 
