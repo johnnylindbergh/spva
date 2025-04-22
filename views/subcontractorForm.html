@@ -134,28 +134,39 @@ function populateJobDropdowns() {
 
 function addBidRow() {
     const newRow = $('<tr></tr>');
+
+    // Job Name column
     const jobNameCell = $('<td></td>');
-    const jobDropdown = $('<select class="job-dropdown"><option value="">Select Job</option></select>');
+    const jobDropdown = $('<select class="job-dropdown form-control"><option value="">Select Job</option></select>');
     jobList.forEach(job => {
-        console.log("Job ID:", job.id);
-        console.log("Job Name:", job.job_name);
-        jobDropdown.append(`<option value="${job.id}">${job.job_name}</option>`);
+        jobDropdown.append(`<option value="${job.id}" data-bid="${job.bid}">${job.job_name}</option>`);
     });
     jobNameCell.append(jobDropdown);
     newRow.append(jobNameCell);
 
+    // Bid column
     const bidCell = $('<td></td>');
-    const bidInput = $('<input type="number" placeholder="Bid">');
+    const bidInput = $('<input type="number" id="bidAmount" class="form-control" placeholder="Bid">');
     bidCell.append(bidInput);
     newRow.append(bidCell);
 
+    // Requested Amount column
     const requestedAmountCell = $('<td></td>');
-    const requestedAmountInput = $('<input type="number" placeholder="Requested Amount">');
+    const requestedAmountInput = $('<input type="number" class="form-control" placeholder="Requested Amount">');
     requestedAmountCell.append(requestedAmountInput);
     newRow.append(requestedAmountCell);
 
+    // Append the new row to the table
     $('.jobsWithBids tbody').append(newRow);
+
+    // Add change event listener to update bidAmount when a job is selected
+    jobDropdown.change(function () {
+        const selectedOption = $(this).find('option:selected');
+        const bidAmount = selectedOption.data('bid') || '';
+        bidInput.val(bidAmount);
+    });
 }
+
 
 function addTimesheetRow(timesheet) {
     const newRow = $('<tr></tr>');
@@ -226,80 +237,107 @@ $(document).ready(function () {
         addTimesheetRow(timesheet);
     });
 
-    $('#submit').click(function () {
-        const data = [];
-        const bidsData = [];
+    $('#submit').click(function (event) {
+    event.preventDefault(); // Prevent default form submission
 
-        const formName = $('#formName').val();
+    const data = [];
+    const bidsData = [];
 
-        // Collect timesheet data
-        timesheet.find('tr').each(function () {
-            const row = $(this);
-            if (row.find('select').length > 0) {
-                const jobId = row.find('select').val();
-                const days = [];
-                row.find('input[type="number"]').each(function () {
-                    days.push($(this).val());
-                });
-                const total = row.find('.total').text();
-                const description = row.find('textarea').val();
-                data.push({
-                    jobId,
-                    days,
-                    total,
-                    description
-                });
-            }
-        });
+    const formName = $('#formName').val();
 
-        // use popper
-
-    
-        // Collect jobsWithBids data
-        $('.jobsWithBids tbody tr').each(function () {
-            const row = $(this);
+    // Collect timesheet data
+    timesheet.find('tr').each(function () {
+        const row = $(this);
+        if (row.find('select').length > 0) {
             const jobId = row.find('select').val();
-            const bid = row.find('input[type="number"]').eq(0).val();
-            const requestedAmount = row.find('input[type="number"]').eq(1).val();
-
-            // if the requested amount is greater than the bid, show an alert
-            if (parseFloat(requestedAmount) > parseFloat(bid)) {
-                Swal.Fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Requested amount cannot be greater than the bid amount!'
-                });
-                return;
-            }
-            if (!jobId || !bid || !requestedAmount) {
-                alert('Please fill all fields in the jobs with bids section.');
-                return;
-            }
-            bidsData.push({
-                jobId,
-                bid,
-                requestedAmount
+            const days = [];
+            row.find('input[type="number"]').each(function () {
+                days.push($(this).val());
             });
-        });
-
-        if (!formName) {
-            alert('Please enter a form name.');
-            return;
+            const total = row.find('.total').text();
+            const description = row.find('textarea').val();
+            data.push({
+                jobId,
+                days,
+                total,
+                description
+            });
         }
+    });
 
-        $.post('/subcontractor/submit', {
-            timesheetData: data,
-            bidsData: bidsData,
-            form_name: formName
-        }, function (response) {
-            if (response.status === 'success') {
-                alert('Data submitted successfully');
-                window.location.href = '/subcontractor/viewForm?id=' + response.form_id;
-            } else {
-                alert('Error submitting data');
-            }
+    // Collect jobsWithBids data
+    let isValid = true; // Flag to track validation status
+    $('.jobsWithBids tbody tr').each(function () {
+        const row = $(this);
+        const jobId = row.find('select').val();
+        const bid = row.find('input[type="number"]').eq(0).val();
+        const requestedAmount = row.find('input[type="number"]').eq(1).val();
+
+        if (parseFloat(requestedAmount) > parseFloat(bid)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Requested amount cannot be greater than the bid amount!'
+            });
+            isValid = false;
+            return false; // Exit the loop
+        }
+        if (!jobId || !bid || !requestedAmount) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please fill all fields in the jobs with bids section!'
+            });
+            isValid = false;
+            return false; // Exit the loop
+        }
+        bidsData.push({
+            jobId,
+            bid,
+            requestedAmount
         });
     });
+
+    if (!isValid) {
+        return false; // Stop form submission if validation fails
+    }
+
+    // Check for duplicate job IDs
+    const jobIds = bidsData.map(item => item.jobId);
+    const uniqueJobIds = [...new Set(jobIds)];
+    if (jobIds.length !== uniqueJobIds.length) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Duplicate job IDs found in the timesheet!'
+        });
+        return false;
+    }
+
+    if (!formName) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Please enter a name for the timesheet!'
+        });
+        return false;
+    }
+
+    // Submit the form data
+    $.post('/subcontractor/submit', {
+        timesheetData: data,
+        bidsData: bidsData,
+        form_name: formName
+    }, function (response) {
+        if (response.status === 'success') {
+            alert('Data submitted successfully');
+            window.location.href = '/subcontractor/viewForm?id=' + response.form_id;
+        } else {
+            alert('Error submitting data');
+        }
+    });
+});
+
 });
     </script>
 </body>

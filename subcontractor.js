@@ -260,6 +260,15 @@ module.exports = function (app) {
             
             console.log('bids data found');
 
+            // check if there are any rows with duplicate jobId
+            let jobIds = bid_data.map(item => item.jobId);
+            let uniqueJobIds = [...new Set(jobIds)];
+            if (jobIds.length !== uniqueJobIds.length) {
+              console.log('Duplicate jobId found');
+              res.status(400).send('Duplicate jobId found');
+              return;
+            }
+
             for (const item of bid_data) {
               // if and of the fields are empty, skip this item
               if (item.jobId == '') {
