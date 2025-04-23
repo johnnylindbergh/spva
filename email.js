@@ -112,7 +112,7 @@ async function sendEstimateEmailInternally(req, res, takeoff_id, targetEmail, ca
 }
 
 
-async function sendInvoiceEmail(takeoff_id, invoice_id, callback) {
+async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
   try {
     // Wrap db.getTakeoffById in a promise
     const takeoff = await new Promise((resolve, reject) => {

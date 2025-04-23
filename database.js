@@ -1132,7 +1132,7 @@ module.exports = {
               }
             });
           } catch (queryErr) {
-            callback(queryErr);
+            callback(queryErr, null, null);
           }
         });
       }

@@ -841,6 +841,7 @@ module.exports = function (app) {
 
 
   app.post("/update-signature", function (req, res) {
+    
     console.log("updating signature ", req.body);
     db.updateSignature(
       req.body.takeoff_id,
@@ -865,11 +866,14 @@ module.exports = function (app) {
                     console.log(err);
                   } else {
 
+                    
+                    const autoSendDeposit = takeoff[0].autoSendDeposit;
                     console.log("sending email to ", takeoff);
                     console.log("for invoice_id", invoice_id);
 
-                    if (takeoff.autoSendDeposit){
-                      emailer.sendInvoiceEmail(req, res, req.body.takeoff_id, invoice_id, function (err) {
+                    if (autoSendDeposit == 1) {
+                      console.log("sending invoice email");
+                      emailer.sendInvoiceEmail(req, res, takeoff[0].id, invoice_id, function (err, valid) {
                         if (err) {
                           console.log(err);
                         } else {
@@ -3102,7 +3106,7 @@ app.post('/getTerms', function (req, res) {
         res.send("error retrieving invoice");
       } else {
         console.log(invoice);
-        emailer.sendInvoiceEmail( req.body.takeoff_id, req.body.invoice_id, function (err, response) {
+        emailer.sendInvoiceEmail(req, res, req.body.takeoff_id, req.body.invoice_id, function (err, response) {
           if (err) {
             console.log(err);
             res.send("email failed");
