@@ -34,6 +34,20 @@ module.exports = function (app) {
         });
     });
 
+    app.get('/api/jobs/:id', mid.isSubcontractorAdmin, function (req, res) {
+        const jobId = req.params.id;
+        db.query("SELECT * FROM jobs WHERE id = ?;", [jobId], function (error, results) {
+            if (error) {
+                console.error('Error fetching job:', error);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+            if (results.length === 0) {
+                return res.status(404).json({ error: 'Job not found' });
+            }
+            res.json(results[0]);
+        });
+    });
+
     
 
     app.get('/api/subcontractors', mid.isSubcontractorAdmin, function (req, res) {
@@ -91,7 +105,7 @@ module.exports = function (app) {
     app.post('/api/assignments', mid.isSubcontractorAdmin, function (req, res) {
         const { jobId, subcontractorId, allotedBid } = req.body;
         db.query(
-            "INSERT INTO subcontractor_jobs_assignment (job_id, user_id, alloted_bid) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE user_id = VALUES(user_id)",
+            "INSERT INTO subcontractor_jobs_assignment (job_id, user_id, alloted_bid) VALUES (?, ?, ?);",
             [jobId, subcontractorId, allotedBid],
             function (error) {
                 if (error) {

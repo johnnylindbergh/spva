@@ -14,11 +14,17 @@ require('dotenv').config();
 function getBidsData(form_id) {
   return new Promise((resolve, reject) => {
     db.query(
-      `SELECT form_bid.*, jobs.*, subcontractor_jobs_assignment.alloted_bid as bid 
-       FROM form_bid 
-       JOIN jobs ON form_bid.job_id = jobs.id 
-       JOIN subcontractor_jobs_assignment ON form_bid.job_id = subcontractor_jobs_assignment.job_id 
-       WHERE form_bid.form_id = ?;`,
+      `SELECT form_bid.*, jobs.*, sja.alloted_bid as bid 
+          FROM form_bid 
+          JOIN jobs ON form_bid.job_id = jobs.id 
+          JOIN subcontractor_jobs_assignment sja 
+      ON sja.id = (
+          SELECT MIN(id) 
+          FROM subcontractor_jobs_assignment 
+          WHERE job_id = form_bid.job_id
+        )
+WHERE form_bid.form_id = ?;
+`,
       [form_id],
       (err, results) => {
         if (err) {
@@ -48,7 +54,7 @@ function getTotalRequestedAmount(jobId, userId, callback) {
         "SELECT alloted_bid FROM subcontractor_jobs_assignment WHERE job_id = ? AND user_id = ?",
         [jobId, userId],
         function (error, bidResults) {
-          if (error) {
+          if (error || bidResults.length === 0) { 
             console.error('Error fetching total allotted amount:', error);
             return callback(error);
           }
@@ -60,7 +66,7 @@ function getTotalRequestedAmount(jobId, userId, callback) {
   );
 }
 
-function getAvailableFunds(userId, jobId, callback) {
+function getAvailableFunds(jobId, userId, callback) {
   getTotalRequestedAmount(jobId, userId, (err, totalRequested, totalAllotted) => {
     if (err) {
       console.error('Error fetching total requested amount:', err);
@@ -152,7 +158,7 @@ module.exports = function (app) {
                   let jobsProcessed = 0;
                   results.forEach((job) => {
                       
-                      getAvailableFunds(user.id, job.id, (error, availableFunds) => {
+                      getAvailableFunds(job.id, user.id, (error, availableFunds) => {
                           
                           if (error) {
                               console.error('Error fetching available funds:', error);
@@ -166,6 +172,8 @@ module.exports = function (app) {
                          
                           jobsProcessed++;
                           if (jobsProcessed === results.length) {
+
+                              
                               res.json(jobsWithFunds);
                           }
                       });
@@ -209,7 +217,18 @@ module.exports = function (app) {
       }
 
       // Proceed to fetch form data
-      db.query('SELECT * FROM form_items JOIN form_item_days ON form_items.id = form_item_days.form_item_id JOIN jobs ON form_items.job_id = jobs.id JOIN subcontractor_jobs_assignment on subcontractor_jobs_assignment.job_id = form_items.job_id WHERE form_items.form_id = ?;', [form_id], (err, results) => {
+      db.query(`SELECT * 
+                  FROM form_items 
+                  JOIN form_item_days 
+                      ON form_items.id = form_item_days.form_item_id 
+                  JOIN jobs 
+                      ON form_items.job_id = jobs.id 
+                  JOIN subcontractor_jobs_assignment 
+                      ON subcontractor_jobs_assignment.job_id = form_items.job_id 
+                    AND subcontractor_jobs_assignment.user_id = ?  -- Subcontractor filter
+                  WHERE form_items.form_id = ?;`, 
+        [user_id,form_id], (err, results) => {
+          
         console.log(results);
         // group by job 
         let grouped = {};
@@ -219,6 +238,8 @@ module.exports = function (app) {
             let item = results[i];
             if (grouped[item.job_name] == undefined) {
               grouped[item.job_name] = [];
+
+              grouped[item.job_name].push(item);
             }
             grouped[item.job_name].push(item);
           }
@@ -337,17 +358,18 @@ module.exports = function (app) {
                 continue;
               }
 
+              console.log("Processing jobBid Data", item);
               // use getTotalRequestedAmount to validate the requested amount
-              getTotalRequestedAmount(item.jobId, user_id, (err, totalRequested, totalAllotted) => {
+              getAvailableFunds(item.jobId, user_id, (err, availableFunds) => {
                 if (err) {
                   console.error('Error fetching total requested amount:', err);
                   res.status(500).send('Error submitting form.');
                   return;
                 }
-                console.log('Total requested amount:', totalRequested);
-                console.log('Total allotted amount:', totalAllotted);
+                console.log('Total  available: ', availableFunds);
+                console.log('Total requested amount:', item.requestedAmount);
 
-                if (totalRequested + item.requestedAmount > totalAllotted) {
+                if (item.requestedAmount > availableFunds) {
                   console.log('Requested amount exceeds allotted amount');
                   //res.status(400).send('Requested amount exceeds allotted amount');
                   return;
