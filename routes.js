@@ -3365,7 +3365,8 @@ app.post('/getTerms', function (req, res) {
     );
   });
 
-  app.post("/updateChangeOrderStatus", mid.isAdmin, function (req, res) {
+  // open to public, should probably change to hash
+  app.post("/updateChangeOrderStatus", function (req, res) {
     console.log("updating change order status");
     console.log(req.body);
     db.updateChangeOrderStatus(req.body.change_order_id, parseInt(req.body.status), function (err) {

@@ -3368,8 +3368,16 @@ createNewSov: function (takeoff_id, callback) {
           // insert the items into the new sov
           console.log("the previous sov items: ", items);
           for (var i = 0; i < items.length; i++) {
-            newSovTotal += parseFloat(items[i].this_invoiced_amount);
             let new_previous_invoiced_amount = parseFloat(items[i].this_invoiced_amount) + parseFloat(items[i].previous_invoiced_amount);
+            // if the amount remaining is greater than 0, insert the item into the new sov
+            if (new_previous_invoiced_amount >= parseFloat(items[i].total_contracted_amount) || parseFloat(items[i].total_contracted_amount) == 0) {
+              // the item is fully invoiced, so skip it
+              console.log("item is fully invoiced, skipping: ", items[i]);
+              continue;
+            }
+
+            newSovTotal += parseFloat(items[i].this_invoiced_amount);
+
             con.query("INSERT INTO sov_items (sov_id, total_contracted_amount, description, previous_invoiced_amount) VALUES (?,?,?,?);", [sov_id, items[i].total_contracted_amount, items[i].description, new_previous_invoiced_amount], function (err) {
               if (err) return callback(err);
             });
