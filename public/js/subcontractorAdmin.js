@@ -133,6 +133,51 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
+    // Add event listeners using event delegation
+    document.getElementById('jobsTable').addEventListener('click', function(e) {
+        if (e.target && (e.target.dataset.action === 'edit' || e.target.dataset.action === 'delete')) {
+            handleJobAction(e);
+        }
+    });
+    async function handleJobAction(e) {
+        
+        const jobId = parseInt(e.target.dataset.id);
+        const action = e.target.dataset.action;
+        console.log("jobId:", jobId);
+        console.log("action:", action);
+        if (action === 'edit') {
+            // Open the edit modal and populate it with job data
+            const job = await fetch(`/api/jobs/${jobId}`).then(res => res.json());
+            document.getElementById('editJobName').value = job.job_name;
+            document.getElementById('editJobDescription').value = job.job_description;
+            document.getElementById('editJobLocation').value = job.job_location;
+            document.getElementById('editJobStartDate').value = job.job_start_date;
+            document.getElementById('editJobEndDate').value = job.job_end_date;
+            $('#jobEditModal').modal('show');
+        }
+        else if (action === 'delete') {
+            // Confirm deletion
+            if (confirm(`Are you sure you want to delete job #${jobId}?`)) {
+                try {
+                    const response = await fetch(`/api/jobs/${jobId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert(`Job #${jobId} deleted successfully!`);
+                        fetchData(); // Refresh data
+                    } else {
+                        alert('Failed to delete job.');
+                    }
+                } catch (error) {
+                    console.error('Error deleting job:', error);
+                }
+            }
+        }
+    }
+
+
+
     // Render job select dropdown
     function renderJobSelect(jobs) {
         jobSelect.innerHTML = '<option value="">Select Job</option>';

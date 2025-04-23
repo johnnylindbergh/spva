@@ -10,6 +10,8 @@ const creds = require("./credentials.js");
 const querystring = require("querystring");
 const schedule = require('node-schedule');
 const pdf = require("./pdf.js");
+const subcontractor = require("./subcontractor.js");
+
 
 
 
@@ -32,28 +34,7 @@ module.exports = function (app) {
         });
     });
 
-    // access by subcontractor
-    // only get jobs assigned to the logged in subcontractor
-    app.get('/subcontractor/jobs', mid.isSubcontractor, function (req, res) {
-        console.log("subcontractor jobs access");
-        const user = req.user.local;
-        console.log("subcontractor userId:", user.id);
-        console.log("Looking for jobs assigned to userId:",  user.id);
-        db.query(
-            "SELECT jobs.*, subcontractor_jobs_assignment.alloted_bid as bid FROM jobs INNER JOIN subcontractor_jobs_assignment ON jobs.id = subcontractor_jobs_assignment.job_id WHERE subcontractor_jobs_assignment.user_id = ? AND jobs.isArchived = 0;",
-            [user.id],
-            function (error, results) {
-                if (error) {
-                    console.error('Error fetching assigned jobs:', error);
-                    return res.status(500).json({ error: 'Internal server error' });
-                }
-
-                // get the total of previous form_bid requests for each job
-                console.log(results);
-                res.json(results);
-            }
-        );
-    });
+    
 
     app.get('/api/subcontractors', mid.isSubcontractorAdmin, function (req, res) {
         db.query("SELECT * FROM users WHERE user_type = 3;", function (error, results) {

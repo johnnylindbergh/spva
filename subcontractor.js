@@ -47,18 +47,33 @@ function getTotalRequestedAmount(jobId, userId, callback) {
       db.query(
         "SELECT alloted_bid FROM subcontractor_jobs_assignment WHERE job_id = ? AND user_id = ?",
         [jobId, userId],
-        function (error, results) {
+        function (error, bidResults) {
           if (error) {
             console.error('Error fetching total allotted amount:', error);
             return callback(error);
           }
-          const totalAllotted = results.length > 0 ? results[0].total_allotted : 0;
-          callback(null, totalRequested, totalAllotted);
+          console.log('Total allotted:', bidResults);
+          callback(null, totalRequested, bidResults[0].alloted_bid);
         }
       );
     }
   );
 }
+
+function getAvailableFunds(userId, jobId, callback) {
+  getTotalRequestedAmount(jobId, userId, (err, totalRequested, totalAllotted) => {
+    if (err) {
+      console.error('Error fetching total requested amount:', err);
+      return callback(err);
+    }
+    console.log('Total requested amount:', totalRequested);
+    console.log('Total allotted amount:', totalAllotted);
+    const availableFunds = totalAllotted - totalRequested;
+    console.log('Available funds:', availableFunds);
+    callback(null, availableFunds);
+  });
+}
+
 
 
 
@@ -113,6 +128,53 @@ module.exports = function (app) {
       res.render('subcontractorViewForm.html', { form: results });
     });
   });
+
+
+  // access by subcontractor
+      // only get jobs assigned to the logged in subcontractor
+      app.get('/subcontractor/jobs', mid.isSubcontractor, function (req, res) {
+          console.log("subcontractor jobs access");
+          const user = req.user.local;
+          console.log("subcontractor userId:", user.id);
+          console.log("Looking for jobs assigned to userId:",  user.id);
+          db.query(
+              "SELECT jobs.*, subcontractor_jobs_assignment.alloted_bid as bid FROM jobs INNER JOIN subcontractor_jobs_assignment ON jobs.id = subcontractor_jobs_assignment.job_id WHERE subcontractor_jobs_assignment.user_id = ? AND jobs.isArchived = 0;",
+              [user.id],
+              function (error, results) {
+                  if (error) {
+                      console.error('Error fetching assigned jobs:', error);
+                      return res.status(500).json({ error: 'Internal server error' });
+                  }
+  
+                  
+                  // for each job, call subcontractor.getAvailableFunds(user.id, job.id, callback)
+                  const jobsWithFunds = [];
+                  let jobsProcessed = 0;
+                  results.forEach((job) => {
+                      
+                      getAvailableFunds(user.id, job.id, (error, availableFunds) => {
+                          
+                          if (error) {
+                              console.error('Error fetching available funds:', error);
+                              return res.status(500).json({ error: 'Internal server error' });
+                          }
+
+                          if (availableFunds> 0) {
+                            job.bid = availableFunds;
+                            jobsWithFunds.push(job);
+                          }
+                         
+                          jobsProcessed++;
+                          if (jobsProcessed === results.length) {
+                              res.json(jobsWithFunds);
+                          }
+                      });
+
+                  });                  
+              }
+          );
+
+      });
 
 
 
@@ -283,11 +345,11 @@ module.exports = function (app) {
                   return;
                 }
                 console.log('Total requested amount:', totalRequested);
-
+                console.log('Total allotted amount:', totalAllotted);
 
                 if (totalRequested + item.requestedAmount > totalAllotted) {
                   console.log('Requested amount exceeds allotted amount');
-                  res.status(400).send('Requested amount exceeds allotted amount');
+                  //res.status(400).send('Requested amount exceeds allotted amount');
                   return;
                 }
                 console.log('Requested amount is within limits');

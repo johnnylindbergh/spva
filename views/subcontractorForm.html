@@ -89,7 +89,7 @@
                         <option value="">Select Job</option>
                     </select>
                 </td>
-                <td><input type="number" id="bidAmount" class="form-control" placeholder="Bid"></td>
+                <td><input type="number" id="bidAmount" class="form-control" placeholder="Bid" readonly></td>
                 <td><input type="number" class="form-control" placeholder="Requested Amount"></td>
             </tr>
         </tbody>
@@ -120,6 +120,9 @@ function populateJobDropdowns() {
         dropdown.empty();
         dropdown.append('<option value="">Select Job</option>');
         jobList.forEach(job => {
+            if (job.bid ==null) {
+                job.bid = 0;
+            }
             dropdown.append(`<option value="${job.id}" data-bid="${job.bid}">${job.job_name}</option>`);
         });
 
@@ -146,7 +149,7 @@ function addBidRow() {
 
     // Bid column
     const bidCell = $('<td></td>');
-    const bidInput = $('<input type="number" id="bidAmount" class="form-control" placeholder="Bid">');
+    const bidInput = $('<input type="number" id="bidAmount" class="form-control" placeholder="Bid" readonly>');
     bidCell.append(bidInput);
     newRow.append(bidCell);
 
@@ -282,11 +285,21 @@ $(document).ready(function () {
             isValid = false;
             return false; // Exit the loop
         }
-        if (!jobId || !bid || !requestedAmount) {
+        if (!jobId || !requestedAmount) {
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
                 text: 'Please fill all fields in the jobs with bids section!'
+            });
+            isValid = false;
+            return false; // Exit the loop
+        }
+
+        if (!bid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please select a job from the dropdown!'
             });
             isValid = false;
             return false; // Exit the loop
