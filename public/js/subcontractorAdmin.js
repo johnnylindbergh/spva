@@ -214,10 +214,18 @@ document.addEventListener('DOMContentLoaded', function() {
         forms.forEach(form => {
             const row = document.createElement('tr');
 
+
+            // format the form.created_at date
+            const date = new Date(form.created_at);
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+            form.created_at = date.toLocaleDateString('en-US', options);
+            console.log("form.created_at:", form.created_at);
+            
             console.log("form:", form);
             row.innerHTML = `
                 <td>${form.form_id}</td>
                 <td>${form.name}</td>
+                <td>${form.created_at}</td>
                 <td><a href="/subcontractor/viewForm/?id=${form.form_id}" target="_blank">${form.form_name}</a></td>
             `;
             subcontractorFormsTable.appendChild(row);
