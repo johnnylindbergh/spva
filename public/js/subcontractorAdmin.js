@@ -204,32 +204,88 @@ document.addEventListener('DOMContentLoaded', function() {
     // Render forms table
     function renderFormsTable(forms) {
         subcontractorFormsTable.innerHTML = '';
-        if (forms.length === 0) {
-            const row = document.createElement('tr');
-            row.innerHTML = '<td colspan="3" class="text-center">No forms submitted yet</td>';
-            subcontractorFormsTable.appendChild(row);
-            return;
+
+        // Create a dropdown for filtering by week
+        const searchContainer = document.createElement('div');
+        searchContainer.classList.add('mb-3');
+        searchContainer.innerHTML = `
+            <label for="weekDropdown" class="form-label">Filter by Week:</label>
+            <select id="weekDropdown" class="form-select">
+                <option value="">Select a week</option>
+            </select>
+        `;
+        subcontractorFormsTable.parentElement.insertBefore(searchContainer, subcontractorFormsTable);
+
+        const weekDropdown = document.getElementById('weekDropdown');
+
+        // Generate unique weeks from forms data
+        const weeks = Array.from(new Set(forms.map(form => {
+            const date = new Date(form.created_at);
+            const startOfWeek = new Date(date.setDate(date.getDate() - date.getDay()));
+            return startOfWeek.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        })));
+
+        // Populate the dropdown with weeks
+        weeks.forEach(week => {
+            const option = document.createElement('option');
+            option.value = week;
+            option.textContent = `Week of ${new Date(week).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            weekDropdown.appendChild(option);
+        });
+
+        // Filter forms by the selected week
+        function filterFormsByWeek() {
+            const selectedWeek = weekDropdown.value;
+            if (!selectedWeek) {
+                renderForms(forms); // Render all forms if no week is selected
+                return;
+            }
+
+            const startOfWeek = new Date(selectedWeek);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+            const filteredForms = forms.filter(form => {
+                const formDate = new Date(form.created_at);
+                return formDate >= startOfWeek && formDate <= endOfWeek;
+            });
+
+            renderForms(filteredForms);
         }
 
-        forms.forEach(form => {
-            const row = document.createElement('tr');
+        // Render forms into the table
+        function renderForms(formsToRender) {
+            subcontractorFormsTable.innerHTML = '';
+            if (formsToRender.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="4" class="text-center">No forms submitted for the selected week</td>';
+                subcontractorFormsTable.appendChild(row);
+                return;
+            }
 
+            formsToRender.forEach(form => {
+                const row = document.createElement('tr');
 
-            // format the form.created_at date
-            const date = new Date(form.created_at);
-            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-            form.created_at = date.toLocaleDateString('en-US', options);
-            console.log("form.created_at:", form.created_at);
-            
-            console.log("form:", form);
-            row.innerHTML = `
-                <td>${form.form_id}</td>
-                <td>${form.name}</td>
-                <td>${form.created_at}</td>
-                <td><a href="/subcontractor/viewForm/?id=${form.form_id}" target="_blank">${form.form_name}</a></td>
-            `;
-            subcontractorFormsTable.appendChild(row);
-        });
+                // Format the form.created_at date
+                const date = new Date(form.created_at);
+                const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                form.created_at = date.toLocaleDateString('en-US', options);
+
+                row.innerHTML = `
+                    <td>${form.form_id}</td>
+                    <td>${form.name}</td>
+                    <td>${form.created_at}</td>
+                    <td><a href="/subcontractor/viewForm/?id=${form.form_id}" target="_blank">${form.form_name}</a></td>
+                `;
+                subcontractorFormsTable.appendChild(row);
+            });
+        }
+
+        // Initial render of all forms
+        renderForms(forms);
+
+        // Add event listener to the dropdown
+        weekDropdown.addEventListener('change', filterFormsByWeek);
     }
 
     // Render payments table with action buttons
