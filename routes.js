@@ -3359,6 +3359,9 @@ app.post('/getTerms', function (req, res) {
           res.redirect("/");
         } else {
           console.log(change_order);
+
+          // save the hash in the session
+          req.session.hash = hash;
           res.render("viewChangeOrderClient.html", { change_order: change_order, change_order_items: change_order_items });
         }
       }
@@ -3369,7 +3372,41 @@ app.post('/getTerms', function (req, res) {
   app.post("/updateChangeOrderStatus", function (req, res) {
     console.log("updating change order status");
     console.log(req.body);
-    db.updateChangeOrderStatus(req.body.change_order_id, parseInt(req.body.status), function (err) {
+    // make sure the session.hash matches 
+    const hash = req.body.hash;
+
+    if (hash != req.body.hash) {
+      console.log("hashes do not match");
+      res.send("hashes do not match");
+      return;
+    }
+    // check if the change order id is valid
+    if (isNaN(req.body.change_order_id)) {
+      console.log("change order id is not a number");
+      res.send("change order id is not a number");
+      return;
+    }
+    // check if the status is valid
+    if (isNaN(req.body.status)) {
+      console.log("status is not a number");
+      res.send("status is not a number");
+      return;
+    }
+    // check if the status is 0 or 1
+    if (req.body.status != 0 && req.body.status != 1) {
+      console.log("status is not 0 or 1");
+      res.send("status is not 0 or 1");
+      return;
+    }
+
+    // set the req.session.hash to the hash
+    req.session.hash = hash;
+
+
+
+
+
+    db.updateChangeOrderStatus(req.body.change_order_id, parseInt(req.body.status), hash,  function (err) {
       if (err) {
         console.log(err);
         res.send("error updating change order status");

@@ -19,10 +19,13 @@
 
     <script>
 
+
         function updateChangeOrderStatus(){
             // get the value of the radio button
             const radioInput = $("input[name='share']:checked").val();
             const change_order_id = $('#change_order_id').val();
+            const hash = $("#changeOrderHash").val();
+
             console.log(radioInput);
             let status = 0;
 
@@ -35,7 +38,7 @@
             }
 
 
-            $.post('/updateChangeOrderStatus', {status: status, change_order_id: change_order_id}, function(data) {
+            $.post('/updateChangeOrderStatus', {status: status, change_order_id: change_order_id, hash: hash}, function(data) {
                 console.log("data",data);
                 if (data == "success") {
                     XSAlert({
@@ -93,12 +96,16 @@ function shareChangeOrderWithClient(){
     </script>
 </head>
 <body>
+    
+
+
     <div class="container mt-5">
         {{#change_order}}
         <h2>Change Order {{co_number}}</h2>
        
     </br>
         <input type="hidden" id="change_order_id" value="{{id}}">
+        <input type="hidden" id="changeOrderHash" value="{{hash}}">
         {{/change_order}}
         <!-- <table class="table table-bordered">
             <thead>
@@ -167,6 +174,10 @@ function shareChangeOrderWithClient(){
                 <h5 class="card-title
                 ">Change Order Total</h5>
                 <p class="card-text">{{change_order_total}}</p>
+                <!-- status -->
+                 <h5 class = "card-body">Status</h5>
+                    <p class = "card-body"> {{status}} </p>
+                 
             </div>
         </div>
         {{/change_order}}

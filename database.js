@@ -1461,10 +1461,10 @@ getChangeOrderItemsById: function (change_order_id, callback) {
       );
     },
 
-    updateChangeOrderStatus: function (change_order_id, status, callback) {
+    updateChangeOrderStatus: function (change_order_id, status, hash, callback) {
       con.query(
-        "UPDATE change_orders SET status = ? WHERE id = ?;",
-        [status, change_order_id],
+        "UPDATE change_orders SET status = ? WHERE id = ? AND hash = ?;",
+        [status, change_order_id, hash],
         function (err) {
           if (err) return callback(err);
           callback(null);

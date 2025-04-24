@@ -88,6 +88,7 @@ VALUES
 
 
 INSERT INTO system_settings (setting_name, setting_value) VALUES ('invoice_due_date', '30');
+INSERT INTO system_settings (setting_name, setting_value) VALUES ('subcontractor_form_due_cron', '0 10 * * 2'); -- tuesday at 10:00 as crontab expression 
 
 CREATE TABLE inclusions_presets (
   id INT NOT NULL AUTO_INCREMENT,

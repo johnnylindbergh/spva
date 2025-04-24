@@ -1,3 +1,4 @@
+
 // global vars
 var subtotal = 0;
 var tax = 0;
@@ -145,11 +146,35 @@ function changeStartDate() {
     var changeStartDate = $('#startDate').val();
     var takeoff_id = parseInt($('#takeoff_id').val());
 
+    if (changeStartDate === '' || changeStartDate === null) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Please provide a start date!'
+        });
+        return;
+    }
+    var currentDate = new Date();
+    var sixDaysFromNow = new Date();
+    sixDaysFromNow.setDate(currentDate.getDate() + 7);
+    var selectedDate = new Date(changeStartDate);
+    if (selectedDate < sixDaysFromNow) {
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Start date must be at least six days from the current date.'
+        });
+        return;
+    }
+
+
     $.post('/changeStartDate', {takeoff_id: takeoff_id, startDate: changeStartDate}, function(data) {
         console.log(data);
     }).fail(function(error) {
         console.log("Start date must be six days in the future.");
-        alert("Start date must be at least six days from the current date.");
+        alert("Failed to change start date.");
+        console.error('Error:', error);
     });
 }
 
