@@ -3617,7 +3617,7 @@ createInvoiceFromSOV: function (sov_id, callback) {
       // Prepare the invoice object
       const invoice = {
         qb_number: null,
-        invoice_name: sov[0].name + "Invoice",
+        invoice_name: "Invoice",
         hash: generateHash(),
         total: sov[0].total,
         invoice_payment_method: null,

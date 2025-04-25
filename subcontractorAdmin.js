@@ -61,7 +61,7 @@ module.exports = function (app) {
     });
 
     app.get('/api/forms', mid.isSubcontractorAdmin, function (req, res) {
-        db.query("SELECT *, forms.id as form_id, users.id as user_id FROM forms JOIN users ON forms.user_id = users.id;", function (error, results) {
+        db.query("SELECT *, forms.created_at as form_created_at, forms.id as form_id, users.id as user_id FROM forms JOIN users ON forms.user_id = users.id;", function (error, results) {
             if (error) {
                 console.error('Error fetching forms:', error);
                 return res.status(500).json({ error: 'Internal server error' });
@@ -73,13 +73,63 @@ module.exports = function (app) {
     app.get('/api/payments', mid.isSubcontractorAdmin, function (req, res) {
         // the sum of all form_bid.requests for each subcontractor using subcontractor_forms to get user_id
         db.query(
-            "SELECT users.id as user_id, users.name as subcontractorName, SUM(form_bid.request) as total_requests, form_bid.status, jobs.job_name FROM form_bid JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id JOIN users ON subcontractor_forms.user_id = users.id JOIN jobs ON form_bid.job_id = jobs.id WHERE form_bid.status = 'pending' GROUP BY users.id, jobs.job_name;",
+            `SELECT 
+                form_bid.id as id, 
+                users.id as user_id, 
+                users.name as subcontractorName, 
+                form_bid.request as total_requests, 
+                form_bid.status, 
+                jobs.job_name 
+            FROM form_bid 
+                JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id 
+                JOIN users ON subcontractor_forms.user_id = users.id 
+                JOIN jobs ON form_bid.job_id = jobs.id 
+            WHERE form_bid.status = 'pending' 
+                GROUP BY form_bid.id, users.id, users.name, form_bid.request, form_bid.status, jobs.job_name;`,
             function (error, results) {
             if (error) {
                 console.error('Error fetching payments:', error);
                 return res.status(500).json({ error: 'Internal server error' });
             }
             res.json(results);
+            }
+        );
+    });
+
+
+    app.post('/api/payments/update-status', mid.isSubcontractorAdmin, function (req, res) {
+
+
+   
+        let {paymentId, status } = req.body;
+
+        console.log('Payment ID:', paymentId);
+        console.log('Status:', status);
+        
+
+        // Validate status
+        const validStatuses = ['approve', 'reject'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ error: 'Invalid status' });
+        }
+
+        status = status === 'approve' ? 'accepted' : 'rejected';
+
+
+        console.log('Updating payment status:', paymentId, status);
+        // Update the payment status in the database
+        db.query(
+            "UPDATE form_bid SET status = ? WHERE id = ?;",
+            [status, paymentId],
+            function (error, results) {
+                if (error) {
+                    console.error('Error updating payment status:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                if (results.affectedRows === 0) {
+                    return res.status(404).json({ error: 'Payment not found' });
+                }
+                res.json({ status: 'success', message: 'Payment status updated successfully' });
             }
         );
     });

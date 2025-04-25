@@ -200,9 +200,9 @@ document.addEventListener('DOMContentLoaded', function() {
             subcontractorSelect.appendChild(option);
         });
     }
-
     // Render forms table
     function renderFormsTable(forms) {
+        console.log("forms:", forms);   
         subcontractorFormsTable.innerHTML = '';
 
         // Create a dropdown for filtering by week
@@ -211,25 +211,29 @@ document.addEventListener('DOMContentLoaded', function() {
         searchContainer.innerHTML = `
             <label for="weekDropdown" class="form-label">Filter by Week:</label>
             <select id="weekDropdown" class="form-select">
-                <option value="">Select a week</option>
+                <option value="">All Weeks</option>
             </select>
         `;
         subcontractorFormsTable.parentElement.insertBefore(searchContainer, subcontractorFormsTable);
 
         const weekDropdown = document.getElementById('weekDropdown');
 
-        // Generate unique weeks from forms data
-        const weeks = Array.from(new Set(forms.map(form => {
-            const date = new Date(form.created_at);
-            const startOfWeek = new Date(date.setDate(date.getDate() - date.getDay()));
-            return startOfWeek.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-        })));
+        // Generate all weeks from forms data
+        const weeks = forms.map(form => {
+            const date = new Date(form.form_created_at);
+            const startOfWeek = new Date(date);
+            startOfWeek.setDate(date.getDate() - date.getDay());
+            return startOfWeek.toISOString().split('T')[0];
+        });
 
-        // Populate the dropdown with weeks
-        weeks.forEach(week => {
+        // Get unique weeks and sort them in descending order (newest first)
+        const uniqueWeeks = Array.from(new Set(weeks)).sort((a, b) => new Date(b) - new Date(a));
+
+        // Populate the dropdown with all weeks
+        uniqueWeeks.forEach(week => {
             const option = document.createElement('option');
             option.value = week;
-            option.textContent = `Week of ${new Date(week).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            option.textContent = `Week of ${week}`;
             weekDropdown.appendChild(option);
         });
 
@@ -246,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
             endOfWeek.setDate(startOfWeek.getDate() + 6);
 
             const filteredForms = forms.filter(form => {
-                const formDate = new Date(form.created_at);
+                const formDate = new Date(form.form_created_at);
                 return formDate >= startOfWeek && formDate <= endOfWeek;
             });
 
@@ -258,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             subcontractorFormsTable.innerHTML = '';
             if (formsToRender.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="4" class="text-center">No forms submitted for the selected week</td>';
+                row.innerHTML = '<td colspan="4" class="text-center">No forms found for the selected week</td>';
                 subcontractorFormsTable.appendChild(row);
                 return;
             }
@@ -266,15 +270,16 @@ document.addEventListener('DOMContentLoaded', function() {
             formsToRender.forEach(form => {
                 const row = document.createElement('tr');
 
-                // Format the form.created_at date
-                const date = new Date(form.created_at);
-                const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-                form.created_at = date.toLocaleDateString('en-US', options);
 
+                // format the date to YYYY-MM-DD
+                const date = new Date(form.form_created_at);
+                const formattedDate = date.toISOString().split('T')[0];
+                form.form_created_at = formattedDate;
+                
                 row.innerHTML = `
                     <td>${form.form_id}</td>
                     <td>${form.name}</td>
-                    <td>${form.created_at}</td>
+                    <td>${form.form_created_at}</td>
                     <td><a href="/subcontractor/viewForm/?id=${form.form_id}" target="_blank">${form.form_name}</a></td>
                 `;
                 subcontractorFormsTable.appendChild(row);
@@ -332,12 +337,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const paymentId = parseInt(e.target.dataset.id);
         const action = e.target.dataset.action;
 
-        try {
-            const response = await fetch(`/api/payments/${paymentId}/${action}`, {
-                method: 'POST'
-            });
+        const data = {
+            paymentId: paymentId,
+            status: action
+        };
 
-            if (response.ok) {
+        try {
+            const response = await fetch(`/api/payments/update-status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const responseData = await response.json();
+            if (responseData.status == "success") {
                 alert(`Payment #${paymentId} ${action}ed successfully!`);
                 fetchData(); // Refresh data
             } else {
