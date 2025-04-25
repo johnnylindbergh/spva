@@ -360,6 +360,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // add listner to the exportPaymentsBtn 
+
+    document.getElementById('exportPaymentsBtn').addEventListener('click', async function() {
+        try {
+            const response = await fetch('/api/payments/export');
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'payments.csv';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } else {
+                alert('Failed to export payments.');
+            }
+        } catch (error) {
+            console.error('Error exporting payments:', error);
+        }
+    }
+    );
+
+    
+
     // Initialize the application
     init();
 });

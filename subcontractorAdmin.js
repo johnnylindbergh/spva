@@ -14,6 +14,23 @@ const subcontractor = require("./subcontractor.js");
 
 
 
+function jsonToCSV(jsonData) {
+    const csvRows = [];
+    if (!Array.isArray(jsonData) || jsonData.length === 0) {
+        throw new Error("Invalid or empty JSON data provided");
+    }
+    const headers = Object.keys(jsonData[0]);
+    csvRows.push(headers.join(','));
+    jsonData.forEach(row => {
+        const values = headers.map(header => {
+            const escaped = ('' + (row[header] || '')).replace(/"/g, '\\"');
+            return `"${escaped}"`;
+        });
+        csvRows.push(values.join(','));
+    });
+    return csvRows.join('\n');
+}
+
 
 
 
@@ -84,7 +101,7 @@ module.exports = function (app) {
                 JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id 
                 JOIN users ON subcontractor_forms.user_id = users.id 
                 JOIN jobs ON form_bid.job_id = jobs.id 
-            WHERE form_bid.status = 'pending' 
+            
                 GROUP BY form_bid.id, users.id, users.name, form_bid.request, form_bid.status, jobs.job_name;`,
             function (error, results) {
             if (error) {
@@ -229,4 +246,43 @@ module.exports = function (app) {
             }
         );
     });
+
+
+    app.get("/api/payments/export", mid.isSubcontractorAdmin, function (req, res) {
+        db.query(
+            `SELECT 
+                form_bid.id as id, 
+                users.id as user_id, 
+                users.name as subcontractorName, 
+                form_bid.request as total_requests, 
+                form_bid.status, 
+                jobs.job_name 
+            FROM form_bid 
+                JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id 
+                JOIN users ON subcontractor_forms.user_id = users.id 
+                JOIN jobs ON form_bid.job_id = jobs.id 
+            WHERE form_bid.status = 'accepted'`,
+            function (error, results) {
+                if (error) {
+                    console.error('Error fetching payments for export:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+
+                console.log("Results for export:", results);    
+                const csvData = results.map(row => ({
+                    id: row.id,
+                    user_id: row.user_id,
+                    subcontractorName: row.subcontractorName,
+                    total_requests: row.total_requests,
+                    status: row.status,
+                    job_name: row.job_name
+                }));
+                const csvString = jsonToCSV(csvData);
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=payments.csv');
+                res.send(csvString);
+            }
+        );
+    }
+    );
 };
