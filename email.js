@@ -151,17 +151,17 @@ async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
       total += item.cost * item.quantity;
     });
 
-    // Removed unused 'sov' variable declaration
-    await new Promise((resolve, reject) => {
-      db.getMostRecentSOV(takeoff_id.toString(), (err, result) => {
-        if (err || !result) {
-          console.log(err);
-          reject("could not get most recent SOV by takeoff id");
-        } else {
-          resolve(result);
-        }
-      });
-    });
+    // // Removed unused 'sov' variable declaration
+    // await new Promise((resolve, reject) => {
+    //   db.getMostRecentSOV(takeoff_id.toString(), (err, result) => {
+    //     if (err || !result) {
+    //       console.log(err);
+    //       reject("could not get most recent SOV by takeoff id");
+    //     } else {
+    //       resolve(result);
+    //     }
+    //   });
+    // });
 
     if (!invoice.hash) {
       throw new Error("Some info is missing from this invoice invoice.hash");
