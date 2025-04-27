@@ -308,6 +308,25 @@ module.exports = function (app) {
     });
   });
 
+  app.post("/update-takeoff-ownership", mid.isAdmin, (req, res) => {
+    console.log("updating takeoff ownership");
+    console.log(req.body);
+    let takeoff_id = req.body.takeoff_id;
+    let owner_id = req.body.customer_id;
+    console.log(takeoff_id);
+    console.log(owner_id);
+
+    db.updateTakeoffOwnership(takeoff_id, owner_id, function (err) {
+      if (err) {
+        console.log(err);
+        res.end();
+      } else {
+        res.redirect("/");
+      }
+    });
+  });
+
+
   app.post("/update-takeoff-owner-name", mid.isAdmin, (req, res) => {
     console.log("updating takeoff owner name");
     let owner_name = req.body.owner;
@@ -843,67 +862,97 @@ module.exports = function (app) {
   app.post("/update-signature", function (req, res) {
     
     console.log("updating signature ", req.body);
-    db.updateSignature(
-      req.body.takeoff_id,
-      req.body.signature,
-      req.body.date,
-      // make the invoice but doesnt get the invoice id
-      function (valid, invoice_id, err) {
-        if (err) {
-          console.log(err);
-        } else {
-          if (valid) {
-            // update the estimate's signed total field 
-            db.updateSignedTotal(req.body.takeoff_id, parseFloat(req.body.total).toFixed(2), function (err) {
-              if (err) {
-                console.log(err);
-              } else {
 
-                // send the email
+    let initialPaymentRequest = 0;
 
-                db.getTakeoff(req.body.takeoff_id, function (err, takeoff) {
-                  if (err) {
-                    console.log(err);
-                  } else {
+    db.getSystemSettingByName("initial-20%-deposit-request", function (err, setting) {
 
-                    
-                    const autoSendDeposit = takeoff[0].autoSendDeposit;
-                    console.log("sending email to ", takeoff);
-                    console.log("for invoice_id", invoice_id);
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving system setting");
+      } else {
+        //console.log("initial deposit setting", setting);
 
-                    if (autoSendDeposit == 1) {
-                      console.log("sending invoice email");
-                      emailer.sendInvoiceEmail(req, res, takeoff[0].id, invoice_id, function (err, valid) {
-                        if (err) {
-                          console.log(err);
-                        } else {
-                          res.send(valid);
-                        }
-                      });
-                      
+         initialPaymentRequest = setting[0].setting_value;
+      }
+
+
+      db.updateSignature(
+        req.body.takeoff_id,
+        req.body.signature,
+        req.body.date,
+        // make the invoice but doesnt get the invoice id
+        function (valid, invoice_id, err) {
+          if (err) {
+            console.log(err);
+          } else {
+            if (valid) {
+              // update the estimate's signed total field 
+              db.updateSignedTotal(req.body.takeoff_id, parseFloat(req.body.total).toFixed(2), function (err) {
+                if (err) {
+                  console.log(err);
+                } else {
+
+                  // send the email
+
+                  db.getTakeoff(req.body.takeoff_id, function (err, takeoff) {
+                    if (err) {
+                      console.log(err);
                     } else {
-                      res.send(valid);
-                    }
 
-                    
+                      
+                      const autoSendDeposit = takeoff[0].autoSendDeposit;
+                      console.log("sending email to ", takeoff);
+                      console.log("for invoice_id", invoice_id);
+
+                      if (autoSendDeposit == 1) {
+                        console.log("sending invoice email");
+                        emailer.sendInvoiceEmail(req, res, takeoff[0].id, invoice_id, function (err, valid) {
+                          if (err) {
+                            console.log(err);
+                          } else {
+                            
+                            const response = {
+                              valid: valid,
+                              initialPaymentRequest: initialPaymentRequest
+                            }
+
+                            res.send(response);
+                          }
+                        });
+                        
+                      } else {
+
+                        const response = {
+                          valid: valid,
+                          initialPaymentRequest: initialPaymentRequest
+                        }
+                        res.send(valid);
+                      }
+
+                      
+                    }
                   }
+                  );
                 }
-                );
-              }
-            });
+              });
+
+            }
 
           }
-
         }
-      }
-    );
+      );
+
+    });
 
     db.takeoffSetStatus(req.body.takeoff_id, 4, function (err) {
       if (err) {
         console.log(err);
       }
-    }
-    );
+    });
+
+
+
   });
 
 

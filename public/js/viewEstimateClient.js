@@ -173,7 +173,7 @@ function changeStartDate() {
         console.log(data);
     }).fail(function(error) {
         console.log("Start date must be six days in the future.");
-        alert("Failed to change start date.");
+        
         console.error('Error:', error);
     });
 }
@@ -205,30 +205,46 @@ function handleSignatureChange() {
     }
 
     console.log("termsScrolled:", termsScrolled);
-    if (!termsScrolled){
-        XSAlert({
-            title:'Please read the terms and conditions',
-            icon:'warning',
+
+    if (!termsScrolled) {
+        Swal.fire({
+            title: 'Please read the terms and conditions',
+            icon: 'warning',
         });
         return;
     }
+        
+    
 
     const signatureInput = $('#signature').val();
     const dateInput = $('#signedDate').val();
     const prefferedStartDate = $('#startDate').val();
 
     if(prefferedStartDate === '' || prefferedStartDate === null) {
-        XSAlert('Please provide a start date');
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Please provide a start date.'
+        });
         return;
     }
 
     if (signatureInput === '') {
-        XSAlert('Please provide a signature');
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Please provide a signature.'
+        });
+
         return;
     }   
 
     if (dateInput === '') {
-        XSAlert('Please provide a date');
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Please provide date of signature.'   
+        });
         return;
     }
 
@@ -249,13 +265,25 @@ function handleSignatureChange() {
                 $('.signature').toggle();
                 $('#options-table').find('input').prop('disabled', true);
 
-                $('#initial-payment-alert').toggle();
+                if (response.initialPaymentRequest == true) {
+
+                    $('#initial-payment-alert').toggle();
+                    
+                } else {
+            
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Signature updated successfully!'
+                    });
+                }
             }
         })
         .fail(function(error) {
             console.error('Error:', error);
         });
 }
+
 
 function createPaymentIntent(method) {
     // if the method is defined and is one of ['card','ACH']

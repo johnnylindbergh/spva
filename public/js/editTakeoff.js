@@ -155,6 +155,80 @@ function updateTakeoffName() {
     });
 }
 
+function changeOwnershipIntent() {
+  // show the change ownership modal
+  $("#changeOwnershipModal").modal("show");
+
+  const customerDropdown = $("#customerDropdown")
+  
+  // fetch customers from the server using jQuery
+  $.get("/getCustomers", function (response) {
+    console.log(response);
+    if (response) {
+      // populate the customer dropdown
+      customerDropdown.empty();
+      customerDropdown.append("<option value=''>Select a customer</option>");
+      response.forEach((customer) => {
+        console.log(customer);
+        customerDropdown.append(
+          "<option value='" + customer.id + "'>" + customer.givenName + "</option>"
+        );
+      });
+    } else {
+      console.error("Failed to fetch customers");
+    }
+  });
+ 
+}
+function closeChangeOwnershipModal() {
+  // close the modal
+  $("#changeOwnershipModal").modal("hide");
+}
+
+
+function changeOwnership() {
+  // get the newname from the input field
+  let customerId = $("#customerDropdown").val();
+  console.log("Changing ownership to customer: " + customerId);
+  $.post("/update-takeoff-ownership", { takeoff_id: takeoff_id, customer_id: customerId })
+
+    .done(function () {
+      console.log("Takeoff ownership changed to customer: " + customerId);
+      // reload the page
+      //location.reload();
+      // re post to the server to reload page
+      $.post("/editTakeoff", { takeoff_id: takeoff_id })
+        .done(function () {
+          console.log("Reloaded takeoff");
+          // reload the page
+          location.reload();
+        })
+        .fail(function () {
+          console.log("Failed to reload takeoff");
+        });
+    })
+    .fail(function () {
+      console.log("Failed to change takeoff ownership to customer: " + customerId);
+      // show an error message
+      Swal.fire({
+        title: 'Error',
+        text: 'Cannot modify signed takeoff',
+        icon: 'error',
+        showCancelButton: false,
+        confirmButtonText: 'OK'
+      }).then((result) => {
+        //console.log('clicked');
+        // go back one page
+        //window.history.back();
+      });
+    });
+}
+
+
+
+
+  
+
 function updateTakeoffOwnerName() {
   // get the newname from the input field
   let name = $("#takeoff_owner_name").val();
@@ -427,17 +501,17 @@ function changeLaborMarkup(value) {
     .fail(function () {
       console.log("Failed to update labor markup: " + labor_markup);
 
-      XSAlert({
+      Swal.fire({
         title: 'Error',
-        message: 'Cannot modify signed takeoff',
+        text: 'Cannot modify signed takeoff',
         icon: 'error',
-        hideCancelButton: true
+        showCancelButton: false,
+        confirmButtonText: 'OK'
       }).then((result) => {
-
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway")
+        console.log("i gonna edit it anyway");
       });
 
 
@@ -462,17 +536,17 @@ function changeMaterialMarkup(value) {
       loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
-      XSAlert({
+      Swal.fire({
         title: 'Error',
-        message: 'Cannot modify signed takeoff',
+        text: 'Cannot modify signed takeoff',
         icon: 'error',
-        hideCancelButton: true
+        showCancelButton: false,
+        confirmButtonText: 'OK'
       }).then((result) => {
-
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway")
+        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -492,17 +566,17 @@ function updateSupervisorMarkup(value) {
       loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
-      XSAlert({
+      Swal.fire({
         title: 'Error',
-        message: 'Cannot modify signed takeoff',
+        text: 'Cannot modify signed takeoff',
         icon: 'error',
-        hideCancelButton: true
+        showCancelButton: false,
+        confirmButtonText: 'OK'
       }).then((result) => {
-
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway")
+        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -531,17 +605,17 @@ function updateTravelExtra(value) {
       loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
-      XSAlert({
+      Swal.fire({
         title: 'Error',
-        message: 'Cannot modify signed takeoff',
+        text: 'Cannot modify signed takeoff',
         icon: 'error',
-        hideCancelButton: true
+        showCancelButton: false,
+        confirmButtonText: 'OK'
       }).then((result) => {
-
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway")
+        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -567,17 +641,17 @@ function updateTouchupsCost(value) {
       loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
-      XSAlert({
+      Swal.fire({
         title: 'Error',
-        message: 'Cannot modify signed takeoff',
+        text: 'Cannot modify signed takeoff',
         icon: 'error',
-        hideCancelButton: true
+        showCancelButton: false,
+        confirmButtonText: 'OK'
       }).then((result) => {
-
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway")
+        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -592,17 +666,17 @@ function updateProfit(value) {
       loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
-      XSAlert({
+      Swal.fire({
         title: 'Error',
-        message: 'Cannot modify signed takeoff',
+        text: 'Cannot modify signed takeoff',
         icon: 'error',
-        hideCancelButton: true
+        showCancelButton: false,
+        confirmButtonText: 'OK'
       }).then((result) => {
-
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway")
+        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -640,19 +714,18 @@ function updateTax(value) {
       loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
-      XSAlert({
+      Swal.fire({
         title: 'Error',
-        message: 'Cannot modify signed takeoff',
+        text: 'Cannot modify signed takeoff',
         icon: 'error',
-        hideCancelButton: true
+        showCancelButton: false,
+        confirmButtonText: 'OK'
       }).then((result) => {
-        
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway")
-      }
-      );
+        console.log("i gonna edit it anyway");
+      });
     });
 }
 
@@ -677,17 +750,17 @@ function updateMiscMaterialCost(value) {
       loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
-      XSAlert({
+      Swal.fire({
         title: 'Error',
-        message: 'Cannot modify signed takeoff',
+        text: 'Cannot modify signed takeoff',
         icon: 'error',
-        hideCancelButton: true
+        showCancelButton: false,
+        confirmButtonText: 'OK'
       }).then((result) => {
-
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway")
+        console.log("i gonna edit it anyway");
       });
     });
 }

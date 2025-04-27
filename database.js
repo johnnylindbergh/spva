@@ -1022,6 +1022,42 @@ module.exports = {
     }
   },
 
+  updateTakeoffOwnership: function (takeoff_id, owner_id, callback) {
+    if (!takeoff_id || !owner_id) {
+      return callback("Missing required parameters");
+    } else {
+      // get the customer id from the takeoff_id useing the customer_takeoffs table
+      con.query("SELECT * FROM customer_takeoffs WHERE takeoff_id = ?;", [takeoff_id], function (err, customerInfo) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
+        console.log(customerInfo[0]);
+
+          con.query(
+            "UPDATE customer_takeoffs SET customer_id = ? WHERE id = ?;",
+            [owner_id, customerInfo[0].id],
+            function (err) {
+              if (err) return callback(err);
+           
+
+              // now update the takeoffs fields to match the new owner
+              con.query(
+                "UPDATE takeoffs SET customer_id = ? WHERE id = ?;",
+                [owner_id, takeoff_id],
+                function (err) {
+                  if (err) return callback(err);
+                  callback(null);
+                }
+              );
+            }
+          );
+        });
+      
+    }
+  },
+
+
   updateTakeoffOwnerName: function (takeoff_id, owner_name, callback) {
     if (!takeoff_id || !owner_name) {
       return callback("Missing required parameters");

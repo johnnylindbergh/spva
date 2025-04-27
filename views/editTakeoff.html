@@ -20,6 +20,10 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/themes/light-theme.css">
   <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- sweet alert -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/js/editTakeoff.js" type="text/javascript"></script>
   <script> loadTakeoffMaterials('{{takeoff_id}}'); </script>
 
@@ -68,14 +72,26 @@
 
     <input type='text' class="titleInput" id='takeoff_name' onchange='updateTakeoffName()' value='{{name}}'></br>
 
-    Owner: <input type='text' class="hiddenInput" id='takeoff_owner_name' onchange='updateTakeoffOwnerName()'
-      value='{{givenName}}'></br>
-    Billing Address: <input type='text' style="width:375px" class="hiddenInput" id='owner_billing_address'
-      onchange='updateTakeoffBillingAddress()' value='{{billing_address}}'></br>
-    Owner Email Address: <input type='text' class="hiddenInput" id='owner_email_address'
-      onchange='updateTakeoffOwnerEmailAddress()' value='{{primary_email_address}}'></br>
-    Invoice Email Address: <input type='text' class="hiddenInput" id='invoice_email_address'
-      onchange='updateTakeoffInvoiceEmailAddress()' value='{{invoice_email_address}}'></br>
+    <div class="form-group">
+      <label for="takeoff_owner_name">Owner:</label>
+        <a href="#" onclick="changeOwnershipIntent()" style="text-decoration: none;">
+          <i class="fa fa-exchange"></i> Change Ownership
+        </a>
+  
+      <input type="text" class="form-control" id="takeoff_owner_name" onchange="updateTakeoffOwnerName()" value="{{givenName}}">
+    </div>
+    <div class="form-group">
+      <label for="owner_billing_address">Billing Address:</label>
+      <input type="text" class="form-control" id="owner_billing_address" onchange="updateTakeoffBillingAddress()" value="{{billing_address}}">
+    </div>
+    <div class="form-group">
+      <label for="owner_email_address">Owner Email Address:</label>
+      <input type="email" class="form-control" id="owner_email_address" onchange="updateTakeoffOwnerEmailAddress()" value="{{primary_email_address}}">
+    </div>
+    <div class="form-group">
+      <label for="invoice_email_address">Invoice Email Address:</label>
+      <input type="email" class="form-control" id="invoice_email_address" onchange="updateTakeoffInvoiceEmailAddress()" value="{{invoice_email_address}}">
+    </div>
     </br>
 
     <div class="float-right" style="text-align: right;">
@@ -190,7 +206,7 @@
     </br>
     {{/takeoff}}
 
-
+  </br>
 
     <!-- as a get request, changed from material settings to settings -->
     <div style="display: flex; gap: 10px;">
@@ -272,10 +288,42 @@
 
     {{#materials}}
     <!-- a link that when you click it it runs a js function -->
-    <a href="#" onclick="add_material({{id}})">{{name}} <i style="font-size: 6;">${{cost}} </i> - <i>{{coverage}} sqft</i></a>
+    <div style="margin-bottom: 10px;">
+      <a href="#" onclick="add_material({{id}})" style="display: block; font-weight: bold; text-decoration: none;">
+      {{name}} 
+      <span style="font-size: 12px; color: gray;"> - ${{cost}} - {{coverage}} sqft</span>
+      </a>
+      <a href="{{datasheet}}" target="_blank" style="font-size: 12px; color: blue; text-decoration: underline;">
+      View Spec Sheet
+      </a>
+    </div>
     {{/materials}}
   </div>
 
+
+  <!-- changeOwnershipModal modal with customer dropdown-->
+  <div id="changeOwnershipModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="changeOwnershipModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="changeOwnershipModalLabel">Change Ownership</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeChangeOwnershipModal()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <label for="customerDropdown">Select Customer:</label>
+          <select id="customerDropdown" class="form-control"></select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeChangeOwnershipModal()">Close</button>
+          <button type="button" class="btn btn-primary" onclick="changeOwnership()">Change Ownership</button>
+        </div>
+      </div>
+    </div>
+
+  
+   
 
 
 

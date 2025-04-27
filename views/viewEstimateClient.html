@@ -10,8 +10,8 @@
     <!-- <script src="/js/checkout.js"></script> -->
 
      <!-- sweet alert -->
-     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-     <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </head>
 
@@ -116,13 +116,14 @@
         </br>
             <!-- <p style="float:up;">[{{takeoff.owner}}]</p> -->
             <label for="signature"><strong>Authorized Signature:</strong></label>
-            <input type="text" id="signature" value='' placeholder="{{takeoff.customer_givenName}}">
+            <input type="text" id="signature" value='' placeholder="{{takeoff.customer_givenName}}" style="font-size: 20px; border:none; border-bottom: 1px; outline: none;">
             <label for="signedDate"><strong> &nbsp Date:</strong></label>
             <input type="date" id="signedDate">
             <i class="loader" style="margin-bottom: -10px; margin-left:2px"></i>
             <!-- submit button that calls handleSig.. -->
             <button class="sign-btn" onclick="handleSignatureChange()">Sign</button>
-            </p>
+             </br>
+                    <p> By typing your name above and clicking Sign, you acknowledge your signature here as legally binding.</p>
         </div>
 
         <div class="signature-success">

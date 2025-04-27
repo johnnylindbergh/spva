@@ -113,7 +113,9 @@
 
                     <!-- view sov -->
                     <div class="text-center mt-3"></div>
+                    {{#sov_hash}}
                         <a href="/sovPdfDownload?hash={{sov_hash}}" class="btn btn-secondary">View SOV</a>
+                        {{/sov_hash}}
                     </div>
                 </div>
             </div>
@@ -123,7 +125,7 @@
                     <button class="btn btn-primary" onclick="createPaymentIntentInvoice('card')">Pay with Card</br> (+3%)</button> 
 
                     <!-- pay with bank button that calls createPaymentIntent("us_bank_account") -->
-                    <button class="btn btn-primary" onclick="createPaymentIntentInvoice('us_bank_account')">Pay with Bank </br> (+$15)</button>
+                    <button class="btn btn-primary" onclick="createPaymentIntentInvoice('us_bank_account')">Pay with Bank </br> (+3%)</button>
 
         </div>
     </div>

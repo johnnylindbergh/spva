@@ -309,26 +309,27 @@ function shareClient() {
 function shareSelf(){
     const takeoff_id = $('#takeoff_id').val();
     console.log(takeoff_id);
-    XSAlert({
+    Swal.fire({
         title: 'Email Confirmation',
-        message: 'Are you sure you want to share this estimate with Sun Painting?',
-        icon: 'success',
-     }).then((value) => {
-        console.log("dialogue output",value);
-        if(value == "ok"){
-
-            $.post('/shareSelf', {takeoff_id: takeoff_id}, function(data) {
-                console.log("twas the email sent?",data);
-                if (data == "email sent") {
-                    XSAlert({
+        text: 'Are you sure you want to share this estimate with Sun Painting?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('/shareSelf', { takeoff_id: takeoff_id }, function(data) {
+                console.log("Was the email sent?", data);
+                if (data === "email sent") {
+                    Swal.fire({
                         title: 'Email Sent',
-                        message: 'The estimate has been sent to your email.',
+                        text: 'The estimate has been sent to your email.',
                         icon: 'success',
                     });
                 } else {
-                    XSAlert({
+                    Swal.fire({
                         title: 'Error',
-                        message: "The estimate could not be sent. Please update server email credentials.",
+                        text: 'The estimate could not be sent. Please update server email credentials.',
                         icon: 'error',
                     });
                 }
@@ -351,15 +352,15 @@ function confirmEmailSend(){
     $.post('/shareClient', { takeoff_id: takeoff_id, sendAutoDeposit: sendAutoDeposit }, function (data) {
         console.log("twas the email sent?", data);
         if (data == "email sent") {
-            XSAlert({
+            Swal.fire({
                 title: 'Email Sent',
-                message: 'The estimate has been sent to your email.',
+                text: 'The estimate has been sent to your email.',
                 icon: 'success',
             });
         } else {
-            XSAlert({
+            Swal.fire({
                 title: 'Error',
-                message: "The estimate could not be sent. Please update server email credentials.",
+                text: 'The estimate could not be sent. Please update server email credentials.',
                 icon: 'error',
             });
         }
@@ -463,9 +464,9 @@ function deleteOption(id){
     })
     .fail(function(error) {
         console.error('Error deleting option:', error);
-        XSAlert({
+        Swal.fire({
             title: 'Error',
-            message: 'Failed to remove the option of a signed estimate.',
+            text: 'Failed to remove the option of a signed estimate.',
             icon: 'error',
         });
     });
