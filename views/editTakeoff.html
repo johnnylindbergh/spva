@@ -115,49 +115,49 @@
         <div style="display: flex; align-items: center;">
           <label for="laborRate" style="width: 150px; white-space: nowrap;">Labor Rate:</label>
           <input type="range" id="laborRate" name="slider" min="0" max="500" value="{{labor_rate}}" oninput="changeLaborRateHelper(this.value)" style="width: 200px;">
-          <span id="laborRateValue" style="display: inline; width: 70px;">{{labor_rate}}$/Hr</span>
+          <input type="number" id="laborRateValue" value="{{labor_rate}}" oninput="changeLaborRateHelper(this.value)" style="width: 70px;">$/Hr
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
           <label for="laborMarkup" style="width: 150px; white-space: nowrap;">Labor Markup:</label>
           <input type="range" id="laborMarkup" name="slider" min="0" max="100" value="{{labor_markup}}" oninput="changeLaborMarkupHelper(this.value)" style="width: 200px;">
-          <span id="laborMarkupValue" style="display: inline; width: 70px;">{{labor_markup}}%</span>
+          <input type="number" id="laborMarkupValue" value="{{labor_markup}}" oninput="changeLaborMarkupHelper(this.value)" style="width: 70px;">%
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
           <label for="materialMarkup" style="width: 150px; white-space: nowrap;">Material Markup:</label>
           <input type="range" id="materialMarkup" name="slider" min="0" max="100" value="{{material_markup}}" oninput="updateMaterialMarkupHelper(this.value)" style="width: 200px;">
-          <span id="materialMarkupValue" style="display: inline; width: 70px;">{{material_markup}}%</span>
+          <input type="number" id="materialMarkupValue" value="{{material_markup}}" oninput="updateMaterialMarkupHelper(this.value)" style="width: 70px;">%
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
           <label for="supervisionMarkup" style="width: 150px; white-space: nowrap;">Supervisor Markup:</label>
           <input type="range" id="supervisionMarkup" name="slider" min="0" max="100" value="{{supervisor_markup}}" oninput="updateSupervisorMarkupHelper(this.value)" style="width: 200px;">
-          <span id="supervisorMarkupValue" style="display: inline; width: 70px;">{{supervisor_markup}}%</span>
+          <input type="number" id="supervisorMarkupValue" value="{{supervisor_markup}}" oninput="updateSupervisorMarkupHelper(this.value)" style="width: 70px;">%
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
           <label for="touchupsCost" style="width: 150px; white-space: nowrap;">Touchups:</label>
           <input type="range" id="touchupsCost" name="slider" min="0" max="5000" value="{{touchups_cost}}" oninput="updateTouchupsCostHelper(this.value)" style="width: 200px;">
-          <span id="touchupsCostValue" style="display: inline; width: 70px;">${{touchups_cost}}</span>
+          <input type="number" id="touchupsCostValue" value="{{touchups_cost}}" oninput="updateTouchupsCostHelper(this.value)" style="width: 70px;">$
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
           <label for="miscMaterialCost" style="width: 150px; white-space: nowrap;">Misc Materials:</label>
           <input type="range" id="miscMaterialCost" name="slider" min="0" max="5000" value="{{misc_materials_cost}}" oninput="updateMiscMaterialCostHelper(this.value)" style="width: 200px;">
-          <span id="miscMaterialCostValue" style="display: inline; width: 70px;">${{misc_materials_cost}}</span>
+          <input type="number" id="miscMaterialCostValue" value="{{misc_materials_cost}}" oninput="updateMiscMaterialCostHelper(this.value)" style="width: 70px;">$
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
           <label for="profit" style="width: 150px; white-space: nowrap;">GB Profit:</label>
           <input type="range" id="profit" name="slider" min="0" max="100" value="{{profit}}" oninput="updateProfitHelper(this.value)" style="width: 200px;">
-          <span id="profitValue" style="display: inline; width: 70px;">{{profit}}%</span>
+          <input type="number" id="profitValue" value="{{profit}}" oninput="updateProfitHelper(this.value)" style="width: 70px;">%
         </div>
         <br>
 
