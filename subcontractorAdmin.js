@@ -170,10 +170,10 @@ module.exports = function (app) {
     });
 
     app.post('/api/assignments', mid.isSubcontractorAdmin, function (req, res) {
-        const { jobId, subcontractorId, allotedBid } = req.body;
+        const { jobId, subcontractorId, allottedBid } = req.body;
         db.query(
             "INSERT INTO subcontractor_jobs_assignment (job_id, user_id, alloted_bid) VALUES (?, ?, ?);",
-            [jobId, subcontractorId, allotedBid],
+            [jobId, subcontractorId, allottedBid],
             function (error) {
                 if (error) {
                     console.error('Error assigning job:', error);

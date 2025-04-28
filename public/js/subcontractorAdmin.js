@@ -81,13 +81,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const jobId = parseInt(jobSelect.value);
         const subcontractorId = parseInt(subcontractorSelect.value);
-        const allotedBid = parseFloat(allotedBidInput.value);
+        const allottedBid = parseFloat(allotedBidInput.value);
 
         try {
             const response = await fetch('/api/assignments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ jobId, subcontractorId })
+                body: JSON.stringify({ jobId, subcontractorId, allottedBid })
             });
 
             if (response.ok) {

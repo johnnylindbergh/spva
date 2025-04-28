@@ -131,7 +131,7 @@ async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
     });
 
     console.log(takeoff);
-    if (!takeoff[0]?.customer_invoice_email_address || !takeoff[0]?.customer_givenName) {
+    if (!takeoff[0].customer_invoice_email_address || !takeoff[0].customer_givenName) {
       throw new Error("Missing customer email or name");
     }
 
