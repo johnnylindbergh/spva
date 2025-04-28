@@ -907,7 +907,7 @@ module.exports = function (app) {
 
                       if (autoSendDeposit == 1) {
                         console.log("sending invoice email");
-                        emailer.sendInvoiceEmail(req, res, takeoff[0].id, invoice_id, function (err, valid) {
+                        emailer.sendInvoiceEmail(req, res, req.body.takeoff_id, invoice_id, function (err, valid) {
                           if (err) {
                             console.log(err);
                           } else {
