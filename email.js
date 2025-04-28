@@ -114,6 +114,10 @@ async function sendEstimateEmailInternally(req, res, takeoff_id, targetEmail, ca
 
 async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
   try {
+
+    if (!takeoff_id || !invoice_id) {
+      throw new Error("Missing takeoff_id or invoice_id");
+    }
     // Wrap db.getTakeoffById in a promise
     const takeoff = await new Promise((resolve, reject) => {
       db.getTakeoffById(takeoff_id, (err, result) => {
