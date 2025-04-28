@@ -411,7 +411,7 @@ module.exports = function (app) {
     console.log("alButton");
     console.log(req.body)
     // if the user name is al, res.send "Hello AL!" otherwise, say you are not al
-    if (req.user.local.name == "AL" || req.user.local.name == "Johnny") {
+    if (req.user.local.name == "AL" || req.user.local.name == "Johnny" || req.user.local.name == "Jonathan") {
       // create a blank Takeoff
 
       // get the form data, customer_id, takeoff_type, takeoff_name
