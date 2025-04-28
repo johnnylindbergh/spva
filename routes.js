@@ -83,8 +83,8 @@ const plansStorage = multer.diskStorage({
   },
 });
 
-// Define maximum upload file size (32 MB) it's just a csv
-const maxSize = 1 * 1000 * 1000 * 32;
+// Define maximum upload file size (1GB) 
+const maxSize = 1 * 1000 * 1000 * 1024; // 1GM MB
 
 // Configure Multer
 const upload = multer({
@@ -524,7 +524,11 @@ module.exports = function (app) {
   app.post("/uploadPlans", mid.isAuth, function (req, res) {
     console.log("uploading plans...");
 
-    if (req.body.takeoff_id == null || req.body.file == null) {
+    // if (req.body.takeoff_id == null) {
+    //   res.render("error.html", { link: 'javascript:history.back()', linkTitle: 'back', friendly: "Missing Takeoff ID, im the doofus" });
+    // }
+
+    if (req.body.file == null && req.body.takeoff != null) {
       res.render("error.html", { link: 'javascript:history.back()', linkTitle: 'back', friendly: "Missing File, doofus" });
     } else {
       // Use Multer middleware to handle file upload
