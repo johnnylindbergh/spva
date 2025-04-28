@@ -117,7 +117,7 @@ async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
     // Wrap db.getTakeoffById in a promise
     const takeoff = await new Promise((resolve, reject) => {
       db.getTakeoffById(takeoff_id, (err, result) => {
-        if (err || !result) {
+        if (err || !result|| result.length === 0) {
           console.log(err);
           reject("could not get takeoff by id");
         } else {
