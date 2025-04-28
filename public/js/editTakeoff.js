@@ -212,7 +212,7 @@ function changeOwnership() {
       // show an error message
       Swal.fire({
         title: 'Error',
-        text: 'Cannot modify signed takeoff',
+        text: 'Cannot modify  takeoff',
         icon: 'error',
         showCancelButton: false,
         confirmButtonText: 'OK'
@@ -503,7 +503,7 @@ function changeLaborMarkup(value) {
 
       Swal.fire({
         title: 'Error',
-        text: 'Cannot modify signed takeoff',
+        text: 'Cannot modify takeoff',
         icon: 'error',
         showCancelButton: false,
         confirmButtonText: 'OK'
@@ -538,7 +538,7 @@ function changeMaterialMarkup(value) {
     .fail(function () {
       Swal.fire({
         title: 'Error',
-        text: 'Cannot modify signed takeoff',
+        text: 'Cannot modify takeoff',
         icon: 'error',
         showCancelButton: false,
         confirmButtonText: 'OK'
@@ -568,7 +568,7 @@ function updateSupervisorMarkup(value) {
     .fail(function () {
       Swal.fire({
         title: 'Error',
-        text: 'Cannot modify signed takeoff',
+        text: 'Cannot modify takeoff',
         icon: 'error',
         showCancelButton: false,
         confirmButtonText: 'OK'
@@ -607,7 +607,7 @@ function updateTravelExtra(value) {
     .fail(function () {
       Swal.fire({
         title: 'Error',
-        text: 'Cannot modify signed takeoff',
+        text: 'Cannot modify takeoff',
         icon: 'error',
         showCancelButton: false,
         confirmButtonText: 'OK'
@@ -643,7 +643,7 @@ function updateTouchupsCost(value) {
     .fail(function () {
       Swal.fire({
         title: 'Error',
-        text: 'Cannot modify signed takeoff',
+        text: 'Cannot modify takeoff',
         icon: 'error',
         showCancelButton: false,
         confirmButtonText: 'OK'
@@ -668,7 +668,7 @@ function updateProfit(value) {
     .fail(function () {
       Swal.fire({
         title: 'Error',
-        text: 'Cannot modify signed takeoff',
+        text: 'Cannot modify takeoff',
         icon: 'error',
         showCancelButton: false,
         confirmButtonText: 'OK'
@@ -716,7 +716,7 @@ function updateTax(value) {
     .fail(function () {
       Swal.fire({
         title: 'Error',
-        text: 'Cannot modify signed takeoff',
+        text: 'Cannot modify takeoff',
         icon: 'error',
         showCancelButton: false,
         confirmButtonText: 'OK'
@@ -752,7 +752,7 @@ function updateMiscMaterialCost(value) {
     .fail(function () {
       Swal.fire({
         title: 'Error',
-        text: 'Cannot modify signed takeoff',
+        text: 'Cannot modify takeoff',
         icon: 'error',
         showCancelButton: false,
         confirmButtonText: 'OK'

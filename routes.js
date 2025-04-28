@@ -543,7 +543,7 @@ module.exports = function (app) {
               console.log(err);
             } else {
               console.log("plans uploaded");
-              res.send("plans uploaded")
+              res.redirect("/");
               // Success message after a successful upload
             }
           });
@@ -1219,6 +1219,8 @@ module.exports = function (app) {
               // call to  async function callChatGPT with the response as the return value and saves the it to the database
               let response = "";
               //console.log("prompt",prompt + JSON.stringify(estimate))
+
+              console.log("prompt",prompt + JSON.stringify(estimate))
               chatgpt.sendChat(prompt + JSON.stringify(estimate)).then((subres) => {
                 response = subres;
                 //console.log("Response:", response);

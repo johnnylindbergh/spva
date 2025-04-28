@@ -125,15 +125,15 @@ function regenChatGPTResponse() {
             const exclusionsList = $('#exclusions');
             exclusionsList.empty(); // Clear any existing content
             exclusionsList.html(formatTextToHTML(data.exclusions));
-            XSAlert({
+            Swal.fire({
                 title: 'Success',
-                message: 'ChatGPT response has been successfully regenerated.',
+                text: 'ChatGPT response has been successfully regenerated.',
                 icon: 'success',
             });
         } else {
-            XSAlert({
+            Swal.fire({
                 title: 'Error',
-                message: 'Failed to regenerate ChatGPT response.',
+                text: 'Failed to regenerate ChatGPT response.',
                 icon: 'error',
             });
         }
