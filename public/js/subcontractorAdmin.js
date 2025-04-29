@@ -148,6 +148,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (action === 'edit') {
             // Open the edit modal and populate it with job data
             const job = await fetch(`/api/jobs/${jobId}`).then(res => res.json());
+            console.log("job:", job);
+            document.getElementById('editJobId').value = job.job_id;
             document.getElementById('editJobName').value = job.job_name;
             document.getElementById('editJobDescription').value = job.job_description;
             document.getElementById('editJobLocation').value = job.job_location;
@@ -157,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         else if (action === 'delete') {
             // Confirm deletion
-            if (confirm(`Are you sure you want to delete job #${jobId}?`)) {
+            if (confirm(`Are you sure you want to delete job #${job.job_name}?`)) {
                 try {
                     const response = await fetch(`/api/jobs/${jobId}`, {
                         method: 'DELETE'
@@ -175,6 +177,44 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+
+    //  add listner to the saveChangesBtn button
+    document.getElementById('saveChangesBtn').addEventListener('click', async function() {
+        const jobId = parseInt(document.getElementById('editJobId').value);
+        const jobName = document.getElementById('editJobName').value;
+        const jobDescription = document.getElementById('editJobDescription').value;
+        const jobLocation = document.getElementById('editJobLocation').value;
+        const jobStartDate = document.getElementById('editJobStartDate').value;
+        const jobEndDate = document.getElementById('editJobEndDate').value;
+
+        if (!jobId || !jobName || !jobDescription || !jobLocation || !jobStartDate || !jobEndDate) {
+            alert('Please fill in all fields.');
+            return;
+        }
+        try {
+            const response = await fetch(`/api/updateJob/`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    job_id: jobId,
+                    job_name: jobName,
+                    job_description: jobDescription,
+                    job_location: jobLocation,
+                    job_start_date: jobStartDate,
+                    job_end_date: jobEndDate
+                })
+            });
+            if (response.ok) {
+                alert(`Job "${jobName}" updated successfully!`);
+                fetchData(); // Refresh data
+                $('#jobEditModal').modal('hide'); // Hide the modal
+            } else {
+                alert('Failed to update job.');
+            }
+        } catch (error) {
+            console.error('Error updating job:', error);
+        }
+    });
 
 
 

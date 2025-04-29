@@ -104,6 +104,41 @@
             </form>
         </section>
 
+
+        <!-- agreement section -->
+         <section class="mb-5">
+            <h2 class="mb-3">Create Subcontractor Agreement</h2>
+            <form id="createAgreementForm" class="row g-3">
+                <div class="col-md-6">
+                    <label for="subcontractorSelectAgreement" class="form-label">Select Subcontractor:</label>
+                    <select id="subcontractorSelectAgreement" name="subcontractorSelectAgreement" class="form-select" required>
+                        <!-- Options will be dynamically populated -->
+                    </select>
+                </div>
+                <!-- job selection -->
+                <div class="col-md-6">
+                    <label for="jobSelectAgreement" class="form-label">Select Job:</label>
+                    <select id="jobSelectAgreement" name="jobSelectAgreement" class="form-select" required>
+                        <!-- Options will be dynamically populated -->
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="agreementDetails" class="form-label">Agreement Details:</label>
+                    <textarea id="agreementDetails" name="agreementDetails" class="form-control" rows="3" required></textarea>
+                </div>
+                <!-- agreement pdf upload -->
+                <div class="col-md-6">
+                    <label for="agreementPdf" class="form-label">Upload Agreement PDF:</label>
+                    <input type="file" id="agreementPdf" name="agreementPdf" class="form-control" accept=".pdf" required>
+                </div>
+                
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Create Agreement</button>
+                </div>
+            </form>
+        </section>
+
         <section class="mb-5">
             <h2 class="mb-3">View Subcontractor Forms</h2>
             <table class="table table-striped">
@@ -158,6 +193,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="editJobForm">
+                        <!-- hidden job id -->
                         <div class="mb-3">
                             <label for="editJobName" class="form-label">Job Name:</label>
                             <input type="text" id="editJobName" name="editJobName" class="form-control" required>

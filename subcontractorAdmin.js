@@ -51,6 +51,45 @@ module.exports = function (app) {
         });
     });
 
+    app.put('/api/updateJob', mid.isSubcontractorAdmin, function (req, res) {
+
+        const { job_id, job_name, job_description, job_location, job_start_date, job_end_date } = req.body;
+        console.log('req body', req.body);
+        if (!job_id || !job_name || !job_description || !job_location || !job_start_date || !job_end_date) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        db.query(
+            "UPDATE jobs SET job_name = ?, job_description = ?, job_location = ?, job_start_date = ?, job_end_date = ? WHERE id = ?",
+            [job_name, job_description, job_location, job_start_date, job_end_date, job_id],
+            function (error, result) {
+                if (error) {
+                    console.error('Error updating job:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({ error: 'Job not found' });
+                }
+                res.json({ message: 'Job updated successfully' });
+            }
+        );
+    });
+
+    app.delete('/api/jobs/:id', mid.isSubcontractorAdmin, function (req, res) {
+        const jobId = req.params.id;
+        db.query("DELETE FROM jobs where id = ?;", [jobId], function (error, results) {
+            if (error) {
+                console.error('Error deleting job:', error);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+            if (results.affectedRows === 0) {
+                return res.status(404).json({ error: 'Job not found' });
+            }
+            res.json({ message: 'Job deleted successfully' });
+        });
+    }
+    );
+
     app.get('/api/jobs/:id', mid.isSubcontractorAdmin, function (req, res) {
         const jobId = req.params.id;
         db.query("SELECT * FROM jobs WHERE id = ?;", [jobId], function (error, results) {
@@ -200,19 +239,46 @@ module.exports = function (app) {
         );
     });
 
-    app.post('/api/forms/assign', mid.isSubcontractorAdmin, function (req, res) {
-        const { form_id, user_id } = req.body;
-        db.query(
-            "INSERT INTO subcontractor_forms (form_id, user_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE user_id = VALUES(user_id)",
-            [form_id, user_id],
-            function (error) {
-                if (error) {
-                    console.error('Error assigning form:', error);
+    app.post('api/agreement/create', mid.isSubcontractorAdmin, function (req, res) {
+        // use multer to handle file upload
+        const storage = multer.memoryStorage();
+        const upload = multer({ storage: storage });
+        const uploadSingle = upload.single('file');
+        uploadSingle(req, res, function (err) {
+            if (err) {
+                console.error('Error uploading file:', err);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+
+            const { user_id, job_id } = req.body;
+            const file = req.file;
+
+            if (!file) {
+                return res.status(400).json({ error: 'No file uploaded' });
+            }
+
+            // Save the file to the database or filesystem
+            const filePath = path.join(__dirname, 'uploads', file.originalname);
+            fs.writeFile(filePath, file.buffer, function (err) {
+                if (err) {
+                    console.error('Error saving file:', err);
                     return res.status(500).json({ error: 'Internal server error' });
                 }
-                res.status(200).json({ message: 'Form assigned successfully' });
-            }
-        );
+                // Save the agreement details to the database
+                db.query(
+                    "INSERT INTO agreements (user_id, job_id, file_path) VALUES (?, ?, ?)",
+                    [user_id, job_id, filePath],
+                    function (error, result) {
+                        if (error) {
+                            console.error('Error creating agreement:', error);
+                            return res.status(500).json({ error: 'Internal server error' });
+                        }
+                        const newAgreement = { id: result.insertId, user_id, job_id, file_path: filePath };
+                        res.status(201).json(newAgreement);
+                    }
+                );
+            });
+        });
     });
 
     app.post('/api/form-items', mid.isSubcontractorAdmin, function (req, res) {
