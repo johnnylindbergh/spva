@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const createJobForm = document.getElementById('createJobForm');
@@ -17,18 +18,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch data from the server
     async function fetchData() {
         try {
-            const [jobsData, subcontractorsData, formsData, paymentsData] = await Promise.all([
+            const [jobsData, subcontractorsData, formsData, paymentsData, agreementsData, assignmentsData] = await Promise.all([
                 fetch('/api/jobs').then(res => res.json()),
                 fetch('/api/subcontractors').then(res => res.json()),
                 fetch('/api/forms').then(res => res.json()),
-                fetch('/api/payments').then(res => res.json())
+                fetch('/api/payments').then(res => res.json()),
+                fetch('/api/agreements').then(res => res.json()),
+                fetch('/api/assignments').then(res => res.json())
             ]);
 
             renderJobSelect(jobsData);
             renderJobsTable(jobsData);
+            renderJobSelectAgreement(jobsData);
             renderSubcontractorSelect(subcontractorsData);
+            renderSubcontractorSelectAgreement(subcontractorsData);
             renderFormsTable(formsData);
             renderPaymentsTable(paymentsData);
+            renderAgreementsTable(agreementsData);
+            renderAssignmentsTable(assignmentsData);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -40,6 +47,51 @@ document.addEventListener('DOMContentLoaded', function() {
         assignJobForm.addEventListener('submit', handleAssignJob);
     }
 
+    // Handle agreement creation
+    async function handleCreateAgreement(e) {
+        e.preventDefault();
+
+        const subcontractorId = parseInt(document.getElementById('subcontractorSelectAgreement').value);
+        const jobId = parseInt(document.getElementById('jobSelectAgreement').value);
+        const agreementDetails = document.getElementById('agreementDetails').value;
+        const agreementPdf = document.getElementById('agreementPdf').files[0];
+
+        if (!subcontractorId || !jobId || !agreementDetails || !agreementPdf) {
+            alert('Please fill in all fields and upload a PDF.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('subcontractorId', subcontractorId);
+        formData.append('jobId', jobId);
+        formData.append('agreementDetails', agreementDetails);
+        formData.append('agreementPdf', agreementPdf);
+
+        try {
+            const response = await fetch('/api/agreement/create', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                alert('Agreement created successfully!');
+                document.getElementById('createAgreementForm').reset();
+                fetchData(); // Refresh data
+            } else {
+                console.log('Failed to create agreement:', response.statusText);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.statusText,
+                });
+            }
+        } catch (error) {
+            console.error('Error creating agreement:', error);
+        }
+    }
+
+    // Add event listener for the agreement form
+    document.getElementById('createAgreementForm').addEventListener('submit', handleCreateAgreement);
     // Handle job creation
     async function handleCreateJob(e) {
         e.preventDefault();
@@ -74,7 +126,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error creating job:', error);
         }
     }
-
     // Handle job assignment
     async function handleAssignJob(e) {
         e.preventDefault();
@@ -91,13 +142,28 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (response.ok) {
-                alert('Job assigned successfully!');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Job assigned successfully!',
+                });
                 assignJobForm.reset();
+                // Refresh data
+                fetchData();
             } else {
-                alert('Failed to assign job.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.statusText,
+                });
             }
         } catch (error) {
             console.error('Error assigning job:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while assigning the job.',
+            });
         }
     }
 
@@ -217,6 +283,62 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
+    function renderAssignmentsTable(assignments) {
+        const assignmentsTable = document.getElementById('assignmentsTable');
+        assignmentsTable.innerHTML = '';
+        if (assignments.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="5" class="text-center">No assignments available</td>';
+            assignmentsTable.appendChild(row);
+            return;
+        }
+        assignments.forEach(assignment => {
+            const row = document.createElement('tr');
+            console.log("assignment:", assignment);
+            row.innerHTML = `
+
+                <td>${assignment.job_name}</td>
+                <td>${assignment.subcontractorName}</td>
+                <td>$${assignment.alloted_bid}</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" data-id="${assignment.id}" data-action="delete">Delete</button>
+                </td>
+            `;
+            assignmentsTable.appendChild(row);
+        });
+        // Add event listeners to action buttons
+        document.querySelectorAll('[data-action="delete"]').forEach(btn => {
+            btn.addEventListener('click', handleAssignmentAction);
+        });
+    }
+
+    async function handleAssignmentAction(e) {
+        const assignmentId = parseInt(e.target.dataset.id);
+        const action = e.target.dataset.action;
+        if (action === 'delete') {
+            // Confirm deletion
+            if (confirm(`Are you sure you want to delete assignment #${assignmentId}?`)) {
+                try {
+                    const response = await fetch(`/api/assignments/${assignmentId}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        alert(`Assignment #${assignmentId} deleted successfully!`);
+                        
+
+                        fetchData(); // Refresh data
+                    }
+                    else {
+                        alert('Failed to delete assignment.');
+                    }
+                } catch (error) {
+                    console.error('Error deleting assignment:', error);
+                }
+            }
+        }
+    }
+    
+
 
     // Render job select dropdown
     function renderJobSelect(jobs) {
@@ -240,6 +362,97 @@ document.addEventListener('DOMContentLoaded', function() {
             subcontractorSelect.appendChild(option);
         });
     }
+
+    function renderSubcontractorSelectAgreement(subcontractors) {
+        const subcontractorSelectAgreement = document.getElementById('subcontractorSelectAgreement');
+        subcontractorSelectAgreement.innerHTML = '<option value="">Select Subcontractor</option>';
+        subcontractors.forEach(subcontractor => {
+            const option = document.createElement('option');
+            option.value = subcontractor.id;
+            option.textContent = subcontractor.name;
+            subcontractorSelectAgreement.appendChild(option);
+        });
+    }
+    function renderAgreementsTable(agreements) {
+        console.log("agreements:", agreements);
+        const agreementsTable = document.getElementById('agreementsTable');
+        agreementsTable.innerHTML = '';
+        if (agreements.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="5" class="text-center">No agreements available</td>';
+            agreementsTable.appendChild(row);
+            return;
+        }
+
+        agreements.forEach(agreement => {
+            const row = document.createElement('tr');
+
+            // Format the agreement.created_at to YYYY-MM-DD
+            const date = new Date(agreement.created_at);
+            const formattedDate = date.toISOString().split('T')[0];
+            agreement.created_at = formattedDate;
+
+            row.innerHTML = `
+                <td>${agreement.id}</td>
+                <td>
+                    <span class="description-hover" data-bs-toggle="tooltip" title="${agreement.description}">
+                        ${agreement.description.length > 30 ? agreement.description.substring(0, 30) + '...' : agreement.description}
+                    </span>
+                </td>
+                <td>${agreement.subcontractorName}</td>
+                <td>${agreement.created_at}</td>
+                <td><a href="/subcontractorAdmin/viewAgreement/?agreement_id=${agreement.agreement_id}" target="_blank">View</a></td>
+                <td>${agreement.status}</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" data-id="${agreement.agreement_id}" data-action="delete">Delete</button>
+                </td>
+            `;
+            agreementsTable.appendChild(row);
+        });
+
+        // Initialize Bootstrap tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Add event listeners to delete buttons
+        document.querySelectorAll('[data-action="delete"]').forEach(btn => {
+            btn.addEventListener('click', handleAgreementDelete);
+        });
+    }
+
+    // Handle agreement deletion
+    async function handleAgreementDelete(e) {
+        const agreementId = parseInt(e.target.dataset.id);
+        if (confirm(`Are you sure you want to delete agreement #${agreementId}?`)) {
+            try {
+                const response = await fetch(`/api/agreements/${agreementId}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    alert(`Agreement #${agreementId} deleted successfully!`);
+                    fetchData(); // Refresh data
+                } else {
+                    alert('Failed to delete agreement.');
+                }
+            } catch (error) {
+                console.error('Error deleting agreement:', error);
+            }
+        }
+    }
+    
+    function renderJobSelectAgreement(jobs) {
+        const jobSelectAgreement = document.getElementById('jobSelectAgreement');
+        jobSelectAgreement.innerHTML = '<option value="">Select Job</option>';
+        jobs.forEach(job => {
+            const option = document.createElement('option');
+            option.value = job.id;
+            option.textContent = `${job.job_name} `;
+            jobSelectAgreement.appendChild(option);
+        });
+    }
+
     // Render forms table
     function renderFormsTable(forms) {
         console.log("forms:", forms);   

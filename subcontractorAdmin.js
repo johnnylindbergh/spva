@@ -4,6 +4,7 @@ const mid = require("./middleware.js");
 const moment = require("moment");
 const path = require("path");
 const multer = require("multer");
+const fs = require("fs");
 const chatgpt = require("./chatgpt.js");
 const emailer = require("./email.js");
 const creds = require("./credentials.js");
@@ -208,6 +209,40 @@ module.exports = function (app) {
         );
     });
 
+    app.get('/api/assignments', mid.isSubcontractorAdmin, function (req, res) {
+        db.query(
+            `SELECT 
+                subcontractor_jobs_assignment.*, 
+                users.name as subcontractorName, 
+                jobs.job_name 
+            FROM subcontractor_jobs_assignment 
+            JOIN users ON subcontractor_jobs_assignment.user_id = users.id 
+            JOIN jobs ON subcontractor_jobs_assignment.job_id = jobs.id;`,
+            function (error, results) {
+                if (error) {
+                    console.error('Error fetching assignments:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                res.json(results);
+            }
+        );
+    }
+    );
+
+app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res) {
+    const assignmentId = req.params.id;
+    db.query("DELETE FROM subcontractor_jobs_assignment WHERE id = ?;", [assignmentId], function (error, results) {
+        if (error) {
+            console.error('Error deleting assignment:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: 'Assignment not found' });
+        }
+        res.json({ message: 'Assignment deleted successfully' });
+    });
+});
+
     app.post('/api/assignments', mid.isSubcontractorAdmin, function (req, res) {
         const { jobId, subcontractorId, allottedBid } = req.body;
         db.query(
@@ -239,47 +274,172 @@ module.exports = function (app) {
         );
     });
 
-    app.post('api/agreement/create', mid.isSubcontractorAdmin, function (req, res) {
+    app.post('/api/agreement/create', mid.isSubcontractorAdmin, function (req, res) {
         // use multer to handle file upload
         const storage = multer.memoryStorage();
         const upload = multer({ storage: storage });
-        const uploadSingle = upload.single('file');
+        const uploadSingle = upload.single('agreementPdf');
         uploadSingle(req, res, function (err) {
+            console.log('req body', req.body);
+
             if (err) {
                 console.error('Error uploading file:', err);
                 return res.status(500).json({ error: 'Internal server error' });
             }
 
-            const { user_id, job_id } = req.body;
+            const { subcontractorId, jobId, agreementDetails } = req.body;
             const file = req.file;
 
             if (!file) {
                 return res.status(400).json({ error: 'No file uploaded' });
             }
 
-            // Save the file to the database or filesystem
-            const filePath = path.join(__dirname, 'uploads', file.originalname);
-            fs.writeFile(filePath, file.buffer, function (err) {
-                if (err) {
-                    console.error('Error saving file:', err);
-                    return res.status(500).json({ error: 'Internal server error' });
-                }
-                // Save the agreement details to the database
-                db.query(
-                    "INSERT INTO agreements (user_id, job_id, file_path) VALUES (?, ?, ?)",
-                    [user_id, job_id, filePath],
-                    function (error, result) {
-                        if (error) {
-                            console.error('Error creating agreement:', error);
+            // Check if record exists in subcontractor_jobs_assignment
+            db.query(
+                "SELECT * FROM subcontractor_jobs_assignment WHERE job_id = ? AND user_id = ?",
+                [jobId, subcontractorId],
+                function (checkError, results) {
+                    if (checkError) {
+                        console.error('Error checking subcontractor_jobs_assignment:', checkError);
+                        return res.status(500).json({ error: 'Please assign sub to job' });
+                    }
+
+                    if (results.length === 0) {
+                        return res.status(500).json({ error: 'No assignment found for the given subcontractor and job' });
+                    }
+
+                    // Save the file to the database or filesystem
+                    const filePath = path.join(__dirname, 'uploads', file.originalname);
+                    fs.writeFile(filePath, file.buffer, function (err) {
+                        if (err) {
+                            console.error('Error saving file:', err);
                             return res.status(500).json({ error: 'Internal server error' });
                         }
-                        const newAgreement = { id: result.insertId, user_id, job_id, file_path: filePath };
-                        res.status(201).json(newAgreement);
-                    }
-                );
-            });
+
+                        // Save the agreement details to the database
+                        db.query(
+                            "INSERT INTO agreements (description, hash, pdf_path) VALUES (?, ?, ?)",
+                            [agreementDetails, db.generateHash(), filePath],
+                            function (error, result) {
+                                if (error) {
+                                    console.error('Error creating agreement:', error);
+                                    return res.status(500).json({ error: 'Internal server error' + error });
+                                }
+
+                                const agreementId = result.insertId;
+
+                                // Update the subcontractor_jobs_assignment table with the agreement ID
+                                db.query(
+                                    "UPDATE subcontractor_jobs_assignment SET agreement_id = ? WHERE job_id = ? AND user_id = ?",
+                                    [agreementId, jobId, subcontractorId],
+                                    function (updateError) {
+                                        if (updateError) {
+                                            console.error('Error updating subcontractor_jobs_assignment:', updateError);
+                                            return res.status(500).json({ error: 'Internal server error Error updating subcontractor_jobs_assignment' });
+                                        }
+
+                                        res.status(200).json({ message: 'Agreement created and assignment updated successfully', agreementId });
+                                    }
+                                );
+                            }
+                        );
+                    });
+                }
+            );
         });
     });
+
+    app.get('/api/agreements', mid.isSubcontractorAdmin, function (req, res) {
+        console.log('Fetching all agreements');
+        db.query(
+            `SELECT 
+                agreements.*, 
+                subcontractor_jobs_assignment.*,
+                users.name as subcontractorName 
+            FROM agreements 
+            JOIN subcontractor_jobs_assignment 
+            ON agreements.id = subcontractor_jobs_assignment.agreement_id
+            JOIN users 
+            ON subcontractor_jobs_assignment.user_id = users.id;`,
+            function (error, results) {
+                if (error) {
+                    console.error('Error fetching agreements:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                res.json(results);
+            }
+        );
+    });
+    
+
+    app.delete('/api/agreements/:id', mid.isSubcontractorAdmin, function (req, res) {
+        const agreementId = req.params.id;
+        db.query("DELETE FROM agreements WHERE id = ?;", [agreementId], function (error, results) {
+            if (error) {
+                console.error('Error deleting agreement:', error);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+            if (results.affectedRows === 0) {
+                return res.status(404).json({ error: 'Agreement not found' });
+            }
+            res.json({ message: 'Agreement deleted successfully' });
+        });
+    });
+
+    // endpoint for /subcontractorAdmin/viewAgreement
+    app.get('/subcontractorAdmin/viewAgreement', mid.isSubcontractorAdmin, function (req, res) {
+        const agreementId = req.query.agreement_id;
+        if (!agreementId) {
+            return res.status(400).json({ error: 'Agreement ID is required' });
+        }
+
+        db.query(
+            "SELECT * FROM agreements WHERE id = ?",
+            [agreementId],
+            function (error, results) {
+                if (error) {
+                    console.error('Error fetching agreement:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                if (results.length === 0) {
+                    return res.status(404).json({ error: 'Agreement not found' });
+                }
+
+                const agreement = results[0];
+                const pdfPath = agreement.pdf_path;
+
+                // Check if the file exists
+                fs.access(pdfPath, fs.constants.F_OK, (err) => {
+                    if (err) {
+                        console.error('Error accessing PDF file:', err);
+                        return res.status(404).json({ error: 'PDF file not found' });
+                    }
+
+                    // Stream the PDF file to the client
+                    res.setHeader('Content-Type', 'application/pdf');
+                    res.setHeader('Content-Disposition', `inline; filename="${path.basename(pdfPath)}"`);
+                    const fileStream = fs.createReadStream(pdfPath);
+                    fileStream.pipe(res);
+                });
+            }
+        );
+    });
+
+    app.get('/api/agreement/:userid', mid.isSubcontractorAdmin, function (req, res) {
+        const userId = req.params.userid;
+        db.query(
+            "SELECT * FROM agreements WHERE id IN (SELECT agreement_id FROM subcontractor_jobs_assignment WHERE user_id = ?)",
+            [userId],
+            function (error, results) {
+                if (error) {
+                    console.error('Error fetching agreements:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                res.json(results);
+            }
+        );
+    }
+    );
 
     app.post('/api/form-items', mid.isSubcontractorAdmin, function (req, res) {
         const { form_id, job_id, item_description } = req.body;

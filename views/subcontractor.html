@@ -40,7 +40,17 @@
                     <button class="btn btn-primary btn-sm" style="background-color: rgba(8, 148, 161, 1.0); border-color: rgba(8, 148, 161, 1.0);" onclick="viewForm('{{form_id}}')">View</button>
                 </div>
                 {{/forms}}
+                {{^forms}}
+                <div class="list-group
+                <div class="list-group-item">
+                    <span>No forms submitted yet.</span>    
+                </div>  
+                <p class="text-muted">Create a new form to get started.</p>
+
+                {{/forms}}
             </div>
+        </div>
+        <div class="mt-4">
         </div>
         <button class="btn btn-success mt-4" onclick="createNewForm()">Create New</button>
     </br>

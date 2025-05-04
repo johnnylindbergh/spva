@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subcontractor View Agreement</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="content" class="container my-5">
+        <div class="mb-4">
+            <h2 class="mb-3">Agreement Details</h2>
+            <p><strong>Description:</strong> {{agreement.description}}</p>
+            <p><strong>Subcontractor Name:</strong> {{agreement.subcontractor_name}}</p>
+            <p><strong>Subcontractor Email:</strong> {{agreement.subcontractor_email}}</p>
+            <p><strong>Job Name:</strong> {{agreement.job_name}}</p>
+            <p><strong>Alloted Bid:</strong> ${{agreement.alloted_bid}}</p>
+        </div>
+
+        <div class="mb-4">
+            <div class="ratio ratio-16x9">
+                <iframe src="/subcontractor/embedAgreementPdf/?agreement_id={{agreement.id}}" title="Agreement PDF"></iframe>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h2 class="mb-3">Signature</h2>
+            <form id="signatureForm" action="/subcontractor/signAgreement" method="POST" class="needs-validation" novalidate>
+                <input type="hidden" name="agreement_id" value="{{agreement.id}}">
+                <div class="mb-3">
+                    <label for="signature" class="form-label">Signature:</label>
+                    <input type="text" id="signature" name="signature" class="form-control" required>
+                    <div class="invalid-feedback">
+                        Please provide your signature.
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Signature</button>
+            </form>
+            <div id="signatureResponse" class="mt-3"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Bootstrap validation
+        (function () {
+            'use strict';
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
+</body>
+</html>

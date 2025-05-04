@@ -431,8 +431,7 @@ CREATE TABLE agreements (
   pdf_path VARCHAR(255),
   view_count INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
+  PRIMARY KEY (id)
 );
 
 CREATE TABLE jobs (
@@ -441,7 +440,6 @@ CREATE TABLE jobs (
   job_name VARCHAR(255) NOT NULL,
   takeoff_id INT,
   -- bid DECIMAL(10,2),
-  default_agreement_id INT,
   job_description TEXT,
   job_location VARCHAR(255),
   job_start_date TIMESTAMP,
@@ -449,7 +447,6 @@ CREATE TABLE jobs (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
 );
 
 -- example insert
@@ -460,11 +457,14 @@ CREATE TABLE subcontractor_jobs_assignment (
   id INT NOT NULL AUTO_INCREMENT,
   job_id INT NOT NULL,
   user_id INT NOT NULL,
+  agreement_id INT,
+  status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
   alloted_bid DECIMAL(10,2),
   PRIMARY KEY (id),
   UNIQUE KEY (job_id, user_id), -- Prevent duplicate assignments
   FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (agreement_id) REFERENCES agreements(id) ON DELETE CASCADE
 );
 
 
@@ -472,16 +472,7 @@ CREATE TABLE subcontractor_jobs_assignment (
 -- example insert
 INSERT INTO agreements (name, description, hash, pdf_path) VALUES ('Agreement 1', 'Description of Agreement 1', 'hash1', 'path/to/agreement.pdf');
 
-CREATE TABLE subcontractor_agreement_assignment (
-  id INT NOT NULL AUTO_INCREMENT,
-  agreement_id INT NOT NULL,
-  user_id INT NOT NULL,
-  status ENUM('pending', 'accepted') DEFAULT 'pending',
-  PRIMARY KEY (id),
-  UNIQUE KEY (agreement_id, user_id), -- Prevent duplicate assignments
-  FOREIGN KEY (agreement_id) REFERENCES agreements(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+
 
 
 -- Forms Table

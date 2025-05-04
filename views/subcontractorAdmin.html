@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subcontractor Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- sweet alert -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/defaults.css">
@@ -77,6 +81,23 @@
             </form>
         </section>
 
+        <!-- existing assignments table -->
+        <section class="mb-5">
+            <h2 class="mb-3">Current Assignments</h2>
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Job Name</th>
+                        <th>Subcontractor Name</th>
+                        <th>Alloted Bid</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="assignmentsTable">
+                    <!-- Rows will be dynamically populated -->
+                </tbody>
+            </table>
+
         <section class="mb-5">
             <h2 class="mb-3">Assign Job to Subcontractor</h2>
             <form id="assignJobForm" class="row g-3">
@@ -106,22 +127,46 @@
 
 
         <!-- agreement section -->
+
+        <section class="mb-5">
+            <h2 class="mb-3">Agreements and Subcontractor Assignments</h2>
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Agreement ID</th>
+                        <th>Scope</th>
+                        <th>Subcontractor Name</th>
+                        <th>Created</th>
+                        <th>PDF</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="agreementsTable">
+                    <!-- Rows will be dynamically populated -->
+                </tbody>
+            </table>
+        </section>
+
          <section class="mb-5">
             <h2 class="mb-3">Create Subcontractor Agreement</h2>
             <form id="createAgreementForm" class="row g-3">
+
+                 <!-- job selection -->
+                 <div class="col-md-6">
+                    <label for="jobSelectAgreement" class="form-label">Select Job:</label>
+                    <select id="jobSelectAgreement" name="jobSelectAgreement" class="form-select" required>
+                        <!-- Options will be dynamically populated -->
+                    </select>
+                </div>
+
                 <div class="col-md-6">
                     <label for="subcontractorSelectAgreement" class="form-label">Select Subcontractor:</label>
                     <select id="subcontractorSelectAgreement" name="subcontractorSelectAgreement" class="form-select" required>
                         <!-- Options will be dynamically populated -->
                     </select>
                 </div>
-                <!-- job selection -->
-                <div class="col-md-6">
-                    <label for="jobSelectAgreement" class="form-label">Select Job:</label>
-                    <select id="jobSelectAgreement" name="jobSelectAgreement" class="form-select" required>
-                        <!-- Options will be dynamically populated -->
-                    </select>
-                </div>
+               
 
                 <div class="col-md-6">
                     <label for="agreementDetails" class="form-label">Agreement Details:</label>
