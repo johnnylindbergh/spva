@@ -12,7 +12,6 @@
             <h2 class="mb-3">Agreement Details</h2>
             <p><strong>Description:</strong> {{agreement.description}}</p>
             <p><strong>Subcontractor Name:</strong> {{agreement.subcontractor_name}}</p>
-            <p><strong>Subcontractor Email:</strong> {{agreement.subcontractor_email}}</p>
             <p><strong>Job Name:</strong> {{agreement.job_name}}</p>
             <p><strong>Alloted Bid:</strong> ${{agreement.alloted_bid}}</p>
         </div>
@@ -48,6 +47,18 @@
             const forms = document.querySelectorAll('.needs-validation');
             Array.from(forms).forEach(form => {
                 form.addEventListener('submit', event => {
+                    const signatureInput = document.getElementById('signature');
+                    const subcontractorName = "{{agreement.subcontractor_name}}";
+
+                    if (signatureInput.value.trim() !== subcontractorName.trim()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        signatureInput.classList.add('is-invalid');
+                        signatureInput.nextElementSibling.textContent = 'Signature must match the subcontractor name.';
+                    } else {
+                        signatureInput.classList.remove('is-invalid');
+                    }
+
                     if (!form.checkValidity()) {
                         event.preventDefault();
                         event.stopPropagation();

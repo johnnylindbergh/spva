@@ -173,6 +173,14 @@ function fetchJobs() {
         jobList = response || [];
         console.log('Jobs fetched:', jobList);
         populateJobDropdowns();
+
+        if (jobList.length === 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'No jobs have been assigned to you or there is no remaining bid. If you believe this is an error, please contact your supervisor.'
+            });
+        }
     });
 }
 function fetchAgreements() {

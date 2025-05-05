@@ -12,6 +12,15 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .form-group {
             margin-bottom: 15px;
@@ -26,39 +35,45 @@
             box-sizing: border-box;
         }
         button {
-            background-color:  rgb(8, 148, 161);
+            background-color: rgb(8, 148, 161);
             color: white;
             border: none;
             cursor: pointer;
         }
         button:hover {
-            background-color: rgb(8, 148, 161);
+            background-color: rgb(6, 120, 130);
         }
     </style>
 </head>
 <body>
-    <h1>Subcontractor Profile</h1>
-    <form id="profileForm">
-        <div class="form-group">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" placeholder="Enter your name" required>
-        </div>
-        <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email" required>
-        </div>
-        <div class="form-group">
-            <label for="phone">Phone:</label>
-            <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
-        </div>
-        <button type="button" onclick="updateProfile()">Update Profile</button>
-    </form>
+    <div class="container">
+        <h1>Subcontractor Profile</h1>
+        <form id="profileForm">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" placeholder="Enter your name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+            </div>
+            <button type="button" onclick="updateProfile()">Update Profile</button>
+        </form>
 
-    <h2>Profile Details</h2>
-    <div id="profileDetails">
-        <p><strong>Name:</strong> {{name}}</p>
-        <p><strong>Email:</strong> {{email}}</p>
-        <p><strong>Phone:</strong> {{phone_number}}</p>
+        <h2>Profile Details</h2>
+        <div id="profileDetails">
+            <p><strong>Name:</strong> {{name}}</p> 
+            <p><strong>Email:</strong> {{email}}</p>
+            <p><strong>Phone:</strong> {{phone_number}}</p> 
+            {{^phone_number}}
+            <p><strong>Phone:</strong> Not provided</p>
+            <p style="font-size: 0.9em; color: gray;">By entering your phone number, you are agreeing to receive text notifications related to your profile updates and activities.</p>
+            {{/phone_number}}
+        </div>
     </div>
 
     <script>
@@ -75,6 +90,7 @@
 
             $.post('/subcontractor/updateProfile', profileDetails, function(response) {
                 if (response.success) {
+                    console.log('Profile updated successfully:', response);
                     alert('Profile updated successfully!');
                     document.getElementById('profileDetails').innerHTML = `
                         <p><strong>Name:</strong> ${profileDetails.name}</p>
@@ -84,8 +100,13 @@
                 } else {
                     alert('Error updating profile. Please try again.');
                 }
+            }).fail(function(xhr) {
+                if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.message) {
+                    alert(xhr.responseJSON.message);
+                } else {
+                    alert('An unexpected error occurred. Please try again later.');
+                }
             });
-        
 
             document.getElementById('profileDetails').innerHTML = `
                 <p><strong>Name:</strong> ${profileDetails.name}</p>

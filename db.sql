@@ -30,6 +30,15 @@ CREATE TABLE users (
   PRIMARY KEY (id)
 );
 
+CREATE TABLE otp (
+  id INT NOT NULL AUTO_INCREMENT,
+  otp VARCHAR(6) NOT NULL,
+  takeoff_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+);
+
 -- Default admin user
 INSERT INTO users (user_type, name, email, phone_number) VALUES (1, "Johnny","lindberghjohnny@gmail.com", "+14342491362");
 

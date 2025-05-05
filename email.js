@@ -446,6 +446,118 @@ async function sendChangeOrderEmail(req, res, change_order_id, callback) {
   );
 }
 
+function sendSubcontractorFormEmail(form_id, user_id, callback) {
+  db.getSubcontractorFormById(form_id, (err, form) => {
+    if (err) {
+      console.log(err);
+      callback("could not get subcontractor form by id", null);
+    } else {
+      db.getUserById(user_id, (err, user) => {
+        if (err) {
+          console.log(err);
+          callback("could not get user by id", null);
+        } else {
+          const mailOptions = {
+            from: credentials.serverEmail,
+            to: user.email,
+            subject: "Your Subcontractor Form from Sun Painting",
+            html: `
+              <h3>Hello, ${user.name},</h3>
+              <h3>Congradulations! You have completed a form!</h3>
+              <p>Please click the link below to view it:</p>
+              <a href="${credentials.domain}/shareSubcontractorForm/?hash=${form.hash}">View Subcontractor Form</a></br>
+            `,
+          };
+          
+          const info = transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+              console.log(err);
+              callback(err, null);
+            } else {
+              console.log("Email sent: " + info.response);
+              callback(null, info.response);
+            }
+          });
+        }
+      });
+    }
+  });
+}
+function sendSubcontractorFormEmailToAdmin(form_id, user_id, callback) {
+  db.getSubcontractorFormById(form_id, (err, form) => {
+    if (err) {
+      console.log(err);
+      callback("could not get subcontractor form by id", null);
+    } else {
+      db.getUserById(user_id, (err, user) => {
+        if (err) {
+          console.log(err);
+          callback("could not get user by id", null);
+        } else {
+          const mailOptions = {
+            from: credentials.serverEmail,
+            to: creds.companyEmail,
+            subject: "New Subcontractor Form from Sun Painting",
+            html: `
+              <h3>Hello, ${creds.companyName},</h3>
+              <h3>A new subcontractor form has been submitted.</h3>
+              <p>Please click the link below to view it:</p>
+              <a href="${credentials.domain}/shareSubcontractorForm/?hash=${form.hash}">View Subcontractor Form</a></br>
+            `,
+          };
+          
+          const info = transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+              console.log(err);
+              callback(err, null);
+            } else {
+              console.log("Email sent: " + info.response);
+              callback(null, info.response);
+            }
+          });
+        }
+      });
+    }
+  });
+}
+
+
+// send notification emil to subcontractor form recipients credentials.subcontractorFormNotifiationRecipients[i].email
+// that a new subcontractor form has been submitted
+
+function sendSubcontractorFormNotificationEmail(form_id, callback) {
+  db.getSubcontractorFormById(form_id, (err, form) => {
+    if (err) {
+      console.log(err);
+      callback("could not get subcontractor form by id", null);
+    } else {
+      console.log(form);
+      for (let i = 0; i < creds.subcontractorFormNotifiationRecipients.length; i++) {
+        const mailOptions = {
+          from: credentials.serverEmail,
+          to: creds.subcontractorFormNotifiationRecipients[i].email,
+          subject: "New Subcontractor Form from Sun Painting",
+          html: `
+            <h3>Hello, ${creds.subcontractorFormNotifiationRecipients[i].name},</h3>
+            <h3>A new subcontractor form has been submitted.</h3>
+            <p>Please click the link below to view it:</p>
+            <a href="${credentials.domain}/subcontractor/viewForm?id=${form.id}">View Subcontractor Form</a></br>
+          `,
+        };
+        
+        const info = transporter.sendMail(mailOptions, (err, info) => {
+          if (err) {
+            console.log(err);
+            callback(err, null);
+          } else {
+            console.log("Email sent: " + info.response);
+            callback(null, info.response);
+          }
+        });
+      }
+    }
+  });
+}
 
 
 
@@ -456,5 +568,7 @@ module.exports = {
   sendExpiredEstimateEmail,
   sendRenewalEmail,
   sendPaymentConfirmationEmail,
-  sendChangeOrderEmail
+  sendChangeOrderEmail,
+  sendSubcontractorFormEmail,
+  sendSubcontractorFormNotificationEmail
 };

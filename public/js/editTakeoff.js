@@ -225,6 +225,85 @@ function changeOwnership() {
 }
 
 
+function unsignTakeoffIntent() {
+  // show the unsign takeoff modal
+  $("#unsignModal").modal("show");
+}
+function closeUnsignTakeoffModal() {
+  // close the modal
+  $("#unsignModal").modal("hide");
+}
+function unsignTakeoff() {
+  // get the newname from the input field
+  console.log("Unsigning takeoff: " + takeoff_id);
+  $.post("/unsign-takeoff-intent", { takeoff_id: takeoff_id })
+    .done(function () {
+      // hide the modal, show the OTP modal
+      $("#unsignModal").modal("hide");
+      $("#otpModal").modal("show");
+    })
+    .fail(function () {
+      console.log("Failed to unsign takeoff: " + takeoff_id);
+      // show an error message
+      Swal.fire({
+        title: 'Error',
+        text: 'Cannot modify takeoff',
+        icon: 'error',
+        showCancelButton: false,
+        confirmButtonText: 'OK'
+      }).then((result) => {
+        //console.log('clicked');
+        // go back one page
+
+
+      });
+    });
+}
+
+function verifyOTP() {
+  // get the newname from the input field
+  let otp = $("#otp").val();
+  console.log("Verifying OTP: " + otp);
+  $.post("/verify-otp", { takeoff_id: takeoff_id, otp: otp })
+
+    .done(function () {
+      console.log("OTP verified");
+      // hide the modal
+      $("#otpModal").modal("hide");
+
+      // Start polling the server every second to check if the OTP has been approved
+      const intervalId = setInterval(() => {
+        $.get("/check-otp-status", { takeoff_id: takeoff_id })
+          .done(function (response) {
+            if (response.approved) {
+              console.log("OTP approved");
+              clearInterval(intervalId); // Stop polling
+              // reload the page
+              location.reload();
+            }
+          })
+          .fail(function () {
+            console.log("Failed to check OTP status");
+          });
+      }, 1000);
+    })
+    .fail(function () {
+      console.log("Failed to verify OTP: " + otp);
+      // show an error message
+      Swal.fire({
+        title: 'Error',
+        text: 'Cannot modify takeoff',
+        icon: 'error',
+        showCancelButton: false,
+        confirmButtonText: 'OK'
+      }).then((result) => {
+        //console.log('clicked');
+        // go back one page
+        //window.history.back();
+      });
+    });
+}
+
 
 
   

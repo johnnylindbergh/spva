@@ -26,6 +26,7 @@ const creds = require("./credentials.js");
 const querystring = require("querystring");
 const schedule = require('node-schedule');
 const pdf = require("./pdf.js");
+const texter = require("./texter.js");
 
 
 // execute every day at 12:30pm
@@ -325,6 +326,37 @@ module.exports = function (app) {
       }
     });
   });
+
+  app.post("/unsign-takeoff-intent", mid.isAdmin, (req, res) => {
+    // send the OTP to the users in creds.superAdmin using the twilio api
+
+    console.log("unsigning takeoff intent");
+    let takeoff_id = req.body.takeoff_id;
+
+    console.log("User ", req.user.local.name, "unsigning takeoff ", takeoff_id);
+
+    console.log("sending OTP to ", creds.superAdmin);
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const message = `Your OTP is ${otp}. Please enter this OTP to confirm the unsigning of the takeoff.`;
+    const to = creds.superAdmin;
+
+    texter.sendTextNotification(to, message);
+    console.log("OTP sent to ", to);
+    // save the OTP to the database
+    db.saveOTP(takeoff_id, otp, function (err) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error saving OTP");
+      } else {
+        console.log("OTP saved to database");
+        res.send("OTP sent to " + to);
+      }
+    });
+  });
+
+
+
+
 
 
   app.post("/update-takeoff-owner-name", mid.isAdmin, (req, res) => {
@@ -1717,6 +1749,7 @@ module.exports = function (app) {
             }
 
             console.log("Material tax: ", materialTax);
+            console.log(takeoff[0]);
             res.render("viewEstimateClient.html", {
               takeoff: takeoff,
               estimate: estimate[0],
@@ -1728,6 +1761,50 @@ module.exports = function (app) {
 
 
         }
+      }
+    );
+  });
+
+  // download shared pdf 
+  app.get("/download-estimate-pdf", function (req, res) {
+    const hash = req.query.hash;
+    console.log("downloading shared pdf ", hash);
+    if (!hash || hash.length != 32) {
+      return res.redirect("/");
+    }
+    db.getSharedEstimate(
+      hash,
+      function (err, estimate, takeoff, options) {
+        if (err || estimate.length == 0) {
+          console.log(err);
+          return res.render("error.html", { link: '/', linkTitle: 'back', friendly: "Invalid estimate link. Estimate has been signed" });
+        }
+
+       
+        const estimateObject = {
+          takeoff: takeoff,
+          options: options,
+          estimate: estimate[0],
+        }
+
+        pdf.generateEstimatePDF(estimateObject, function (err, pdfBuffer) {
+          if (err) {
+            console.log(err);
+            return res.status(500).send("Error generating PDF");
+          }
+          if (!pdfBuffer || !Buffer.isBuffer(pdfBuffer)) {
+            console.error("PDF generation returned invalid data");
+            return res.status(500).send("Failed to generate valid PDF");
+          }
+          try {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=estimate.pdf');
+            res.end(pdfBuffer, 'binary');
+          } catch (sendError) {
+            console.error("Error sending PDF:", sendError);
+            res.status(500).send("Error sending PDF");
+          }
+        });
       }
     );
   });

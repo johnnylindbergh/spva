@@ -10,6 +10,8 @@ const creds = require('./credentials');
 const db = require('./database.js');
 const { name } = require('ejs');
 
+const emailer = require('./email.js');
+
 const path = require('path');
 require('dotenv').config();
 
@@ -128,7 +130,7 @@ module.exports = function (app) {
       }
 
       const form = results[0];
-      if (form.user_id !== req.user.local.id && req.user.local.user_type !== 4) {
+      if (form.user_id !== req.user.local.id && req.user.local.user_type !== 4 && req.user.local.user_type !== 1) {
         res.status(403).send('Unauthorized access to this form.');
         return;
       }
@@ -227,9 +229,9 @@ module.exports = function (app) {
                       ON form_items.job_id = jobs.id 
                   JOIN subcontractor_jobs_assignment 
                       ON subcontractor_jobs_assignment.job_id = form_items.job_id 
-                    AND subcontractor_jobs_assignment.user_id = ?  -- Subcontractor filter
+                   
                   WHERE form_items.form_id = ?;`,
-        [user_id, form_id], (err, results) => {
+        [ form_id], (err, results) => {
 
           console.log(results);
           // group by job 
@@ -400,7 +402,7 @@ module.exports = function (app) {
           return res.status(404).json({ error: 'No matching assignment found or already signed' });
           }
 
-          res.json({ message: 'Status updated successfully for subcontractor_jobs_assignment' });
+          res.redirect('/subcontractor/createForm');
           }
           );
       });
@@ -542,6 +544,32 @@ module.exports = function (app) {
           // send user to the viewForm page
           // res.redirect('/subcontractor/viewForm?id=' + form_id);
 
+
+          emailer.sendSubcontractorFormEmail(
+            form_id,
+            user_id,
+            function (err, result) {
+              if (err) {
+                console.log('Error sending email:', err);
+                res.status(500).send('Error sending email.');
+                return;
+              }
+              console.log('Email sent:', result);
+            }
+          );
+
+          emailer.sendSubcontractorFormNotificationEmail(
+            form_id,
+            function (err, result) {
+              if (err) {
+                console.log('Error sending email:', err);
+                res.status(500).send('Error sending email.');
+                return;
+              }
+              console.log('Email sent:', result);
+            }
+          );
+
           res.send({
             status: 'success',
             form_id: form_id
@@ -589,6 +617,16 @@ module.exports = function (app) {
       });
     }
     if (profile.email != undefined && profile.email.trim() != '') {
+
+      // ensure the email is a google email
+      
+      if (!profile.email.endsWith('@gmail.com')) {
+        console.log("User ", profile.email, " tried to update their email to a non-google email");
+        res.status(400).json({ status: 'error', message: 'Email must be a google email. If you want to use a different email, please contact the system administrator.' });
+        return;
+      }
+
+
       db.query('UPDATE users SET email = ? WHERE id = ?;', [profile.email, user_id], (err, results) => {
         if (err) {
           console.log('update error:', err);
@@ -598,8 +636,8 @@ module.exports = function (app) {
         console.log("Profile updated");
       });
     }
-    if (profile.phone != undefined && profile.phone.trim() != '') {
-      db.query('UPDATE users SET phone = ? WHERE id = ?;', [profile.phone, user_id], (err, results) => {
+    if (profile.phone_number != undefined && profile.phone_number.trim() != '') {
+      db.query('UPDATE users SET phone_number = ? WHERE id = ?;', [profile.phone_number, user_id], (err, results) => {
         if (err) {
           console.log('update error:', err);
           res.status(500).send('Error updating profile.');

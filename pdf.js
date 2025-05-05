@@ -12,6 +12,21 @@ const { name } = require('ejs');
 
 const path = require('path');
 const PDFDocument = require('pdfkit');
+const doc = require('pdfkit');
+
+
+function numbersWithCommas(x) {
+    if (x === null || x === undefined) {
+        return '0.00';
+    }
+    x = parseFloat(x);
+    if (isNaN(x)) {
+        return '0.00';
+    }
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+// Function to generate PDF of SOV
+
 
 // Use PDFKit to generate PDF of sov-template.ejs
 const generateSOVPDF = (data, callback) => {
@@ -215,7 +230,154 @@ const generateInvoicePdf = (data, callback) => {
     }
 };
 
+
+
+function generateEstimatePDF(estimate, callback) {
+    console.log('Generating estimate PDF with data:', estimate);
+    try {
+        const doc = new PDFDocument({ margin: 50 });
+        const buffers = [];
+
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', () => {
+            const pdfBuffer = Buffer.concat(buffers);
+            callback(null, pdfBuffer);
+        });
+
+        doc.font("Times-Roman");
+        doc.fontSize(12);
+
+        // Add header
+        doc.moveDown(2);
+
+        // Add logo
+        const logoPath = path.join(__dirname, 'public/sunpainting_logo_blue.png');
+        if (fs.existsSync(logoPath)) {
+            const imageX = (doc.page.width - 128) / 2; // Center the image horizontally
+            doc.image(logoPath, imageX, 0, { width: 128 });
+        } else {
+            console.error('Logo file not found:', logoPath);
+        }
+
+        doc.moveDown(2);
+
+        // Add company details if available
+      
+
+        if (creds.companyAddress) {
+            doc.fontSize(12).text(creds.companyAddress, { align: 'center' });
+        }
+        doc.moveDown();
+
+        // Add estimate details
+            doc.fontSize(12).text(`   Date: ${new Date(estimate.takeoff.takeoff_created_at).toLocaleDateString() || 'N/A'}`);
+        if (estimate.takeoff.takeoff_start_date) {
+            doc.text(`   Start Date: ${new Date(estimate.takeoff.takeoff_start_date).toLocaleDateString() || 'N/A'}`);
+        }
+        doc.moveDown();
+        doc.text(`To: ${estimate.takeoff.customer_givenName || 'N/A'}`);
+        doc.text(`Company: ${estimate.takeoff.customer_CompanyName || 'N/A'}`);
+        doc.text(`Billing Address: ${estimate.takeoff.customer_billing_address || 'N/A'}`);
+        doc.text(`Phone: ${estimate.takeoff.customer_phone || 'N/A'}`);
+        doc.text(`Email: ${estimate.takeoff.customer_invoice_email_address || 'N/A'}`);
+        doc.moveDown(2);
+
+        // Add inclusions and exclusions in a table
+        doc.moveDown();
+
+        const tableTop = doc.y;
+        const descriptionWidth = 400;
+        const totalWidth = 100;
+
+        // Table headers
+        doc.fontSize(12).text('Description', 50, tableTop, { bold: true });
+        doc.text('Total', 50 + descriptionWidth, tableTop, { bold: true });
+
+        // Draw a line under the headers
+        doc.moveTo(50, tableTop + 15)
+            .lineTo(50 + descriptionWidth + totalWidth, tableTop + 15)
+            .stroke();
+
+        // Add inclusions
+        let rowTop = tableTop + 25;
+        let inclusion = estimate.estimate.inclusions || 'N/A';
+        let inclusionTotal = numbersWithCommas(estimate.takeoff.takeoff_total) || '0.00';
+        inclusion = inclusion.replace(/<[^>]+>/g, ''); // Remove HTML tags
+        doc.fontSize(12).text('Inclusions', 50, rowTop);
+        doc.text(`$${inclusionTotal}`, 50 + descriptionWidth, rowTop);
+        rowTop += 20;
+        doc.text(inclusion, 50, rowTop, { width: descriptionWidth });
+        rowTop += 100;
+
+        // Draw a line between inclusions and exclusions
+        doc.moveTo(50, rowTop)
+            .lineTo(50 + descriptionWidth + totalWidth, rowTop)
+            .stroke();
+        rowTop += 10; // Move down for exclusions
+        // Add a label for exclusions
+
+        // Add exclusions
+        let exclusion = estimate.estimate.exclusions || 'N/A';
+        let exclusionTotal = numbersWithCommas(estimate.estimate.exclusion_total) || '0.00';
+        exclusion = exclusion.replace(/<[^>]+>/g, ''); // Remove HTML tags
+        doc.fontSize(12).text('Exclusions', 50, rowTop);
+        doc.text(`$${exclusionTotal}`, 50 + descriptionWidth, rowTop);
+        rowTop += 20;
+        doc.text(exclusion, 50, rowTop, { width: descriptionWidth });
+        rowTop += 40;
+
+        doc.moveDown(2);
+
+        // Add items table
+        doc.fontSize(14).text('Options', { underline: true });
+        doc.moveDown();
+
+        // Define table headers
+        const optionsTableTop = doc.y;
+        const itemWidth = 400;
+        const totalOptionWidth = 100;
+
+        doc.fontSize(12).text('Description', 50, optionsTableTop, { bold: true });
+        doc.text('Total', 50 + itemWidth, optionsTableTop, { bold: true });
+
+        // Draw a line under the headers
+        doc.moveTo(50, optionsTableTop + 15)
+            .lineTo(50 + itemWidth + totalOptionWidth, optionsTableTop + 15)
+            .stroke();
+
+        // Add table rows
+        let optionsRowTop = optionsTableTop + 25;
+        if (estimate.options.length > 0) {
+            estimate.options.forEach((item) => {
+                const total = parseFloat(item.labor_cost) + parseFloat(item.material_cost);
+                let formattedTotal = numbersWithCommas(total.toFixed(2));
+                doc.fontSize(12).text(item.description || 'N/A', 50, optionsRowTop);
+                doc.text(`$${formattedTotal || '0.00'}`, 50 + itemWidth, optionsRowTop);
+                optionsRowTop += 20; // Move to the next row
+            });
+        } else {
+            doc.fontSize(12).text('No items available.', 50, optionsRowTop);
+        }
+
+        // Add total amount
+        doc.moveDown(2);
+        doc.fontSize(14).text(`Total Amount: $${numbersWithCommas(estimate.takeoff.takeoff_total) || '0.00'}`, { align: 'right', bold: true });
+        doc.moveDown(2);
+
+        // Add footer
+        doc.end();
+    } catch (err) {
+        console.error('Error generating PDF:', err);
+        callback(err);
+    }
+}
+
+// function generateSubcontractorFormPDF(formData, callback) {
+
+
+
 module.exports = {
     generateSOVPDF: generateSOVPDF,
     generateInvoicePdf: generateInvoicePdf,
+    generateEstimatePDF: generateEstimatePDF,
 };

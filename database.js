@@ -1113,6 +1113,18 @@ module.exports = {
     }
   },
 
+  saveOTP: function (takeoff_id, otp, callback) {
+    // save the otp to the database
+    con.query(
+      "INSERT INTO otp (takeoff_id, otp) VALUES (?, ?);",
+      [takeoff_id, otp],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+
 
   getTakeoff: function (takeoff_id, callback) {
     con.query(
@@ -3776,6 +3788,23 @@ createInvoiceFromSOV: function (sov_id, callback) {
       }
     );
   },
+
+  getSubcontractorFormById: function (form_id, callback) {
+    con.query(
+      "SELECT * FROM subcontractor_forms WHERE id = ?;",
+      [form_id],
+      function (err, form) {
+        if (err) return callback(err);
+        if (form.length == 0) {
+          console.log("form not found");
+          return callback(null, null);
+        } else {
+          return callback(null, form[0]);
+        }
+      }
+    );
+  },
+    
 
   // used by the material library
   getAllMaterials: function (callback) {

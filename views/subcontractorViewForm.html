@@ -52,10 +52,17 @@
                             dayCell.text(dayMap[day] || placeholderValue);
                             newRow.append(dayCell);
                         });
-    
+
+                        console.log(element);
                         var total = 0;
+                        const uniqueDays = new Set();
                         element.forEach(day => {
-                            total += parseFloat(day.duration) || 0;
+                            if (!uniqueDays.has(day.day)) {
+                                uniqueDays.add(day.day);
+                                console.log('Day:', day);
+                                console.log('Duration:', day.duration);
+                                total += parseFloat(day.duration) || 0;
+                            }
                         });
     
                         var totalCell = $('<td></td>');
