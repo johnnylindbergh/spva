@@ -355,6 +355,51 @@ module.exports = function (app) {
   });
 
 
+  app.post("/verify-otp", mid.isAdmin, (req, res) => {
+    console.log("verifying OTP");
+    let takeoff_id = req.body.takeoff_id;
+    let otp = req.body.otp;
+
+    console.log("User ", req.user.local.name, "verifying OTP for takeoff ", takeoff_id);
+
+    db.verifyOTP(takeoff_id, otp, function (err, valid) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error verifying OTP");
+      } else {
+        if (valid) {
+          db.unsignTakeoff(takeoff_id, function (err) {
+            if (err) {
+              console.log(err);
+              res.status(500).send("Error unsigning takeoff");
+            } else {
+              res.send({approved: true});
+            }
+          });
+        } else {
+          res.status(500).send("Invalid OTP");
+        }
+      }
+    });
+  });
+
+  app.get("/check-otp-status", mid.isAdmin, (req, res) => {
+    console.log("checking OTP status");
+    let takeoff_id = req.query.takeoff_id;
+
+    db.checkOTPStatus(takeoff_id, function (err, valid) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error checking OTP status");
+      } else {
+        if (valid) {
+          res.send({approved: true});
+        } else {
+          res.send({approved: false});
+        }
+      }
+    });
+  });
 
 
 

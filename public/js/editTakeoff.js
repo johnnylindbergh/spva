@@ -275,6 +275,7 @@ function verifyOTP() {
       const intervalId = setInterval(() => {
         $.get("/check-otp-status", { takeoff_id: takeoff_id })
           .done(function (response) {
+            console.log(response);
             if (response.approved) {
               console.log("OTP approved");
               clearInterval(intervalId); // Stop polling
@@ -285,14 +286,14 @@ function verifyOTP() {
           .fail(function () {
             console.log("Failed to check OTP status");
           });
-      }, 1000);
+      }, 5000);
     })
     .fail(function () {
       console.log("Failed to verify OTP: " + otp);
       // show an error message
       Swal.fire({
         title: 'Error',
-        text: 'Cannot modify takeoff',
+        text: 'Failed to verify OTP.',
         icon: 'error',
         showCancelButton: false,
         confirmButtonText: 'OK'
@@ -302,6 +303,15 @@ function verifyOTP() {
         //window.history.back();
       });
     });
+}
+
+
+
+function closeOtpModal() {
+  // close the modal
+  $("#otpModal").modal("hide");
+  // reload the page
+  location.reload();
 }
 
 

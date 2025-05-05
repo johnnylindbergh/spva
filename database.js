@@ -1057,6 +1057,43 @@ module.exports = {
     }
   },
 
+  verifyOTP: function (takeoff_id, otp, callback) {
+    // check if the otp exists in the database
+    con.query("SELECT * FROM otp WHERE takeoff_id = ? AND otp = ?;", [takeoff_id, otp], function (err, result) {
+      if (err) return callback(err);
+      if (result.length === 0) {
+        return callback(null, false);
+      } else {
+        // delete the otp from the database
+        con.query("DELETE FROM otp WHERE takeoff_id = ? AND otp = ?;", [takeoff_id, otp], function (err) {
+          if (err) return callback(err);
+          callback(null, true);
+        });
+      }
+    });
+  },
+
+  checkOTPStatus: function (takeoff_id, callback) {
+    // check if the otp exists in the database and get the most recent record
+    con.query("SELECT * FROM otp WHERE takeoff_id = ? ORDER BY created_at DESC LIMIT 1;", [takeoff_id], function (err, result) {
+      if (err) return callback(err);
+      if (result.length === 0) {
+        return callback(null, false);
+      } else {
+        callback(null, true);
+      }
+    });
+  },
+
+  unsignTakeoff: function (takeoff_id, callback) {
+    // set the takeoff's status to 3
+    con.query("UPDATE takeoffs SET status = 3 WHERE id = ?;", [takeoff_id], function (err) {
+      if (err) return callback(err);
+      callback(null);
+    }
+    );
+  },
+
 
   updateTakeoffOwnerName: function (takeoff_id, owner_name, callback) {
     if (!takeoff_id || !owner_name) {
