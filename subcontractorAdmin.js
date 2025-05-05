@@ -246,14 +246,16 @@ app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res)
     app.post('/api/assignments', mid.isSubcontractorAdmin, function (req, res) {
         const { jobId, subcontractorId, allottedBid } = req.body;
         db.query(
-            "INSERT INTO subcontractor_jobs_assignment (job_id, user_id, alloted_bid) VALUES (?, ?, ?);",
+            `INSERT INTO subcontractor_jobs_assignment (job_id, user_id, alloted_bid) 
+            VALUES (?, ?, ?) 
+            ON DUPLICATE KEY UPDATE alloted_bid = alloted_bid + VALUES(alloted_bid);`,
             [jobId, subcontractorId, allottedBid],
             function (error) {
                 if (error) {
                     console.error('Error assigning job:', error);
                     return res.status(500).json({ error: 'Internal server error' });
                 }
-                res.status(200).json({ message: 'Job assigned successfully' });
+                res.status(200).json({ message: 'Job assigned successfully or allotted_bid updated' });
             }
         );
     });

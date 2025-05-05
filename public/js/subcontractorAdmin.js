@@ -302,6 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>$${assignment.alloted_bid}</td>
                 <td>
                     <button class="btn btn-sm btn-danger" data-id="${assignment.id}" data-action="delete">Delete</button>
+                    <button class="btn btn-sm btn-primary" data-id="${assignment.id}" data-action="change-order">Change Order</button>
                 </td>
             `;
             assignmentsTable.appendChild(row);

@@ -100,6 +100,10 @@
 
         <section class="mb-5">
             <h2 class="mb-3">Assign Job to Subcontractor</h2>
+        
+            <!-- subtext -->
+            <p class="text-muted">Select a job, subcontractor, and their alloted bid.</p>
+        </br>
             <form id="assignJobForm" class="row g-3">
                 <div class="col-md-6">
                     <label for="jobSelect" class="form-label">Select Job:</label>
@@ -124,6 +128,27 @@
                 </div>
             </form>
         </section>
+
+        <!-- change order section -->
+        <section class="mb-5">
+            <h2 class="mb-3">Change Orders</h2>
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Job Name</th>
+                        <th>Subcontractor Name</th>
+                        <th>Change Order Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="changeOrdersTable">
+                    <!-- Rows will be dynamically populated -->
+                </tbody>
+            </table>
+        </section>
+
+       
 
 
         <!-- agreement section -->

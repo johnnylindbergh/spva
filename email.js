@@ -465,7 +465,7 @@ function sendSubcontractorFormEmail(form_id, user_id, callback) {
               <h3>Hello, ${user.name},</h3>
               <h3>Congradulations! You have completed a form!</h3>
               <p>Please click the link below to view it:</p>
-              <a href="${credentials.domain}/shareSubcontractorForm/?hash=${form.hash}">View Subcontractor Form</a></br>
+              <a href="${credentials.domain}/subcontractor/viewForm/?id=${form.id}">View Subcontractor Form</a></br>
             `,
           };
           
@@ -502,7 +502,7 @@ function sendSubcontractorFormEmailToAdmin(form_id, user_id, callback) {
               <h3>Hello, ${creds.companyName},</h3>
               <h3>A new subcontractor form has been submitted.</h3>
               <p>Please click the link below to view it:</p>
-              <a href="${credentials.domain}/shareSubcontractorForm/?hash=${form.hash}">View Subcontractor Form</a></br>
+              <a href="${credentials.domain}/subcontractor/viewForm/?id=${form.id}">View Subcontractor Form</a></br>
             `,
           };
           
