@@ -3841,6 +3841,23 @@ createInvoiceFromSOV: function (sov_id, callback) {
       }
     );
   },
+
+  getSubcontractorAgreementById: function (user_id, agreement_id, callback) {
+    con.query(
+      "SELECT * FROM subcontractor_jobs_assignment JOIN agreements ON subcontractor_jobs_assignment.agreement_id = agreements.id WHERE user_id = ? AND agreement_id = ?;",
+      [user_id, agreement_id],
+      function (err, agreement) {
+        if (err) return callback(err);
+        if (agreement.length == 0) {
+          console.log("agreement not found");
+          return callback(null, null);
+        } else {
+          return callback(null, agreement[0]);
+        }
+      }
+    );
+  },
+
     
 
   // used by the material library

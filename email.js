@@ -559,6 +559,40 @@ function sendSubcontractorFormNotificationEmail(form_id, callback) {
   });
 }
 
+function sendSubcontractorAgreementNotificationEmail(user_id, agreement_id, callback) {
+  db.getSubcontractorAgreementById(user_id, agreement_id, (err, form) => {
+    if (err) {
+      console.log(err);
+      callback("could not get subcontractor form by id", null);
+    } else {
+      console.log(form);
+      for (let i = 0; i < creds.subcontractorFormNotifiationRecipients.length; i++) {
+        const mailOptions = {
+          from: credentials.serverEmail,
+          to: creds.subcontractorAgreementNotifiationRecipients[i].email,
+          subject: "New Subcontractor Agreement from Sun Painting",
+          html: `
+            <h3>Hello, ${creds.subcontractorFormNotifiationRecipients[i].name},</h3>
+            <h3>A new subcontractor agreement has been submitted.</h3>
+            <p>Please click the link below to view it:</p>
+            <a href="${credentials.domain}/subcontractorAdmin/viewAgreement/?agreement_id=${form.id}">View Subcontractor Agreement</a></br>
+          `,
+        };
+        
+        const info = transporter.sendMail(mailOptions, (err, info) => {
+          if (err) {
+            console.log(err);
+            callback(err, null);
+          } else {
+            console.log("Email sent: " + info.response);
+            callback(null, info.response);
+          }
+        });
+      }
+    }
+  });
+}
+
 
 
 module.exports = {
@@ -570,5 +604,6 @@ module.exports = {
   sendPaymentConfirmationEmail,
   sendChangeOrderEmail,
   sendSubcontractorFormEmail,
-  sendSubcontractorFormNotificationEmail
+  sendSubcontractorFormNotificationEmail,
+  sendSubcontractorAgreementNotificationEmail
 };

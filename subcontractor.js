@@ -402,7 +402,18 @@ module.exports = function (app) {
           return res.status(404).json({ error: 'No matching assignment found or already signed' });
           }
 
-          res.redirect('/subcontractor/createForm');
+          emailer.sendSubcontractorAgreementNotificationEmail(
+            userId,
+            agreementId,
+            function (err, result) {
+              if (err) {
+                console.log('Error sending email:', err);
+                return res.status(500).send('Error sending email.');
+              }
+              console.log('Email sent:', result);
+              res.redirect('/subcontractor/createForm');
+            }
+          );
           }
           );
       });
