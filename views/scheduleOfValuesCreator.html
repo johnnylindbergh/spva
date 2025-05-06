@@ -278,6 +278,13 @@
             row.querySelector('.remaining-balance').textContent = remainingBalance.toFixed(2);
             row.querySelector('.percent-remaining').textContent = `${percentRemaining}%`;
 
+            // if the remaining balance is less than 0, highlight the row red
+            if (remainingBalance < 0) {
+                row.style.backgroundColor = 'rgba(255, 0, 0, 0.2)'; // Light red
+            } else {
+                row.style.backgroundColor = '';
+            }
+
             totalPrevious += previousAmount;
             totalThis += this_invoice_amount;
             totalRemaining += remainingBalance;

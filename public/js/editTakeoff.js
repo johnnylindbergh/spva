@@ -524,7 +524,7 @@ function deletePlans() {
 }
 
 function updateLaborRate() {
-  document.getElementById('laborRateValue').innerText = "$" + labor_rate + "/hr";
+  document.getElementById('laborRateValue').value = labor_rate;
   console.log(laborTotal)
 
   let labor_adjusted = laborTotal / labor_rate;// 8 hours a day
@@ -568,7 +568,7 @@ const debounceChangeLaborRate = debounce(function () {
 
 function changeLaborMarkupHelper(value) {
   labor_markup = value / 100;
-  $('#laborMarkupValue').text(parseInt(labor_markup * 100) + "%");
+  $('#laborMarkupValue').val(labor_markup * 100 );
   debounceChangeLaborMarkup(value);
 }
 
@@ -579,7 +579,7 @@ const debounceChangeLaborMarkup = debounce(function (value) {
 function changeLaborMarkup(value) {
   labor_markup = value / 100.0;
   console.log("Changing labor markup to: " + labor_markup);
-  $("#laborMarkupValue").text(parseInt(labor_markup * 100) + "%");
+  $("#laborMarkupValue").val(parseInt(labor_markup * 100) );
 
   $('#laborTotal').text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)));
   $.post("/change-labor-markup", { takeoff_id: takeoff_id, labor_markup: (labor_markup.toFixed(2)) })
@@ -609,14 +609,14 @@ function changeLaborMarkup(value) {
 
 function updateMaterialMarkupHelper(value) {
   material_markup = value;
-  $('#materialMarkupValue').text(material_markup + "%");
+  $('#materialMarkupValue').text(material_markup );
   debounceChangeMaterialMarkup(value);
 }
 
 function changeMaterialMarkup(value) {
   material_markup = value / 100.0;
   console.log("Changing material markup to: " + material_markup);
-  $("#materialMarkupValue").text(parseInt(material_markup * 100) + "%");
+  $("#materialMarkupValue").val(parseInt(material_markup * 100) );
 
   //$('#sum').text("Total Cost: $" + numberWithCommas((laborTotalAdjusted + materialTotal).toFixed(2)));
   $.post("/change-material-markup", { takeoff_id: takeoff_id, material_markup: material_markup.toFixed(2) })
@@ -647,7 +647,7 @@ const debounceChangeMaterialMarkup = debounce(function (value) {
 function updateSupervisorMarkup(value) {
   supervisor_markup = value / 100.0;
   console.log("Changing supervisor markup to: " + supervisor_markup);
-  $("#supervisorMarkupValue").text(parseInt(value) + "%");
+  $("#supervisorMarkupValue").val(parseInt(value) );
 
   $.post("/change-supervisor-markup", { takeoff_id: takeoff_id, supervisor_markup: (supervisor_markup).toFixed(2) })
     .done(function () {
@@ -673,7 +673,7 @@ function updateSupervisorMarkup(value) {
 // helper debounced
 function updateSupervisorMarkupHelper(value) {
   supervisor_markup = value;
-  $('#supervisorMarkupValue').text(supervisor_markup + "%");
+  $('#supervisorMarkupValue').val(supervisor_markup );
   debounceUpdateSupervisorMarkup(value);
 }
 
@@ -711,7 +711,7 @@ function updateTravelExtra(value) {
 
 function updateTouchupsCostHelper(value) {
   touchups_cost = value;
-  $('#touchupsCostValue').text("$" + touchups_cost);
+  $('#touchupsCostValue').val( touchups_cost);
   debounceUpdateTouchupsCost(value);
 }
 
@@ -774,7 +774,7 @@ function updateProfit(value) {
 // debounce the profit change
 function updateProfitHelper(value) {
   profit = value;
-  $('#profitValue').text(profit + "%");
+  $('#profitValue').val(profit);
   debounceUpdateProfit(value);
 }
 
@@ -821,7 +821,7 @@ function updateTax(value) {
 
 function updateMiscMaterialCostHelper(value) {
   misc_material_cost = value;
-  $('#miscMaterialCostValue').text("$" + misc_material_cost);
+  $('#miscMaterialCostValue').val(misc_material_cost);
   debounceUpdateMiscMaterialCost(value);
 }
 
@@ -1104,6 +1104,14 @@ function loadTakeoffMaterials(id) {
 
                 materialsCell.append(" ").append(coverageInput).append(" sqft/gal @ ");
 
+
+                if (row.coverage_delta > 0) {
+                  coverageInput.css("color", "red");
+                } else if (row.coverage_delta < 0) {
+                  coverageInput.css("color", "green");
+                } else {
+                  coverageInput.css("color", "black");
+                }
 
             
 
