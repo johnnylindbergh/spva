@@ -934,6 +934,36 @@ module.exports = {
       }
     );
   },
+
+  createUser: function (user, callback) {
+    // check if the user already exists
+    con.query("SELECT * FROM users WHERE email = ?;", [user.email], function (err, results) {
+      if (err) return callback(err);
+      if (results.length > 0) {
+        return callback("User already exists");
+      } else {
+
+        // check if title is in the user_types table
+        con.query("SELECT * FROM user_types WHERE title LIKE ?;", [user.title], function (err, results) {
+
+          if (err) return callback(err);
+          if (results.length === 0) {
+            return callback("User type does not exist");
+          } else {
+            // insert the user into the users table
+            con.query(
+              "INSERT INTO users (email, name, user_type) VALUES (?, ?, ?);",
+              [user.email, user.name, results[0].id],
+              function (err) {
+                if (err) return callback(err);
+                callback(null);
+              }
+            );
+          }
+        });
+      }
+    });
+  },
   
 
   updateTakeoffCustomer: function (takeoff_id, customer_id, callback) {
