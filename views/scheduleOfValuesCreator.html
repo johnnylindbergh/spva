@@ -358,6 +358,7 @@
                         <td><input type="number" class="form-control this-invoice" placeholder="Enter amount"></td>
                         <td class="remaining-balance">0.00</td>
                         <td class="percent-remaining">0%</td>
+                        <td><button class="btn btn-danger remove-row-btn">Remove</button></td>
                     `;
                     invoiceTableBody.appendChild(newRow);
 
@@ -370,6 +371,26 @@
                    
                 });
             });
+
+            // Event delegation for removing rows
+            invoiceTableBody.addEventListener('click', function (event) {
+                if (event.target.classList.contains('remove-row-btn')) {
+                    const row = event.target.closest('tr');
+                    const rowId = row.getAttribute('data-id');
+
+                    // Remove the row from the DOM
+                    invoiceTableBody.removeChild(row);
+
+                    // Optionally, send a request to the server to delete the item
+                    $.post('/deleteSOVItem', { sov_item_id: rowId }, function (data) {
+                        console.log(data);
+                        if (data.status !== 'success') {
+                            alert('Failed to remove row.');
+                        }
+                    });
+                }
+            });
+            
 
             // Initial data load
             fetchSOVData();

@@ -233,6 +233,7 @@ module.exports = function (app) {
       if (err) {
         console.log(err);
       } else {
+        console.log(users);
         render.users = users;
         res.render("userManagement.html", render);
       }
@@ -3092,6 +3093,22 @@ module.exports = function (app) {
     }
     );
   });
+
+  app.post("/deleteSOVItem", mid.isAdmin, function (req, res) {
+    const sov_item_id = req.body.sov_item_id;
+    console.log("deleting schedule of values item for ", req.body.sov_item_id);
+    db.deleteSOVItem(sov_item_id, function (err) {
+      if (err) {
+        console.log(err);
+        res.send("error deleting schedule of values item");
+      } else {
+        console.log("deleted schedule of values item");
+        res.send({ status: 'success' });
+      }
+    }
+    );
+  }
+  );
 
 
 

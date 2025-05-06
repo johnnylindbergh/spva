@@ -924,6 +924,18 @@ module.exports = {
   },
 
 
+  getUsers: function (callback) {
+    con.query(
+      "SELECT users.*, user_types.title FROM users JOIN user_types ON users.user_type = user_types.id;",
+      function (err, users) {
+        if (err) return callback(err);
+        // if the data is not null, return the data
+        callback(err, users);
+      }
+    );
+  },
+  
+
   updateTakeoffCustomer: function (takeoff_id, customer_id, callback) {
     if (!takeoff_id || !customer_id) {
       callback("Missing required parameters in updateTakeoffCustomer");
@@ -2540,57 +2552,54 @@ getChangeOrderItemsById: function (change_order_id, callback) {
               function (err, takeoff) {
                 if (err) return callback(err);
                 let invoiceTotal = parseFloat(takeoff[0].total) * 0.2;
-                let invoiceNumber = Math.floor(Math.random() * 1000000000);
 
-                con.query("SELECT SUM(total_cost) as total from options where takeoff_id = ? AND (required = 1 OR applied = 1);", [takeoff_id], function (err, total) {
+                con.query("SELECT COUNT(*) as count FROM invoices;", function (err, result) {
                   if (err) return callback(err);
-                  //console.log("total: ", total[0].total);
-                  if (total[0].total != null) {
-                    invoiceTotal += (parseFloat(total[0].total) * 0.2);
-                  }
+                  const invoiceCount = String(result[0].count + 1).padStart(4, '0'); // Pad the count with at least 4 zeros
+                  const randomDigits = Math.floor(100000 + Math.random() * 900000); // Generate 6 random digits
+                  const invoiceNumber = `${randomDigits}-${invoiceCount}`;
 
-                  // get the invoice_due_date setting
-                  con.query("SELECT setting_value FROM system_settings WHERE setting_name = 'invoice_due_date';", function (err, invoiceDueDate) {
+                  con.query("SELECT SUM(total_cost) as total from options where takeoff_id = ? AND (required = 1 OR applied = 1);", [takeoff_id], function (err, total) {
                     if (err) return callback(err);
-                    //console.log("invoiceDueDate: ", invoiceDueDate[0].setting_value);
-                    let dueDate = moment().add(invoiceDueDate[0].setting_value, "days").format("YYYY-MM-DD");
-                    //console.log("due date: ", dueDate);
+                    //console.log("total: ", total[0].total);
+                    if (total[0].total != null) {
+                      invoiceTotal += (parseFloat(total[0].total) * 0.2);
+                    }
 
-                
-                  con.query(
-                    "INSERT INTO invoices (takeoff_id, total, invoice_number, due_date, hash) VALUES (?,?,?,?,?); SELECT LAST_INSERT_ID() as last;",
-                    [takeoff_id, invoiceTotal, invoiceNumber, dueDate, generateHash()],
-                    function (err, results) {
+                    // get the invoice_due_date setting
+                    con.query("SELECT setting_value FROM system_settings WHERE setting_name = 'invoice_due_date';", function (err, invoiceDueDate) {
                       if (err) return callback(err);
-                      console.log(results);
-                      let invoice_id = results[1][0].last;
-                      console.log("invoice id in update sig", invoice_id);
-                      // insert into invoice_items
+                      //console.log("invoiceDueDate: ", invoiceDueDate[0].setting_value);
+                      let dueDate = moment().add(invoiceDueDate[0].setting_value, "days").format("YYYY-MM-DD");
+                      //console.log("due date: ", dueDate);
+
                       con.query(
-                        "INSERT INTO invoice_items (invoice_id, cost, quantity, description) VALUES (?,?,?,?);",
-                        [invoice_id, invoiceTotal, 1, "Initial Deposit"],
-                        function (err) {
-                          if (err) {
-                            console.log(err);
-                            return callback(err);
-                          }
-                          // return the invoice_id
-                          console.log(`passing new invoice id ${invoice_id}`);
-                          callback(true, invoice_id, null);
+                        "INSERT INTO invoices (takeoff_id, total, invoice_number, due_date, hash) VALUES (?,?,?,?,?); SELECT LAST_INSERT_ID() as last;",
+                        [takeoff_id, invoiceTotal, invoiceNumber, dueDate, generateHash()],
+                        function (err, results) {
+                          if (err) return callback(err);
+                          console.log(results);
+                          let invoice_id = results[1][0].last;
+                          console.log("invoice id in update sig", invoice_id);
+                          // insert into invoice_items
+                          con.query(
+                            "INSERT INTO invoice_items (invoice_id, cost, quantity, description) VALUES (?,?,?,?);",
+                            [invoice_id, invoiceTotal, 1, "Initial Deposit"],
+                            function (err) {
+                              if (err) {
+                                console.log(err);
+                                return callback(err);
+                              }
+                              // return the invoice_id
+                              console.log(`passing new invoice id ${invoice_id}`);
+                              callback(true, invoice_id, null);
+                            });
                         });
-
-
-
-
                     });
                   });
-
                 });
-
               }
             );
-
-
 
           } else {
             console.log(
@@ -3532,6 +3541,19 @@ createNewSov: function (takeoff_id, callback) {
     }
   });
 },
+
+deleteSOVItem: function (sov_item_id, callback) {
+  con.query(
+    "DELETE FROM sov_items WHERE id = ?;",
+    [sov_item_id],
+    function (err) {
+      if (err) return callback(err);
+      callback(null);
+    }
+  );
+},
+
+
 
 getCustomerInfoByTakeoffId: function (takeoff_id, callback) {
   con.query(
