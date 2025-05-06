@@ -76,7 +76,7 @@ function populateOptions(takeoff_id) {
             const isRequired = data[i].required;
             
             const radioCell = $('<td >');
-            radioCell.css('width', '105px');
+            radioCell.css('width', '145px');
             const yesRadio = $('<input>').attr('type', 'radio').attr('name', 'option-' + data[i].id).attr('value', 'yes');
             const noRadio = $('<input>').attr('type', 'radio').attr('name', 'option-' + data[i].id).attr('value', 'no');
             

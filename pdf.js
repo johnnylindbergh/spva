@@ -322,7 +322,7 @@ function generateEstimatePDF(estimate, callback) {
         exclusion = exclusion.replace(/<[^>]+>/g, ''); // Remove HTML tags
         doc.fontSize(12).text('Exclusions', 50, rowTop);
         doc.text(`$${exclusionTotal}`, 50 + descriptionWidth, rowTop);
-        rowTop += 20;
+        rowTop += 15
         doc.text(exclusion, 50, rowTop, { width: descriptionWidth });
         rowTop += 40;
 

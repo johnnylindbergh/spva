@@ -57,6 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const agreementPdf = document.getElementById('agreementPdf').files[0];
 
         if (!subcontractorId || !jobId || !agreementDetails || !agreementPdf) {
+            console.log("subcontractorId:", subcontractorId);
+            console.log("jobId:", jobId);
+            console.log("agreementDetails:", agreementDetails);
+            console.log("agreementPdf:", agreementPdf);
             alert('Please fill in all fields and upload a PDF.');
             return;
         }
@@ -182,8 +186,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const row = document.createElement('tr');
 
             const actions = `
-                <button class="btn btn-sm btn-primary me-2" data-id="${job.id}" data-action="edit">Edit</button>
-                <button class="btn btn-sm btn-danger" data-id="${job.id}" data-action="delete">Delete</button>
+                <button class="btn btn-sm btn-primary me-2" data-id="${job.id}" data-action="editJob">Edit</button>
+                <button class="btn btn-sm btn-danger" data-id="${job.id}" data-action="deleteJob">Delete</button>
             `;
 
             row.innerHTML = `
@@ -201,31 +205,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add event listeners using event delegation
     document.getElementById('jobsTable').addEventListener('click', function(e) {
-        if (e.target && (e.target.dataset.action === 'edit' || e.target.dataset.action === 'delete')) {
+        if (e.target && (e.target.dataset.action === 'editJob' || e.target.dataset.action === 'deleteJob')) {
             handleJobAction(e);
         }
     });
     async function handleJobAction(e) {
         
+        // the button data-id is the job id
         const jobId = parseInt(e.target.dataset.id);
         const action = e.target.dataset.action;
-        console.log("jobId:", jobId);
+        console.log("jobId h:", jobId);
         console.log("action:", action);
-        if (action === 'edit') {
+        if (action === 'editJob') {
             // Open the edit modal and populate it with job data
             const job = await fetch(`/api/jobs/${jobId}`).then(res => res.json());
             console.log("job:", job);
-            document.getElementById('editJobId').value = job.job_id;
+            document.getElementById('editJobId').value = job.id;
             document.getElementById('editJobName').value = job.job_name;
             document.getElementById('editJobDescription').value = job.job_description;
             document.getElementById('editJobLocation').value = job.job_location;
+
+            // Format the dates to YYYY-MM-DD
+            const startDate = new Date(job.job_start_date);
+            const formattedStartDate = startDate.toISOString().split('T')[0];
+            const endDate = new Date(job.job_end_date);
+            const formattedEndDate = endDate.toISOString().split('T')[0];
+            job.job_start_date = formattedStartDate;
+            job.job_end_date = formattedEndDate;
+
             document.getElementById('editJobStartDate').value = job.job_start_date;
             document.getElementById('editJobEndDate').value = job.job_end_date;
             $('#jobEditModal').modal('show');
         }
-        else if (action === 'delete') {
+        else if (action === 'deleteJob') {
             // Confirm deletion
-            if (confirm(`Are you sure you want to delete job #${job.job_name}?`)) {
+            if (confirm(`Are you sure you want to delete job?`)) {
                 try {
                     const response = await fetch(`/api/jobs/${jobId}`, {
                         method: 'DELETE'
@@ -246,17 +260,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     //  add listner to the saveChangesBtn button
     document.getElementById('saveChangesBtn').addEventListener('click', async function() {
-        const jobId = parseInt(document.getElementById('editJobId').value);
+        const jobId = document.getElementById('editJobId').value;
         const jobName = document.getElementById('editJobName').value;
         const jobDescription = document.getElementById('editJobDescription').value;
         const jobLocation = document.getElementById('editJobLocation').value;
         const jobStartDate = document.getElementById('editJobStartDate').value;
         const jobEndDate = document.getElementById('editJobEndDate').value;
+        console.log("jobId:", jobId);
+            console.log("jobName:", jobName);
+            console.log("jobDescription:", jobDescription);
+            console.log("jobLocation:", jobLocation);
+            console.log("jobStartDate:", jobStartDate);
+            console.log("jobEndDate:", jobEndDate);
 
         if (!jobId || !jobName || !jobDescription || !jobLocation || !jobStartDate || !jobEndDate) {
             alert('Please fill in all fields.');
+            console.log("jobId:", jobId);
+            console.log("jobName:", jobName);
+            console.log("jobDescription:", jobDescription);
+            console.log("jobLocation:", jobLocation);
+            console.log("jobStartDate:", jobStartDate);
+            console.log("jobEndDate:", jobEndDate);
+            
             return;
         }
+
         try {
             const response = await fetch(`/api/updateJob/`, {
                 method: 'PUT',
@@ -301,14 +329,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${assignment.subcontractorName}</td>
                 <td>$${assignment.alloted_bid}</td>
                 <td>
-                    <button class="btn btn-sm btn-danger" data-id="${assignment.id}" data-action="delete">Delete</button>
+                    <button class="btn btn-sm btn-danger" data-id="${assignment.id}" data-action="deleteAssignment">Delete</button>
                     <button class="btn btn-sm btn-primary" data-id="${assignment.id}" data-action="change-order">Change Order</button>
                 </td>
             `;
             assignmentsTable.appendChild(row);
         });
         // Add event listeners to action buttons
-        document.querySelectorAll('[data-action="delete"]').forEach(btn => {
+        document.querySelectorAll('[data-action="deleteAssignment"]').forEach(btn => {
             btn.addEventListener('click', handleAssignmentAction);
         });
     }
@@ -316,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleAssignmentAction(e) {
         const assignmentId = parseInt(e.target.dataset.id);
         const action = e.target.dataset.action;
-        if (action === 'delete') {
+        if (action === 'handleAssignment') {
             // Confirm deletion
             if (confirm(`Are you sure you want to delete assignment #${assignmentId}?`)) {
                 try {
@@ -405,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td><a href="/subcontractorAdmin/viewAgreement/?agreement_id=${agreement.agreement_id}" target="_blank">View</a></td>
                 <td>${agreement.status}</td>
                 <td>
-                    <button class="btn btn-sm btn-danger" data-id="${agreement.agreement_id}" data-action="delete">Delete</button>
+                    <button class="btn btn-sm btn-danger" data-id="${agreement.agreement_id}" data-action="deleteAgreement">Delete</button>
                 </td>
             `;
             agreementsTable.appendChild(row);
@@ -418,7 +446,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Add event listeners to delete buttons
-        document.querySelectorAll('[data-action="delete"]').forEach(btn => {
+        document.querySelectorAll('[data-action="deleteAgreement"]').forEach(btn => {
             btn.addEventListener('click', handleAgreementDelete);
         });
     }
@@ -568,8 +596,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${payment.status}</td>
                 <td>
                     ${payment.status === 'pending' ? 
-                        `<button class="btn btn-sm btn-success me-2" data-id="${payment.id}" data-action="approve">Approve</button>
-                         <button class="btn btn-sm btn-danger" data-id="${payment.id}" data-action="reject">Reject</button>` : 
+                        `<button class="btn btn-sm btn-success me-2" data-id="${payment.id}" data-action="approvePayment">Approve</button>
+                         <button class="btn btn-sm btn-danger" data-id="${payment.id}" data-action="rejectPayment">Reject</button>` : 
                         '<span class="text-muted">Completed</span>'}
                 </td>
             `;
@@ -577,11 +605,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Add event listeners to action buttons
-        document.querySelectorAll('[data-action="approve"]').forEach(btn => {
+        document.querySelectorAll('[data-action="approvePayment"]').forEach(btn => {
             btn.addEventListener('click', handlePaymentAction);
         });
 
-        document.querySelectorAll('[data-action="reject"]').forEach(btn => {
+        document.querySelectorAll('[data-action="rejectPayment"]').forEach(btn => {
             btn.addEventListener('click', handlePaymentAction);
         });
     }

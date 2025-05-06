@@ -9,6 +9,11 @@
     <script src="/js/viewEstimateClient.js"></script>
     <!-- <script src="/js/checkout.js"></script> -->
 
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
      <!-- sweet alert -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -82,6 +87,11 @@
             <!-- <h3 class="total" id = "total" onchange="updateTotal()">$</h3> </br> -->
 
         </div>
+
+            <!-- download as pdf -->
+    <div class="download-pdf" style= "text-align:center">
+        <button id="download-pdf" class="btn btn-primary" onclick="window.location.href='/download-estimate-pdf/?hash={{takeoff.takeoff_hash}}'" style="text-decoration: none;">Download PDF</button>
+    </div>
     </br>
        
   
@@ -98,9 +108,6 @@
         <br>
     </div>
 
-    <!-- download as pdf -->
-    <div class="download-pdf">
-        <a href="/download-estimate-pdf/?hash={{takeoff.takeoff_hash}}" id="download-pdf" class="button">Download PDF</a>
 
     
 
