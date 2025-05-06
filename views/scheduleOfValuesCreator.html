@@ -211,6 +211,7 @@
                             <td><input type="number" class="form-control this-invoice" value="${item.this_invoiced_amount || 0}"></td>
                             <td class="remaining-balance">${remainingBalance.toFixed(2)}</td>
                             <td class="percent-remaining">${percentRemaining.toFixed(2)}%</td>
+                            <td><button class="btn btn-danger remove-row-btn">Remove</button></td>
                         </tr>
                     `;
                     tbody.innerHTML += row;
@@ -390,7 +391,7 @@
                     });
                 }
             });
-            
+
 
             // Initial data load
             fetchSOVData();
