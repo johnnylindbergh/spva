@@ -1619,39 +1619,89 @@ getChangeOrderItemsById: function (change_order_id, callback) {
       status = 2;
     }
 
+    // get the change order count 
     con.query(
-      "INSERT INTO change_orders (takeoff_id, name, status, description, qb_number, co_number, hash, change_order_total, require_client_approval ) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?); SELECT LAST_INSERT_ID() as last;", 
-      [takeoff_id, customerName, status, description, null, Math.floor(Math.random() * 1000000), generateHash(), parseFloat(changeOrderTotal), clientAgreement],
+      "SELECT COUNT(*) as count FROM change_orders WHERE takeoff_id = ?;",
+      [takeoff_id],
       function (err, result) {
-      if (err) {
-        console.log(err);
-        return callback(err);
-      }
-
-      const changeOrderId = result[1][0].last;
-
-      // Insert each item into the change_order_items table
-      const items = itemDescription.map((desc, index) => [
-        changeOrderId,
-        desc,
-        quantity[index],
-        cost[index]
-      ]);
-
-      con.query(
-        "INSERT INTO change_order_items (change_order_id, description, quantity, cost) VALUES ?;",
-        [items],
-        function (err) {
         if (err) {
           console.log(err);
           return callback(err);
         }
-        callback(null, changeOrderId);
-        }
-      );
+        console.log(result[0].count);
+        // set the co_number to the count + 1
+        let co_number = result[0].count + 1;
+
+        // now insert the change order into the database
+        con.query(
+          "INSERT INTO change_orders (takeoff_id, name, status, description, qb_number, co_number, hash, change_order_total, require_client_approval ) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?); SELECT LAST_INSERT_ID() as last;", 
+          [takeoff_id, customerName, status, description, null, co_number, generateHash(), parseFloat(changeOrderTotal), clientAgreement],
+          function (err, result) {
+            if (err) {
+              console.log(err);
+              return callback(err);
+            }
+
+            const changeOrderId = result[1][0].last;
+
+            // Insert each item into the change_order_items table
+            const items = itemDescription.map((desc, index) => [
+              changeOrderId,
+              desc,
+              quantity[index],
+              cost[index]
+            ]);
+
+            con.query(
+              "INSERT INTO change_order_items (change_order_id, description, quantity, cost) VALUES ?;",
+              [items],
+              function (err) {
+                if (err) {
+                  console.log(err);
+                  return callback(err);
+                }
+                callback(null, changeOrderId);
+              }
+            );
+          }
+        );
       }
     );
   },
+
+  //   con.query(
+  //     "INSERT INTO change_orders (takeoff_id, name, status, description, qb_number, co_number, hash, change_order_total, require_client_approval ) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?); SELECT LAST_INSERT_ID() as last;", 
+  //     [takeoff_id, customerName, status, description, null, Math.floor(Math.random() * 1000000), generateHash(), parseFloat(changeOrderTotal), clientAgreement],
+  //     function (err, result) {
+  //     if (err) {
+  //       console.log(err);
+  //       return callback(err);
+  //     }
+
+  //     const changeOrderId = result[1][0].last;
+
+  //     // Insert each item into the change_order_items table
+  //     const items = itemDescription.map((desc, index) => [
+  //       changeOrderId,
+  //       desc,
+  //       quantity[index],
+  //       cost[index]
+  //     ]);
+
+  //     con.query(
+  //       "INSERT INTO change_order_items (change_order_id, description, quantity, cost) VALUES ?;",
+  //       [items],
+  //       function (err) {
+  //       if (err) {
+  //         console.log(err);
+  //         return callback(err);
+  //       }
+  //       callback(null, changeOrderId);
+  //       }
+  //     );
+  //     }
+  //   );
+  // },
 
 
 

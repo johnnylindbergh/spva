@@ -227,6 +227,25 @@ module.exports = function (app) {
     }
   });
 
+  app.get("/userManagement", mid.isAdmin, (req, res) => {
+    var render = defaultRender(req);
+    db.getUsers(function (err, users) {
+      if (err) {
+        console.log(err);
+      } else {
+        render.users = users;
+        res.render("userManagement.html", render);
+      }
+    });
+  });
+
+  //
+  // app.post("/userManagement/createUser", mid.isAdmin, (req, res) => {
+
+  // });
+
+
+
 
   app.get("/admin", mid.isAdmin, (req, res) => {
     var render = defaultRender(req);
@@ -3421,7 +3440,8 @@ app.post('/getTerms', function (req, res) {
         return res.status(500).json({ error: 'Failed to fetch change order count.' });
       }
 
-      // Generate change order number
+      console.log("change order count", count);
+      // Generate change or≈der number
       const long_id = String(Math.floor(Math.random() * 10000000)) + String(takeoff_id);
       const changeOrderNumber = `${long_id.padStart(4, '0')}-${String(count + 1).padStart(4, '0')}`;
 
