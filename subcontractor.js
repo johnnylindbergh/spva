@@ -185,7 +185,7 @@ module.exports = function (app) {
 
                 if (ticketResults.length > 0) {
                   console.log('Job has a ticket:', ticketResults);
-                  job.bid = availableFunds;
+                  job.bid = 0;
                   job.ticket = ticketResults[0];
                 }
 

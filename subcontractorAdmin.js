@@ -261,8 +261,8 @@ module.exports = function (app) {
         }
 
         db.query(
-            "INSERT INTO tickets (ticket_name, job_id, subcontractor_id, ticket_description, ticket_number) VALUES (?, ?, ?, ?, ?)",
-            [ticket_name, job_id, subcontractor_id, ticket_description, ticket_number],
+            "INSERT INTO tickets (ticket_name, job_id, subcontractor_id, ticket_description, ticket_number, ticket_status) VALUES (?, ?, ?, ?, ?, ?)",
+            [ticket_name, job_id, subcontractor_id, ticket_description, ticket_number, 'open'],
             function (error, result) {
                 if (error) {
                     console.error('Error creating ticket:', error);
