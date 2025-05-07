@@ -334,7 +334,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>$${assignment.alloted_bid}</td>
                 <td>
                     <button class="btn btn-sm btn-danger" data-id="${assignment.id}" data-action="deleteAssignment">Delete</button>
-                    <button class="btn btn-sm btn-primary" data-id="${assignment.id}" data-action="change-order">Change Order</button>
                 </td>
             `;
             assignmentsTable.appendChild(row);
@@ -677,6 +676,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleTicketFormSubmit(e) {
         e.preventDefault();
+        const ticketName = document.getElementById('ticketName').value;
         const ticketNumber = document.getElementById('ticketNumber').value;
         const ticketDescription = document.getElementById('ticketDescription').value;
         const jobId = parseInt(document.getElementById('jobSelectTicket').value);
@@ -687,6 +687,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const data = {
+            ticket_name: ticketName,
             ticket_number: ticketNumber,
             ticket_description: ticketDescription,
             job_id: jobId,

@@ -250,6 +250,28 @@ module.exports = function (app) {
     }
     );
 
+    app.post('/api/tickets', mid.isSubcontractorAdmin, function (req, res) {
+        console.log('req body', req.body);
+        const { ticket_name, job_id, subcontractor_id, ticket_description, ticket_number } = req.body;
+
+        if (!job_id || !subcontractor_id || !ticket_description || !ticket_number) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        db.query(
+            "INSERT INTO tickets (ticket_name, job_id, subcontractor_id, ticket_description, ticket_number) VALUES (?, ?, ?, ?, ?)",
+            [ticket_name, job_id, subcontractor_id, ticket_description, ticket_number],
+            function (error, result) {
+                if (error) {
+                    console.error('Error creating ticket:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                const newTicket = { id: result.insertId, job_id, subcontractor_id, ticket_description, ticket_number };
+                res.status(201).json(newTicket);
+            }
+        );
+    });
+
 app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res) {
     const assignmentId = req.params.id;
     db.query("DELETE FROM subcontractor_jobs_assignment WHERE id = ?;", [assignmentId], function (error, results) {
