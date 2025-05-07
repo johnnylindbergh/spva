@@ -177,7 +177,7 @@ module.exports = function (app) {
               console.log('looking for tickets for user:', user.id, 'and job:', job.id);
 
               // Check if the job has a ticket
-              db.query('SELECT * FROM tickets WHERE job_id = ? AND subcontractor_id = ?;', [job.id, user.id], (err, ticketResults) => {
+              db.query('SELECT * FROM tickets WHERE job_id = ? AND subcontractor_id = ? AND ticket_status = "open";', [job.id, user.id], (err, ticketResults) => {
                 if (err) {
                   console.error(err);
                   return res.status(500).send('Error retrieving tickets.');
@@ -247,7 +247,7 @@ module.exports = function (app) {
                       ON form_items.job_id = jobs.id 
                   JOIN subcontractor_jobs_assignment 
                       ON subcontractor_jobs_assignment.job_id = form_items.job_id 
-                  JOIN tickets
+                  LEFT JOIN tickets
                       ON tickets.id = form_items.ticket_id
                    
                   WHERE form_items.form_id = ?;`,
@@ -493,6 +493,19 @@ module.exports = function (app) {
                 console.log('form_items insert error', err);
                 res.status(500).send('Error submitting form.');
                 return;
+              }
+
+              if (item.ticketId){
+                // mark the ticket as closed
+
+                db.query('UPDATE tickets SET ticket_status = "closed" WHERE id = ?;', [item.ticketId], (err) => {
+                  if (err) {
+                    console.log('tickets update error', err);
+                    res.status(500).send('Error submitting form.');
+                    return;
+                  }
+                }
+                );
               }
 
               // console.log(itemResult);

@@ -485,6 +485,7 @@ CREATE TABLE tickets (
   ticket_number VARCHAR(64) NOT NULL,
   ticket_name VARCHAR(64) NOT NULL,
   ticket_description TEXT,
+  ticket_status ENUM('open', 'closed'),
   PRIMARY KEY (id),
   FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
   FOREIGN KEY (subcontractor_id) REFERENCES users(id) ON DELETE CASCADE
