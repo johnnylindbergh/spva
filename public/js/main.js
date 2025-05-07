@@ -109,8 +109,9 @@ $(document).ready(function () {
     headers.append($("<th>").text(" "));
     headers.append($("<th>").text(" "));
     headers.append($("<th>").text("Status"));
-    headers.append($("<th>").text("Total Due"));
-    headers.append($("<th>").text("Signed Total"));
+    headers.append($("<th>").text("Total_due"));
+    headers.append($("<th>").text("Signed_total"));
+    headers.append($("<th>").text("total"));
     // headers.append($("<th>").text("Total"));
 
     $("#takeoffs_table").append(headers);
@@ -189,12 +190,14 @@ $(document).ready(function () {
 
         // add amout due
         row.append($("<td>").text("$"+ numberWithCommas(parseFloat(takeoff.total_due).toFixed(2))));
+
+
         if (takeoff.signed_total == null) {
           takeoff.signed_total = 0;
         }
         
         row.append($("<td>").text("$"+ numberWithCommas(parseFloat(takeoff.signed_total).toFixed(2))));
-        // row.append($("<td>").text("$"+ numberWithCommas(parseFloat(takeoff.total).toFixed(2))));
+        row.append($("<td>").text("$"+ numberWithCommas(parseFloat(takeoff.total).toFixed(2))));
   
         // Append the row to the table
         $("#takeoffs_table").append(row);

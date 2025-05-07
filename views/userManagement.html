@@ -6,13 +6,45 @@
     <title>User Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .container {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    }
+    .createUsercontainer {
+        margin-bottom: 20px;
+        width: 25%;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    
+    .table th {
+        background-color: #e9ecef;
+    }
+
+    
+    
+</style>
 <body>
     <div class="container">
+        <h1 class="mb-4">User Management</h1>
+
+        <div class = "createUsercontainer">
+
         <div class="my-5">
-            <h1 class="mb-4">User Management</h1>
 
             <!-- create user section -->
-            <div class="mb-3">
+            <div class="mb-3" style="width: 50%;"></div>
                 <h2>Create User</h2>
                 <form action="/createUser" method="POST">
                     <div class="mb-3">
@@ -34,6 +66,8 @@
                     <button type="submit" class="btn btn-primary">Create User</button>
                 </form>
             </div>
+            </div>  
+
 
             <div class="table-responsive">
                 <table class="table table-striped table-bordered">

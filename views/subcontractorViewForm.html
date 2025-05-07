@@ -41,6 +41,10 @@
                         var jobNameCell = $('<td></td>');
                         jobNameCell.text(element[0].job_name);
                         newRow.append(jobNameCell);
+
+                        var ticketCell = $('<td></td>');
+                        ticketCell.text(element[0].ticket_name || 'N/A');
+                        newRow.append(ticketCell);
     
                         const dayMap = {};
                         element.forEach(day => {
@@ -191,9 +195,8 @@ duration: '0.000'
                 <thead>
                     <tr>
                         <th>Job Name</th>
-                        <th>
-
-                            Monday</th>
+                        <th>Ticket Name</th>
+                        <th>Monday</th>
                         <th>Tuesday</th>
                         <th>Wednesday</th>
                         <th>Thursday</th>

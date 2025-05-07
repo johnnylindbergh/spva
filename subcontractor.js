@@ -13,6 +13,8 @@ const { name } = require('ejs');
 const emailer = require('./email.js');
 
 const path = require('path');
+const { ConversationRelay } = require('twilio/lib/twiml/VoiceResponse.js');
+const { initMetadata } = require('pdfkit');
 require('dotenv').config();
 
 function getBidsData(form_id) {
@@ -156,14 +158,11 @@ module.exports = function (app) {
           return res.status(500).json({ error: 'Internal server error' });
         }
 
-
-        // for each job, call subcontractor.getAvailableFunds(user.id, job.id, callback)
         const jobsWithFunds = [];
         let jobsProcessed = 0;
+
         results.forEach((job) => {
-
           getAvailableFunds(job.id, user.id, (error, availableFunds) => {
-
             if (error) {
               console.error('Error fetching available funds:', error);
               return res.status(500).json({ error: 'Internal server error' });
@@ -172,20 +171,39 @@ module.exports = function (app) {
             if (availableFunds > 0) {
               job.bid = availableFunds;
               jobsWithFunds.push(job);
-            }
+              checkCompletion();
+            } else {
+              console.log('No available funds for job:', job.id);
+              console.log('looking for tickets for user:', user.id, 'and job:', job.id);
 
-            jobsProcessed++;
-            if (jobsProcessed === results.length) {
+              // Check if the job has a ticket
+              db.query('SELECT * FROM tickets WHERE job_id = ? AND subcontractor_id = ?;', [job.id, user.id], (err, ticketResults) => {
+                if (err) {
+                  console.error(err);
+                  return res.status(500).send('Error retrieving tickets.');
+                }
 
+                if (ticketResults.length > 0) {
+                  console.log('Job has a ticket:', ticketResults);
+                  job.bid = availableFunds;
+                  job.ticket = ticketResults[0];
+                }
 
-              res.json(jobsWithFunds);
+                jobsWithFunds.push(job);
+                checkCompletion();
+              });
             }
           });
-
         });
+
+        function checkCompletion() {
+          jobsProcessed++;
+          if (jobsProcessed === results.length) {
+            res.json(jobsWithFunds);
+          }
+        }
       }
     );
-
   });
 
 
@@ -229,6 +247,8 @@ module.exports = function (app) {
                       ON form_items.job_id = jobs.id 
                   JOIN subcontractor_jobs_assignment 
                       ON subcontractor_jobs_assignment.job_id = form_items.job_id 
+                  JOIN tickets
+                      ON tickets.id = form_items.ticket_id
                    
                   WHERE form_items.form_id = ?;`,
         [ form_id], (err, results) => {
@@ -468,7 +488,7 @@ module.exports = function (app) {
 
 
 
-            db.query('INSERT INTO form_items (form_id, job_id, item_description) VALUES (?, ?, ?);', [form_id, item.jobId, item.description], (err, itemResult) => {
+            db.query('INSERT INTO form_items (form_id, job_id, ticket_id, item_description) VALUES (?, ?, ?, ?);', [form_id, item.jobId, item.ticketId || null, item.description], (err, itemResult) => {
               if (err) {
                 console.log('form_items insert error', err);
                 res.status(500).send('Error submitting form.');
@@ -495,8 +515,8 @@ module.exports = function (app) {
           // check if the bidsData is not empty
           if (bid_data == undefined || bid_data.length == 0) {
             console.log('no bids data found');
-            res.status(200).send('success');
-            return;
+            // res.status(200).send('success');
+            // return;
           } else {
 
             console.log('bids data found');

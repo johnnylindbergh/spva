@@ -165,12 +165,14 @@ module.exports = function (app) {
         
 
         // Validate status
-        const validStatuses = ['approve', 'reject'];
+        const validStatuses = ['approvePayment', 'rejectPayment'];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ error: 'Invalid status' });
         }
 
-        status = status === 'approve' ? 'accepted' : 'rejected';
+
+        // conversion from the ui approvePayment to db enum
+        status = status === 'approvePayment' ? 'accepted' : 'rejected';
 
 
         console.log('Updating payment status:', paymentId, status);
@@ -205,6 +207,25 @@ module.exports = function (app) {
                 }
                 const newJob = { id: result.insertId, job_name, job_description, job_location, job_start_date, job_end_date };
                 res.status(201).json(newJob);
+            }
+        );
+    });
+
+    app.get('/api/tickets', mid.isSubcontractorAdmin, function (req, res) {
+        db.query(
+            `SELECT 
+                tickets.*, 
+                users.name as subcontractorName, 
+                jobs.job_name 
+            FROM tickets 
+            JOIN users ON tickets.subcontractor_id = users.id 
+            JOIN jobs ON tickets.job_id = jobs.id;`,
+            function (error, results) {
+                if (error) {
+                    console.error('Error fetching tickets:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                res.json(results);
             }
         );
     });

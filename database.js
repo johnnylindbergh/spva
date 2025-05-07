@@ -15,6 +15,7 @@ const crypto = require("crypto");
 const e = require("express");
 const OAuthClient = require("intuit-oauth");
 const { group } = require("console");
+const { parse } = require("path");
 
 // establish database connection
 const con = mysql.createConnection({
@@ -570,7 +571,7 @@ module.exports = {
                 takeoff.total_due = 0;
                 
                 let invoiceQuery = `SELECT COALESCE(SUM(total), 0) AS total FROM invoices WHERE takeoff_id = ${takeoff.id};`;
-                let changeOrdersQuery = `SELECT COALESCE(SUM(change_order_total), 0) AS total FROM change_orders WHERE takeoff_id = ${takeoff.id};`;
+                let changeOrdersQuery = `SELECT COALESCE(SUM(change_order_total), 0) AS total FROM change_orders WHERE status = 1 AND takeoff_id = ${takeoff.id};`;
                 let paymentHistoryQuery = `SELECT COALESCE(SUM(amount), 0) AS total FROM payment_history WHERE takeoff_id = ${takeoff.id};`;
                 
                 con.query(invoiceQuery, function (err, invoices) {
@@ -585,11 +586,25 @@ module.exports = {
                             if (err) return callback(err);
                             let paymentHistoryTotal = parseFloat(paymentHistory[0].total);
                             
-                            takeoff.total_due = invoiceTotal + changeOrdersTotal - paymentHistoryTotal;
-                            // console.log("paymentHistoryTotal", paymentHistoryTotal);
-                            // console.log("invoiceTotal", invoiceTotal);
-                            // console.log("changeOrdersTotal", changeOrdersTotal);
-                            // console.log("takeoff.total_due", takeoff.total_due);
+                          
+                              signed_total = parseFloat(takeoff.signed_total) || 0;
+
+                            takeoff.total_due = signed_total + invoiceTotal + changeOrdersTotal - paymentHistoryTotal;
+
+
+                            takeoff.signed_total += changeOrdersTotal;
+                            
+
+                            console.log("--------------------------");
+                            console.log("signed_total", signed_total);
+                            console.log("paymentHistoryTotal", paymentHistoryTotal);
+                            console.log("invoiceTotal", invoiceTotal);
+                            console.log("changeOrdersTotal", changeOrdersTotal);
+                            console.log("takeoff.total_due", takeoff.total_due);
+                            console.log("--------------------------");
+
+
+                            
                             modifiedTakeoffs.push(takeoff);
                             completedQueries++;
                             

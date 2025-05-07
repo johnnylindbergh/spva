@@ -92,6 +92,20 @@
             text-align: center;
             margin-bottom: 20px;
         }
+
+        .ticket-dropdown {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ced4da;  
+        }
+
+        .job-dropdown {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ced4da;  
+        }
     </style>
     
 </head>
@@ -168,21 +182,29 @@
              let jobList = [];
 
 function fetchJobs() {
-    $.get('/subcontractor/jobs', function (response) {
-        console.log(response)
-        jobList = response || [];
-        console.log('Jobs fetched:', jobList);
-        populateJobDropdowns();
+    return new Promise((resolve, reject) => {
+        $.get('/subcontractor/jobs', function (response) {
+            console.log(response);
+            jobList = response || [];
+            console.log('Jobs fetched:', jobList);
+            populateJobDropdowns();
 
-        if (jobList.length === 0) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'No jobs have been assigned to you or there is no remaining bid. If you believe this is an error, please contact your supervisor.'
-            });
-        }
+            if (jobList.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'No jobs have been assigned to you or there is no remaining bid. If you believe this is an error, please contact your supervisor.'
+                });
+            }
+            resolve(jobList);
+        }).fail(function (error) {
+            console.error('Error fetching jobs:', error);
+            reject(error);
+        });
     });
 }
+
+
 function fetchAgreements() {
     $.get('/subcontractor/agreements', function(response) {
         console.log('Agreements fetched:', response);
@@ -291,6 +313,27 @@ function addTimesheetRow(timesheet) {
     jobNameCell.attr('width', '200px');
     newRow.append(jobNameCell);
 
+    // Ticket column
+    const ticketCell = $('<td></td>');
+    const ticketDropdown = $('<select class="ticket-dropdown"><option value="">Select Ticket</option></select>');
+
+    // style dropdown
+    ticketDropdown.addClass('ticket-dropdown');
+    ticketDropdown.attr('style', 'width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ced4da;');
+    // Populate ticket dropdown based on selected job
+
+    jobList.forEach(job => {
+        console.log(job.ticket)
+        if (job.ticket && job.ticket.id && job.ticket.ticket_name) {
+            ticketDropdown.append(`<option value="${job.ticket.id}">${job.ticket.ticket_name}</option>`);
+        }
+    });
+
+
+    ticketCell.append(ticketDropdown);
+    ticketCell.attr('width', '200px');
+    newRow.append(ticketCell);
+
     // Input fields for each day of the week
     for (let i = 0; i < 7; i++) {
         const timesheetCell = $('<td></td>');
@@ -325,141 +368,152 @@ $(document).ready(function () {
     const timesheet = $('#timesheet');
 
     // Fetch jobs from the server
-    fetchJobs();
-    fetchAgreements();
+    fetchJobs().then(() => {
+        fetchAgreements();
+       // fetchTickets();
 
+        // Add table headers
+        const headers = ['Job Name', 'Ticket', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Total', 'Description'];
+        const headerRow = $('<tr></tr>');
+        headers.forEach(header => {
+            const headerCell = $('<th></th>').text(header);
+            headerRow.append(headerCell);
+        });
+        timesheet.append(headerRow);
 
-    // Add table headers
-    const headers = ['Job Name', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Total', 'Description'];
-    const headerRow = $('<tr></tr>');
-    headers.forEach(header => {
-        const headerCell = $('<th></th>').text(header);
-        headerRow.append(headerCell);
-    });
-    timesheet.append(headerRow);
+        const initialRows = 5;
 
-    const initialRows = 5;
-    for (let i = 0; i < initialRows; i++) {
-        addTimesheetRow(timesheet);
-    }
+        for (let i = 0; i < initialRows; i++) {
+            addTimesheetRow(timesheet);
+        }
 
-    // Add row button functionality
-    $('#addTimesheetRowButton').click(function () {
-        addTimesheetRow(timesheet);
+        // Add row button functionality
+        $('#addTimesheetRowButton').click(function () {
+            addTimesheetRow(timesheet);
+        });
     });
 
     $('#submit').click(function (event) {
-    event.preventDefault(); // Prevent default form submission
+        event.preventDefault(); // Prevent default form submission
 
-    const data = [];
-    const bidsData = [];
+        const data = [];
+        const bidsData = [];
 
-    const formName = $('#formName').val();
+        const formName = $('#formName').val();
 
-    // Collect timesheet data
-    timesheet.find('tr').each(function () {
-        const row = $(this);
-        if (row.find('select').length > 0) {
+        // Collect timesheet data
+        timesheet.find('tr').each(function () {
+            const row = $(this);
+            if (row.find('select').length > 0) {
+                const jobId = row.find('select').val();
+                const days = [];
+                row.find('input[type="number"]').each(function () {
+                    days.push($(this).val());
+                });
+                const total = row.find('.total').text();
+                const description = row.find('textarea').val();
+                const ticketId = row.find('.ticket-dropdown').val();
+                data.push({
+                    jobId,
+                    days,
+                    total,
+                    description,
+                    ticketId
+                });
+            }
+        });
+
+        // Collect jobsWithBids data
+        let isValid = true; // Flag to track validation status
+        $('.jobsWithBids tbody tr').each(function () {
+            const row = $(this);
             const jobId = row.find('select').val();
-            const days = [];
-            row.find('input[type="number"]').each(function () {
-                days.push($(this).val());
-            });
-            const total = row.find('.total').text();
-            const description = row.find('textarea').val();
-            data.push({
-                jobId,
-                days,
-                total,
-                description
-            });
+            const bid = row.find('input[type="number"]').eq(0).val();
+            const requestedAmount = row.find('input[type="number"]').eq(1).val();
+
+            if (parseFloat(requestedAmount) > parseFloat(bid)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Requested amount cannot be greater than the bid amount!'
+                });
+                isValid = false;
+                return false; // Exit the loop
+            }
+            // if (!jobId || !requestedAmount) {
+            //     Swal.fire({
+            //         icon: 'error',
+            //         title: 'Oops...',
+            //         text: 'Please fill all fields in the jobs with bids section!'
+            //     });
+            //     isValid = false;
+            //     return false; // Exit the loop
+            // }
+
+            // if (!bid) {
+            //     Swal.fire({
+            //         icon: 'error',
+            //         title: 'Oops...',
+            //         text: 'Please select a job from the dropdown!'
+            //     });
+            //     isValid = false;
+            //     return false; // Exit the loop
+            // }
+            if (jobId && bid && requestedAmount) {
+                // Only push to bidsData if both jobId and requestedAmount are present
+
+            bidsData.push({
+                    jobId,
+                    bid,
+                    requestedAmount
+             });
+    
+            }
+       
+        });
+
+        if (!isValid) {
+            return false; // Stop form submission if validation fails
         }
-    });
 
-    // Collect jobsWithBids data
-    let isValid = true; // Flag to track validation status
-    $('.jobsWithBids tbody tr').each(function () {
-        const row = $(this);
-        const jobId = row.find('select').val();
-        const bid = row.find('input[type="number"]').eq(0).val();
-        const requestedAmount = row.find('input[type="number"]').eq(1).val();
-
-        if (parseFloat(requestedAmount) > parseFloat(bid)) {
+        // Check for duplicate job IDs
+        const jobIds = bidsData.map(item => item.jobId);
+        const uniqueJobIds = [...new Set(jobIds)];
+        if (jobIds.length !== uniqueJobIds.length) {
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: 'Requested amount cannot be greater than the bid amount!'
+                text: 'Duplicate job IDs found in the timesheet!'
             });
-            isValid = false;
-            return false; // Exit the loop
+            return false;
         }
-        if (!jobId || !requestedAmount) {
+
+        if (!formName) {
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: 'Please fill all fields in the jobs with bids section!'
+                text: 'Please enter a name for the timesheet!'
             });
-            isValid = false;
-            return false; // Exit the loop
+            return false;
         }
 
-        if (!bid) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Please select a job from the dropdown!'
-            });
-            isValid = false;
-            return false; // Exit the loop
-        }
-        bidsData.push({
-            jobId,
-            bid,
-            requestedAmount
+        // Submit the form data
+        $.post('/subcontractor/submit', {
+            timesheetData: data,
+            bidsData: bidsData,
+            form_name: formName
+        }, function (response) {
+            if (response.status === 'success') {
+                alert('Data submitted successfully');
+                window.location.href = '/subcontractor/viewForm?id=' + response.form_id;
+            } else {
+                alert('Error submitting data');
+            }
         });
-    });
-
-    if (!isValid) {
-        return false; // Stop form submission if validation fails
-    }
-
-    // Check for duplicate job IDs
-    const jobIds = bidsData.map(item => item.jobId);
-    const uniqueJobIds = [...new Set(jobIds)];
-    if (jobIds.length !== uniqueJobIds.length) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Duplicate job IDs found in the timesheet!'
-        });
-        return false;
-    }
-
-    if (!formName) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Please enter a name for the timesheet!'
-        });
-        return false;
-    }
-
-    // Submit the form data
-    $.post('/subcontractor/submit', {
-        timesheetData: data,
-        bidsData: bidsData,
-        form_name: formName
-    }, function (response) {
-        if (response.status === 'success') {
-            alert('Data submitted successfully');
-            window.location.href = '/subcontractor/viewForm?id=' + response.form_id;
-        } else {
-            alert('Error submitting data');
-        }
     });
 });
 
-});
+
     </script>
 </body>
 

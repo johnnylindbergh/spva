@@ -477,6 +477,21 @@ CREATE TABLE subcontractor_jobs_assignment (
 );
 
 
+CREATE TABLE tickets (
+  id INT NOT NULL AUTO_INCREMENT,
+  job_id INT NOT NULL,
+  subcontractor_id INT NOT NULL,
+  ticket_number VARCHAR(64) NOT NULL,
+  ticket_name VARCHAR(64) NOT NULL,
+  ticket_description TEXT,
+  PRIMARY KEY (id),
+  FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
+  FOREIGN KEY (subcontractor_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- example insert
+INSERT INTO tickets (job_id, subcontractor_id, ticket_number, ticket_name, ticket_description) VALUES (1, 1, 'Ticket 1', 'Ticket Name 1', 'Description of Ticket 1');
+
 
 -- example insert
 INSERT INTO agreements (name, description, hash, pdf_path) VALUES ('Agreement 1', 'Description of Agreement 1', 'hash1', 'path/to/agreement.pdf');
@@ -517,6 +532,7 @@ CREATE TABLE form_items (
   id INT NOT NULL AUTO_INCREMENT,
   form_id INT NOT NULL,
   job_id INT, -- Job
+  ticket_id INT DEFAULT NULL, -- Ticket
   item_description VARCHAR(255), -- Description (made nullable for flexibility)
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -129,23 +129,57 @@
             </form>
         </section>
 
-        <!-- change order section -->
+        <!--ticket section -->
         <section class="mb-5">
-            <h2 class="mb-3">Change Orders</h2>
+            <h2 class="mb-3">Tickets</h2>
             <table class="table table-striped">
                 <thead class="table-dark">
                     <tr>
-                        <th>Job Name</th>
-                        <th>Subcontractor Name</th>
-                        <th>Change Order Amount</th>
-                        <th>Status</th>
+                        <th>Ticket Number</th>
+                        <th>Ticket Description</th>
+                        <th>Subcontractor</th>
+                        <th>Job</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="changeOrdersTable">
+                <tbody id="ticketsTable">
                     <!-- Rows will be dynamically populated -->
                 </tbody>
             </table>
+        </section>
+
+        <!-- create ticket section -->
+        <section class="mb-5">
+            <h2 class="mb-3">Create Ticket</h2>
+            <form id="ticketForm" class="row g-3">
+
+                <div class="col-md-6">
+                    <label for="ticketNumber" class="form-label">Ticket Number:</label>
+                    <input type="text" id="ticketNumber" name="ticketNumber" class="form-control" required>
+                </div>
+               
+                <div class="col-md-6">
+                    <label for="jobSelectTicket" class="form-label">Select Job:</label>
+                    <select id="jobSelectTicket" name="jobSelectTicket" class="form-select" required>
+                        <!-- Options will be dynamically populated -->
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="subcontractorSelectTicket" class="form-label">Select Subcontractor:</label>
+                    <select id="subcontractorSelectTicket" name="subcontractorSelectTicket" class="form-select" required>
+                        <!-- Options will be dynamically populated -->
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="ticketDescription" class="form-label">Ticket Description:</label>
+                    <textarea id="ticketDescription" name="ticketDescription" class="form-control" rows="3" required></textarea>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Create Ticket</button>
+                </div>
+            </form>
         </section>
 
        

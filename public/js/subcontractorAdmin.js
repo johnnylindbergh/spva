@@ -18,13 +18,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch data from the server
     async function fetchData() {
         try {
-            const [jobsData, subcontractorsData, formsData, paymentsData, agreementsData, assignmentsData] = await Promise.all([
+            const [jobsData, subcontractorsData, formsData, paymentsData, agreementsData, assignmentsData, ticketsData] = await Promise.all([
                 fetch('/api/jobs').then(res => res.json()),
                 fetch('/api/subcontractors').then(res => res.json()),
                 fetch('/api/forms').then(res => res.json()),
                 fetch('/api/payments').then(res => res.json()),
                 fetch('/api/agreements').then(res => res.json()),
-                fetch('/api/assignments').then(res => res.json())
+                fetch('/api/assignments').then(res => res.json()),
+                fetch('api/tickets').then(res => res.json())
             ]);
 
             renderJobSelect(jobsData);
@@ -36,6 +37,9 @@ document.addEventListener('DOMContentLoaded', function() {
             renderPaymentsTable(paymentsData);
             renderAgreementsTable(agreementsData);
             renderAssignmentsTable(assignmentsData);
+            renderTicketsTable(ticketsData);
+            renderTicketJobSelect(jobsData);
+            renderTicketSubcontractorSelect(subcontractorsData);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -574,6 +578,147 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add event listener to the dropdown
         weekDropdown.addEventListener('change', filterFormsByWeek);
     }
+
+    function renderTicketsTable(tickets) {
+        console.log("tickets:", tickets);
+        const ticketsTable = document.getElementById('ticketsTable');
+        ticketsTable.innerHTML = '';
+        if (tickets.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="5" class="text-center">No tickets available</td>';
+            ticketsTable.appendChild(row);
+            return;
+        } else {
+            tickets.forEach(ticket => {
+                const row = document.createElement('tr');
+             
+                row.innerHTML = `
+                    <td>${ticket.ticket_number}</td>
+                    <td>${ticket.ticket_description}</td>
+                    <td>${ticket.subcontractorName}</td>
+                    <td>${ticket.job_name}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" data-id="${ticket.id}" data-action="viewTicket">View</button>
+                        <button class="btn btn-sm btn-danger" data-id="${ticket.id}" data-action="deleteTicket">Delete</button>
+                    </td>
+                `;
+                ticketsTable.appendChild(row);
+            });
+        }
+        // Add event listeners to action buttons
+        document.querySelectorAll('[data-action="viewTicket"]').forEach(btn => {
+            btn.addEventListener('click', handleTicketAction);
+        });
+        document.querySelectorAll('[data-action="deleteTicket"]').forEach(btn => {
+            btn.addEventListener('click', handleTicketAction);
+        });
+    }
+
+    async function handleTicketAction(e) {
+        const ticketId = parseInt(e.target.dataset.id);
+        const action = e.target.dataset.action;
+        if (action === 'viewTicket') {
+            // Open the view modal and populate it with ticket data
+            const ticket = await fetch(`/api/tickets/${ticketId}`).then(res => res.json());
+            console.log("ticket:", ticket);
+            document.getElementById('viewTicketNumber').textContent = ticket.ticket_number;
+            document.getElementById('viewTicketDescription').textContent = ticket.ticket_description;
+            document.getElementById('viewTicketSubcontractor').textContent = ticket.subcontractorName;
+            document.getElementById('viewTicketJob').textContent = ticket.job_name;
+            $('#ticketViewModal').modal('show');
+        }
+        else if (action === 'deleteTicket') {
+            // Confirm deletion
+            if (confirm(`Are you sure you want to delete ticket #${ticketId}?`)) {
+                try {
+                    const response = await fetch(`/api/tickets/${ticketId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert(`Ticket #${ticketId} deleted successfully!`);
+                        fetchData(); // Refresh data
+                    } else {
+                        alert('Failed to delete ticket.');
+                    }
+                } catch (error) {
+                    console.error('Error deleting ticket:', error);
+                }
+            }
+        }
+    }
+
+
+
+
+    function renderTicketJobSelect(jobs) {
+        const ticketJobSelect = document.getElementById('jobSelectTicket');
+        ticketJobSelect.innerHTML = '<option value="">Select Job</option>';
+        jobs.forEach(job => {
+            const option = document.createElement('option');
+            option.value = job.id;
+            option.textContent = job.job_name;
+            ticketJobSelect.appendChild(option);
+        });
+
+
+    }
+
+    function renderTicketSubcontractorSelect(subcontractors) {
+        const ticketSubcontractorSelect = document.getElementById('subcontractorSelectTicket');
+        ticketSubcontractorSelect.innerHTML = '<option value="">Select Subcontractor</option>';
+        subcontractors.forEach(subcontractor => {
+            const option = document.createElement('option');
+            option.value = subcontractor.id;
+            option.textContent = subcontractor.name;
+            ticketSubcontractorSelect.appendChild(option);
+        });
+    }
+
+    function handleTicketFormSubmit(e) {
+        e.preventDefault();
+        const ticketNumber = document.getElementById('ticketNumber').value;
+        const ticketDescription = document.getElementById('ticketDescription').value;
+        const jobId = parseInt(document.getElementById('jobSelectTicket').value);
+        const subcontractorId = parseInt(document.getElementById('subcontractorSelectTicket').value);
+        if (!ticketNumber || !ticketDescription || !jobId || !subcontractorId) {
+            alert('Please fill in all fields.');
+            return;
+        }
+
+        const data = {
+            ticket_number: ticketNumber,
+            ticket_description: ticketDescription,
+            job_id: jobId,
+            subcontractor_id: subcontractorId
+        };
+
+        fetch('/api/tickets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Ticket created successfully!');
+                document.getElementById('ticketForm').reset();
+                fetchData(); // Refresh data
+            } else {
+                alert('Failed to create ticket.');
+            }
+        })
+        .catch(error => {
+            console.error('Error creating ticket:', error);
+        });
+    }
+    // Add event listener to the ticket form
+
+    document.getElementById('ticketForm').addEventListener('submit', handleTicketFormSubmit);
+    // Render payments table
+
+    
+
+
 
     // Render payments table with action buttons
     function renderPaymentsTable(payments) {
