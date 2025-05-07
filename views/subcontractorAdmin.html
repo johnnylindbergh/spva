@@ -41,6 +41,7 @@
                         <th>Job Name</th>
                         <th>Location</th>
                         <th>Description</th>
+                        <th>Job Type</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -74,6 +75,18 @@
             <div class="col-md-6">
                 <label for="jobEndDate" class="form-label">Job End Date:</label>
                 <input type="date" id="jobEndDate" name="jobEndDate" class="form-control" required>
+            </div>
+            <!-- job type radio section. types ("Bid", "TM") -->
+            <div class="col-md-6">
+                <label class="form-label">Job Type:</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="jobType" id="jobTypeBid" value="Bid" checked>
+                    <label class="form-check-label" for="jobTypeBid">Bid</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="jobType" id="jobTypeTM" value="TM">
+                    <label class="form-check-label" for="jobTypeTM">TM</label>
+                </div>
             </div>
             <div class="col-12">
                 <button type="submit" class="btn btn-primary">Create Job</button>
@@ -169,7 +182,7 @@
                         <!-- Options will be dynamically populated -->
                     </select>
                 </div>
-                
+
                 <div class="col-md-6">
                     <label for="subcontractorSelectTicket" class="form-label">Select Subcontractor:</label>
                     <select id="subcontractorSelectTicket" name="subcontractorSelectTicket" class="form-select" required>

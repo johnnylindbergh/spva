@@ -448,6 +448,7 @@ CREATE TABLE jobs (
   isArchived TINYINT(1) DEFAULT 0,
   job_name VARCHAR(255) NOT NULL,
   takeoff_id INT,
+  job_type ENUM('TM', 'bid') DEFAULT 'bid',
   -- bid DECIMAL(10,2),
   job_description TEXT,
   job_location VARCHAR(255),

@@ -109,6 +109,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const jobLocation = document.getElementById('jobLocation').value;
         const jobStartDate = document.getElementById('jobStartDate').value;
         const jobEndDate = document.getElementById('jobEndDate').value;
+        const jobTypeBid = document.getElementById('jobTypeBid').checked;
+        const jobTypeTM = document.getElementById('jobTypeTM').checked;
+       
+
+        // if jobTypeBid is selected, set jobType to 'bid'
+        // if jobTypeTM is selected, set jobType to 'tm'
+
+        console.log("job type bid:", jobTypeBid);
+        console.log("job type tm:", jobTypeTM);
+        let jobType = '';
+        if (jobTypeBid) {
+            jobType = 'bid';
+        } else if (jobTypeTM) {
+            jobType = 'tm';
+        }
 
         try {
             const response = await fetch('/api/jobs', {
@@ -119,7 +134,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     job_description: jobDescription,
                     job_location: jobLocation,
                     job_start_date: jobStartDate,
-                    job_end_date: jobEndDate
+                    job_end_date: jobEndDate,
+                    job_type: jobType
                 })
             });
 
@@ -199,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${job.job_location}</td>
         
                 <td>${job.job_description}</td>
+                <td>${job.job_type}</td>
                 
             `;
             row.innerHTML += `<td>${actions}</td>`;

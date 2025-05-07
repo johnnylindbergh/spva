@@ -196,10 +196,12 @@ module.exports = function (app) {
   
 
     app.post('/api/jobs', mid.isSubcontractorAdmin, function (req, res) {
-        const { job_name, job_description, job_location, job_start_date, job_end_date } = req.body;
+        const { job_name, job_description, job_location, job_start_date, job_end_date, job_type } = req.body;
+
+        console.log('req body', req.body);
         db.query(
-            "INSERT INTO jobs (job_name, job_description, job_location, job_start_date, job_end_date) VALUES (?, ?, ?, ?, ?)",
-            [job_name, job_description, job_location, job_start_date, job_end_date],
+            "INSERT INTO jobs (job_name, job_description, job_location, job_start_date, job_end_date, job_type) VALUES (?, ?, ?, ?, ?, ?)",
+            [job_name, job_description, job_location, job_start_date, job_end_date, job_type],
             function (error, result) {
                 if (error) {
                     console.error('Error creating job:', error);
