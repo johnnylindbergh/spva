@@ -291,9 +291,9 @@ app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res)
     app.post('/api/assignments', mid.isSubcontractorAdmin, function (req, res) {
         const { jobId, subcontractorId, allottedBid } = req.body;
         db.query(
-            `INSERT INTO subcontractor_jobs_assignment (job_id, user_id, alloted_bid) 
+            `INSERT INTO subcontractor_jobs_assignment (job_id, user_id, allotted_bid) 
             VALUES (?, ?, ?) 
-            ON DUPLICATE KEY UPDATE alloted_bid = alloted_bid + VALUES(alloted_bid);`,
+            ON DUPLICATE KEY UPDATE allotted_bid = allotted_bid + VALUES(allotted_bid);`,
             [jobId, subcontractorId, allottedBid],
             function (error) {
                 if (error) {

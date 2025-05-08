@@ -20,7 +20,7 @@ require('dotenv').config();
 function getBidsData(form_id) {
   return new Promise((resolve, reject) => {
     db.query(
-      `SELECT form_bid.*, jobs.*, sja.alloted_bid as bid 
+      `SELECT form_bid.*, jobs.*, sja.allotted_bid as bid 
           FROM form_bid 
           JOIN jobs ON form_bid.job_id = jobs.id 
           JOIN subcontractor_jobs_assignment sja 
@@ -57,7 +57,7 @@ function getTotalRequestedAmount(jobId, userId, callback) {
 
       // Fetch totalAllotted from subcontractor_jobs_assignment
       db.query(
-        "SELECT alloted_bid FROM subcontractor_jobs_assignment WHERE job_id = ? AND user_id = ?",
+        "SELECT allotted_bid FROM subcontractor_jobs_assignment WHERE job_id = ? AND user_id = ?",
         [jobId, userId],
         function (error, bidResults) {
           if (error || bidResults.length === 0) {
@@ -65,7 +65,7 @@ function getTotalRequestedAmount(jobId, userId, callback) {
             return callback(error);
           }
           console.log('Total allotted:', bidResults);
-          callback(null, totalRequested, bidResults[0].alloted_bid);
+          callback(null, totalRequested, bidResults[0].allotted_bid);
         }
       );
     }
@@ -150,7 +150,7 @@ module.exports = function (app) {
     console.log("subcontractor userId:", user.id);
     console.log("Looking for jobs assigned to userId:", user.id);
     db.query(
-      "SELECT jobs.*, subcontractor_jobs_assignment.alloted_bid as bid FROM jobs INNER JOIN subcontractor_jobs_assignment ON jobs.id = subcontractor_jobs_assignment.job_id WHERE subcontractor_jobs_assignment.user_id = ? AND jobs.isArchived = 0;",
+      "SELECT jobs.*, subcontractor_jobs_assignment.allotted_bid as bid FROM jobs INNER JOIN subcontractor_jobs_assignment ON jobs.id = subcontractor_jobs_assignment.job_id WHERE subcontractor_jobs_assignment.user_id = ? AND jobs.isArchived = 0;",
       [user.id],
       function (error, results) {
         if (error) {
@@ -322,7 +322,7 @@ module.exports = function (app) {
     }
     // Check if the user owns the agreement or is user_type 4 or 1
     db.query(
-      `SELECT agreements.*, users.name as subcontractor_name, users.id as subcontractor_id, users.email as subcontractor_email, jobs.job_name, subcontractor_jobs_assignment.alloted_bid 
+      `SELECT agreements.*, users.name as subcontractor_name, users.id as subcontractor_id, users.email as subcontractor_email, jobs.job_name, subcontractor_jobs_assignment.allotted_bid 
        FROM agreements 
        JOIN subcontractor_jobs_assignment ON agreements.id = subcontractor_jobs_assignment.agreement_id 
        JOIN jobs ON subcontractor_jobs_assignment.job_id = jobs.id 

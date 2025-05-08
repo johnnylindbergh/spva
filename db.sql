@@ -469,7 +469,7 @@ CREATE TABLE subcontractor_jobs_assignment (
   user_id INT NOT NULL,
   agreement_id INT,
   status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
-  alloted_bid DECIMAL(10,2),
+  allotted_bid DECIMAL(10,2),
   PRIMARY KEY (id),
   UNIQUE KEY (job_id, user_id), -- Prevent duplicate assignments
   FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,

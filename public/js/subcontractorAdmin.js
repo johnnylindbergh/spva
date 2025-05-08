@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const assignJobForm = document.getElementById('assignJobForm');
     const jobSelect = document.getElementById('jobSelect');
     const subcontractorSelect = document.getElementById('subcontractorSelect');
-    const allotedBidInput = document.getElementById('allotedBid');
+    const allottedBidInput = document.getElementById('allottedBid');
     const subcontractorFormsTable = document.getElementById('subcontractorFormsTable');
     const paymentsTable = document.getElementById('paymentsTable');
 
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const jobId = parseInt(jobSelect.value);
         const subcontractorId = parseInt(subcontractorSelect.value);
-        const allottedBid = parseFloat(allotedBidInput.value);
+        const allottedBid = parseFloat(allottedBidInput.value);
 
         try {
             const response = await fetch('/api/assignments', {
@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <td>${assignment.job_name}</td>
                 <td>${assignment.subcontractorName}</td>
-                <td>$${assignment.alloted_bid}</td>
+                <td>$${assignment.allotted_bid}</td>
                 <td>
                     <button class="btn btn-sm btn-danger" data-id="${assignment.id}" data-action="deleteAssignment">Delete</button>
                 </td>

@@ -16,6 +16,7 @@ const e = require("express");
 const OAuthClient = require("intuit-oauth");
 const { group } = require("console");
 const { parse } = require("path");
+const { ScimEmailAddress } = require("twilio/lib/rest/previewIam/versionless/organization/user.js");
 
 // establish database connection
 const con = mysql.createConnection({
@@ -971,7 +972,39 @@ module.exports = {
               [user.email, user.name, results[0].id],
               function (err) {
                 if (err) return callback(err);
+                
                 callback(null);
+              }
+            );
+          }
+        });
+      }
+    });
+  },
+
+  createUserGetUserId: function (user, callback) {
+    // check if the user already exists
+    con.query("SELECT * FROM users WHERE email = ?;", [user.email], function (err, results) {
+      if (err) return callback(err);
+      if (results.length > 0) {
+        return callback("User already exists");
+      } else {
+
+        // check if title is in the user_types table
+        con.query("SELECT * FROM user_types WHERE title LIKE ?;", [user.title], function (err, results) {
+
+          if (err) return callback(err);
+          if (results.length === 0) {
+            return callback("User type does not exist");
+          } else {
+            // insert the user into the users table
+            con.query(
+              "INSERT INTO users (email, name, user_type) VALUES (?, ?, ?); SELECT LAST_INSERT_ID() as last;",
+              [user.email, user.name, results[0].id],
+              function (err, result) {
+                if (err) return callback(err);
+                
+                callback(null, result[1][0].last);
               }
             );
           }

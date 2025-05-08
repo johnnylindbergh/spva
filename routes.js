@@ -243,12 +243,14 @@ module.exports = function (app) {
   app.post('/createUser', mid.isAdmin, function (req, res) {
     console.log("creating user");
     console.log(req.body);
-    db.createUser(req.body, function (err) {
+    db.createUserGetUserId(req.body, function (err, user_id) {
       if (err) {
         console.log(err);
         res.status(500).send("Error creating user");
       } else {
-        res.redirect("/userManagement");
+        emailer.sendWelcomeEmail(user_id, function (err) {
+          res.redirect("/userManagement");
+        });
       }
     });
   });

@@ -413,6 +413,27 @@ $(document).ready(function () {
                 const total = row.find('.total').text();
                 const description = row.find('textarea').val();
                 const ticketId = row.find('.ticket-dropdown').val();
+
+                if (ticketId && !jobId) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Please select a job for the ticket!'
+                    });
+                    isValid = false;
+                    return false; // Exit the loop
+                }
+                // if (!jobId || !ticketId) {
+                //     Swal.fire({
+                //         icon: 'error',
+                //         title: 'Oops...',
+                //         text: 'Please fill all fields in the timesheet!'
+                //     });
+                //     isValid = false;
+                //     return false; // Exit the loop
+                // }
+
+              
                 data.push({
                     jobId,
                     days,
@@ -504,7 +525,12 @@ $(document).ready(function () {
             form_name: formName
         }, function (response) {
             if (response.status === 'success') {
-                alert('Data submitted successfully');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Form submitted successfully!'
+                });
+                // Redirect to the view form page
                 window.location.href = '/subcontractor/viewForm?id=' + response.form_id;
             } else {
                 alert('Error submitting data');
