@@ -529,11 +529,13 @@ app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res)
                 users.name as subcontractorName, 
                 form_bid.request as total_requests, 
                 form_bid.status, 
+                forms.created_at as form_created_at,
                 jobs.job_name 
             FROM form_bid 
                 JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id 
                 JOIN users ON subcontractor_forms.user_id = users.id 
                 JOIN jobs ON form_bid.job_id = jobs.id 
+                JOIN forms ON subcontractor_forms.form_id = forms.id
             WHERE form_bid.status = 'accepted'`,
             function (error, results) {
                 if (error) {
@@ -548,7 +550,8 @@ app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res)
                     subcontractorName: row.subcontractorName,
                     total_requests: row.total_requests,
                     status: row.status,
-                    job_name: row.job_name
+                    job_name: row.job_name,
+                    date_created: moment(row.form_created_at).format('YYYY-MM-DD hh:mm:ss A')
                 }));
                 const csvString = jsonToCSV(csvData);
                 res.setHeader('Content-Type', 'text/csv');
