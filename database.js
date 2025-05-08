@@ -588,16 +588,16 @@ module.exports = {
                             let paymentHistoryTotal = parseFloat(paymentHistory[0].total);
                             
                           
-                              signed_total = parseFloat(takeoff.signed_total) || 0;
+                              takeoff.signed_total = parseFloat(takeoff.signed_total) || 0;
 
-                            takeoff.total_due = signed_total + invoiceTotal + changeOrdersTotal - paymentHistoryTotal;
+                            // takeoff.total_due = signed_total + invoiceTotal + changeOrdersTotal - paymentHistoryTotal;
 
-
+                            takeoff.total_due = invoiceTotal + changeOrdersTotal - paymentHistoryTotal;
                             takeoff.signed_total += changeOrdersTotal;
                             
 
                             console.log("--------------------------");
-                            console.log("signed_total", signed_total);
+                            console.log("signed_total", takeoff.signed_total);
                             console.log("paymentHistoryTotal", paymentHistoryTotal);
                             console.log("invoiceTotal", invoiceTotal);
                             console.log("changeOrdersTotal", changeOrdersTotal);

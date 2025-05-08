@@ -109,9 +109,9 @@ $(document).ready(function () {
     headers.append($("<th>").text(" "));
     headers.append($("<th>").text(" "));
     headers.append($("<th>").text("Status"));
-    headers.append($("<th>").text("Total_due"));
-    headers.append($("<th>").text("Signed_total"));
-    headers.append($("<th>").text("total"));
+    headers.append($("<th>").text("Total Invoiced"));
+    headers.append($("<th>").text("Signed Total (+options & change orders)"));
+    headers.append($("<th>").text("Base Cost"));
     // headers.append($("<th>").text("Total"));
 
     $("#takeoffs_table").append(headers);

@@ -194,6 +194,7 @@ CREATE TABLE customer_takeoffs (
   takeoff_id INT NOT NULL,
   customer_id INT NOT NULL,
   PRIMARY KEY (id),
+  UNIQUE KEY (takeoff_id, customer_id), -- Prevent duplicate assignments
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
   FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );

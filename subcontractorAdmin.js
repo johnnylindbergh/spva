@@ -524,39 +524,39 @@ app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res)
     app.get("/api/payments/export", mid.isSubcontractorAdmin, function (req, res) {
         db.query(
             `SELECT 
-                form_bid.id as id, 
-                users.id as user_id, 
-                users.name as subcontractorName, 
-                form_bid.request as total_requests, 
-                form_bid.status, 
-                forms.created_at as form_created_at,
-                jobs.job_name 
+            form_bid.id as id, 
+            users.id as user_id, 
+            users.name as subcontractorName, 
+            form_bid.request as total_requests, 
+            form_bid.status, 
+            forms.created_at as form_created_at,
+            jobs.job_name 
             FROM form_bid 
-                JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id 
-                JOIN users ON subcontractor_forms.user_id = users.id 
-                JOIN jobs ON form_bid.job_id = jobs.id 
-                JOIN forms ON subcontractor_forms.form_id = forms.id
-            WHERE form_bid.status = 'accepted'`,
+            JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id 
+            JOIN users ON subcontractor_forms.user_id = users.id 
+            JOIN jobs ON form_bid.job_id = jobs.id 
+            JOIN forms ON subcontractor_forms.form_id = forms.id
+            WHERE form_bid.status = 'accepted' AND forms.created_at >= NOW() - INTERVAL 4 WEEK`,
             function (error, results) {
-                if (error) {
-                    console.error('Error fetching payments for export:', error);
-                    return res.status(500).json({ error: 'Internal server error' });
-                }
+            if (error) {
+                console.error('Error fetching payments for export:', error);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
 
-                console.log("Results for export:", results);    
-                const csvData = results.map(row => ({
-                    id: row.id,
-                    user_id: row.user_id,
-                    subcontractorName: row.subcontractorName,
-                    total_requests: row.total_requests,
-                    status: row.status,
-                    job_name: row.job_name,
-                    date_created: moment(row.form_created_at).format('YYYY-MM-DD hh:mm:ss A')
-                }));
-                const csvString = jsonToCSV(csvData);
-                res.setHeader('Content-Type', 'text/csv');
-                res.setHeader('Content-Disposition', 'attachment; filename=payments.csv');
-                res.send(csvString);
+            console.log("Results for export:", results);    
+            const csvData = results.map(row => ({
+                id: row.id,
+                user_id: row.user_id,
+                subcontractorName: row.subcontractorName,
+                total_requests: row.total_requests,
+                status: row.status,
+                job_name: row.job_name,
+                date_created: moment(row.form_created_at).format('YYYY-MM-DD hh:mm:ss A')
+            }));
+            const csvString = jsonToCSV(csvData);
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', 'attachment; filename=payments.csv');
+            res.send(csvString);
             }
         );
     }
