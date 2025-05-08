@@ -463,7 +463,7 @@ function sendSubcontractorFormEmail(form_id, user_id, callback) {
             subject: "Your Subcontractor Form from Sun Painting",
             html: `
               <h3>Hello, ${user.name},</h3>
-              <h3>Congradulations! You have completed a form!</h3>
+              <h3>Congratulations! You have completed a form!</h3>
               <p>Please click the link below to view it:</p>
               <a href="${credentials.domain}/subcontractor/viewForm/?id=${form.id}">View Subcontractor Form</a></br>
             `,
