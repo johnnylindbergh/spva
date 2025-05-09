@@ -161,47 +161,49 @@ module.exports = function (app) {
         const jobsWithFunds = [];
         let jobsProcessed = 0;
 
-        results.forEach((job) => {
+      const jobPromises = results.map((job) => {
+        return new Promise((resolve, reject) => {
           getAvailableFunds(job.id, user.id, (error, availableFunds) => {
             if (error) {
               console.error('Error fetching available funds:', error);
-              return res.status(500).json({ error: 'Internal server error' });
+              return reject('Internal server error');
             }
 
-            if (availableFunds > 0) {
-              job.bid = availableFunds;
-              jobsWithFunds.push(job);
-              checkCompletion();
-            } else {
-              console.log('No available funds for job:', job.id);
-              console.log('looking for tickets for user:', user.id, 'and job:', job.id);
+            console.log('No available funds for job:', job.id);
+            console.log('looking for tickets for user:', user.id, 'and job:', job.id);
 
-              // Check if the job has a ticket
-              db.query('SELECT * FROM tickets WHERE job_id = ? AND subcontractor_id = ? AND ticket_status = "open";', [job.id, user.id], (err, ticketResults) => {
-                if (err) {
-                  console.error(err);
-                  return res.status(500).send('Error retrieving tickets.');
-                }
+            // Check if the job has a ticket
+            db.query('SELECT * FROM tickets WHERE job_id = ? AND subcontractor_id = ? AND ticket_status = "open";', [job.id, user.id], (err, ticketResults) => {
+              if (err) {
+                console.error(err);
+                return reject('Error retrieving tickets.');
+              }
 
-                if (ticketResults.length > 0) {
-                  console.log('Job has a ticket:', ticketResults);
-                  job.bid = 0;
-                  job.ticket = ticketResults[0];
-                }
+              let jobHasAssignedTicket = false;
+              if (ticketResults.length > 0) {
+                console.log('Job has a ticket:', ticketResults);
+                jobHasAssignedTicket = true;
+                job.ticket = ticketResults[0];
+              }
 
+              if (availableFunds > 0 || jobHasAssignedTicket) {
+                job.bid = availableFunds;
                 jobsWithFunds.push(job);
-                checkCompletion();
-              });
-            }
+              }
+              resolve();
+            });
           });
         });
+      });
 
-        function checkCompletion() {
-          jobsProcessed++;
-          if (jobsProcessed === results.length) {
-            res.json(jobsWithFunds);
-          }
-        }
+      Promise.all(jobPromises)
+        .then(() => {
+          res.json(jobsWithFunds);
+        })
+        .catch((error) => {
+          console.error(error);
+          res.status(500).json({ error });
+        });
       }
     );
   });

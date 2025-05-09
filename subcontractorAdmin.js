@@ -218,10 +218,14 @@ module.exports = function (app) {
             `SELECT 
                 tickets.*, 
                 users.name as subcontractorName, 
-                jobs.job_name 
+                jobs.job_name,
+                COALESCE(SUM(form_item_days.duration), 0) AS total_hours
             FROM tickets 
             JOIN users ON tickets.subcontractor_id = users.id 
-            JOIN jobs ON tickets.job_id = jobs.id;`,
+            JOIN jobs ON tickets.job_id = jobs.id
+            LEFT JOIN form_items ON tickets.id = form_items.ticket_id
+            LEFT JOIN form_item_days ON form_items.id = form_item_days.form_item_id
+            GROUP BY tickets.id, users.name, jobs.job_name;`,
             function (error, results) {
                 if (error) {
                     console.error('Error fetching tickets:', error);
@@ -536,7 +540,7 @@ app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res)
             JOIN users ON subcontractor_forms.user_id = users.id 
             JOIN jobs ON form_bid.job_id = jobs.id 
             JOIN forms ON subcontractor_forms.form_id = forms.id
-            WHERE form_bid.status = 'accepted' AND forms.created_at >= NOW() - INTERVAL 4 WEEK`,
+            WHERE form_bid.status = 'accepted' AND forms.created_at >= NOW() - INTERVAL 3 WEEK`,
             function (error, results) {
             if (error) {
                 console.error('Error fetching payments for export:', error);

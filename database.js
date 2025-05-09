@@ -304,7 +304,7 @@ function matchSubjectStrings(currentSubjectId, takeoff_id, callback) {
 
 
 async function copyTakeoff(takeoff_id, callback) {
-  // just copy the takeoff, applied_materials, and the customer_takeoffs table
+  // just copy the takeoff, applied_materials
 
   // first copy the takeoff
   con.query("SELECT * FROM takeoffs WHERE id = ?;", [takeoff_id], async function (err, takeoff) {
@@ -340,6 +340,9 @@ async function copyTakeoff(takeoff_id, callback) {
             return callback(err);
           }
 
+
+           
+
           for (const material of applied_materials) {
             con.query(
               "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
@@ -353,16 +356,7 @@ async function copyTakeoff(takeoff_id, callback) {
             );
           }
 
-          // copy the customer_takeoffs
-          con.query(
-            "INSERT INTO customer_takeoffs (customer_id, takeoff_id) SELECT customer_id, ? FROM customer_takeoffs WHERE takeoff_id = ?;",
-            [newTakeoffId, takeoff_id],
-            function (err) {
-              if (err) {
-                console.log(err);
-                return callback(err);
-              }
-
+        
               // copy the estimates
               con.query("SELECT * FROM estimates WHERE takeoff_id = ?;", [takeoff_id], function (err, estimates) {
                 if (err) {
@@ -426,7 +420,7 @@ async function copyTakeoff(takeoff_id, callback) {
                     );
                   }
                 });
-              });
+            
             }
           );
         });
@@ -596,13 +590,13 @@ module.exports = {
                             takeoff.signed_total += changeOrdersTotal;
                             
 
-                            console.log("--------------------------");
-                            console.log("signed_total", takeoff.signed_total);
-                            console.log("paymentHistoryTotal", paymentHistoryTotal);
-                            console.log("invoiceTotal", invoiceTotal);
-                            console.log("changeOrdersTotal", changeOrdersTotal);
-                            console.log("takeoff.total_due", takeoff.total_due);
-                            console.log("--------------------------");
+                            // console.log("--------------------------");
+                            // console.log("signed_total", takeoff.signed_total);
+                            // console.log("paymentHistoryTotal", paymentHistoryTotal);
+                            // console.log("invoiceTotal", invoiceTotal);
+                            // console.log("changeOrdersTotal", changeOrdersTotal);
+                            // console.log("takeoff.total_due", takeoff.total_due);
+                            // console.log("--------------------------");
 
 
                             
@@ -809,11 +803,7 @@ module.exports = {
               return cb(err);
             }
             console.log("created takeoff", result[1][0].last);
-            con.query("INSERT INTO customer_takeoffs (customer_id, takeoff_id) VALUES (?, ?);", [customer_id, result[1][0].last], function (err) {
-              if (err) {
-                console.log(err);
-                return cb(err);
-              }
+          
 
               // insert a blank estimate, get its id and update the takeoffs table set estimate_id where id = new takeoff id
               con.query("INSERT INTO estimates (takeoff_id) VALUES (?); SELECT LAST_INSERT_ID() as last;", [result[1][0].last], function (err, estimateResult) {
@@ -834,7 +824,7 @@ module.exports = {
                   cb(null, result[1][0].last);
 
                 });
-              });
+         
 
             });
           }
@@ -1027,14 +1017,7 @@ module.exports = {
         }
         console.log("Customer Info: ", customerInfo[0]);
         let customer_id = customerInfo[0].id;
-        con.query(
-          "INSERT INTO customer_takeoffs (customer_id, takeoff_id) VALUES (?, ?);",
-          [customer_id, takeoff_id],
-          function (err) {
-            if (err) {
-              console.log(err);
-              callback(err);
-            } else {
+       
 
               // update the takeoffs table set customer_id = customer_id
               con.query(
@@ -1050,52 +1033,11 @@ module.exports = {
               );
 
               callback(null);
-            }
-          }
-        );
+         
       });
     }
   },
 
-  // deprecated now just make association in the customer_takeoffs table
-  //   updateTakeoffCustomer: function (takeoff_id, customer, project, callback) {
-  //     console.log("Updating takeoff Customer: ", takeoff_id, customer, project);
-  //  // customer string become the owner name
-  //  // and the project name becomes appended to the takeoff name
-  //      if (!takeoff_id || !customer) {
-  //       console.log("updateTakeoffCustomer got null value");
-  //       console.log(takeoff_id, customer, project);
-  //       callback("Missing required parameters");
-  //     } else {
-
-  //       // query the customer table for the customer name
-
-  //       con.query("SELECT * FROM customers WHERE FullyQualifiedName = ?;", [customer], function (err, customerInfo) {
-  //         if (err){
-  //           console.log(err);
-  //           return callback(err);
-  //         } else {
-  //           console.log("Customer Info: ", customerInfo[0]);
-  //           console.log("Customer name: ", customerInfo[0].GivenName +" "+ customerInfo[0].FamilyName);
-  //           console.log("Customer billing address: "+ customerInfo[0].BillAddr_Line1 + ", " + customerInfo[0].BillAddr_City + ", " + customerInfo[0].BillAddr_CountrySubDivisionCode);
-  //           console.log("Customer email address:", customerInfo[0].PrimaryEmailAddr_Address)
-  //           let billing_address = customerInfo[0].BillAddr_Line1 + ", " + customerInfo[0].BillAddr_City + ", " + customerInfo[0].BillAddr_CountrySubDivisionCode
-  //           // use this info to update the takeoff's owner
-  //           con.query(
-  //             "UPDATE takeoffs SET owner = ?, name = ?, owner_billing_address = ?, owner_email = ? WHERE id = ?;",
-  //             [customerInfo[0].GivenName +" "+ customerInfo[0].FamilyName, project, billing_address, customerInfo[0].PrimaryEmailAddr_Address, takeoff_id],
-  //             function (err) {
-  //               if (err) {
-  //                 console.log(err);
-  //                 return callback(err);
-  //               }
-  //               callback(null);
-  //             }
-  //           );
-  //         }
-  //       });
-  //     }
-  //   },
 
   updateTakeoffName: function (takeoff_id, name, callback) {
     if (!takeoff_id || !name) {
@@ -1117,35 +1059,28 @@ module.exports = {
       return callback("Missing required parameters");
     } else {
       // get the customer id from the takeoff_id useing the customer_takeoffs table
-      con.query("SELECT * FROM customer_takeoffs WHERE takeoff_id = ?;", [takeoff_id], function (err, customerInfo) {
+      con.query("SELECT * FROM takeoffs WHERE id = ?;", [takeoff_id], function (err, customerInfo) {
         if (err) {
           console.log(err);
           return callback(err);
         }
         console.log(customerInfo[0]);
 
-          con.query(
-            "UPDATE customer_takeoffs SET customer_id = ? WHERE id = ?;",
-            [owner_id, customerInfo[0].id],
-            function (err) {
-              if (err) return callback(err);
-           
+        con.query(
+          "UPDATE takeoffs SET customer_id = ? WHERE id = ?;",
+          [owner_id, customerInfo[0].id],
+          function (err) {
+            if (err) return callback(err);
 
-              // now update the takeoffs fields to match the new owner
-              con.query(
-                "UPDATE takeoffs SET customer_id = ? WHERE id = ?;",
-                [owner_id, takeoff_id],
-                function (err) {
-                  if (err) return callback(err);
-                  callback(null);
-                }
-              );
-            }
-          );
-        });
-      
-    }
-  },
+
+            callback(null);
+          }
+        );
+
+      });
+
+  }
+},
 
   verifyOTP: function (takeoff_id, otp, callback) {
     // check if the otp exists in the database
@@ -1191,7 +1126,7 @@ module.exports = {
     } else {
       // get the customer id from the takeoff_id useing the customer_takeoffs table
 
-      con.query("SELECT * FROM customer_takeoffs WHERE takeoff_id = ?;", [takeoff_id], function (err, customerInfo) {
+      con.query("SELECT * FROM takeoffs WHERE id = ?;", [takeoff_id], function (err, customerInfo) {
         if (err) {
           console.log(err);
           return callback(err);
@@ -1295,7 +1230,7 @@ module.exports = {
             //console.log(updatedRows);
 
             // query the customer_id and append the row to the takeoff_info
-            con.query("SELECT * FROM customer_takeoffs join customers on customer_takeoffs.customer_id = customers.id  WHERE takeoff_id = ? LIMIT 1;", [takeoff_id], function (err, customerInfo) {
+            con.query("SELECT * FROM takeoffs join customers on takeoffs.customer_id = customers.id  WHERE takeoffs.id = ? LIMIT 1;", [takeoff_id], function (err, customerInfo) {
               if (err) {
                 console.log(err);
                 return callback(err);
@@ -3794,6 +3729,17 @@ updateSOVItems: function (sov_id, items, callback) {
     if (items[i].id == null) {
       console.log("aaaah! the sov_items id is null");
     } else {
+
+      // do some validation
+
+      const total_contracted_amount = parseInt(items[i].total_contracted_amount);
+      const previous_invoiced_amount = parseInt(items[i].previous_invoiced_amount);
+      const this_invoiced_amount = parseInt(items[i].this_invoiced_amount);
+
+      if ((previous_invoiced_amount + this_invoiced_amount ) > total_contracted_amount){
+        console.log("previous_invoiced_amount + this_invoiced_amount > total_contracted_amount");
+        return callback(new Error("previous_invoiced_amount + this_invoiced_amount > total_contracted_amount"));
+      }
       con.query(
         "UPDATE sov_items SET description = ?, total_contracted_amount = ?, previous_invoiced_amount = ?, this_invoiced_amount = ? WHERE id = ?;",
         [items[i].description, items[i].total_contracted_amount, items[i].previous_invoiced_amount, items[i].this_invoiced_amount, items[i].id],

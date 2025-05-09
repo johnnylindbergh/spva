@@ -218,7 +218,17 @@ function deleteInvoice() {
                         text: 'The invoice has been deleted.',
                         icon: 'success',
                     }).then((result) => {
-                        window.location.href = "/viewPaymentHistory";
+                        // post to the viewPaymentHistory page
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/viewPaymentHistory#invoiceTable';
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'takeoff_id';
+                        input.value = $('#takeoff_id').val();
+                        form.appendChild(input);
+                        document.body.appendChild(form);
+                        form.submit();
                     });
                 } else {
                     Swal.fire({

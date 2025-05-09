@@ -64,12 +64,11 @@ module.exports = {
     customers.invoice_email_address AS customer_invoice_email_address,
     customers.created_at AS customer_created_at,
     customers.updated_at AS customer_updated_at
+
 FROM 
-    customer_takeoffs
+    takeoffs
 JOIN 
-    takeoffs ON takeoffs.id = customer_takeoffs.takeoff_id
-JOIN 
-    customers ON customer_takeoffs.customer_id = customers.id
+    customers ON takeoffs.customer_id = customers.id
 WHERE 
     takeoffs.id = ? LIMIT 1;`,
 
@@ -113,12 +112,11 @@ WHERE
     customers.invoice_email_address AS customer_invoice_email_address,
     customers.created_at AS customer_created_at,
     customers.updated_at AS customer_updated_at
+
 FROM 
-    customer_takeoffs
+    takeoffs
 JOIN 
-    takeoffs ON takeoffs.id = customer_takeoffs.takeoff_id
-JOIN 
-    customers ON customer_takeoffs.customer_id = customers.id
+    customers ON takeoffs.customer_id = customers.id
 WHERE 
     takeoffs.hash = ? LIMIT 1;`,
 
@@ -164,11 +162,9 @@ WHERE
     customers.created_at AS customer_created_at,
     customers.updated_at AS customer_updated_at
 FROM
-    customer_takeoffs
+    takeoffs
 JOIN
-    takeoffs ON takeoffs.id = customer_takeoffs.takeoff_id
-JOIN
-    customers ON customer_takeoffs.customer_id = customers.id 
+    customers ON takeoffs.customer_id = customers.id 
 WHERE
     customers.id = ?;`,
 
