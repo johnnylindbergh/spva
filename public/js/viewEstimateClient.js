@@ -370,7 +370,7 @@ $(document).ready(function() {
     // get the terms and conditions from the database
     $.post('/getTerms', function(response) {
         const termsContainer = $('<div>').css({
-            'max-height': '200px',
+            'max-height': '400px',
             'overflow-y': 'auto',
             'border': '1px solid #ccc',
             'padding': '10px',
