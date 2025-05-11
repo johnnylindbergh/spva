@@ -1,4 +1,4 @@
-// const { t } = require("i18next");
+
 
 const takeoff_data = [];
 
@@ -170,6 +170,9 @@ function populateOptions(takeoff_id) {
         headerRow.append(materialCostHeader);
         headerRow.append(requiredHeader);
         table.append(headerRow);
+
+        let requiredTotal = 0;
+        let optionalTotal = 0;
         
 
         for (let i = 0; i < data.length; i++) {
@@ -181,6 +184,14 @@ function populateOptions(takeoff_id) {
             const requiredCell = $('<td contenteditable="false" class="editable">').text(data[i].required == 1 ? "Yes" : "No");
             // delete cell with a fontawesome trashcan
             const deleteCell = $('<td>').html('<i class="fa fa-trash"></i>');
+
+            if (data[i].required == 1) {
+                requiredTotal += parseFloat(data[i].labor_cost) + parseFloat(data[i].material_cost);
+            } else {
+                optionalTotal += parseFloat(data[i].labor_cost) + parseFloat(data[i].material_cost);
+            }
+
+
 
             deleteCell.on('click', function() {
                 deleteOption(data[i].id);
@@ -202,7 +213,24 @@ function populateOptions(takeoff_id) {
             table.append(newRow);
 
         }
+
+        requiredTotal = parseFloat(requiredTotal);
+        optionalTotal = parseFloat(optionalTotal);
+    
+        console.log('Required Total:', requiredTotal);
+        console.log('Optional Total:', optionalTotal);
+    
+        $('#requiredTotal').text("Required Total: $"+numberWithCommas(requiredTotal.toFixed(2)));
+
+        let takeoffTotal = parseFloat($('#takeoffTotal').text().replace(/[^0-9.-]+/g,""));
+
+        takeoffTotal += requiredTotal;
+        $('#takeoffTotal').text("$"+numberWithCommas(takeoffTotal.toFixed(2)));
+
+
     });
+
+ 
 }
 
 
@@ -524,20 +552,23 @@ $(document).ready(function() {
         estimate_id = data.estimate[0].id;  
         populateProposalIncludes(data.estimate[0].inclusions);
         populateExclusions(data.estimate[0].exclusions);
-        populateOptions(takeoff_id);
+         populateOptions(takeoff_id) || 0;
+
+
         console.log(data.takeoff[0].takeoff_total);
         isAlTakeoff = parseInt(data.takeoff[0].isAlTakeoff) == 1;
         inclusions_presets = data.inclusions_presets;
         console.log(isAlTakeoff);
         console.log(inclusions_presets);
+
         $('#includes-total').text("$"+numberWithCommas(data.takeoff[0].takeoff_total));
         $('#materialTotal').text("Material   : $"+numberWithCommas(data.takeoff[0].material_total));
         $('#laborTotal').text("Labor   : $"+numberWithCommas(data.takeoff[0].labor_total));
         $('#takeoffTax').text("Tax: %"+numberWithCommas(data.takeoff[0].takeoff_tax));
         
-        
         // add commas to the total
-        $('#takeoffTotal').text("$"+numberWithCommas(parseFloat(data.takeoff[0].takeoff_total).toFixed(2)));
+        let takeoffTotal = parseFloat(data.takeoff[0].takeoff_total);
+        $('#takeoffTotal').text("$"+numberWithCommas(takeoffTotal.toFixed(2)));
 
 
         if (isAlTakeoff) {
