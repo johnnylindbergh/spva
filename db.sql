@@ -121,6 +121,7 @@ CREATE TABLE takeoffs (
   id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(64) DEFAULT 'Untitled',
   type ENUM('commercial', 'residential'),
+  isLocked TINYINT(1) DEFAULT 0,
   isArchived TINYINT(1) DEFAULT 0,
   isAlTakeoff TINYINT(1) DEFAULT 0,
   autoSendDeposit TINYINT(1) DEFAULT 0,

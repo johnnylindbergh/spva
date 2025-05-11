@@ -16,6 +16,10 @@ let misc_material_cost = 0;
 let tax = 0;
 let profit = 0;
 
+let takeoffStatus = 0; // 0 = uploaded, 4 = signed
+
+let isLocked = 0; // 0 = unlocked, 1 = locked
+
 // Returns the total material cost including miscellaneous material
 function getMaterialTotal() {
   return materialTotal + misc_material_cost;
@@ -883,7 +887,12 @@ function loadTakeoffMaterials(id) {
       misc_material_cost = parseFloat(data.takeoff[0].misc_materials_cost);
       profit = parseFloat(data.takeoff[0].profit);
       tax = parseFloat(data.takeoff[0].tax);
+      isLocked = parseInt(data.takeoff[0].isLocked);
       paintOrder = [];
+      takeoffStatus = parseInt(data.takeoff[0].status);
+
+      
+
 
 
 
@@ -1269,6 +1278,66 @@ function loadTakeoffMaterials(id) {
 
       // Update material total (including markup)
       $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialCost.toFixed(2)));
+
+
+
+
+      // if the takeoff is locked, disable all inputs and sliders
+      if (isLocked == 1 || takeoffStatus >= 3) {
+        console.log("Takeoff is locked");
+        $("#takeoff_materials_table input").prop("disabled", true);
+        $("#takeoff_materials_table select").prop("disabled", true);
+        $("#add_material_button").prop("disabled", true);
+        $("#add_material_button").css("background-color", "gray");
+        $("input[type='range']").prop("disabled", true); // Disable sliders
+        // disable the slider's label input type number
+        $("input[type='number']").prop("disabled", true); // Disable number inputs
+
+
+
+        if (takeoffStatus >= 3) {
+        // show a sweet alert with a custom image
+          Swal.fire({
+            title: 'Takeoff Locked',
+            text: 'This takeoff is shared and cannot be modified.',
+            icon: 'warning',
+            showCancelButton: false,
+            confirmButtonText: 'OK',
+            imageUrl: '/ruhroh.png',
+            imageWidth: 100,
+            imageHeight: 100,
+            imageAlt: 'Custom image'
+          }).then((result) => {
+            console.log('clicked');
+            // go back one page
+            //window.history.back();
+            console.log("i gonna edit it anyway");
+          });
+        
+      } else if (isLocked == 1) {
+        // show a sweet alert with a custom image
+        Swal.fire({
+          title: 'Takeoff Locked',
+          text: 'This takeoff is locked and cannot be modified.',
+          icon: 'warning',
+          showCancelButton: false,
+          confirmButtonText: 'OK',
+          imageUrl: '/ruhroh.png',
+          imageWidth: 100,
+          imageHeight: 100,
+          imageAlt: 'Custom image'
+        }).then((result) => {
+          console.log('clicked');
+          // go back one page
+          //window.history.back();
+          console.log("i gonna edit it anyway");
+        });
+      }
+    }
+
+
+      
+      
 
       renderPaintOrder(paintOrder);
       //now post the new sums to /updateTakeoffTotal
