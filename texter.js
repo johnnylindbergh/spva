@@ -9,6 +9,9 @@ const credentials = require('./credentials.js');
 const accountSid = credentials.twilio.accountSid // Replace with your Account SID
 const authToken = credentials.twilio.authToken  // Replace with your Auth Token
 
+
+const mid = require('./middleware.js');
+
 // Create a Twilio client
 const client = twilio(accountSid, authToken);
 
@@ -27,6 +30,49 @@ function sendTextNotification(user, message) {
 // Example usage
 //sendTextNotification('+19876543210', 'Hello! This is a test notification from Twilio.');
 
-module.exports = {
-    sendTextNotification
-};
+module.exports = function (app) {
+
+    // page to view and update text profile settings
+    app.get('/textProfile', mid.isAdmin, (req, res) => {
+      
+        
+        db.getUserById(req.user.local.id, (err, userData) => {
+            if (err) {
+                console.error('Error fetching user data:', err);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            console.log('User data:', userData);
+            res.render('textProfile.html', { user: userData });
+        });
+    });
+
+    app.post('/update-sms-preferences', mid.isAdmin, (req, res) => {
+        const smsEnabled = req.body.smsEnabled; // Assuming this is a checkbox in your form
+        const userId = req.user.local.id; // Assuming you have the user ID in the session
+
+        // Validate the input
+     
+
+        
+        console.log('SMS preference:', smsEnabled);
+        console.log('User ID:', userId);
+        // Update the user's SMS preferences in the database
+        db.updateUserSMSPreferences(userId, smsEnabled, (err) => {
+            if (err) {
+                console.error('Error updating SMS preferences:', err);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            console.log('SMS preferences updated successfully');
+            //res.redirect('/textProfile'); // Redirect to the profile page after updating
+
+            res.send({
+                success: true,
+                message: 'SMS preferences updated successfully'
+            });
+        });
+    }
+    );
+
+}

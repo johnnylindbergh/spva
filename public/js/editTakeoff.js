@@ -610,7 +610,6 @@ function changeLaborMarkup(value) {
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway");
       });
 
 
@@ -645,7 +644,6 @@ function changeMaterialMarkup(value) {
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -675,7 +673,6 @@ function updateSupervisorMarkup(value) {
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -714,7 +711,6 @@ function updateTravelExtra(value) {
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -750,7 +746,6 @@ function updateTouchupsCost(value) {
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -775,7 +770,6 @@ function updateProfit(value) {
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -823,7 +817,6 @@ function updateTax(value) {
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -859,7 +852,6 @@ function updateMiscMaterialCost(value) {
         console.log('clicked');
         // go back one page
         //window.history.back();
-        console.log("i gonna edit it anyway");
       });
     });
 }
@@ -1319,22 +1311,22 @@ function loadTakeoffMaterials(id) {
 
         if (takeoffStatus >= 3) {
         // show a sweet alert with a custom image
-          Swal.fire({
-            title: 'Takeoff Locked',
-            text: 'This takeoff is shared and cannot be modified.',
-            icon: 'warning',
-            showCancelButton: false,
-            confirmButtonText: 'OK',
-            imageUrl: '/ruhroh.png',
+        // delay for 1 second
+            if (!Swal.isVisible()) {
+            Swal.fire({
+              title: 'Takeoff Locked',
+              text: 'This takeoff is shared and cannot be modified.',
+              icon: 'warning',
+              showCancelButton: false,
+              imageUrl: '/ruhroh.png',
             imageWidth: 100,
             imageHeight: 100,
-            imageAlt: 'Custom image'
-          }).then((result) => {
-            console.log('clicked');
-            // go back one page
-            //window.history.back();
-            console.log("i gonna edit it anyway");
-          });
+            imageAlt: 'Custom image',
+              confirmButtonText: 'OK',
+            }).then((result) => {
+              console.log('clicked');
+            });
+            }
         
       } else if (isLocked == 1) {
         // show a sweet alert with a custom image
@@ -1352,7 +1344,6 @@ function loadTakeoffMaterials(id) {
           console.log('clicked');
           // go back one page
           //window.history.back();
-          console.log("i gonna edit it anyway");
         });
       }
     }

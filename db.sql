@@ -21,6 +21,7 @@ CREATE TABLE users (
   name VARCHAR(64) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
   phone_number VARCHAR(20) NULL UNIQUE,
+  SMSenabled TINYINT(1) DEFAULT 0,
   public_key VARCHAR(64),
   authentication_token VARCHAR(64),
   isArchived TINYINT(1) DEFAULT 0,

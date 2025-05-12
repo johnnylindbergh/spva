@@ -26,7 +26,6 @@ const creds = require("./credentials.js");
 const querystring = require("querystring");
 const schedule = require('node-schedule');
 const pdf = require("./pdf.js");
-const texter = require("./texter.js");
 
 
 // execute every day at 12:30pm
@@ -375,7 +374,8 @@ module.exports = function (app) {
     const message = `Your OTP is ${otp}. Please enter this OTP to confirm the unsigning of the takeoff.`;
     const to = creds.superAdmin;
 
-    texter.sendTextNotification(to, message);
+    // texter.sendTextNotification(to, message);
+    console.log("messages disabled")
     console.log("OTP sent to ", to);
     // save the OTP to the database
     db.saveOTP(takeoff_id, otp, function (err) {
@@ -443,6 +443,7 @@ module.exports = function (app) {
       }
     });
   });
+  
 
 
 

@@ -526,6 +526,41 @@ module.exports = {
     });
   },
 
+  SMSAgreeUser: (user_id, cb) => {
+    // set SMSenabled to 1
+    con.query("UPDATE users SET SMSenabled = 1 WHERE id = ?;", [user_id], (err) => {
+      if (err) {
+        console.log(err);
+        return cb(err);
+      }
+      cb(null);
+    })
+  },
+
+  updateUserSMSPreferences: (user_id, smsEnabled, cb) => {
+    // set SMSenabled to 1
+    con.query("UPDATE users SET SMSenabled = ? WHERE id = ?;", [smsEnabled, user_id], (err) => {
+      if (err) {
+        console.log(err);
+        return cb(err);
+      }
+      cb(null);
+    
+    })
+  },
+
+  getUserSMSAgreementStatus: (user_id, cb) => {
+    // retrieve user information associated with this email
+    con.query("SELECT SMSenabled FROM users WHERE id = ?;", [user_id], (err, rows) => {
+      if (!err && rows !== undefined && rows.length > 0) {
+        // callback on retrieved profile
+        cb(err, rows[0]);
+      } else {
+        cb(err || "Failed to find a user with the given id.");
+      }
+    });
+  }, 
+
 
   /*  Add a new system user account, given the user's Google info.
       Callback on profile of created user. */

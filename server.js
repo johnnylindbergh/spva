@@ -73,6 +73,7 @@ const routes = require('./routes.js')(app);
 const quickbooks = require('./quickbooks.js')(app); 
 const subcontractors = require('./subcontractor.js')(app); 
 const subcontractorAdmin = require('./subcontractorAdmin.js')(app); 
+const texter = require('./texter.js')(app);
 
 
 // unhandled routes redirect to home
