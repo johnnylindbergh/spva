@@ -26,12 +26,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetch('/api/agreements').then(res => res.json()),
                 fetch('/api/assignments').then(res => res.json()),
                 fetch('api/tickets').then(res => res.json())
+
             ]);
 
             renderJobSelect(jobsData);
             renderJobsTable(jobsData);
             renderJobSelectAgreement(jobsData);
             renderSubcontractorSelect(subcontractorsData);
+            renderSubcontractorExportSelect(subcontractorsData);
             renderSubcontractorSelectAgreement(subcontractorsData);
             renderFormsTable(formsData);
             renderPaymentsTable(paymentsData);
@@ -805,11 +807,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // add listner to the exportPaymentsBtn 
+    function renderSubcontractorExportSelect(subcontractors) {
+        const subcontractorExportSelect = document.getElementById('subcontractorSelectExport');
+        subcontractorExportSelect.innerHTML = '<option value="">Select Subcontractor</option>';
+        subcontractors.forEach(subcontractor => {
+            const option = document.createElement('option');
+            option.value = subcontractor.id;
+            option.textContent = subcontractor.name;
+            subcontractorExportSelect.appendChild(option);
+        });
+    }
+    // Add event listener to the exportPaymentsBtn button
 
+    // add listner to the exportPaymentsBtn 
     document.getElementById('exportPaymentsBtn').addEventListener('click', async function() {
+
+        const subcontractorId = parseInt(document.getElementById('subcontractorSelectExport').value);
+
+        if (!subcontractorId) {
+            alert('Please select a subcontractor.');
+            return;
+        }
+        const data = {
+            subcontractorId: subcontractorId
+        };
+        
         try {
-            const response = await fetch('/api/payments/export');
+            const response = await fetch('/api/payments/export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
             if (response.ok) {
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -825,8 +853,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error exporting payments:', error);
         }
-    }
-    );
+    });
 
     
 

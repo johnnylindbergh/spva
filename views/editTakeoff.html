@@ -82,6 +82,18 @@
         <a href="#" onclick="unsignTakeoffIntent()" style="text-decoration: none;">
           <i class="fa fa-eraser"></i> Unsign
         </a>
+
+
+       <!-- lock/unlock button -->
+      
+      <a href="#" onclick="unlockTakeoffIntent()" style="text-decoration: none;">
+        {{#isLocked}}
+          <i class="fa fa-unlock"></i> Unlock Takeoff
+        {{/isLocked}}
+        {{^isLocked}}
+          <i class="fa fa-lock"></i> Lock Takeoff
+        {{/isLocked}}
+      </a>
   
       <input type="text" class="form-control" id="takeoff_owner_name" onchange="updateTakeoffOwnerName()" value="{{givenName}}">
     </div>
@@ -294,7 +306,7 @@
     {{#materials}}
     <!-- a link that when you click it it runs a js function -->
     <div style="margin-bottom: 10px;">
-      <a href="#" onclick="add_material({{id}})" style="display: block; font-weight: bold; text-decoration: none;">
+      <a href="#" data-id="{{id}}" onclick="add_material(this.getAttribute('data-id'))" style="display: block; font-weight: bold; text-decoration: none;">
       {{name}} 
       <span style="font-size: 12px; color: gray;"> - ${{cost}} - {{coverage}} sqft</span>
       </a>
@@ -371,6 +383,29 @@
       </div>
     </div>
     
+
+  <!-- unlock modal -->
+  <div id="unlockModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="unlockModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="unlockModalLabel">Unlock Takeoff</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeUnlockModal()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body
+">
+          <p>Are you sure you want to unlock this takeoff?</p>
+          <p>This action will send a OTP to the super admin (Gerry) for confirmation.</p>
+
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeUnlockModal()">Close</button>
+          <button type="button" class="btn btn-primary" onclick="unlockTakeoff()">Unlock</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   
 
 

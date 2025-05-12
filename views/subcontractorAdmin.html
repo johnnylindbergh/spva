@@ -301,6 +301,13 @@
         <!-- section to export payments to CSV-->
         <section class="mb-5">
             <h2 class="mb-3">Export Payments to CSV</h2>
+            <!-- subcontractor dropdown -->
+            <div class="col-md-6">
+                <label for="subcontractorSelectExport" class="form-label">Select Subcontractor:</label>
+                <select id="subcontractorSelectExport" name="subcontractorSelectExport" class="form-select" required>
+                    <!-- Options will be dynamically populated -->
+                </select>
+            </div>
             <button id="exportPaymentsBtn" class="btn btn-primary">Export Payments</button>
         </section>
 

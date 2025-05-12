@@ -309,6 +309,12 @@ function verifyOTP() {
     });
 }
 
+function unlockTakeoffIntent(){
+  // show the unlock takeoff modal
+  $("#unlockModal").modal("show");
+
+}
+
 
 
 function closeOtpModal() {
@@ -890,6 +896,22 @@ function loadTakeoffMaterials(id) {
       isLocked = parseInt(data.takeoff[0].isLocked);
       paintOrder = [];
       takeoffStatus = parseInt(data.takeoff[0].status);
+
+
+      console.log("is locked", isLocked);
+      // set the lock icon
+      if (isLocked == 1) {
+        $("#lockIcon").removeClass("fa-lock");
+        $("#lockIcon").addClass("fa-lock-open");
+        $("#lockIcon").attr("onclick", "unlockTakeoffIntent()");
+        $("#lockIcon").attr("title", "Unlock Takeoff");
+      } else {
+        $("#lockIcon").removeClass("fa-lock-open");
+        $("#lockIcon").addClass("fa-lock");
+        $("#lockIcon").attr("onclick", "lockTakeoffIntent()");
+        $("#lockIcon").attr("title", "Lock Takeoff");
+      }
+
 
       
 

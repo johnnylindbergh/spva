@@ -18,7 +18,8 @@ const subcontractor = require("./subcontractor.js");
 function jsonToCSV(jsonData) {
     const csvRows = [];
     if (!Array.isArray(jsonData) || jsonData.length === 0) {
-        throw new Error("Invalid or empty JSON data provided");
+        console.error('Invalid JSON data for CSV conversion');
+        return 'Nothing to export';
     }
     const headers = Object.keys(jsonData[0]);
     csvRows.push(headers.join(','));
@@ -525,7 +526,9 @@ app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res)
     });
 
 
-    app.get("/api/payments/export", mid.isSubcontractorAdmin, function (req, res) {
+    app.post("/api/payments/export", mid.isSubcontractorAdmin, function (req, res) {
+
+        const subcontractorId = req.body.subcontractorId;
         db.query(
             `SELECT 
             form_bid.id as id, 
@@ -540,7 +543,8 @@ app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res)
             JOIN users ON subcontractor_forms.user_id = users.id 
             JOIN jobs ON form_bid.job_id = jobs.id 
             JOIN forms ON subcontractor_forms.form_id = forms.id
-            WHERE form_bid.status = 'accepted' AND forms.created_at >= NOW() - INTERVAL 3 WEEK`,
+            WHERE form_bid.status = 'accepted' AND forms.created_at >= NOW() - INTERVAL 3 WEEK AND users.id = ?;`,
+            [subcontractorId],
             function (error, results) {
             if (error) {
                 console.error('Error fetching payments for export:', error);

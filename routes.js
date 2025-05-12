@@ -408,7 +408,15 @@ module.exports = function (app) {
               console.log(err);
               res.status(500).send("Error unsigning takeoff");
             } else {
-              res.send({approved: true});
+              db.unlockTakeoff(takeoff_id, function (err) {
+                if (err) {
+                  console.log(err);
+                  res.status(500).send("Error unlocking takeoff");
+                } else {
+                  res.send({approved: true});
+
+                }
+              });
             }
           });
         } else {

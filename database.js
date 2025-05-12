@@ -1119,6 +1119,14 @@ module.exports = {
     );
   },
 
+  unlockTakeoff: function (takeoff_id, callback) {
+    con.query("UPDATE takeoffs SET isLocked = 0 WHERE id = ?;", [takeoff_id], function (err) {
+      if (err) return callback(err);
+      callback(null);
+    }
+    );
+  },
+
 
   updateTakeoffOwnerName: function (takeoff_id, owner_name, callback) {
     if (!takeoff_id || !owner_name) {
