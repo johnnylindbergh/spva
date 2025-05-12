@@ -12,7 +12,7 @@ CREATE TABLE user_types (
 );
 
 -- Pre-populate user roles
-INSERT INTO user_types (title) VALUES ('Admin'), ('User'), ('subcontractor'), ('subcontractor_admin');
+INSERT INTO user_types (title) VALUES ('Admin'), ('User'), ('subcontractor'), ('subcontractor_admin'), ('supervisor');
 
 -- Users table
 CREATE TABLE users (
@@ -424,6 +424,7 @@ CREATE TABLE jobs (
   takeoff_id INT,
   job_type ENUM('TM', 'bid') DEFAULT 'bid',
   -- bid DECIMAL(10,2),
+  supervisor_id INT,
   job_description TEXT,
   job_location VARCHAR(255),
   job_start_date TIMESTAMP,

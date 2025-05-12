@@ -106,6 +106,17 @@ module.exports = function (app) {
         });
     });
 
+    app.get('/api/supervisors', mid.isSubcontractorAdmin, function (req, res) {
+        db.query("SELECT * FROM users JOIN user_types ON users.user_type = user_types.id WHERE user_types.title = 'supervisor';", function (error, results) {
+            if (error) {
+                console.error('Error fetching supervisors:', error);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+            res.json(results);
+        });
+    }
+    );
+
     
 
     app.get('/api/subcontractors', mid.isSubcontractorAdmin, function (req, res) {

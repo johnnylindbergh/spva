@@ -18,14 +18,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch data from the server
     async function fetchData() {
         try {
-            const [jobsData, subcontractorsData, formsData, paymentsData, agreementsData, assignmentsData, ticketsData] = await Promise.all([
+            const [jobsData, subcontractorsData, formsData, paymentsData, agreementsData, assignmentsData, ticketsData, supervisorsData] = await Promise.all([
                 fetch('/api/jobs').then(res => res.json()),
                 fetch('/api/subcontractors').then(res => res.json()),
                 fetch('/api/forms').then(res => res.json()),
                 fetch('/api/payments').then(res => res.json()),
                 fetch('/api/agreements').then(res => res.json()),
                 fetch('/api/assignments').then(res => res.json()),
-                fetch('api/tickets').then(res => res.json())
+                fetch('api/tickets').then(res => res.json()),
+                fetch('/api/supervisors').then(res => res.json())
 
             ]);
 
@@ -42,6 +43,8 @@ document.addEventListener('DOMContentLoaded', function() {
             renderTicketsTable(ticketsData);
             renderTicketJobSelect(jobsData);
             renderTicketSubcontractorSelect(subcontractorsData);
+            renderSupervisorsSelect(supervisorsData);
+
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -113,6 +116,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const jobEndDate = document.getElementById('jobEndDate').value;
         const jobTypeBid = document.getElementById('jobTypeBid').checked;
         const jobTypeTM = document.getElementById('jobTypeTM').checked;
+
+        const supervisorId = parseInt(document.getElementById('supervisorSelect').value);
        
 
         // if jobTypeBid is selected, set jobType to 'bid'
@@ -682,6 +687,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     }
 
+    function renderSupervisorsSelect(supervisors) {
+        console.log("supervisors:", supervisors);
+        const supervisorSelect = document.getElementById('supervisorSelect');
+        supervisorSelect.innerHTML = '<option value="">Select Supervisor</option>';
+        supervisors.forEach(supervisor => {
+            const option = document.createElement('option');
+            option.value = supervisor.id;
+            option.textContent = `${supervisor.name}`;
+            supervisorSelect.appendChild(option);
+        });
+    }
+    
+
     function renderTicketSubcontractorSelect(subcontractors) {
         const ticketSubcontractorSelect = document.getElementById('subcontractorSelectTicket');
         ticketSubcontractorSelect.innerHTML = '<option value="">Select Subcontractor</option>';
@@ -692,6 +710,8 @@ document.addEventListener('DOMContentLoaded', function() {
             ticketSubcontractorSelect.appendChild(option);
         });
     }
+
+
 
     function handleTicketFormSubmit(e) {
         e.preventDefault();
