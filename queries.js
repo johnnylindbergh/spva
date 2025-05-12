@@ -111,12 +111,15 @@ WHERE
     customers.primary_email_address AS customer_primary_email_address,
     customers.invoice_email_address AS customer_invoice_email_address,
     customers.created_at AS customer_created_at,
-    customers.updated_at AS customer_updated_at
-
+    customers.updated_at AS customer_updated_at,
+    users.name AS creator_name,
+    users.email AS creator_email
 FROM 
     takeoffs
 JOIN 
     customers ON takeoffs.customer_id = customers.id
+JOIN
+    users ON takeoffs.creator_id = users.id
 WHERE 
     takeoffs.hash = ? LIMIT 1;`,
 

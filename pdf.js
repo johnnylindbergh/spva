@@ -282,6 +282,15 @@ function generateEstimatePDF(estimate, callback) {
         doc.text(`Email: ${estimate.takeoff.customer_invoice_email_address || 'N/A'}`);
         doc.moveDown(2);
 
+        // sales person
+        if (estimate.takeoff.creator_name) {
+            doc.text(`Sales Person: ${estimate.takeoff.creator_name}`);
+        } 
+        if (estimate.takeoff.creator_email) {
+            doc.text(`Sales Person Email: ${estimate.takeoff.creator_email}`);
+        }
+        doc.moveDown(2);
+
         // Add inclusions and exclusions in a table
         doc.moveDown();
 
