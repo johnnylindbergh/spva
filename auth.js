@@ -34,7 +34,7 @@ module.exports = (app, passport) => {
           user.local = profile;
           
           // pass through
-          done(null, user);
+          done(null, user.local.id);
         });
       } else {
         done("The system failed to find an account associated with the given email (" + email + ") and was unable to create a new account.", null);

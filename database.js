@@ -1093,7 +1093,7 @@ module.exports = {
     if (!takeoff_id || !owner_id) {
       return callback("Missing required parameters");
     } else {
-      // get the customer id from the takeoff_id useing the customer_takeoffs table
+      // get the customer id from the takeoff_id useing the takeoffs table
       con.query("SELECT * FROM takeoffs WHERE id = ?;", [takeoff_id], function (err, customerInfo) {
         if (err) {
           console.log(err);
@@ -1167,7 +1167,7 @@ module.exports = {
     if (!takeoff_id || !owner_name) {
       return callback("Missing required parameters");
     } else {
-      // get the customer id from the takeoff_id useing the customer_takeoffs table
+      // get the customer id from the takeoff_id useing the takeoffs table
 
       con.query("SELECT * FROM takeoffs WHERE id = ?;", [takeoff_id], function (err, customerInfo) {
         if (err) {
@@ -2039,7 +2039,7 @@ getChangeOrderItemsById: function (change_order_id, callback) {
       return callback("Missing required parameters");
     } else {
       // use the takeoffs customer_id to update customers.invoice_email_address
-      con.query("SELECT * FROM customer_takeoffs WHERE takeoff_id = ?;", [takeoff_id], function (err, customerInfo) {
+      con.query("SELECT * FROM takeoffs WHERE id = ?;", [takeoff_id], function (err, customerInfo) {
         if (err) {
           console.log(err);
           return callback(err);

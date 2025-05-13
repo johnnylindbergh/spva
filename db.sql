@@ -160,18 +160,6 @@ CREATE TABLE takeoffs (
   PRIMARY KEY (id)
 );
 
--- example insert
--- INSERT INTO takeoffs (name, creator_id, file_path_of_plans, status, hash, total, travel_cost, tax, labor_cost, labor_rate, material_cost, material_markup, labor_markup, supervisor_markup, payment_method, duration_hours, start_date, end_date, last_updated_by, customer_id) VALUES ('Takeoff 1', 1, 'path/to/plans', 0, 'hash1', 2000.00, 0.00, 5.3, 0.00, 25.00, 0.00, 0.30, 0.40, 0.03, 'card', 40, '2022-01-01 00:00:00', '2022-01-31 00:00:00', 1, 1);
--- Customer-Takeoff relationship table
-CREATE TABLE customer_takeoffs (
-  id INT NOT NULL AUTO_INCREMENT,
-  takeoff_id INT NOT NULL,
-  customer_id INT NOT NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY (takeoff_id, customer_id), -- Prevent duplicate assignments
-  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
-  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
-);
 
 -- Options table
 CREATE TABLE options (
