@@ -1320,10 +1320,10 @@ function loadTakeoffMaterials(id) {
               text: 'This takeoff is shared and cannot be modified.',
               icon: 'warning',
               showCancelButton: false,
-              imageUrl: '/ruhroh.png',
-            imageWidth: 100,
-            imageHeight: 100,
-            imageAlt: 'Custom image',
+            //   imageUrl: '/ruhroh.png',
+            // imageWidth: 100,
+            // imageHeight: 100,
+            // imageAlt: 'Custom image',
               confirmButtonText: 'OK',
             }).then((result) => {
               console.log('clicked');
@@ -1338,10 +1338,10 @@ function loadTakeoffMaterials(id) {
           icon: 'warning',
           showCancelButton: false,
           confirmButtonText: 'OK',
-          imageUrl: '/ruhroh.png',
-          imageWidth: 100,
-          imageHeight: 100,
-          imageAlt: 'Custom image'
+          // imageUrl: '/ruhroh.png',
+          // imageWidth: 100,
+          // imageHeight: 100,
+          // imageAlt: 'Custom image'
         }).then((result) => {
           console.log('clicked');
           // go back one page
