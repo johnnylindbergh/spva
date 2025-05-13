@@ -27,6 +27,8 @@ const querystring = require("querystring");
 const schedule = require('node-schedule');
 const pdf = require("./pdf.js");
 
+const texter = require("./texter.js");
+
 
 // execute every day at 12:30pm
 const job = schedule.scheduleJob('47 14 * * *', function () {
@@ -372,22 +374,32 @@ module.exports = function (app) {
     console.log("sending OTP to ", creds.superAdmin);
     const otp = Math.floor(100000 + Math.random() * 900000);
     const message = `Your OTP is ${otp}. Please enter this OTP to confirm the unsigning of the takeoff.`;
-    const to = creds.superAdmin;
+    const to = creds.superAdmin.email;
 
-    // texter.sendTextNotification(to, message);
-    console.log("messages disabled")
-    console.log("OTP sent to ", to);
-    // save the OTP to the database
-    db.saveOTP(takeoff_id, otp, function (err) {
+     emailer.sendEmail(to, "Takeoff Unsigning OTP", message, function (err) {
       if (err) {
         console.log(err);
-        res.status(500).send("Error saving OTP");
+        res.status(500).send("Error sending OTP");
       } else {
-        console.log("OTP saved to database");
-        res.send("OTP sent to " + to);
+
+      // console.log("messages disabled")
+        console.log("OTP sent to ", to);
+        // save the OTP to the database
+        db.saveOTP(takeoff_id, otp, function (err) {
+          if (err) {
+            console.log(err);
+            res.status(500).send("Error saving OTP");
+          } else {
+            console.log("OTP saved to database");
+            res.send("OTP sent to " + to);
+          }
+        });
+
       }
-    });
   });
+  
+});
+
 
 
   app.post("/verify-otp", mid.isAdmin, (req, res) => {
@@ -437,7 +449,10 @@ module.exports = function (app) {
       } else {
         if (valid) {
           res.send({approved: true});
+
+          console.log("OTP is valid");
         } else {
+          console.log("OTP is invalid");
           res.send({approved: false});
         }
       }

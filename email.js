@@ -23,6 +23,28 @@ const transporter = nodemailer.createTransport({
           pass: credentials.emailPassword,
         }
 });
+
+
+
+async function sendEmail(to, subject, message, callback) {
+  const mailOptions = {
+    from: credentials.serverEmail,
+    to: to,
+    subject: subject,
+    html: message,
+   };
+
+  transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err);
+      callback(err, null);
+    } else {
+      console.log("Email sent: " + info.response);
+      callback(null, info.response);
+    }
+  });
+}
+
 // async..await is not allowed in global scope, must use a wrapper
 async function sendEstimateEmail(req, res, takeoff_id, callback) {
   db.getTakeoffById(takeoff_id.toString(), (err, takeoff) => {
@@ -627,6 +649,7 @@ function sendWelcomeEmail(user_id, callback) {
 
 
 module.exports = {
+  sendEmail,
   sendEstimateEmail,
   sendEstimateEmailInternally,
   sendInvoiceEmail,

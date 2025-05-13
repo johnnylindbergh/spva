@@ -264,7 +264,7 @@ function unsignTakeoff() {
     });
 }
 
-function verifyOTP() {
+function verifyOTP(action) {
   // get the newname from the input field
   let otp = $("#otp").val();
   console.log("Verifying OTP: " + otp);
@@ -285,6 +285,14 @@ function verifyOTP() {
               clearInterval(intervalId); // Stop polling
               // reload the page
               location.reload();
+            } else {
+              Swal.fire({
+                title: 'Error',
+                text: 'OTP is invalid or expired.',
+                icon: 'error',
+                showCancelButton: false,
+                confirmButtonText: 'OK'
+              });
             }
           })
           .fail(function () {
@@ -307,12 +315,6 @@ function verifyOTP() {
         //window.history.back();
       });
     });
-}
-
-function unlockTakeoffIntent(){
-  // show the unlock takeoff modal
-  $("#unlockModal").modal("show");
-
 }
 
 
@@ -890,19 +892,19 @@ function loadTakeoffMaterials(id) {
       takeoffStatus = parseInt(data.takeoff[0].status);
 
 
-      console.log("is locked", isLocked);
-      // set the lock icon
-      if (isLocked == 1) {
-        $("#lockIcon").removeClass("fa-lock");
-        $("#lockIcon").addClass("fa-lock-open");
-        $("#lockIcon").attr("onclick", "unlockTakeoffIntent()");
-        $("#lockIcon").attr("title", "Unlock Takeoff");
-      } else {
-        $("#lockIcon").removeClass("fa-lock-open");
-        $("#lockIcon").addClass("fa-lock");
-        $("#lockIcon").attr("onclick", "lockTakeoffIntent()");
-        $("#lockIcon").attr("title", "Lock Takeoff");
-      }
+      // console.log("is locked", isLocked);
+      // // set the lock icon
+      // if (isLocked == 1) {
+      //   $("#lockIcon").removeClass("fa-lock");
+      //   $("#lockIcon").addClass("fa-lock-open");
+      //   $("#lockIcon").attr("onclick", "unlockTakeoffIntent()");
+      //   $("#lockIcon").attr("title", "Unlock Takeoff");
+      // } else {
+      //   $("#lockIcon").removeClass("fa-lock-open");
+      //   $("#lockIcon").addClass("fa-lock");
+      //   $("#lockIcon").attr("onclick", "lockTakeoffIntent()");
+      //   $("#lockIcon").attr("title", "Lock Takeoff");
+      // }
 
 
       
