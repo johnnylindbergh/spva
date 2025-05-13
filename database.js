@@ -957,7 +957,7 @@ module.exports = {
   },
 
   getCustomers: function (callback) {
-    con.query("SELECT * FROM customers;", function (err, customers) {
+    con.query("SELECT * FROM customers ORDER BY givenName ASC;", function (err, customers) {
       if (err) return callback(err);
       // if the data is not null, return the data
       callback(err, customers);
