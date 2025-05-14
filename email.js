@@ -617,22 +617,57 @@ function sendSubcontractorAgreementNotificationEmail(user_id, agreement_id, call
 
 
 function sendWelcomeEmail(user_id, callback) {
+
+  console.log("sendWelcomeEmail");
+
   db.getUserById(user_id, (err, user) => {
     if (err) {
       console.log(err);
       callback("could not get user by id", null);
     } else {
-      const mailOptions = {
-        from: credentials.serverEmail,
-        to: user.email,
-        subject: "Welcome to Sun Painting",
-        html: `
-          <h3>Hello, ${user.name},</h3>
-          <h3>Welcome to Sun Painting!</h3>
-          <p>Please click the link below to view your account:</p>
-          <a href="${credentials.domain}">View Account</a></br>
-        `,
-      };
+
+
+      let mailOptions = {};
+
+      console.log(user.user_type);
+      if (user.user_type == 3) { // type 3 is subcontractor
+         mailOptions = {
+          from: credentials.serverEmail,
+          to: user.email,
+          subject: "Welcome to Sun Painting",
+          html: `
+            <h3>Hello, ${user.name},</h3>
+            <h3>Welcome to Sun Painting!</h3>
+            <p>Please click the link below to view your account:</p>
+            <a href="${credentials.domain}/subcontractorGuide.html">View Account</a></br>
+          `,
+        };
+
+      } else if (user[0].user_type == 1) { // type 1 is admin
+         mailOptions = {
+          from: credentials.serverEmail,
+          to: user.email,
+          subject: "Welcome to Sun Painting",
+          html: `
+            <h3>Hello, ${user.name},</h3>
+            <h3>Welcome to Sun Painting!</h3>
+            <p>Please click the link below to view your account:</p>
+            <a href="${credentials.domain}">View Account</a></br>
+          `,
+        };
+      } else {
+         mailOptions = {
+          from: credentials.serverEmail,
+          to: user.email,
+          subject: "Welcome to Sun Painting",
+          html: `
+            <h3>Hello, ${user.name},</h3>
+            <h3>Welcome to Sun Painting!</h3>
+            <p>Please click the link below to view your account:</p>
+            <a href="${credentials.domain}">View Account</a></br>
+          `,
+        };
+      }
       
       const info = transporter.sendMail(mailOptions, (err, info) => {
         if (err) {

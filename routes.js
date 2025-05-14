@@ -223,9 +223,16 @@ module.exports = function (app) {
       res.redirect("/subcontractor");
     } else if (req.user.local.user_type == "4"){
       res.redirect("/subcontractorAdmin");
+
+    } else if (req.user.local.user_type == "5") {
+      res.redirect("/supervisor");
     } else {
       res.redirect("/login");
     }
+  });
+
+  app.get('/supervisor', mid.isAuth, (req, res) => {
+    res.send("Hello Supervisor");
   });
 
   app.get("/userManagement", mid.isAdmin, (req, res) => {
@@ -247,7 +254,7 @@ module.exports = function (app) {
     db.createUserGetUserId(req.body, function (err, user_id) {
       if (err) {
         console.log(err);
-        res.status(500).send("Error creating user");
+        res.status(500).send(err);
       } else {
         emailer.sendWelcomeEmail(user_id, function (err) {
           res.redirect("/userManagement");

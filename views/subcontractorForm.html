@@ -116,7 +116,7 @@
     </header>
     <p class="text-center">Welcome to the subcontractor page.</p>
     <div class="timesheet-container">
-        <input type="text" id="formName" class="form-control" placeholder="My timesheet">
+        <!-- <input type="text" id="formName" class="form-control" placeholder="My timesheet"> -->
         <hr>
         <table id="timesheet" class="table table-bordered">
             <!-- Header will be dynamically added -->
@@ -193,7 +193,7 @@ function fetchJobs() {
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
-                    text: 'No jobs have been assigned to you or there is no remaining bid. If you believe this is an error, please contact your supervisor.'
+                    text: 'No jobs have been assigned to you or there is no remaining bid. If you believe this is an error, please contact your job supervisor.'
                 });
             }
             resolve(jobList);

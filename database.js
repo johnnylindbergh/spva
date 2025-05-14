@@ -997,6 +997,8 @@ module.exports = {
               [user.email, user.name, results[0].id],
               function (err) {
                 if (err) return callback(err);
+
+                
                 
                 callback(null);
               }
