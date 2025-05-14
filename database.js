@@ -2377,14 +2377,11 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     });
   },
 
-  addMaterial: function (name, desc, cost, laborCost, datasheet, coverage, type, callback) {
-    type = parseInt(type);
-    if (type == 0 || type == null || isNaN(type)) {
-      type = 6; // the default for paint
-    }
+  addMaterial: function (name, desc, cost, laborCost, datasheet, coverage, callback) {
+  
     con.query(
       "INSERT INTO materials (name, description, cost, labor_cost, datasheet, coverage, material_type) VALUES (?,?,?,?,?,?,?);",
-      [name, desc, cost, laborCost, datasheet, coverage, type],
+      [name, desc, cost, laborCost, datasheet, coverage, 6],
       function (err) {
         if (err) return callback(err);
         callback(null);
@@ -2407,6 +2404,13 @@ getChangeOrderItemsById: function (change_order_id, callback) {
               return callback(err);
             }
             if (err) return callback(err);
+
+
+             console.log("estimate here", takeoff);
+            if (takeoff && takeoff.length > 0 && takeoff[0].takeoff_updated_at != null) {
+              takeoff[0].takeoff_updated_at = moment(takeoff[0].takeoff_updated_at).format("YYYY-MM-DD HH:mm:ss a");
+            }
+
 
             con.query(
               "SELECT setting_value FROM system_settings WHERE setting_name = 'sales_tax';",

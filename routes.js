@@ -425,7 +425,27 @@ module.exports = function (app) {
                   console.log(err);
                   res.status(500).send("Error unlocking takeoff");
                 } else {
-                  res.send({approved: true});
+
+                  db.updateTakeoffLastUpdatedBy(takeoff_id, req.user.local.id, function (err) {
+                    if (err) {
+                      console.log(err);
+                      res.status(500).send("Error updating takeoff last updated by");
+                    } else {
+                      console.log("Takeoff unsinged and unlocked");
+                      // delete the OTP from the database
+                      db.deleteOTP(takeoff_id, function (err) {
+                        if (err) {
+                          console.log(err);
+                          res.status(500).send("Error deleting OTP");
+                        } else {
+                          console.log("OTP deleted from database");
+                          res.send({approved: true});
+
+                        }
+                      });
+                    }
+
+                  });
 
                 }
               });
@@ -1536,26 +1556,22 @@ module.exports = function (app) {
   app.post("/newMaterial", mid.isAdmin, function (req, res) {
     console.log("adding new material ", req.body);
 
-    // must process the material type
-    // print the material type
-    console.log("Material type: ", req.body.type);
-    if (req.body.type == "null") {
-      req.body.type = null;
-    }
+
+    const {name, desc, cost, labor_cost, datasheet, coverage} = req.body;
+  
 
     db.addMaterial(
-      req.body.name,
-      req.body.desc,
-      req.body.cost,
-      req.body.labor_cost,
-      req.body.datasheet,
-      req.body.coverage,
-      req.body.type,
+      name,
+      desc,
+      cost,
+      labor_cost,
+      datasheet,
+      coverage,
       function (err) {
         if (err) {
           console.log(err);
         } else {
-          res.end();
+          res.status(200).send("Material added");
         }
       }
     );
@@ -1819,7 +1835,7 @@ module.exports = function (app) {
       function (err, estimate, takeoff, options) {
         if (err || estimate.length == 0) {
           console.log(err);
-          res.render("error.html", { link: '/', linkTitle: 'back', friendly: "Invalid estimate link. Estimate has been signed" });
+          res.render("error.html", { link: '/', linkTitle: 'back', friendly: "Invalid estimate link. Please contact sales respresentative for new estimate." });
           // res.redirect("/");
         } else {
           // authenticate the user session
@@ -1881,7 +1897,7 @@ module.exports = function (app) {
       function (err, estimate, takeoff, options) {
         if (err || estimate.length == 0) {
           console.log(err);
-          return res.render("error.html", { link: '/', linkTitle: 'back', friendly: "Invalid estimate link. Estimate has been signed" });
+          return res.render("error.html", { link: '/', linkTitle: 'back', friendly: "Invalid estimate link. Please contact sales respresentative for new estimate." });
         }
 
        

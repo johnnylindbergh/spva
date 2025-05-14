@@ -98,13 +98,13 @@
         <input type="text" class="form-control" id="spec_sheet" name="datasheet" placeholder="Link to Spec Sheet">
       </div>
       </div>
-      <div class="form-group">
-      <select class="form-control" id="material_type" name="material_type">
-        <option value="6">Paint</option>
-        <option value="7">Misc</option>
-      </select>
-      </div>
+     
       <button type="button" class="btn btn-success" onclick="addMaterial()">Add Material</button>
+
+      <!-- callout message -->
+      <div class="alert alert-info mt-3" role="alert" id = "systemMessage" style="display:none;">
+      </div>
+
     </form>
 
     <h2 class="mt-4 text-danger">Danger Zone</h2>
@@ -147,14 +147,40 @@
     // Add material dynamically
     function addMaterial() {
       const formData = new FormData(document.getElementById("add_material_form"));
+      const data = Object.fromEntries(formData.entries());
       fetch("/newMaterial", {
         method: "POST",
-        body: JSON.stringify(Object.fromEntries(formData)),
+        body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
       })
-        .then((response) => response.json())
         .then((data) => {
-          alert("Material added successfully!");
+
+          console.log(data);
+
+          // clear the form
+          // document.getElementById("name").value = "";
+          // document.getElementById("desc").value = "";
+          // document.getElementById("cost").value = "";
+          // document.getElementById("coverage").value = "";
+          // document.getElementById("labor_cost").value = "";
+          // document.getElementById("spec_sheet").value = "";
+
+
+        // show the message
+          document.getElementById("systemMessage").style.display = "block";
+          
+          if (data.ok) {
+            document.getElementById("systemMessage").innerHTML = "Material added successfully!";
+          } else {
+            document.getElementById("systemMessage").innerHTML = "Failed to add material.";
+          }
+
+          // wait 3 seconds and then hide the message
+          setTimeout(() => {
+            document.getElementById("systemMessage").style.display = "none";
+          }, 3000);
+
+
         });
     }
   </script>

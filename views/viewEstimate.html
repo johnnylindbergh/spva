@@ -63,6 +63,12 @@
     font-size: 1rem; /* Default font size */
 }
 
+.form-control {
+    width: 100%; /* Full width */
+}
+
+
+
 
 
 
@@ -137,35 +143,40 @@
         </div>
 
         <div class="container">
+   
+{{#takeoff}}
 
-            <div class="image-container">
-                <img src="/sunpainting_logo_blue.png" alt="Sun Painting Logo">
-            </div>
-            </br>
-            <p>1819 Broadway St, Charlottesville, VA 22902 US</p> </br>
-            <p>Phone: +1 434-207-2025 | Email: <a href="mailto:sales@sunpaintingva.com"
-                    style="color:#000000;">sales@sunpaintingva.com</a></p>
-            <p>Website: <a href="http://www.sunpaintingva.com" style="color:#000000;">www.sunpaintingva.com</a></p>
-
-
-            {{#takeoff}}
-
-
-            <input type='hidden' id='takeoff_id' value='{{takeoff_id}}'>
-            </br>
-            Owner: <input type='text' class="hiddenInput" id='takeoff_owner_name' onchange='updateTakeoffOwnerName()'
-                value='{{customer_givenName}}'></br></br>
-            Billing Address: <input type='text' class="hiddenInput" id='owner_billing_address'
-                onchange='updateTakeoffBillingAddress()' value='{{customer_billing_address}}'></br></br>
-            Owner Email Address: <input type='text' class="hiddenInput" id='owner_email_address'
-                onchange='updateTakeoffOwnerEmailAddress()' value='{{customer_primary_email_address}}'></br></br>
-            Invoice Email Address: <input type='text' class="hiddenInput" id='invoice_email_address'
-                onchange='updateTakeoffInvoiceEmailAddress()' value='{{customer_invoice_email_address}}'></br>
-            last updated {{takeoff_updated_at}} </br> by {{takeoff_last_updated_by}} </br>
-
-
-            </br>
-            {{/takeoff}}
+<div class="mb-4">
+    <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
+    <div class="row mb-2">
+        <label for="takeoff_owner_name" class="col-sm-2 col-form-label">Owner:</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control w-100" id="takeoff_owner_name" onchange="updateTakeoffOwnerName()" value="{{customer_givenName}}">
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label for="owner_billing_address" class="col-sm-2 col-form-label">Billing Address:</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control w-100" id="owner_billing_address" onchange="updateTakeoffBillingAddress()" value="{{customer_billing_address}}">
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label for="owner_email_address" class="col-sm-2 col-form-label">Owner Email Address:</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control w-100" id="owner_email_address" onchange="updateTakeoffOwnerEmailAddress()" value="{{customer_primary_email_address}}">
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label for="invoice_email_address" class="col-sm-2 col-form-label">Invoice Email Address:</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control w-100" id="invoice_email_address" onchange="updateTakeoffInvoiceEmailAddress()" value="{{customer_invoice_email_address}}">
+        </div>
+    </div>
+    <div class="text-muted small mt-2">
+        Last updated {{takeoff_updated_at}} by {{takeoff_last_updated_by}}
+    </div>
+</div>
+{{/takeoff}}
 
             <!-- regen chatGPT response button -->
             <input type="button" value="Regenerate ChatGPT Response" onclick="regenChatGPTResponse()"

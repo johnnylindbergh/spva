@@ -51,7 +51,7 @@ module.exports = {
     takeoffs.end_date AS takeoff_end_date,
     takeoffs.created_at AS takeoff_created_at,
     takeoffs.updated_at AS takeoff_updated_at,
-    takeoffs.last_updated_by AS takeoff_last_updated_by,
+    users.name AS takeoff_last_updated_by,
     takeoffs.customer_id AS takeoff_customer_id,
     customers.id AS customer_id,
     customers.taxable AS customer_taxable,
@@ -69,6 +69,8 @@ FROM
     takeoffs
 JOIN 
     customers ON takeoffs.customer_id = customers.id
+JOIN
+    users ON takeoffs.last_updated_by = users.id
 WHERE 
     takeoffs.id = ? LIMIT 1;`,
 
