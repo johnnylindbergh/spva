@@ -175,7 +175,8 @@ fullJoin: `SELECT * FROM subcontractor_forms JOIN forms ON subcontractor_forms.f
 
 getinvoiceById:  `SELECT 
     invoices.id AS invoice_id,
-    invoices.total AS invoiceTotal, 
+    invoices.total AS invoiceTotal,
+    invoices.payment_confirmation_email_sent,
     takeoffs.name AS takeoffName, 
     takeoffs.customer_id AS customer_id, 
     takeoffs.payment_method AS payment_method, 

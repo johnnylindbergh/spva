@@ -2520,12 +2520,19 @@ module.exports = function (app) {
     console.log("status: " + session.status);
     console.log("amount_total: " + session.amount_total);
 
+    console.log("status", session.payment_status)
+
     // compute the raw amount. subtract 3%
     let raw_amount = session.amount_total - Math.floor((session.amount_total) * 0.0288);
     console.log("session.amount_total: " + session.amount_total);
     console.log("Amount Recieved from stripe" + raw_amount);
 
     console.log("session:", session);
+
+
+
+    if (session.status == 'complete') {
+      console.log("session is complete");
 
     // insert into the payment history table (takeoff_id, invoice_id, amount)
 
@@ -2568,6 +2575,15 @@ module.exports = function (app) {
       status: session.status,
       customer_email: session.customer_details.email
     });
+
+
+  } else {
+    console.log("session is not complete");
+    res.send({
+      status: session.status,
+      customer_email: session.customer_details.email
+    });
+  }
   });
 
   app.get('/return', async (req, res) => {

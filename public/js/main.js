@@ -8,12 +8,12 @@ $(document).ready(function () {
 
   function createStatusIndicator(statusCode, dateCreated) {
     const statuses = [
-      { code: 0, label: "Takeoff Created" },
-      { code: 1, label: "Takeoff Uploaded" },
-      { code: 2, label: "Estimate Generated" },
-      { code: 3, label: "Estimate Published" },
-      { code: 4, label: "Estimate Approved" },
-      { code: 5, label: "Invoiced" },
+      { code: 0, label: "Takeoff Created", color: "rgba(255, 235, 59, 0.36)" }, // vibrant yellow
+      { code: 1, label: "Takeoff Uploaded", color: "rgba(255, 152, 0, 0.36)" }, // vibrant orange
+      { code: 2, label: "Estimate Generated", color: "rgba(33, 150, 243, 0.36)" }, // light blue
+      { code: 3, label: "Estimate Published", color: "rgba(3, 169, 244, 0.36)" }, // vibrant blue
+      { code: 4, label: "Estimate Approved", color: "rgba(76, 175, 80, 0.36)" }, // vibrant green
+      { code: 5, label: "Invoiced", color: "green" },
     ];
 
     const status = statuses.find((s) => s.code === statusCode);
@@ -28,6 +28,12 @@ $(document).ready(function () {
 
     // Set the text content and attributes
     indicator.textContent = status.label;
+    indicator.setAttribute("data-status", status.code);
+
+    // set the color based on the status
+
+    // use bootstrap color
+     indicator.style.backgroundColor = status.color;
 
     // use bootstrap callout 
     indicator.className = "alert alert-info";
