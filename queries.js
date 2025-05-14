@@ -69,7 +69,7 @@ FROM
     takeoffs
 JOIN 
     customers ON takeoffs.customer_id = customers.id
-JOIN
+LEFT JOIN
     users ON takeoffs.last_updated_by = users.id
 WHERE 
     takeoffs.id = ? LIMIT 1;`,

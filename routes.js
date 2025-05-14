@@ -1207,7 +1207,7 @@ module.exports = function (app) {
         db.generateEstimate(takeoff_id, function (err, takeoff_info, estimate) {
           if (err) {
             console.log(err);
-            res.status(500).send("Error generating estimate");
+            res.status(500).send("Error generating estimate. Here");
           } else {
 
             //console.log(takeoff_info);
