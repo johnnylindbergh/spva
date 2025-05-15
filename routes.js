@@ -3777,7 +3777,7 @@ function defaultRender(req) {
       auth: {
         isAuthenticated: true,
         userIsAdmin: req.user.local.isAdmin,
-        message: "Hello,  " + req.user.name.givenName + "!",
+        message: "Welcome,  " + req.user.name.givenName + "!",
         email: req.user.local.email
       },
       defaults: {
