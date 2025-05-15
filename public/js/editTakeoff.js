@@ -1309,6 +1309,9 @@ function loadTakeoffMaterials(id) {
         $("input[type='range']").prop("disabled", true); // Disable sliders
         // disable the slider's label input type number
         $("input[type='number']").prop("disabled", true); // Disable number inputs
+        // disable the delete material link
+        $(".fa-trash").css("pointer-events", "none");
+        
 
 
 
