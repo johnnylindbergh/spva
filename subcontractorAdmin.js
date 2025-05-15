@@ -250,22 +250,43 @@ module.exports = function (app) {
     app.get('/api/assignments', mid.isSubcontractorAdmin, function (req, res) {
         db.query(
             `SELECT 
-                subcontractor_jobs_assignment.*, 
+                users.id as user_id,
                 users.name as subcontractorName, 
-                jobs.job_name 
+                jobs.id as job_id,
+                jobs.job_name,
+                subcontractor_jobs_assignment.id as assignment_id,
+                subcontractor_jobs_assignment.allotted_bid
             FROM subcontractor_jobs_assignment 
             JOIN users ON subcontractor_jobs_assignment.user_id = users.id 
-            JOIN jobs ON subcontractor_jobs_assignment.job_id = jobs.id;`,
+            JOIN jobs ON subcontractor_jobs_assignment.job_id = jobs.id
+            ORDER BY users.id;`,
             function (error, results) {
                 if (error) {
                     console.error('Error fetching assignments:', error);
                     return res.status(500).json({ error: 'Internal server error' });
                 }
-                res.json(results);
+                // Group by user
+                const usersMap = {};
+                results.forEach(row => {
+                    if (!usersMap[row.user_id]) {
+                        usersMap[row.user_id] = {
+                            user_id: row.user_id,
+                            subcontractorName: row.subcontractorName,
+                            jobs: []
+                        };
+                    }
+                    usersMap[row.user_id].jobs.push({
+                        job_id: row.job_id,
+                        job_name: row.job_name,
+                        assignment_id: row.assignment_id,
+                        allotted_bid: row.allotted_bid
+                    });
+                });
+                console.log('usersMap', usersMap);
+                res.json(Object.values(usersMap));
             }
         );
-    }
-    );
+    });
 
     app.post('/api/tickets', mid.isSubcontractorAdmin, function (req, res) {
         console.log('req body', req.body);

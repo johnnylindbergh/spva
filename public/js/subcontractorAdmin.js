@@ -338,30 +338,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-
-    function renderAssignmentsTable(assignments) {
+    function renderAssignmentsTable(assignmentsByUser) {
         const assignmentsTable = document.getElementById('assignmentsTable');
         assignmentsTable.innerHTML = '';
-        if (assignments.length === 0) {
+
+        const userIds = Object.keys(assignmentsByUser);
+        if (userIds.length === 0) {
             const row = document.createElement('tr');
             row.innerHTML = '<td colspan="5" class="text-center">No assignments available</td>';
             assignmentsTable.appendChild(row);
             return;
         }
-        assignments.forEach(assignment => {
-            const row = document.createElement('tr');
-            console.log("assignment:", assignment);
-            row.innerHTML = `
 
-                <td>${assignment.job_name}</td>
-                <td>${assignment.subcontractorName}</td>
-                <td>$${assignment.allotted_bid}</td>
-                <td>
-                    <button class="btn btn-sm btn-danger" data-id="${assignment.id}" data-action="deleteAssignment">Delete</button>
-                </td>
-            `;
-            assignmentsTable.appendChild(row);
+        userIds.forEach(userId => {
+            const user = assignmentsByUser[userId];
+            const jobs = user.jobs || [];
+            if (jobs.length === 0) return;
+
+            // Row for user name (spanning all columns)
+            const userRow = document.createElement('tr');
+            userRow.innerHTML = `<td colspan="4" class="fw-bold bg-light">${user.subcontractorName}</td>`;
+            assignmentsTable.appendChild(userRow);
+
+            jobs.forEach(assignment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${assignment.job_name}</td>
+                    <td>$${assignment.allotted_bid}</td>
+                    <td>${assignment.status || ''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" data-id="${assignment.id}" data-action="deleteAssignment">Delete</button>
+                    </td>
+                `;
+                assignmentsTable.appendChild(row);
+            });
         });
+
         // Add event listeners to action buttons
         document.querySelectorAll('[data-action="deleteAssignment"]').forEach(btn => {
             btn.addEventListener('click', handleAssignmentAction);

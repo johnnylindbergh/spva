@@ -257,8 +257,19 @@ function populateJobDropdowns() {
         // Add change event listener to update bidAmount
         dropdown.change(function () {
             const selectedOption = $(this).find('option:selected');
-            const bidAmount = selectedOption.data('bid') || '';
+            const bidAmount = parseFloat(selectedOption.data('bid'));
             $(this).closest('tr').find('#bidAmount').val(bidAmount);
+            console.log('Bid amount updated:', bidAmount);
+
+            if (bidAmount <= 0){
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'No bid available for this job!'
+                });
+                $(this).closest('tr').find('#bidAmount').val('No bid available');
+            }
+            
         });
     });
 }
@@ -293,8 +304,11 @@ function addBidRow() {
     // Add change event listener to update bidAmount when a job is selected
     jobDropdown.change(function () {
         const selectedOption = $(this).find('option:selected');
-        const bidAmount = selectedOption.data('bid') || '';
+        const bidAmount = selectedOption.data('bid') || 'No bid available';
         bidInput.val(bidAmount);
+
+        console.log('Bid amount updated:', bidAmount);
+
     });
 }
 
@@ -399,7 +413,6 @@ $(document).ready(function () {
         const data = [];
         const bidsData = [];
 
-        const formName = $('#formName').val();
 
         // Collect timesheet data
         timesheet.find('tr').each(function () {
@@ -509,20 +522,12 @@ $(document).ready(function () {
             return false;
         }
 
-        if (!formName) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Please enter a name for the timesheet!'
-            });
-            return false;
-        }
+
 
         // Submit the form data
         $.post('/subcontractor/submit', {
             timesheetData: data,
-            bidsData: bidsData,
-            form_name: formName
+            bidsData: bidsData
         }, function (response) {
             if (response.status === 'success') {
                 Swal.fire({

@@ -158,7 +158,7 @@ module.exports = function (app) {
           return res.status(500).json({ error: 'Internal server error' });
         }
 
-        const jobsWithFunds = [];
+        const availableJobs = [];
         let jobsProcessed = 0;
 
       const jobPromises = results.map((job) => {
@@ -169,10 +169,15 @@ module.exports = function (app) {
               return reject('Internal server error');
             }
 
-            console.log('No available funds for job:', job.id);
-            console.log('looking for tickets for user:', user.id, 'and job:', job.id);
 
-            // Check if the job has a ticket
+            let jobType = job.job_type;
+
+            // if job type is TM, it should always be added to the list
+            if (jobType == 'bid' || jobType == 'TM') {
+              job.bid = availableFunds;
+              availableJobs.push(job);
+            }
+            // if job type is not TM, check if there are any tickets assigned to the job
             db.query('SELECT * FROM tickets WHERE job_id = ? AND subcontractor_id = ? AND ticket_status = "open";', [job.id, user.id], (err, ticketResults) => {
               if (err) {
                 console.error(err);
@@ -186,9 +191,9 @@ module.exports = function (app) {
                 job.ticket = ticketResults[0];
               }
 
-              if (availableFunds > 0 || jobHasAssignedTicket) {
+              if ( jobHasAssignedTicket) {
                 job.bid = availableFunds;
-                jobsWithFunds.push(job);
+                availableJobs.push(job);
               }
               resolve();
             });
@@ -198,7 +203,7 @@ module.exports = function (app) {
 
       Promise.all(jobPromises)
         .then(() => {
-          res.json(jobsWithFunds);
+          res.json(availableJobs);
         })
         .catch((error) => {
           console.error(error);
@@ -453,7 +458,7 @@ module.exports = function (app) {
 
       // Set default form_name
       if (!form.form_name || form.form_name.trim() === '') {
-        form.form_name = 'New Form';
+        form.form_name = 'Form';
       }
 
       // null check
