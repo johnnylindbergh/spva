@@ -131,19 +131,20 @@ function separateLineItem(materialId, checkbox) {
 
 
 function filterFunction() {
-  let input, filter, div, a, i, txtValue;
-  input = document.getElementById("myInput");
-  filter = input.value.toUpperCase();
-  div = document.getElementById("materialLibrary");
-  a = div.getElementsByTagName("a");
-  for (i = 0; i < a.length; i++) {
-    txtValue = a[i].textContent || a[i].innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      a[i].style.display = "";
+  const input = document.getElementById("myInput");
+  const filter = input.value.toUpperCase();
+  const div = document.getElementById("materialLibrary");
+  // Get all material blocks (skip the first <a> which is the close button)
+  const materialDivs = Array.from(div.querySelectorAll("div[data-name]"));
+
+  materialDivs.forEach(materialDiv => {
+    const name = materialDiv.getAttribute("data-name") || "";
+    if (name.toUpperCase().indexOf(filter) > -1) {
+      materialDiv.style.display = "";
     } else {
-      a[i].style.display = "none";
+      materialDiv.style.display = "none";
     }
-  }
+  });
 }
 
 function updateTakeoffName() {

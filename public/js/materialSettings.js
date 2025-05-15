@@ -71,7 +71,6 @@ function getMaterialTypes() {
         }
     });
 }
-
 // Function to filter the material library
 function filterFunction() {
     const input = document.getElementById('myInput');
@@ -79,6 +78,10 @@ function filterFunction() {
     const div = document.getElementById('materialLibrary');
     const a = div.getElementsByTagName('a');
     for (let i = 0; i < a.length; i++) {
+        // Skip links that are spec sheet links (they have data-material attribute)
+        if (a[i].hasAttribute('data-material')) {
+            continue;
+        }
         const txtValue = a[i].textContent || a[i].innerText;
         if (txtValue.toUpperCase().indexOf(filter) > -1) {
             a[i].style.display = '';

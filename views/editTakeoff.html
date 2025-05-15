@@ -294,20 +294,27 @@
     <a href="#" onclick="closeDropdown()"><span><i class="fa fa-times"></i></span></a>
     <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
 
-
     {{#materials}}
-    <!-- a link that when you click it it runs a js function -->
-    <div style="margin-bottom: 10px;">
+    <div style="margin-bottom: 10px;" data-name="{{name}}">
       <a href="#" data-id="{{id}}" onclick="add_material(this.getAttribute('data-id'))" style="display: block; font-weight: bold; text-decoration: none;">
-      {{name}} 
-      <span style="font-size: 12px; color: gray;"> - ${{cost}} - {{coverage}} sqft</span>
+        {{name}} 
+        <span style="font-size: 12px; color: gray;"> - ${{cost}} - {{coverage}} sqft</span>
       </a>
-      <a href="{{datasheet}}" target="_blank" style="font-size: 12px; color: blue; text-decoration: underline;">
-      View Spec Sheet
+      <a href="{{datasheet}}" data-material='{{name}}' target="_blank" style="font-size: 12px; color: blue; text-decoration: underline;">
+        View Spec Sheet
       </a>
     </div>
     {{/materials}}
   </div>
+  <script>
+    // Dismiss materialLibrary when clicking outside of it
+    document.addEventListener('mousedown', function(event) {
+      var dropdown = document.getElementById('materialLibrary');
+      if (dropdown && dropdown.style.display !== 'none' && !dropdown.contains(event.target)) {
+        closeDropdown();
+      }
+    });
+  </script>
 
 
   <!-- changeOwnershipModal modal with customer dropdown-->
