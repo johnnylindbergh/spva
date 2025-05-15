@@ -546,13 +546,31 @@ $(document).ready(function() {
     var isAlTakeoff = false;
     var inclusions_presets;
 
+    var isLocked = false;
+    var takeoff_status;
+
     $.post('/getEstimateData', {takeoff_id: takeoff_id}, function(data) {
         console.log(data)
         tax = data.takeoff[0].takeoff_tax; // consider that the tax percentage will be zero if the server returns zero.  
         estimate_id = data.estimate[0].id;  
+        isLocked = data.takeoff[0].isLocked;
+        takeoff_status = data.takeoff[0].takeoff_status;
+        console.log("isLocked", isLocked);
         populateProposalIncludes(data.estimate[0].inclusions);
         populateExclusions(data.estimate[0].exclusions);
          populateOptions(takeoff_id) || 0;
+
+         if (isLocked == 1 || takeoff_status >=3) {
+            // disable the inputs
+            $('#proposal-includes').attr('contenteditable', 'false');
+            $('#exclusions').attr('contenteditable', 'false');
+            $('#description').attr('disabled', true);
+            $('#laborCost').attr('disabled', true);
+            $('#materialCost').attr('disabled', true);
+            $('#isRequired').attr('disabled', true);
+            $('.editable').css('pointer-events', 'none');
+            $('.editable').css('background-color', '#f0f0f0');
+         }
 
 
         console.log(data.takeoff[0].takeoff_total);

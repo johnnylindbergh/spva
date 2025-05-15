@@ -31,6 +31,7 @@ module.exports = {
     takeoffs.file_path_of_plans,
     takeoffs.estimate_id,
     takeoffs.isAlTakeoff AS isAlTakeoff,
+    takeoffs.isLocked AS isLocked,
     takeoffs.status AS takeoff_status,
     takeoffs.hash AS takeoff_hash,
     takeoffs.view_count AS takeoff_view_count,
