@@ -126,7 +126,7 @@ CREATE TABLE takeoffs (
   isArchived TINYINT(1) DEFAULT 0,
   isAlTakeoff TINYINT(1) DEFAULT 0,
   autoSendDeposit TINYINT(1) DEFAULT 0,
-  creator_id INT NOT NULL,
+  creator_id INT,
   file_path_of_plans VARCHAR(255),
   estimate_id INT UNIQUE,
   status TINYINT(1) DEFAULT 0,
@@ -153,7 +153,7 @@ CREATE TABLE takeoffs (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   last_updated_by INT,
   customer_id INT,
-  FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE SET NULL,
   FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE SET NULL,
   FOREIGN KEY (last_updated_by) REFERENCES users(id),
   FOREIGN KEY (customer_id) REFERENCES customers(id),
@@ -190,18 +190,7 @@ CREATE TABLE statements (
   FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
 );
 
--- sovs with a given takeoff_id are associated
-CREATE TABLE sov (
-  id INT NOT NULL AUTO_INCREMENT,
-  takeoff_id INT NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  total DECIMAL(10,2) NOT NULL,
-  hash VARCHAR(64) UNIQUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE
-);
+
 
 -- Invoices table
 CREATE TABLE invoices (
@@ -420,7 +409,7 @@ CREATE TABLE jobs (
   job_end_date TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
+  PRIMARY KEY (id)
 );
 
 -- example insert
@@ -432,6 +421,7 @@ CREATE TABLE subcontractor_jobs_assignment (
   job_id INT NOT NULL,
   user_id INT NOT NULL,
   agreement_id INT,
+  isArchived TINYINT(1) DEFAULT 0,
   status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
   allotted_bid DECIMAL(10,2),
   PRIMARY KEY (id),
@@ -574,7 +564,7 @@ CREATE TABLE sov (
 
 -- example insert
 
-INSERT INTO sov (takeoff_id, name, total, hash) VALUES (1, 'SOV 1', 2000.00, 'lh2489sfuyfu2434879');
+-- INSERT INTO sov (takeoff_id, name, total, hash) VALUES (1, 'SOV 1', 2000.00, 'lh2489sfuyfu2434879');
 
 
 CREATE TABLE sov_items (
@@ -590,6 +580,6 @@ CREATE TABLE sov_items (
   FOREIGN KEY (sov_id) REFERENCES sov(id) ON DELETE CASCADE
 );
 
--- example insert 
-INSERT INTO sov_items (sov_id, description, total_contracted_amount, previous_invoiced_amount, cost, quantity, this_invoiced_amount) VALUES (1, 'Description 1', 2000.00, 0.00, 2000.00, 1, 2000.00);
-INSERT INTO sov_items (sov_id, description, total_contracted_amount, previous_invoiced_amount, cost, quantity, this_invoiced_amount) VALUES (1, 'Description 2', 3000.00, 0.00, 3000.00, 1, 3000.00);
+-- -- example insert 
+-- INSERT INTO sov_items (sov_id, description, total_contracted_amount, previous_invoiced_amount, this_invoiced_amount, quantity, this_invoiced_amount) VALUES (1, 'Description 1', 2000.00, 0.00, 2000.00, 1, 2000.00);
+-- INSERT INTO sov_items (sov_id, description, total_contracted_amount, previous_invoiced_amount, this_invoiced_amount, quantity, this_invoiced_amount) VALUES (1, 'Description 2', 3000.00, 0.00, 3000.00, 1, 3000.00);

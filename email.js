@@ -640,6 +640,7 @@ function sendWelcomeEmail(user_id, callback) {
             <h3>Welcome to Sun Painting!</h3>
             <p>Please click the link below to view your account:</p>
             <a href="${credentials.domain}/subcontractorGuide.html">View Account</a></br>
+            <p>If you have any issues, please contact ${credentials.subcontractorFormNotifiationRecipients[0].name} at ${credentials.subcontractorFormNotifiationRecipients[0].email}</p>
           `,
         };
 

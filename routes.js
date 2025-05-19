@@ -218,7 +218,7 @@ module.exports = function (app) {
     if (req.user.local.user_type == "1") {
       res.redirect("/admin");
     } else if (req.user.local.user_type == "2") {
-      res.redirect("/user");
+      res.redirect("/");
     } else if (req.user.local.user_type == "3") {
       res.redirect("/subcontractor");
     } else if (req.user.local.user_type == "4"){
@@ -227,7 +227,7 @@ module.exports = function (app) {
     } else if (req.user.local.user_type == "5") {
       res.redirect("/supervisor");
     } else {
-      res.redirect("/login");
+       res.redirect("/");
     }
   });
 
@@ -648,10 +648,7 @@ module.exports = function (app) {
                   res.send(err);
                 } else {
                   console.log("takeoff loaded");
-                  db.takeoffSetStatus(takeoff_id, 1, function (err) {
-                    if (err) {
-                      console.log(err);
-                    }
+                 
                     console.log("takeoff status set to 1");
 
                     // update the customer and project fields
@@ -667,7 +664,7 @@ module.exports = function (app) {
 
                     // res.redirect("/");
 
-                  });
+                  
 
                 }
               }
@@ -1346,6 +1343,13 @@ module.exports = function (app) {
           console.log(err);
           res.status(500).send("Error Regenerating estimate");
         } else {
+
+
+          if (takeoff_info[0].isLocked) {
+            console.log("Takeoff is locked, cannot regenerate estimate");
+            res.status(500).send("Takeoff is locked, cannot regenerate estimate");
+            return;
+          }
           //console.log(takeoff_info);
 
           // format the totals in takeoff_info  
@@ -3777,7 +3781,7 @@ function defaultRender(req) {
       auth: {
         isAuthenticated: true,
         userIsAdmin: req.user.local.isAdmin,
-        message: "Welcome!  " + req.user.name.givenName + "!",
+        message: "Welcome,   " + req.user.name.givenName + "!",
         email: req.user.local.email
       },
       defaults: {

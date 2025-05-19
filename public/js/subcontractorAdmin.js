@@ -362,12 +362,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             jobs.forEach(assignment => {
                 const row = document.createElement('tr');
+
+                console.log("assignment:", assignment);
                 row.innerHTML = `
                     <td>${assignment.job_name}</td>
                     <td>$${assignment.allotted_bid}</td>
                     <td>${assignment.status || ''}</td>
                     <td>
-                        <button class="btn btn-sm btn-danger" data-id="${assignment.id}" data-action="deleteAssignment">Delete</button>
+                        <button class="btn btn-sm btn-danger" data-id="${assignment.assignment_id}" data-action="deleteAssignment">Delete</button>
                     </td>
                 `;
                 assignmentsTable.appendChild(row);
@@ -381,9 +383,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function handleAssignmentAction(e) {
-        const assignmentId = parseInt(e.target.dataset.id);
-        const action = e.target.dataset.action;
-        if (action === 'handleAssignment') {
+        const assignmentId = parseInt(e.currentTarget.dataset.id);
+        const action = e.currentTarget.dataset.action;
+        if (action === 'deleteAssignment') {
             // Confirm deletion
             if (confirm(`Are you sure you want to delete assignment #${assignmentId}?`)) {
                 try {
@@ -392,8 +394,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     if (response.ok) {
                         alert(`Assignment #${assignmentId} deleted successfully!`);
-                        
-
                         fetchData(); // Refresh data
                     }
                     else {

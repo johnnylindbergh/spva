@@ -3912,6 +3912,13 @@ createInvoiceFromSOV: function (sov_id, callback) {
           console.log(err);
           return cb(err);
         }
+
+        if (results.length == 0) {
+          console.log("takeoff not found");
+          return cb(new Error("Takeoff not found"));
+        } 
+
+     
         const currentStatus = results[0].status;
         if (currentStatus <= status) {
           con.query(

@@ -12,6 +12,7 @@
     
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/defaults.css">
+    <link rel="stylesheet" href="./css/navbar.css">
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -26,10 +27,15 @@
     }
 </style>
 <body>
-    <header class="bg-primary text-white text-center py-3">
-        <h1>Subcontractor Admin Panel</h1>
-    </header>
 
+    <div class="navbar" style="text-align: center;">
+        <li> <a href = "/admin"> Admin</a></li>
+        <li> <a href = "/logout"> Logout</a></li>
+        <h1 style="color:white; display: inline-block; margin: 0 auto;">Subcontractor Admin</h1>
+    </div>
+</br>
+</br>
+</br>
 
     <!-- table of existing jobs -->
     <main class="container my-4">
@@ -110,9 +116,10 @@
             <table class="table table-striped">
                 <thead class="table-dark">
                     <tr>
-                        <th>Job Name</th>
-                        <th>Subcontractor Name</th>
-                        <th>allotted Bid</th>
+                        <th>Subcontractor</th>
+                        <th>Allotted Bid</th>
+                        <th></th>
+
                         <th>Actions</th>
                     </tr>
                 </thead>

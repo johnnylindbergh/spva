@@ -127,7 +127,7 @@ module.exports = function (app) {
       }
       console.log(results);
       if (results == null || results.length === 0) {
-        res.send('sowwy, no form found with that id');
+        res.redirect('/subcontractor');
         return;
       }
 
@@ -159,7 +159,6 @@ module.exports = function (app) {
         }
 
         const availableJobs = [];
-        let jobsProcessed = 0;
 
       const jobPromises = results.map((job) => {
         return new Promise((resolve, reject) => {
@@ -169,34 +168,39 @@ module.exports = function (app) {
               return reject('Internal server error');
             }
 
-
             let jobType = job.job_type;
 
             // if job type is TM, it should always be added to the list
-            if (jobType == 'bid' || jobType == 'TM') {
+            if (jobType == 'TM') {
+              console.log('Job is TM:', job);
+              // if job type is not TM, check if there are any tickets assigned to the job
+              db.query('SELECT * FROM tickets WHERE job_id = ? AND subcontractor_id = ? AND ticket_status = "open";', [job.id, user.id], (err, ticketResults) => {
+                if (err) {
+                  console.error(err);
+                  return reject('Error retrieving tickets.');
+                }
+
+                let jobHasAssignedTicket = false;
+                if (ticketResults.length > 0) {
+                  console.log('Job has a ticket:', ticketResults);
+                  jobHasAssignedTicket = true;
+                  job.ticket = ticketResults[0];
+                }
+
+                  availableJobs.push(job);
+                
+                resolve();
+              });
+
+            } else if (job.job_type == 'bid' && availableFunds > 0) {
+
+              console.log('Job is bid:', job);
               job.bid = availableFunds;
               availableJobs.push(job);
-            }
-            // if job type is not TM, check if there are any tickets assigned to the job
-            db.query('SELECT * FROM tickets WHERE job_id = ? AND subcontractor_id = ? AND ticket_status = "open";', [job.id, user.id], (err, ticketResults) => {
-              if (err) {
-                console.error(err);
-                return reject('Error retrieving tickets.');
-              }
-
-              let jobHasAssignedTicket = false;
-              if (ticketResults.length > 0) {
-                console.log('Job has a ticket:', ticketResults);
-                jobHasAssignedTicket = true;
-                job.ticket = ticketResults[0];
-              }
-
-              if ( jobHasAssignedTicket) {
-                job.bid = availableFunds;
-                availableJobs.push(job);
-              }
               resolve();
-            });
+            } else {
+              resolve();
+            }
           });
         });
       });

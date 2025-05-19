@@ -79,18 +79,17 @@ module.exports = function (app) {
 
     app.delete('/api/jobs/:id', mid.isSubcontractorAdmin, function (req, res) {
         const jobId = req.params.id;
-        db.query("DELETE FROM jobs where id = ?;", [jobId], function (error, results) {
+        db.query("UPDATE jobs SET isArchived = 1 WHERE id = ?;", [jobId], function (error, results) {
             if (error) {
-                console.error('Error deleting job:', error);
+                console.error('Error archiving job:', error);
                 return res.status(500).json({ error: 'Internal server error' });
             }
             if (results.affectedRows === 0) {
                 return res.status(404).json({ error: 'Job not found' });
             }
-            res.json({ message: 'Job deleted successfully' });
+            res.json({ message: 'Job archived successfully' });
         });
-    }
-    );
+    });
 
     app.get('/api/jobs/:id', mid.isSubcontractorAdmin, function (req, res) {
         const jobId = req.params.id;
@@ -259,6 +258,7 @@ module.exports = function (app) {
             FROM subcontractor_jobs_assignment 
             JOIN users ON subcontractor_jobs_assignment.user_id = users.id 
             JOIN jobs ON subcontractor_jobs_assignment.job_id = jobs.id
+            WHERE subcontractor_jobs_assignment.isArchived = 0
             ORDER BY users.id;`,
             function (error, results) {
                 if (error) {
@@ -312,15 +312,15 @@ module.exports = function (app) {
 
 app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res) {
     const assignmentId = req.params.id;
-    db.query("DELETE FROM subcontractor_jobs_assignment WHERE id = ?;", [assignmentId], function (error, results) {
+    db.query("UPDATE subcontractor_jobs_assignment SET isArchived = 1 WHERE id = ?;", [assignmentId], function (error, results) {
         if (error) {
-            console.error('Error deleting assignment:', error);
+            console.error('Error archiving assignment:', error);
             return res.status(500).json({ error: 'Internal server error' });
         }
         if (results.affectedRows === 0) {
             return res.status(404).json({ error: 'Assignment not found' });
         }
-        res.json({ message: 'Assignment deleted successfully' });
+        res.json({ message: 'Assignment archived successfully' });
     });
 });
 

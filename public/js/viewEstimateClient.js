@@ -374,12 +374,13 @@ $(document).ready(function() {
             'overflow-y': 'auto',
             'border': '1px solid #ccc',
             'padding': '10px',
-            'margin-top': '10px'
+            'margin-top': '10px',
+            'text-align': 'left',
         }).attr('id', 'terms-container');
 
 
         console.log(response);
-        termsContainer.html(formatTextToHTML(response));
+        termsContainer.html((response));
         $('#terms').html(termsContainer);
 
 
