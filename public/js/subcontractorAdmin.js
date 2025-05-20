@@ -30,6 +30,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             ]);
 
+            // Store data in global variables for later use
+            window.jobsData = jobsData;
+            window.subcontractorsData = subcontractorsData;
+            window.formsData = formsData;
+            window.paymentsData = paymentsData;
+            window.agreementsData = agreementsData;
+            window.assignmentsData = assignmentsData;
+            window.ticketsData = ticketsData;
+            window.supervisorsData = supervisorsData;
+            // Render data in the UI
+
+
             renderJobSelect(jobsData);
             renderJobsTable(jobsData);
             renderJobSelectAgreement(jobsData);
@@ -520,14 +532,20 @@ document.addEventListener('DOMContentLoaded', function() {
             jobSelectAgreement.appendChild(option);
         });
     }
-
     // Render forms table
     function renderFormsTable(forms) {
         console.log("forms:", forms);   
         subcontractorFormsTable.innerHTML = '';
 
+        // Remove existing searchContainer if it exists to prevent duplicates
+        const existingSearchContainer = document.getElementById('formsSearchContainer');
+        if (existingSearchContainer) {
+            existingSearchContainer.remove();
+        }
+
         // Create a dropdown for filtering by week
         const searchContainer = document.createElement('div');
+        searchContainer.id = 'formsSearchContainer';
         searchContainer.classList.add('mb-3');
         searchContainer.innerHTML = `
             <label for="weekDropdown" class="form-label">Filter by Week:</label>
@@ -535,6 +553,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <option value="">All Weeks</option>
             </select>
         `;
+
+        // Insert the dropdown above the table
         subcontractorFormsTable.parentElement.insertBefore(searchContainer, subcontractorFormsTable);
 
         const weekDropdown = document.getElementById('weekDropdown');
@@ -632,9 +652,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${ticket.ticket_description}</td>
                     <td>${ticket.subcontractorName}</td>
                     <td>${ticket.job_name}</td>
+                    <td>${ticket.ticket_status}</td>
                     <td>
                         <button class="btn btn-sm btn-primary" data-id="${ticket.id}" data-action="viewTicket">View</button>
-                        <button class="btn btn-sm btn-danger" data-id="${ticket.id}" data-action="deleteTicket">Delete</button>
+                        <button class="btn btn-sm btn-danger" data-id="${ticket.id}" data-action="closeTicket">Close Ticket</button>
                     </td>
                 `;
                 ticketsTable.appendChild(row);
@@ -644,7 +665,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('[data-action="viewTicket"]').forEach(btn => {
             btn.addEventListener('click', handleTicketAction);
         });
-        document.querySelectorAll('[data-action="deleteTicket"]').forEach(btn => {
+        document.querySelectorAll('[data-action="closeTicket"]').forEach(btn => {
             btn.addEventListener('click', handleTicketAction);
         });
     }
@@ -652,36 +673,138 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleTicketAction(e) {
         const ticketId = parseInt(e.target.dataset.id);
         const action = e.target.dataset.action;
+
         if (action === 'viewTicket') {
-            // Open the view modal and populate it with ticket data
-            const ticket = await fetch(`/api/tickets/${ticketId}`).then(res => res.json());
-            console.log("ticket:", ticket);
-            document.getElementById('viewTicketNumber').textContent = ticket.ticket_number;
-            document.getElementById('viewTicketDescription').textContent = ticket.ticket_description;
-            document.getElementById('viewTicketSubcontractor').textContent = ticket.subcontractorName;
-            document.getElementById('viewTicketJob').textContent = ticket.job_name;
-            $('#ticketViewModal').modal('show');
+        // Open the view modal and populate it with ticket data
+        const ticket = await fetch(`/api/tickets/${ticketId}`).then(res => res.json());
+        console.log("ticket:", ticket);
+
+        // Populate fields
+        document.getElementById('editTicketId').value = ticket.id || '';
+        document.getElementById('editTicketName').value = ticket.ticket_name || '';
+        document.getElementById('editTicketNumber').value = ticket.ticket_number || '';
+        document.getElementById('editTicketDescription').value = ticket.ticket_description || '';
+
+        // Populate job select
+        const jobSelect = document.getElementById('editJobSelectTicket');
+        jobSelect.innerHTML = '';
+        if (window.jobsData && Array.isArray(window.jobsData)) {
+            window.jobsData.forEach(job => {
+                const option = document.createElement('option');
+                option.value = job.id;
+                option.textContent = job.job_name;
+                if (job.id === ticket.job_id) option.selected = true;
+                jobSelect.appendChild(option);
+            });
+        } else if (ticket.job_id && ticket.job_name) {
+            // fallback if jobsData is not available
+            const option = document.createElement('option');
+            option.value = ticket.job_id;
+            option.textContent = ticket.job_name;
+            option.selected = true;
+            jobSelect.appendChild(option);
         }
-        else if (action === 'deleteTicket') {
+
+        // Populate subcontractor select
+        const subSelect = document.getElementById('editSubcontractorSelectTicket');
+        subSelect.innerHTML = '';
+        if (window.subcontractorsData && Array.isArray(window.subcontractorsData)) {
+            window.subcontractorsData.forEach(sub => {
+                const option = document.createElement('option');
+                option.value = sub.id;
+                option.textContent = sub.name;
+                if (sub.id === ticket.subcontractor_id) option.selected = true;
+                subSelect.appendChild(option);
+            });
+        } else if (ticket.subcontractor_id && ticket.subcontractorName) {
+            // fallback if subcontractorsData is not available
+            const option = document.createElement('option');
+            option.value = ticket.subcontractor_id;
+            option.textContent = ticket.subcontractorName;
+            option.selected = true;
+            subSelect.appendChild(option);
+        }
+
+        // Set status switch and label
+        const statusSwitch = document.getElementById('editTicketStatusSwitch');
+        const statusLabel = document.getElementById('editTicketStatusLabel');
+        const statusInput = document.getElementById('editTicketStatus');
+        const isOpen = (ticket.ticket_status || '').toLowerCase() === 'open';
+        statusSwitch.checked = isOpen;
+        statusLabel.textContent = isOpen ? 'Open' : 'Closed';
+        statusInput.value = isOpen ? 'Open' : 'Closed';
+
+        // Show modal
+        $('#ticketViewModal').modal('show');
+        }
+        else if (action === 'closeTicket') {
             // Confirm deletion
-            if (confirm(`Are you sure you want to delete ticket #${ticketId}?`)) {
+            if (confirm(`Are you sure you want to close ticket #${ticketId}?`)) {
                 try {
                     const response = await fetch(`/api/tickets/${ticketId}`, {
                         method: 'DELETE'
                     });
 
                     if (response.ok) {
-                        alert(`Ticket #${ticketId} deleted successfully!`);
+                        alert(`Ticket #${ticketId} closed successfully!`);
                         fetchData(); // Refresh data
                     } else {
-                        alert('Failed to delete ticket.');
+                        alert('Failed to close ticket.');
                     }
                 } catch (error) {
-                    console.error('Error deleting ticket:', error);
+                    console.error('Error closing ticket:', error);
                 }
             }
         }
     }
+    
+
+    // event lisner for the editTicketForm triggered by saveTicketChangesBtn
+    document.getElementById('saveTicketChangesBtn').addEventListener('click', async function() {
+        const ticketId = document.getElementById('editTicketId').value;
+        const ticketName = document.getElementById('editTicketName').value;
+        const ticketNumber = document.getElementById('editTicketNumber').value;
+        const ticketDescription = document.getElementById('editTicketDescription').value;
+        const jobId = parseInt(document.getElementById('editJobSelectTicket').value);
+        const subcontractorId = parseInt(document.getElementById('editSubcontractorSelectTicket').value);
+        //ticket status is a switch
+        const ticketStatus  = document.getElementById('editTicketStatusSwitch').checked ? 'open' : 'closed';
+        console.log("ticketId:", ticketId);
+        console.log("ticketName:", ticketName);
+        console.log("ticketNumber:", ticketNumber);
+        console.log("ticketDescription:", ticketDescription);
+        console.log("jobId:", jobId);
+
+        // validate inputs
+        if (!ticketId || !ticketName || !ticketNumber || !ticketDescription || !jobId || !subcontractorId) {
+            alert('Please fill in all fields.');
+        } else {
+            try {
+                const response = await fetch(`/api/tickets/${ticketId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ticket_name: ticketName,
+                        ticket_number: ticketNumber,
+                        ticket_description: ticketDescription,
+                        job_id: jobId,
+                        subcontractor_id: subcontractorId,
+                        ticket_status: ticketStatus
+                    })
+                });
+                if (response.ok) {
+                    alert(`Ticket "${ticketName}" updated successfully!`);
+                    fetchData(); // Refresh data
+                    $('#ticketViewModal').modal('hide'); // Hide the modal
+                } else {
+                    alert('Failed to update ticket.');
+                }
+            } catch (error) {
+                console.error('Error updating ticket:', error);
+            }
+
+        }
+    });
 
 
 

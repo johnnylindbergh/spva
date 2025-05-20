@@ -246,6 +246,23 @@ module.exports = function (app) {
         );
     });
 
+    app.delete('/api/tickets/:id', mid.isSubcontractorAdmin, function (req, res) {
+        const ticketId = req.params.id;
+        db.query("UPDATE tickets SET ticket_status = 'closed' WHERE id = ?;", [ticketId], function (error, results) {
+            if (error) {
+                console.error('Error closing ticket:', error);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+            if (results.affectedRows === 0) {
+                return res.status(404).json({ error: 'Ticket not found' });
+            }
+            res.json({ message: 'Ticket closed successfully' });
+        });
+    }
+    );
+
+
+
     app.get('/api/assignments', mid.isSubcontractorAdmin, function (req, res) {
         db.query(
             `SELECT 
@@ -323,6 +340,45 @@ app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res)
         res.json({ message: 'Assignment archived successfully' });
     });
 });
+
+
+    app.get('/api/tickets/:id', mid.isSubcontractorAdmin, function (req, res) {
+        const ticketId = req.params.id;
+        db.query("SELECT * FROM tickets WHERE id = ?;", [ticketId], function (error, results) {
+            if (error) {
+                console.error('Error fetching ticket:', error);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+            if (results.length === 0) {
+                return res.status(404).json({ error: 'Ticket not found' });
+            }
+            res.json(results[0]);
+        });
+    }
+    );
+
+    app.put('/api/tickets/:id', mid.isSubcontractorAdmin, function (req, res) {
+        const ticketId = req.params.id;
+
+        console.log('req body', req.body);
+        const { ticket_name, job_id, subcontractor_id, ticket_description, ticket_number, ticket_status } = req.body;
+
+        db.query(
+            "UPDATE tickets SET ticket_name = ?, job_id = ?, subcontractor_id = ?, ticket_description = ?, ticket_number = ?, ticket_status = ? WHERE id = ?",
+            [ticket_name, job_id, subcontractor_id, ticket_description, ticket_number, ticket_status, ticketId],
+            function (error, result) {
+                if (error) {
+                    console.error('Error updating ticket:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({ error: 'Ticket not found' });
+                }
+                res.json({ message: 'Ticket updated successfully' });
+            }
+        );
+    });
+
 
     app.post('/api/assignments', mid.isSubcontractorAdmin, function (req, res) {
         const { jobId, subcontractorId, allottedBid } = req.body;

@@ -399,7 +399,7 @@ CREATE TABLE jobs (
   id INT NOT NULL AUTO_INCREMENT,
   isArchived TINYINT(1) DEFAULT 0,
   job_name VARCHAR(255) NOT NULL,
-  takeoff_id INT,
+  takeoff_id INT NULL,
   job_type ENUM('TM', 'bid') DEFAULT 'bid',
   -- bid DECIMAL(10,2),
   supervisor_id INT,
@@ -409,8 +409,12 @@ CREATE TABLE jobs (
   job_end_date TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (takeoff_id) REFERENCES takeoffs(id) ON DELETE CASCADE,
+  FOREIGN KEY (supervisor_id) REFERENCES users(id) ON DELETE SET NULL,
   PRIMARY KEY (id)
 );
+
+
 
 -- example insert
 INSERT INTO jobs (job_name, takeoff_id, job_description, job_location, job_start_date, job_end_date) VALUES ('Job 1', 1, 'Description of Job 1', 'Location of Job 1', '2023-01-01 00:00:00', '2023-12-31 00:00:00');

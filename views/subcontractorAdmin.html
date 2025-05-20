@@ -169,6 +169,7 @@
                         <th>Ticket Description</th>
                         <th>Subcontractor</th>
                         <th>Job</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -372,6 +373,90 @@
             </div>
         </div>
     </div>
+
+    <!-- edit ticket modal -->
+    <div class="modal fade" id="ticketViewModal" tabindex="-1" aria-labelledby="ticketEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ticketEditModalLabel">Edit Ticket</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editTicketForm" class="row g-3">
+                        <input type="hidden" id="editTicketId" name="editTicketId">
+                        <div class="col-md-6">
+                            <label for="editTicketName" class="form-label">Ticket Name:</label>
+                            <input type="text" id="editTicketName" name="editTicketName" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editTicketNumber" class="form-label">Ticket Number:</label>
+                            <input type="text" id="editTicketNumber" name="editTicketNumber" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editJobSelectTicket" class="form-label">Select Job:</label>
+                            <select id="editJobSelectTicket" name="editJobSelectTicket" class="form-select" required>
+                                <!-- Options will be dynamically populated -->
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editSubcontractorSelectTicket" class="form-label">Select Subcontractor:</label>
+                            <select id="editSubcontractorSelectTicket" name="editSubcontractorSelectTicket" class="form-select" required>
+                                <!-- Options will be dynamically populated -->
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editTicketDescription" class="form-label">Ticket Description:</label>
+                            <textarea id="editTicketDescription" name="editTicketDescription" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status:</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="editTicketStatusSwitch" name="editTicketStatusSwitch">
+                                <label class="form-check-label" for="editTicketStatusSwitch" id="editTicketStatusLabel">Open</label>
+                            </div>
+                            <!-- Hidden select to store status value for form submission -->
+                            <input type="hidden" id="editTicketStatus" name="editTicketStatus" value="Open">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveTicketChangesBtn">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Switch logic for ticket status (Open <-> Closed)
+        $(function() {
+            // Set initial label and value based on checkbox
+            $('#editTicketStatusSwitch').on('change', function() {
+                if (this.checked) {
+                    $('#editTicketStatusLabel').text('Closed');
+                    $('#editTicketStatus').val('closed');
+                } else {
+                    $('#editTicketStatusLabel').text('Open');
+                    $('#editTicketStatus').val('cpen');
+                }
+            });
+
+            // Optional: When opening modal, set switch and label based on current status
+            window.setEditTicketStatus = function(status) {
+                if (status === 'Closed') {
+                    $('#editTicketStatusSwitch').prop('checked', true);
+                    $('#editTicketStatusLabel').text('Closed');
+                    $('#editTicketStatus').val('Closed');
+                } else {
+                    $('#editTicketStatusSwitch').prop('checked', false);
+                    $('#editTicketStatusLabel').text('Open');
+                    $('#editTicketStatus').val('Open');
+                }
+            };
+        });
+
+        
+    </script>
 
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
