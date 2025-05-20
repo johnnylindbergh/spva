@@ -230,13 +230,25 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
 
             row.innerHTML = `
-                <td>${job.job_name}</td>
-                <td>${job.job_location}</td>
-        
-                <td>${job.job_description}</td>
-                <td>${job.job_type}</td>
-                
-            `;
+                            <td>
+                                <div class="alert alert-info mb-0 p-2">
+                                    <strong>${job.job_name}</strong><br>
+                                    <span class="text-muted">${job.job_location}</span>
+                                </div>
+                            </td>
+                            <td>
+                                ${job.job_description}
+                            </td>
+                            <td>
+                                <span class="badge ${
+                                    job.job_type === 'TM' ? 'bg-warning text-dark' :
+                                    job.job_type === 'bid' ? 'bg-success' :
+                                    'bg-secondary'
+                                }">
+                                    ${job.job_type}
+                                </span>
+                            </td>
+                        `;
             row.innerHTML += `<td>${actions}</td>`;
             jobsTable.appendChild(row);
         });
