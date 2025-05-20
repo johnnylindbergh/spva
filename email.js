@@ -644,7 +644,7 @@ function sendWelcomeEmail(user_id, callback) {
           `,
         };
 
-      } else if (user[0].user_type == 1) { // type 1 is admin
+      } else if (user.user_type == 1) { // type 1 is admin
          mailOptions = {
           from: credentials.serverEmail,
           to: user.email,

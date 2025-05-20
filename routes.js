@@ -237,16 +237,59 @@ module.exports = function (app) {
 
   app.get("/userManagement", mid.isAdmin, (req, res) => {
     var render = defaultRender(req);
+    res.render("userManagement.html", render);
+  });
+
+  app.get("/userManagement/getUsers", mid.isAdmin, (req, res) => {
     db.getUsers(function (err, users) {
       if (err) {
         console.log(err);
       } else {
         console.log(users);
-        render.users = users;
-        res.render("userManagement.html", render);
+        res.send(JSON.stringify(users));
       }
     });
   });
+
+  app.get("/userManagement/getUser/:id", mid.isAdmin, (req, res) => {
+    db.getUser(req.params.id, function (err, user) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(user);
+        res.send(JSON.stringify(user));
+      }
+    });
+  });
+
+  app.put("/userManagement/updateUser/:id", mid.isAdmin, (req, res) => {
+    console.log("updating user", req.params.id);
+    console.log(req.body);
+    db.updateUser(req.params.id, req.body, function (err) {
+      if (err) {
+        console.log(err);
+        res.status(500).send(err);
+      } else {
+        res.send("User updated");
+      }
+    });
+  });
+
+  app.delete("/userManagement/deleteUser/:id", mid.isAdmin, (req, res) => {
+    console.log("deleting user", req.params.id);
+    db.deleteUser(req.params.id, function (err) {
+      if (err) {
+        console.log(err);
+        res.status(500).send(err);
+      } else {
+        res.send("User deleted");
+      }
+    });
+  });
+
+  
+
+
 
   app.post('/createUser', mid.isAdmin, function (req, res) {
     console.log("creating user");

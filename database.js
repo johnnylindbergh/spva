@@ -976,6 +976,20 @@ module.exports = {
     );
   },
 
+    getUser: function (user_id, callback) {
+    con.query(
+      "SELECT users.*, user_types.title FROM users JOIN user_types ON users.user_type = user_types.id WHERE users.id = ?;",
+      [user_id],
+      function (err, user) {
+        if (err) return callback(err);
+        if (user.length === 0) return callback("User not found");
+        callback(err, user[0]);
+      }
+    );
+  },
+
+
+
   createUser: function (user, callback) {
     // check if the user already exists
     con.query("SELECT * FROM users WHERE email = ?;", [user.email], function (err, results) {
@@ -1008,6 +1022,45 @@ module.exports = {
       }
     });
   },
+
+  updateUser: function (user_id, user, callback) {
+    // get all the user types and match the user.title  
+    con.query("SELECT * FROM user_types WHERE title LIKE ?;", [user.title], function (err, results) {
+      if (err) return callback(err);
+      if (results.length === 0) {
+        return callback("User type does not exist");
+      } else {
+        // update the user in the users table
+        con.query(
+          "UPDATE users SET email = ?, name = ?, phone_number = ?, user_type = ? WHERE id = ?;",
+          [user.email, user.name, user.phone_number, results[0].id, user_id],
+          function (err) {
+            if (err) return callback(err);
+            callback(null);
+          }
+        );
+      }
+    });
+  },
+  
+
+  deleteUser: function (user_id, callback) {
+    // check if the user exists
+    con.query("SELECT * FROM users WHERE id = ?;", [user_id], function (err, results) {
+      if (err) return callback(err);
+      if (results.length === 0) {
+        return callback("User not found");
+      } else {
+        // delete the user from the users table
+        con.query("DELETE FROM users WHERE id = ?;", [user_id], function (err) {
+          if (err) return callback(err);
+          callback(null);
+        });
+      }
+    });
+  },
+
+
 
   createUserGetUserId: function (user, callback) {
     // check if the user already exists
