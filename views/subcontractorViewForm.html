@@ -14,6 +14,10 @@
 
 
     <script>
+
+
+        
+
         $(function () {
             const decimalPlaces = 1;
             const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -122,6 +126,69 @@
                 });
             });
         });
+
+        // on document ready
+        $(document).ready(function () {
+            // Add click event to the table rows
+            $('#timesheet tbody tr').click(function () {
+                $(this).toggleClass('selected');
+                const selectedRowData = $(this).children('td').map(function () {
+                    return $(this).text();
+                }).get();
+                console.log('Selected Row Data:', selectedRowData);
+            });
+    
+            $('#bid tbody tr').click(function () {
+                $(this).toggleClass('selected');
+                const selectedRowData = $(this).children('td').map(function () {
+                    return $(this).text();
+                }).get();
+                console.log('Selected Row Data:', selectedRowData);
+            });
+        });
+ $(document).ready(function () {
+     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // If the user prefers dark mode, add the class
+        
+            // If the user prefers light mode, remove the class
+       
+            $('body').addClass('dark-mode');
+            $('table').addClass('table-dark table-striped');
+            $('th').addClass('table-dark');
+            $('td').addClass('table-dark');
+            $('tr').addClass('table-dark');
+        
+            $('td').css('background-color', '#142a30');
+            $('th').css('background-color', '#343a40');
+            $('td').css('background-color', '#343a40');
+            $('tr').css('background-color', '#343a40');
+            $('th').css('color', '#ffffff');
+            $('td').css('color', '#ffffff');
+            $('tr').css('color', '#ffffff');
+            
+            $('table').css('background-color', '#343a40');
+            $('table').css('border', '1px solid white');
+            $('table').css('border-radius', '5px');
+            $('table').css('border-collapse', 'collapse');
+            $('table').css('width', '100%');
+            $('table').css('overflow', 'scroll');
+            $('table').css('padding', '6%');
+            $('table').css('margin', 'auto');
+            $('table').css('margin-top', '20px');
+            $('table').css('margin-bottom', '20px');
+            $('table').css('border-radius', '5px');
+            $('table').css('border-collapse', 'collapse');
+            $('table').css('overflow', 'scroll');
+            $('table').css('padding', '6%');
+            $('table').css('margin', 'auto');
+            $('table').css('margin-top', '20px');
+            $('table').css('margin-bottom', '20px');
+
+            $('body').css('background-color', '#343a40');
+     }
+        });
+
+        
     </script>
     
     <style>
@@ -159,13 +226,13 @@
     
     <div class="container">
         <div class="well text-center">
-            <h1>Subcontractor Form</h1>
             {{#form}}
             <div class="row">
                 <input type="hidden" id="formId" value="{{id}}">
                 <div class="col-md-12">
                     <h1>{{form_name}}</h1>
                     <p>{{created_at}}</p>
+                    <p id="total"></p>
 
                 </div>
             </div>

@@ -379,6 +379,10 @@ function addTimesheetRow(timesheet) {
 }
 
 $(document).ready(function () {
+
+
+  
+
     const timesheet = $('#timesheet');
 
     // Fetch jobs from the server
@@ -542,7 +546,61 @@ $(document).ready(function () {
             }
         });
     });
+
+
+      // Apply dark mode
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        applyDarkMode();
+    }
+
 });
+
+
+function applyDarkMode() {
+    $('body').css('background-color', '#23272b');
+    $('body').css('color', '#f1f1f1');
+    $('header').css('background-color', '#343a40');
+    $('header h1').css('color', '#f1f1f1');
+    $('header h1').css('text-shadow', '2px 2px 4px #23272b');
+    $('table').css('background-color', '#343a40');
+    $('table').css('color', '#f1f1f1');
+    $('table th').css('background-color', '#495057');
+    $('table th').css('color', '#f1f1f1');
+    $('table th').css('border', '1px solid #6c757d');
+    $('table td').css('background-color', '#343a40');
+    $('table td').css('color', '#f1f1f1');
+    $('table td').css('border', '1px solid #6c757d');
+    $('input, select, textarea').css('background-color', '#23272b');
+    $('input, select, textarea').css('color', '#f1f1f1');
+    $('input, select, textarea').css('border', '1px solid #6c757d');
+    $('input, select, textarea').css('border-radius', '5px');
+    $('input, select, textarea').css('padding', '10px');
+    $('input, select, textarea').css('box-sizing', 'border-box');
+    $('button').css('background-color', '#495057');
+    $('button').css('color', '#f1f1f1');
+    $('button').css('border', '1px solid #6c757d');
+    $('button').css('border-radius', '5px');
+    $('button').css('padding', '10px');
+    $('button').css('box-sizing', 'border-box');
+    $('button').css('cursor', 'pointer');
+    $('button').css('transition', 'background-color 0.3s, color 0.3s, border 0.3s, border-radius 0.3s, padding 0.3s, box-sizing 0.3s');
+
+    // remove striped row style
+    $('tr:nth-child(even)').css('background-color', '#343a40');
+    $('tr:nth-child(even)').css('color', '#f1f1f1');
+    $('tr:nth-child(even)').css('border', '1px solid #6c757d');
+    $('tr:nth-child(even)').css('border-radius', '5px');
+    $('tr:nth-child(even)').css('overflow', 'hidden');
+
+    $('tr:nth-child(odd)').css('background-color', '#343a40');
+    $('tr:nth-child(odd)').css('color', '#f1f1f1');
+    $('tr:nth-child(odd)').css('border', '1px solid #6c757d');
+    $('tr:nth-child(odd)').css('border-radius', '5px');
+    $('tr:nth-child(odd)').css('overflow', 'hidden');
+
+
+}
+
 
 
     </script>

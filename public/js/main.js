@@ -2,6 +2,53 @@
 
 $(document).ready(function () {
 
+
+
+
+     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // If the user prefers dark mode, add the class
+        
+            // If the user prefers light mode, remove the class
+       
+            $('table').addClass('table-dark table-striped');
+            $('th').addClass('table-dark');
+            $('td').addClass('table-dark');
+            $('tr').addClass('table-dark');
+
+        
+            $('td').css('background-color', '#142a30');
+            $('th').css('background-color', '#343a40');
+            $('tr').css('background-color', '#343a40');
+            $('th').css('color', 'gray');
+            $('td').css('color', 'gray');
+            $('tr').css('color', 'gray');
+            $('table').css('background-color', '#343a40');
+            $('table').css('color', 'gray');
+            $('table').css('border', '1px solid white');
+            $('table').css('border-radius', '5px');
+            $('table').css('border-collapse', 'collapse');
+            $('table').css('width', '100%');
+            $('table').css('overflow', 'scroll');
+            $('table').css('padding', '6%');
+            $('table').css('margin', 'auto');
+            $('table').css('margin-top', '20px');
+            $('table').css('margin-bottom', '20px');
+            $('table').css('border-radius', '5px');
+            $('table').css('border-collapse', 'collapse');
+            $('table').css('overflow', 'scroll');
+            $('table').css('padding', '6%');
+            $('table').css('margin', 'auto');
+            $('table').css('margin-top', '20px');
+            $('table').css('margin-bottom', '20px');
+
+            $('body').css('background-color', '#343a40');
+
+            $('container').css('background-color', '#343a40');
+         
+
+     }
+    
+
   function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
