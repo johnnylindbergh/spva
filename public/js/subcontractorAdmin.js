@@ -230,25 +230,20 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
 
             row.innerHTML = `
-                            <td>
-                                <div class="alert alert-info mb-0 p-2">
-                                    <strong>${job.job_name}</strong><br>
-                                    <span class="text-muted">${job.job_location}</span>
-                                </div>
-                            </td>
-                            <td>
-                                ${job.job_description}
-                            </td>
-                            <td>
-                                <span class="badge ${
-                                    job.job_type === 'TM' ? 'bg-warning text-dark' :
-                                    job.job_type === 'bid' ? 'bg-success' :
-                                    'bg-secondary'
-                                }">
-                                    ${job.job_type}
-                                </span>
-                            </td>
-                        `;
+                <td>
+                    <div class="alert alert-info mb-0 p-2">
+                        <strong>${job.job_name}</strong><br>
+                        <span class="text-muted">${job.job_location}</span>
+                    </div>
+                </td>
+                <td>
+                    ${job.job_description.slice(0, 20)}...
+                </td>
+                <td>
+                    <span class="badge ${job.job_type === 'TM' ? 'bg-warning text-dark' : job.job_type === 'bid' ? 'bg-orange text-dark' : 'bg-secondary'}">
+                        ${job.job_type}
+                </td>
+            `;
             row.innerHTML += `<td>${actions}</td>`;
             jobsTable.appendChild(row);
         });
@@ -351,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
             });
             if (response.ok) {
-                alert(`Job "${jobName}" updated successfully!`);
+                //alert(`Job "${jobName}" updated successfully!`);
                 fetchData(); // Refresh data
                 $('#jobEditModal').modal('hide'); // Hide the modal
             } else {
@@ -805,7 +800,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                 });
                 if (response.ok) {
-                    alert(`Ticket "${ticketName}" updated successfully!`);
+                    //alert(`Ticket "${ticketName}" updated successfully!`);
                     fetchData(); // Refresh data
                     $('#ticketViewModal').modal('hide'); // Hide the modal
                 } else {

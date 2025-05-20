@@ -77,10 +77,7 @@
                 <label for="jobStartDate" class="form-label">Job Start Date:</label>
                 <input type="date" id="jobStartDate" name="jobStartDate" class="form-control" required>
             </div>
-            <div class="col-md-6">
-                <label for="jobEndDate" class="form-label">Job End Date:</label>
-                <input type="date" id="jobEndDate" name="jobEndDate" class="form-control" required>
-            </div>
+          
 
             <!-- supervisor select -->
             <div class="col-md-6">
@@ -88,6 +85,11 @@
                 <select id="supervisorSelect" name="supervisorSelect" class="form-select" required>
                     <!-- Options will be dynamically populated -->
                 </select>
+            </div>
+
+              <div class="col-md-6">
+                <label for="jobEndDate" class="form-label">Job End Date:</label>
+                <input type="date" id="jobEndDate" name="jobEndDate" class="form-control" required>
             </div>
 
             
@@ -432,18 +434,18 @@
             // Set initial label and value based on checkbox
             $('#editTicketStatusSwitch').on('change', function() {
                 if (this.checked) {
+                    $('#editTicketStatusLabel').text('Open');
+                    $('#editTicketStatus').val('open');
+                } else {
                     $('#editTicketStatusLabel').text('Closed');
                     $('#editTicketStatus').val('closed');
-                } else {
-                    $('#editTicketStatusLabel').text('Open');
-                    $('#editTicketStatus').val('cpen');
                 }
             });
 
             // Optional: When opening modal, set switch and label based on current status
             window.setEditTicketStatus = function(status) {
                 if (status === 'Closed') {
-                    $('#editTicketStatusSwitch').prop('checked', true);
+                    $('#editTicketStatusSwitch').prop('checked', false);
                     $('#editTicketStatusLabel').text('Closed');
                     $('#editTicketStatus').val('Closed');
                 } else {
