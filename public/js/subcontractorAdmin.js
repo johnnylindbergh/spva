@@ -222,6 +222,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         jobs.forEach(job => {
+
+            if (job.job_description.length > 30) {
+                job.job_description = job.job_description.substring(0, 30) + '...';
+            }
             const row = document.createElement('tr');
 
             const actions = `
@@ -237,13 +241,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </td>
                 <td>
-                    ${job.job_description.slice(0, 20)}...
+                    ${job.job_description}
                 </td>
-                <td>
-                    <span class="badge ${job.job_type === 'TM' ? 'bg-warning text-dark' : job.job_type === 'bid' ? 'bg-orange text-dark' : 'bg-secondary'}">
-                        ${job.job_type}
-                </td>
+              
             `;
+
+
+            if (job.job_type === 'bid') {
+                row.innerHTML += `
+                    <td>
+                        <span class="badge bg-success">
+                            Bid
+                        </span>
+                    </td>
+                `;
+            } else if (job.job_type === 'TM') {
+                row.innerHTML += `
+                    <td>
+                        <span class="badge bg-warning">
+                            TM
+                        </span>
+                    </td>
+                `;
+            }
             row.innerHTML += `<td>${actions}</td>`;
             jobsTable.appendChild(row);
         });
