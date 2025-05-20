@@ -119,12 +119,6 @@ module.exports = {
     environment: 'sandbox',  
   },
 
-  twilio: {
-    accountSid: '',
-    authToken: '',
-    from: '' 
-  },
-
   superAdmin: {
     name: '',
     email: '',
