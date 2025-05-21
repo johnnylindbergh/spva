@@ -33,7 +33,7 @@ function sendTextNotification(user, message) {
 module.exports = function (app) {
 
     // page to view and update text profile settings
-    app.get('/textProfile', mid.isAdmin, (req, res) => {
+    app.get('/profile', mid.isAdmin, (req, res) => {
       
         
         db.getUserById(req.user.local.id, (err, userData) => {
@@ -43,7 +43,7 @@ module.exports = function (app) {
             }
 
             console.log('User data:', userData);
-            res.render('textProfile.html', { user: userData });
+            res.render('profile.html', { user: userData });
         });
     });
 

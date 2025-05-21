@@ -256,6 +256,23 @@ module.exports = function (app) {
     res.send("Hello Supervisor");
   });
 
+  // app.get('/profile', mid.isAuth, (req, res) => {
+
+  //   res.redirect("/rofile");
+
+  //   // console.log("getting profile");
+  //   // var render = defaultRender(req);
+  //   // db.getUser(req.user.local.id, function (err, user) {
+  //   //   if (err) {
+  //   //     console.log(err);
+  //   //   } else {
+  //   //     console.log(user);
+  //   //     render.user = user;
+  //   //     res.send(render);
+  //   //   }
+  //   // });
+  // });
+
   app.get("/userManagement", mid.isAdmin, (req, res) => {
     var render = defaultRender(req);
     res.render("userManagement.html", render);
