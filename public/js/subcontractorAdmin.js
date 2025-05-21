@@ -154,7 +154,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     job_location: jobLocation,
                     job_start_date: jobStartDate,
                     job_end_date: jobEndDate,
-                    job_type: jobType
+                    job_type: jobType,
+                    supervisor_id: supervisorId
                 })
             });
 
@@ -238,6 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="alert alert-info mb-0 p-2">
                         <strong>${job.job_name}</strong><br>
                         <span class="text-muted">${job.job_location}</span>
+                        <span class="text-muted"> (${job.supervisor_name})</span>
                     </div>
                 </td>
                 <td>
@@ -275,55 +277,71 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target && (e.target.dataset.action === 'editJob' || e.target.dataset.action === 'deleteJob')) {
             handleJobAction(e);
         }
-    });
-    async function handleJobAction(e) {
-        
-        // the button data-id is the job id
-        const jobId = parseInt(e.target.dataset.id);
-        const action = e.target.dataset.action;
-        console.log("jobId h:", jobId);
-        console.log("action:", action);
-        if (action === 'editJob') {
-            // Open the edit modal and populate it with job data
-            const job = await fetch(`/api/jobs/${jobId}`).then(res => res.json());
-            console.log("job:", job);
-            document.getElementById('editJobId').value = job.id;
-            document.getElementById('editJobName').value = job.job_name;
-            document.getElementById('editJobDescription').value = job.job_description;
-            document.getElementById('editJobLocation').value = job.job_location;
 
-            // Format the dates to YYYY-MM-DD
-            const startDate = new Date(job.job_start_date);
-            const formattedStartDate = startDate.toISOString().split('T')[0];
-            const endDate = new Date(job.job_end_date);
-            const formattedEndDate = endDate.toISOString().split('T')[0];
-            job.job_start_date = formattedStartDate;
-            job.job_end_date = formattedEndDate;
+        async function handleJobAction(e) {
+            // the button data-id is the job id
+            const jobId = parseInt(e.target.dataset.id);
+            const action = e.target.dataset.action;
+            console.log("jobId h:", jobId);
+            console.log("action:", action);
+            if (action === 'editJob') {
+                // Open the edit modal and populate it with job data
+                const job = await fetch(`/api/jobs/${jobId}`).then(res => res.json());
+                console.log("job:", job);
+                document.getElementById('editJobId').value = job.id;
+                document.getElementById('editJobName').value = job.job_name;
+                document.getElementById('editJobDescription').value = job.job_description;
+                document.getElementById('editJobLocation').value = job.job_location;
 
-            document.getElementById('editJobStartDate').value = job.job_start_date;
-            document.getElementById('editJobEndDate').value = job.job_end_date;
-            $('#jobEditModal').modal('show');
-        }
-        else if (action === 'deleteJob') {
-            // Confirm deletion
-            if (confirm(`Are you sure you want to delete job?`)) {
-                try {
-                    const response = await fetch(`/api/jobs/${jobId}`, {
-                        method: 'DELETE'
+                // Format the dates to YYYY-MM-DD
+                const startDate = new Date(job.job_start_date);
+                const formattedStartDate = startDate.toISOString().split('T')[0];
+                const endDate = new Date(job.job_end_date);
+                const formattedEndDate = endDate.toISOString().split('T')[0];
+                job.job_start_date = formattedStartDate;
+                job.job_end_date = formattedEndDate;
+
+                document.getElementById('editJobStartDate').value = job.job_start_date;
+                document.getElementById('editJobEndDate').value = job.job_end_date;
+
+                // Populate supervisor dropdown
+                const supervisorSelect = document.getElementById('editJobSupervisor');
+                supervisorSelect.innerHTML = '<option value="">Select Supervisor</option>';
+                if (window.supervisorsData && Array.isArray(window.supervisorsData)) {
+                    window.supervisorsData.forEach(supervisor => {
+                        const option = document.createElement('option');
+                        option.value = supervisor.id;
+                        option.textContent = supervisor.name;
+                        if (supervisor.id === job.supervisor_id) option.selected = true;
+                        supervisorSelect.appendChild(option);
                     });
+                }
 
-                    if (response.ok) {
-                        alert(`Job #${jobId} deleted successfully!`);
-                        fetchData(); // Refresh data
-                    } else {
-                        alert('Failed to delete job.');
+                $('#jobEditModal').modal('show');
+            }
+            else if (action === 'deleteJob') {
+                // Confirm deletion
+                if (confirm(`Are you sure you want to delete job?`)) {
+                    try {
+                        const response = await fetch(`/api/jobs/${jobId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            alert(`Job #${jobId} deleted successfully!`);
+                            fetchData(); // Refresh data
+                        } else {
+                            alert('Failed to delete job.');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting job:', error);
                     }
-                } catch (error) {
-                    console.error('Error deleting job:', error);
                 }
             }
         }
-    }
+    });
+
+
 
     //  add listner to the saveChangesBtn button
     document.getElementById('saveChangesBtn').addEventListener('click', async function() {
@@ -333,14 +351,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const jobLocation = document.getElementById('editJobLocation').value;
         const jobStartDate = document.getElementById('editJobStartDate').value;
         const jobEndDate = document.getElementById('editJobEndDate').value;
+        const jobSupervisor = parseInt(document.getElementById('editJobSupervisor').value);
         console.log("jobId:", jobId);
             console.log("jobName:", jobName);
             console.log("jobDescription:", jobDescription);
             console.log("jobLocation:", jobLocation);
             console.log("jobStartDate:", jobStartDate);
             console.log("jobEndDate:", jobEndDate);
+            console.log("jobSupervisor:", jobSupervisor);
 
-        if (!jobId || !jobName || !jobDescription || !jobLocation || !jobStartDate || !jobEndDate) {
+        if (!jobId || !jobName || !jobDescription || !jobLocation || !jobStartDate || !jobEndDate || !jobSupervisor) {
             alert('Please fill in all fields.');
             console.log("jobId:", jobId);
             console.log("jobName:", jobName);
@@ -348,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("jobLocation:", jobLocation);
             console.log("jobStartDate:", jobStartDate);
             console.log("jobEndDate:", jobEndDate);
-            
+            console.log("jobSupervisor:", jobSupervisor);
             return;
         }
 
@@ -362,7 +382,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     job_description: jobDescription,
                     job_location: jobLocation,
                     job_start_date: jobStartDate,
-                    job_end_date: jobEndDate
+                    job_end_date: jobEndDate,
+                    supervisor_id: jobSupervisor
                 })
             });
             if (response.ok) {

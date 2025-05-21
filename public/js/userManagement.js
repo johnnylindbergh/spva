@@ -35,8 +35,8 @@ $(document).ready(function() {
                 $('#editUserTitle').val(user.title);
             })
             .catch(error => console.error('Error fetching user:', error));
-    }
-    );
+    });
+
     $('#editUserForm').on('submit', function(event) {
         event.preventDefault();
         const userId = $('#editUserId').val();
@@ -76,8 +76,8 @@ $(document).ready(function() {
                 $("#viewUserModal").modal('show');
             })
             .catch(error => console.error('Error fetching user:', error));
-    }
-    );
+    });
+
     $('#viewUserModal').on('hidden.bs.modal', function() {
         $('#viewUserId').text('');
         $('#viewUserEmail').text('');
@@ -138,14 +138,16 @@ function renderUsersTable(users) {
         tableHtml += `
             <tr>
                 <td>${user.id}</td>
-                <td>${user.name}</td>
+                <td>
+                    <span>${user.name}</span>
+                    <span class="badge bg-info text-dark ms-2" data-bs-toggle="tooltip" title="Last Login">${user.last_login}</span>
+                </td>
                 <td>${user.email}</td>
                 <td>${user.phone_number || 'None'}</td>
                 <td>${user.title}</td>
                 <td>
-                    <button class="btn btn-primary btn-sm edit-btn" data-id="${user.id}">Edit</button>
-                    <button class="btn btn-info btn-sm view-btn" data-id="${user.id}">View</button>
-                    <button class="btn btn-danger btn-sm delete-btn" data-id="${user.id}">Delete</button>
+                    <button class="btn btn-outline-primary edit-btn" data-id="${user.id}">Edit</button>
+                    <button class="btn btn-outline-danger delete-btn" data-id="${user.id}">Delete</button>
                 </td>
             </tr>
         `;

@@ -21,7 +21,7 @@
 </head>
 
 <style>
-    .btn btn-primary {
+    .btn btn-outline-primary {
         background-color: #57bbd6;
         border-color: #3babc9;
     }
@@ -106,7 +106,7 @@
                 </div>
             </div>
             <div class="col-12">
-                <button type="submit" class="btn btn-primary">Create Job</button>
+                <button type="submit" class="btn btn-outline-primary">Create Job</button>
             </div>
             </form>
         </section>
@@ -155,7 +155,7 @@
                     <input type="number" id="allottedBid" name="allottedBid" class="form-control" required>
                 </div>
                 <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Assign Job</button>
+                    <button type="submit" class="btn btn-outline-primary">Assign Job</button>
                 </div>
             </form>
         </section>
@@ -215,7 +215,7 @@
                 </div>
 
                 <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Create Ticket</button>
+                    <button type="submit" class="btn btn-outline-primary">Create Ticket</button>
                 </div>
             </form>
         </section>
@@ -276,7 +276,7 @@
                 </div>
                 
                 <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Create Agreement</button>
+                    <button type="submit" class="btn btn-outline-primary">Create Agreement</button>
                 </div>
             </form>
         </section>
@@ -327,7 +327,7 @@
                     <!-- Options will be dynamically populated -->
                 </select>
             </div>
-            <button id="exportPaymentsBtn" class="btn btn-primary">Export Payments</button>
+            <button id="exportPaymentsBtn" class="btn btn-outline-primary">Export Payments</button>
         </section>
 
         </main>
@@ -363,13 +363,23 @@
                             <label for="editJobEndDate" class="form-label">Job End Date:</label>
                             <input type="date" id="editJobEndDate" name="editJobEndDate" class="form-control" required>
                         </div>
+
+                        <!-- editJobSupervisor -->
+
+                        <div class="mb-3">
+                            <label for="editJobSupervisor" class="form-label">Select Supervisor:</label>
+                            <select id="editJobSupervisor" name="editJobSupervisor" class="form-select" required>
+                                <!-- Options will be dynamically populated -->
+                            </select>
+                        </div>
+
                         <input type="hidden" id="editJobId" name="editJobId">
                     </form>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="saveChangesBtn">Save changes</button>
+                    <button type="button" class="btn btn-outline-primary" id="saveChangesBtn">Save changes</button>
                 </div>
             </div>
         </div>
@@ -423,7 +433,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="saveTicketChangesBtn">Save changes</button>
+                    <button type="button" class="btn btn-outline-primary" id="saveTicketChangesBtn">Save changes</button>
                 </div>
             </div>
         </div>

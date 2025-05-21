@@ -215,20 +215,41 @@ function numbersWithCommas(x) {
 module.exports = function (app) {
   // GET requests
   app.get("/", mid.isAuth, (req, res) => {
-    if (req.user.local.user_type == "1") {
-      res.redirect("/admin");
-    } else if (req.user.local.user_type == "2") {
-      res.redirect("/");
-    } else if (req.user.local.user_type == "3") {
-      res.redirect("/subcontractor");
-    } else if (req.user.local.user_type == "4"){
-      res.redirect("/subcontractorAdmin");
 
-    } else if (req.user.local.user_type == "5") {
-      res.redirect("/supervisor");
-    } else {
-       res.redirect("/");
-    }
+
+
+
+    console.log(req.user);
+
+      db.initializeUser(req.user, function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          
+
+
+          if (req.user.local.user_type == "1") {
+            res.redirect("/admin");
+          } else if (req.user.local.user_type == "2") {
+            res.redirect("/");
+          } else if (req.user.local.user_type == "3") {
+            res.redirect("/subcontractor");
+          } else if (req.user.local.user_type == "4"){
+            res.redirect("/subcontractorAdmin");
+
+          } else if (req.user.local.user_type == "5") {
+            res.redirect("/supervisor");
+          } else {
+            res.redirect("/");
+          }
+
+
+
+        }
+
+      });
+    
+
   });
 
   app.get('/supervisor', mid.isAuth, (req, res) => {
@@ -3825,7 +3846,8 @@ function defaultRender(req) {
         isAuthenticated: true,
         userIsAdmin: req.user.local.isAdmin,
         message: "Welcome,   " + req.user.name.givenName + "!",
-        email: req.user.local.email
+        email: req.user.local.email,
+        userImage: req.user.local.profile_image_url,
       },
       defaults: {
         sysName: sys.SYSTEM_NAME,

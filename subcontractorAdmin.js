@@ -43,27 +43,33 @@ module.exports = function (app) {
     });
 
     app.get('/api/jobs', mid.isSubcontractorAdmin, function (req, res) {
-        db.query("SELECT * FROM jobs WHERE isArchived = 0;", function (error, results) {
-            if (error) {
-                console.error('Error fetching jobs:', error);
-                return res.status(500).json({ error: 'Internal server error' });
+        db.query(
+            `SELECT jobs.*, users.name AS supervisor_name 
+             FROM jobs 
+             LEFT JOIN users ON users.id = jobs.supervisor_id 
+             WHERE jobs.isArchived = 0;`,
+            function (error, results) {
+                if (error) {
+                    console.error('Error fetching jobs:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                console.log(results);
+                res.json(results);
             }
-            console.log(results);
-            res.json(results);
-        });
+        );
     });
 
     app.put('/api/updateJob', mid.isSubcontractorAdmin, function (req, res) {
 
-        const { job_id, job_name, job_description, job_location, job_start_date, job_end_date } = req.body;
+        const { job_id, job_name, job_description, job_location, job_start_date, job_end_date,supervisor_id  } = req.body;
         console.log('req body', req.body);
-        if (!job_id || !job_name || !job_description || !job_location || !job_start_date || !job_end_date) {
+        if (!job_id || !job_name || !job_description || !job_location || !job_start_date || !job_end_date || !supervisor_id) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
         db.query(
-            "UPDATE jobs SET job_name = ?, job_description = ?, job_location = ?, job_start_date = ?, job_end_date = ? WHERE id = ?",
-            [job_name, job_description, job_location, job_start_date, job_end_date, job_id],
+            "UPDATE jobs SET job_name = ?, job_description = ?, job_location = ?, job_start_date = ?, job_end_date = ?, supervisor_id = ? WHERE id = ?",
+            [job_name, job_description, job_location, job_start_date, job_end_date, supervisor_id, job_id],
             function (error, result) {
                 if (error) {
                     console.error('Error updating job:', error);
@@ -106,7 +112,7 @@ module.exports = function (app) {
     });
 
     app.get('/api/supervisors', mid.isSubcontractorAdmin, function (req, res) {
-        db.query("SELECT * FROM users JOIN user_types ON users.user_type = user_types.id WHERE user_types.title = 'supervisor';", function (error, results) {
+        db.query("SELECT *, users.id AS id, user_types.id as user_type_id FROM users JOIN user_types ON users.user_type = user_types.id WHERE user_types.title = 'supervisor';", function (error, results) {
             if (error) {
                 console.error('Error fetching supervisors:', error);
                 return res.status(500).json({ error: 'Internal server error' });
@@ -206,12 +212,12 @@ module.exports = function (app) {
   
 
     app.post('/api/jobs', mid.isSubcontractorAdmin, function (req, res) {
-        const { job_name, job_description, job_location, job_start_date, job_end_date, job_type } = req.body;
+        const { job_name, job_description, job_location, job_start_date, job_end_date, supervisor_id, job_type} = req.body;
 
         console.log('req body', req.body);
         db.query(
-            "INSERT INTO jobs (job_name, job_description, job_location, job_start_date, job_end_date, job_type) VALUES (?, ?, ?, ?, ?, ?)",
-            [job_name, job_description, job_location, job_start_date, job_end_date, job_type],
+            "INSERT INTO jobs (job_name, job_description, job_location, job_start_date, job_end_date, supervisor_id, job_type) VALUES (?, ?, ?, ?, ,?, ?, ?)",
+            [job_name, job_description, job_location, job_start_date, job_end_date, supervisor_id, job_type],
             function (error, result) {
                 if (error) {
                     console.error('Error creating job:', error);

@@ -93,8 +93,8 @@
         </div>
         <nav class="bottom-navbar">
             <!-- <input type="button" value="send to my email: {{email}}" onclick="shareSelf()" class="img-button-client"> -->
-            <input type="button" value="Share With Client" onclick="shareClient()" class="btn btn-primary">
-            <input type="button" value="Toggle Numbers" onclick="toggleNumbers()" class="btn btn-primary">
+            <input type="button" value="Share With Client" onclick="shareClient()" class="btn btn-outline-primary">
+            <input type="button" value="Toggle Numbers" onclick="toggleNumbers()" class="btn btn-outline-primary">
             <!-- Add Google Translate Widget -->
             <!-- <input type="button" value="Select Language" onclick="toggleTranslateMenu()" class="img-button-client"> -->
         </nav>
@@ -115,7 +115,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button id="confirm-auto-deposit" class="btn btn-primary" onclick="confirmSendAutoDeposit()">Confirm</button>
+                        <button id="confirm-auto-deposit" class="btn btn-outline-primary" onclick="confirmSendAutoDeposit()">Confirm</button>
                         <button type="button" class="btn btn-secondary" onclick="closeAutoInitialDepositDialog()">Cancel</button>
                         </div>
                     </div>
@@ -135,7 +135,7 @@
                 <p>Are you sure you want to send this email?</p>
                 </div>
                 <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="confirmEmailSend()">Send</button>
+                <button type="button" class="btn btn-outline-primary" onclick="confirmEmailSend()">Send</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -180,14 +180,14 @@
 
             <!-- regen chatGPT response button -->
             <input type="button" value="Regenerate ChatGPT Response" onclick="regenChatGPTResponse()"
-                class="btn btn-primary">
+                class="btn btn-outline-primary">
             </br>
         </br>
 
 
             <form action="/settings" method="POST">
                 <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
-                <input type="submit" class="btn btn-primary" value="Settings">
+                <input type="submit" class="btn btn-outline-primary" value="Settings">
               </form>
             </br>
 

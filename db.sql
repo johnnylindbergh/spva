@@ -25,6 +25,7 @@ CREATE TABLE users (
   public_key VARCHAR(64),
   authentication_token VARCHAR(64),
   isArchived TINYINT(1) DEFAULT 0,
+  last_login TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_type) REFERENCES user_types(id),

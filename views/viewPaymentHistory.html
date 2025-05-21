@@ -93,13 +93,13 @@
             <div id="actionButtons" class="mb-4">
                 <form id="createInvoiceBtn" action="/invoiceCreator" method="POST" class="d-inline">
                     <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
-                    <button type="submit" style="background-color: 0893A1;">Create Invoice</button>
+                    <button type="submit" class="btn btn-outline-primary mb-3">Create Invoice</button>
                 </form>
             </div>
 
             <!-- sov creator button -->
             <a href="/createSOV?takeoff_id={{takeoff_id}}" style="text-decoration: none;">
-                <button id="createSOVBtn" class="btn btn-primary mb-3" style="color: white;">Create Schedule of Values</button>
+                <button id="createSOVBtn" class="btn btn-outline-primary mb-3" style="">Create Schedule of Values</button>
             </a>
             <!-- a section of past sovs -->
             <div id="sovHistory">
@@ -155,7 +155,7 @@
                     <!-- create change order button -->
                     <form id="createChangeOrderBtn" action="/changeOrderCreator" method="POST" class="d-inline">
                         <input type="hidden" id="takeoff_id" name="takeoff_id" value="{{takeoff_id}}">
-                        <button type="submit" style="background-color: 0893A1;" btn btn-primary">Create Change
+                        <button type="submit" class="btn btn-outline-primary mb-3">Create Change
                             Order</button>
                     </form>
 

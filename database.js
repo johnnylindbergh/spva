@@ -561,6 +561,42 @@ module.exports = {
     });
   }, 
 
+  initializeUser: (user, cb) => {
+
+    if (user.local.last_login === null) {
+      // Update the user's profile_image_url and last_login fields
+      const email = user.emails && user.emails[0] && user.emails[0].value ? user.emails[0].value : null;
+      const profileImage = user.photos && user.photos[0] && user.photos[0].value ? user.photos[0].value : null;
+      if (!email) {
+        return cb("User email not found");
+      }
+      con.query(
+        "UPDATE users SET profile_image_url = ?, last_login = NOW() WHERE email = ?;",
+        [profileImage, email],
+        (err) => {
+          if (err) {
+            console.log(err);
+            return cb(err);
+          }
+          cb(null);
+        }
+      );
+
+    } else {
+      // Update the user's last_login field
+      con.query(
+        "UPDATE users SET last_login = NOW() WHERE email = ?;",
+        [user._json.email],
+        (err) => {
+          if (err) {
+            console.log(err);
+            return cb(err);
+          }
+          cb(null);
+        }
+      );
+    }
+  },
 
   /*  Add a new system user account, given the user's Google info.
       Callback on profile of created user. */
@@ -1033,7 +1069,7 @@ module.exports = {
         // update the user in the users table
         con.query(
           "UPDATE users SET email = ?, name = ?, phone_number = ?, user_type = ? WHERE id = ?;",
-          [user.email, user.name, user.phone_number, results[0].id, user_id],
+          [user.email, user.name, user.phone_number || null, results[0].id, user_id],
           function (err) {
             if (err) return callback(err);
             callback(null);

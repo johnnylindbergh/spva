@@ -21,25 +21,26 @@
   </script>
 </head>
 <body>
-  <div class="navbar">
-    <ul> 
+  <div class="navbar" style="display: flex; align-items: center;">
+    <ul style="margin: 0; padding: 0; display: flex; align-items: center; height: 100%;"> 
       <li><a href="https://youtu.be/3zDkMfjyfaU?si=2nBjVTSEArqtvWm2">{{defaults.sysName}}</a></li>
       {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
-      <!-- link to fscTrack -->
       <li><a href="https://shop.franksaulconstruction.com">Time Tracking</a></li>
       <li><a href="/subcontractorAdmin">Subcontractor</a></li>
       <li><a href="/userManagement">User Management</a></li>
-      
     </ul>
-    <ul>
-      <div style="float:right;">
-        <li><a href="/textProfile">SMS Preferences</a></li>
-
-        <li><a href="/auth/google">Log In</a></li>
-        <li><a href="/logout">Log Out</a></li>
-      </div>
+    <ul style="margin: 0 0 0 auto; padding: 0; align-items: center; height: 100%;">
+      <li><a href="/textProfile">SMS Preferences</a></li>
+      <li><a href="/auth/google">Log In</a></li>
+      <li><a href="/logout">Log Out</a></li>
+      <li style="display: flex; align-items: center; padding: 0 8px; height: 100%;">
+        <a href="/profile" >
+            <img src="{{auth.userImage}}" alt="Profile" style="border-radius: 50%; width: 36px; height: 36px; border: 2px solid #ccc; margin: -10px;">
+        </a>
+      </li>
     </ul>
   </div>
+
   {{#auth}} 
   <div class="container">
     <h2>
