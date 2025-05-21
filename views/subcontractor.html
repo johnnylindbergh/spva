@@ -48,7 +48,7 @@
                 <div class="list-group-item">
                     <span>No forms submitted yet.</span>    
                 </div>  
-                <p class="text-muted">Create a new form to get started.</p>
+                <p class="">Create a new form to get started.</p>
 
                 {{/forms}}
             </div>
@@ -89,9 +89,13 @@
             $('body').css('font-size', '16px');
             $('body').css('line-height', '1.5');
 
+
             // restyle table
             $('table').css('background-color', '#424242');
             $('table').css('color', '#ffffff');
+
+            //restyle text-muted
+            $('p.text-muted').css('color', 'white');
 
         }
     </script>
