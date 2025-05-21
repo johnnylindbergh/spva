@@ -441,7 +441,7 @@ module.exports = function (app) {
                 console.log('Error sending email:', err);
                 return res.status(500).send('Error sending email.');
               }
-              console.log('Email sent:', result);
+              //console.log('Email sent:', result);
               res.redirect('/subcontractor/createForm');
             }
           );
@@ -609,7 +609,7 @@ module.exports = function (app) {
                 res.status(500).send('Error sending email.');
                 return;
               }
-              console.log('Email sent:', result);
+              //console.log('Email sent:', result);
             }
           );
 
@@ -621,7 +621,7 @@ module.exports = function (app) {
                 res.status(500).send('Error sending email.');
                 return;
               }
-              console.log('Email sent:', result);
+              //console.log('Email sent:', result);
             }
           );
 
