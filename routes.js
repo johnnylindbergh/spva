@@ -1390,6 +1390,8 @@ module.exports = function (app) {
                   console.log(err);
                 } else {
                   console.log(takeoff_info);
+
+                  console.log("Estimate:", estimate);
                   res.render("viewEstimate.html", {
                     estimate: estimate,
                     takeoff: takeoff_info,

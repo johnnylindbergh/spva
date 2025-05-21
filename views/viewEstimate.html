@@ -95,6 +95,9 @@
             <!-- <input type="button" value="send to my email: {{email}}" onclick="shareSelf()" class="img-button-client"> -->
             <input type="button" value="Share With Client" onclick="shareClient()" class="btn btn-outline-primary">
             <input type="button" value="Toggle Numbers" onclick="toggleNumbers()" class="btn btn-outline-primary">
+            {{#takeoff}}
+            <button id="download-pdf" class="btn btn-outline-primary" onclick="window.location.href='/download-estimate-pdf/?hash={{takeoff_hash}}'" style="text-decoration: none;">Download PDF</button>
+            {{/takeoff}}
             <!-- Add Google Translate Widget -->
             <!-- <input type="button" value="Select Language" onclick="toggleTranslateMenu()" class="img-button-client"> -->
         </nav>
