@@ -94,14 +94,14 @@
         }
 
         .ticket-dropdown {
-            width: 100%;
+            width: 75%;
             padding: 10px;
             box-sizing: border-box;
             border: 1px solid #ced4da;  
         }
 
         .job-dropdown {
-            width: 100%;
+            width: 75%;
             padding: 10px;
             box-sizing: border-box;
             border: 1px solid #ced4da;  
@@ -129,7 +129,7 @@
     <table class="jobsWithBids table table-bordered">
         <thead>
             <tr>
-                <th>Job Name</th>
+                <th style = "min-width: 300px;"> &nbsp;Job Name</th>
                 <th>Bid</th>
                 <th>Requested Amount</th>
             </tr>
@@ -137,7 +137,7 @@
         <tbody>
             <tr>
                 <td>
-                    <select class="job-dropdown form-control">
+                    <select class="bid-job-dropdown form-control">
                         <option value="">Select Job</option>
                     </select>
                 </td>
@@ -187,8 +187,8 @@ function fetchJobs() {
             console.log(response);
             jobList = response || [];
             console.log('Jobs fetched:', jobList);
-            populateJobDropdowns();
-
+            populateTMJobDropdowns();
+            populateBidJobDropdowns();
             if (jobList.length === 0) {
                 Swal.fire({
                     icon: 'error',
@@ -241,17 +241,53 @@ function fetchAgreements() {
 
 
 
-function populateJobDropdowns() {
-    const dropdowns = $('.job-dropdown');
+function populateTMJobDropdowns() {
+    const dropdowns = $('.tm-job-dropdown');
     dropdowns.each(function () {
         const dropdown = $(this);
         dropdown.empty();
         dropdown.append('<option value="">Select Job</option>');
         jobList.forEach(job => {
-            if (job.bid ==null) {
-                job.bid = 0;
+                            console.log(job.job_name + ' is ' + job.job_type);
+
+            if (job.job_type == 'TM') {
+                dropdown.append(`<option value="${job.id}">${job.job_name}</option>`);
             }
-            dropdown.append(`<option value="${job.id}" data-bid="${job.bid}">${job.job_name}</option>`);
+            //dropdown.append(`<option value="${job.id}" data-bid="${job.bid}">${job.job_name}</option>`);
+        });
+
+        // Add change event listener to update bidAmount
+        dropdown.change(function () {
+            const selectedOption = $(this).find('option:selected');
+            const bidAmount = parseFloat(selectedOption.data('bid'));
+            $(this).closest('tr').find('#bidAmount').val(bidAmount);
+            console.log('Bid amount updated:', bidAmount);
+
+            if (bidAmount <= 0){
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'No bid available for this job!'
+                });
+                $(this).closest('tr').find('#bidAmount').val('No bid available');
+            }
+            
+        });
+    });
+}
+
+
+function populateBidJobDropdowns(){
+
+    const dropdowns = $('.bid-job-dropdown');
+    dropdowns.each(function () {
+        const dropdown = $(this);
+        dropdown.empty();
+        dropdown.append('<option value="">Select Job</option>');
+        jobList.forEach(job => {
+            if (job.job_type === 'bid') {
+                dropdown.append(`<option value="${job.id}" data-bid="${job.bid}">${job.job_name}</option>`);
+            }
         });
 
         // Add change event listener to update bidAmount
@@ -279,7 +315,7 @@ function addBidRow() {
 
     // Job Name column
     const jobNameCell = $('<td></td>');
-    const jobDropdown = $('<select class="job-dropdown form-control"><option value="">Select Job</option></select>');
+    const jobDropdown = $('<select class="bid-job-dropdown form-control"><option value="">Select Job</option></select>');
     jobList.forEach(job => {
         jobDropdown.append(`<option value="${job.id}" data-bid="${job.bid}">${job.job_name}</option>`);
     });
@@ -318,9 +354,12 @@ function addTimesheetRow(timesheet) {
 
     // Job Name column
     const jobNameCell = $('<td></td>');
-    const jobDropdown = $('<select class="job-dropdown"><option value="">Select Job</option></select>');
+    jobNameCell.attr('min-width', '300px');
+    const jobDropdown = $('<select class="tm-job-dropdown"><option value="">Select Job</option></select>');
     jobList.forEach(job => {
-        jobDropdown.append(`<option value="${job.id}">${job.job_name}</option>`);
+        if (job.job_type == 'TM') {
+            jobDropdown.append(`<option value="${job.id}">${job.job_name}</option>`);
+        }
     });
     jobNameCell.append(jobDropdown);
 
@@ -345,12 +384,12 @@ function addTimesheetRow(timesheet) {
 
 
     ticketCell.append(ticketDropdown);
-    ticketCell.attr('width', '200px');
     newRow.append(ticketCell);
 
     // Input fields for each day of the week
     for (let i = 0; i < 7; i++) {
         const timesheetCell = $('<td></td>');
+        timesheetCell.attr('width', '10px');
         const durationInput = $('<input id="duration" type="number" min="0" placeholder="Hours">');
         timesheetCell.append(durationInput);
         newRow.append(timesheetCell);
@@ -373,6 +412,7 @@ function addTimesheetRow(timesheet) {
 
     // Append the description cell
     const descriptionCell = $('<td></td>');
+    descriptionCell.attr('width', '200px');
     const descriptionInput = $('<textarea placeholder="Description"></textarea>');
     descriptionCell.append(descriptionInput);
     newRow.append(descriptionCell);
