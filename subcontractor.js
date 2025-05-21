@@ -46,7 +46,7 @@ WHERE form_bid.form_id = ?;
 
 function getTotalRequestedAmount(jobId, userId, callback) {
   db.query(
-    "SELECT SUM(form_bid.request) as total_requested FROM form_bid JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id WHERE form_bid.job_id = ? AND subcontractor_forms.user_id = ? AND form_bid.status IN ('Approved', 'Pending')",
+    "SELECT SUM(form_bid.request) as total_requested FROM form_bid JOIN subcontractor_forms ON form_bid.form_id = subcontractor_forms.form_id WHERE form_bid.job_id = ? AND subcontractor_forms.user_id = ? AND form_bid.status IN ('accepted', 'pending')",
     [jobId, userId],
     function (error, results) {
       if (error) {

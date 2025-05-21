@@ -135,6 +135,28 @@ function renderUsersTable(users) {
     `;
 
     users.forEach(user => {
+// format the last login date to a more readable format
+
+if (user.last_login) {
+            user.last_login = new Date(user.last_login).toLocaleString();
+        
+        const lastLoginDate = new Date(user.last_login);
+        const formattedDate = lastLoginDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+
+        user.last_login = formattedDate;
+
+    } else {
+        user.last_login = 'Never';
+    }
+
+
         tableHtml += `
             <tr>
                 <td>${user.id}</td>
