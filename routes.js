@@ -504,16 +504,16 @@ module.exports = function (app) {
                     } else {
                       console.log("Takeoff unsinged and unlocked");
                       // delete the OTP from the database
-                      db.deleteOTP(takeoff_id, function (err) {
-                        if (err) {
-                          console.log(err);
-                          res.status(500).send("Error deleting OTP");
-                        } else {
-                          console.log("OTP deleted from database");
+                      // db.deleteOTP(takeoff_id, function (err) {
+                      //   if (err) {
+                      //     console.log(err);
+                      //     res.status(500).send("Error deleting OTP");
+                      //   } else {
+                      //     console.log("OTP deleted from database");
                           res.send({approved: true});
 
-                        }
-                      });
+                      //   }
+                      // });
                     }
 
                   });

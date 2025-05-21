@@ -1236,9 +1236,18 @@ module.exports = {
     });
   },
 
+  deleteOTP: function (takeoff_id, callback) {
+    // delete the otp from the database
+    con.query("DELETE FROM otp WHERE takeoff_id = ?;", [takeoff_id], function (err) {
+      if (err) return callback(err);
+      callback(null);
+    });
+  }
+  ,
+
   unsignTakeoff: function (takeoff_id, callback) {
     // set the takeoff's status to 3
-    con.query("UPDATE takeoffs SET status = 3 WHERE id = ?;", [takeoff_id], function (err) {
+    con.query("UPDATE takeoffs SET status = 2 WHERE id = ?;", [takeoff_id], function (err) {
       if (err) return callback(err);
       callback(null);
     }
