@@ -216,7 +216,7 @@ module.exports = function (app) {
 
         console.log('req body', req.body);
         db.query(
-            "INSERT INTO jobs (job_name, job_description, job_location, job_start_date, job_end_date, supervisor_id, job_type) VALUES (?, ?, ?, ?, ,?, ?, ?)",
+            "INSERT INTO jobs (job_name, job_description, job_location, job_start_date, job_end_date, supervisor_id, job_type) VALUES (?, ?, ?, ?, ?, ?, ?);",
             [job_name, job_description, job_location, job_start_date, job_end_date, supervisor_id, job_type],
             function (error, result) {
                 if (error) {

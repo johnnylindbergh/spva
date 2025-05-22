@@ -54,6 +54,11 @@ button:active { background-color:
   font-family: "Roboto", sans-serif;
   scroll-behavior: smooth;
 }
+
+ body {
+        background: linear-gradient(135deg, #088ea694 0%, #cfdef3 100%);
+    }
+
 .container {
   text-align: left;
   display: center;
@@ -64,6 +69,7 @@ button:active { background-color:
   width: 85%;
   background-color: #f5f5f5;
   padding: 8px 21px;
+  border-radius: 8px;
 }
 
 .subcontainer {
@@ -111,7 +117,7 @@ button:active { background-color:
 }
 
 .table {
-  width: 80%;
+/* width: 80%; */
   border-collapse: collapse;
   border-spacing: 0;
   padding: 1px;

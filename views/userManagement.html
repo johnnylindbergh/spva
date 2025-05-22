@@ -13,7 +13,7 @@
 </head>
 <style>
     body {
-        background-color: #f8f9fa;
+        background: linear-gradient(135deg, #088ea694 0%, #cfdef3 100%);
     }
     .container {
         margin-top: 20px;
@@ -72,6 +72,37 @@
                 </form>
             </div>
             </div>  
+
+
+            <!-- mass email section -->
+            <div class="mb-3" style="width: 75%;">
+                 <h2>Send Mass Email</h2>
+                <button type="button" class="btn btn-success" data-bs-target="#massEmailModal" onclick="onMassEmailButtonClick()">Send Mass Email</button>
+                    
+                </button>
+
+
+                <!-- button to select all subcontractors -->
+                <button type="button" class="btn btn-outline-primary" onclick="onSelectAllSubcontractorsButtonClick()">
+                    Select All Subcontractors
+                </button>
+
+                <!-- select all admins button -->
+                <button type="button" class="btn btn-outline-primary" onclick="onSelectAllAdminsButtonClick()">
+                    Select All Admins
+                </button>
+
+                <!-- select all supervisors button -->
+                <button type="button" class="btn btn-outline-primary" onclick="onSelectAllSupervisorsButtonClick()">
+                    Select All Supervisors
+                </button>
+            </div>
+
+
+            
+               
+            
+
 
 
 
@@ -156,6 +187,44 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- mass email modal -->
+<div class="modal fade" id="massEmailModal" tabindex="-1" aria-labelledby="massEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="massEmailForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="massEmailModalLabel">Send Mass Email</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="massEmailSubject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="massSubject" name="subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="massEmailBody" class="form-label">Body</label>
+                        <textarea class="form-control" id="massEmailBody" name="body" rows="5" required></textarea>
+                    </div>
+                    <!-- recipients -->
+                    <div class="mb-3">
+                        <label for="recipients" class="form-label">Recipients</label>
+                        <!-- list with bubble style to be dynamically populated -->
+                        <ul id="recipients" >
+                            <!-- Recipients will be dynamically inserted here -->
+                        </ul>
+                      
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-outline-primary">Send Email</button>
                 </div>
             </div>
         </form>

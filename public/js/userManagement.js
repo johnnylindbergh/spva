@@ -16,6 +16,7 @@ $(document).ready(function() {
             return;
         } else {
             console.log(users);
+            window.users = users; // Store users in a global variable
             renderUsersTable(users);
         }
     });
@@ -123,6 +124,7 @@ function renderUsersTable(users) {
         <table class="table" id="usersTable">
             <thead>
                 <tr>
+                    <th>Send Email</th>
                     <th>User ID</th>
                     <th>Name</th>
                     <th>Email</th>
@@ -157,8 +159,15 @@ if (user.last_login) {
     }
 
 
+    // create a large, styled checkbox for sending email
+    const emailCheckbox = `
+        <input type="checkbox" class="form-check-input form-check-lg" id="sendEmail${user.id}" data-id="${user.id}" style="width: 1.5em; height: 1.5em;">
+    `;
+
+
         tableHtml += `
             <tr>
+                <td>${emailCheckbox}</td>
                 <td>${user.id}</td>
                 <td>
                     <span>${user.name}</span>
@@ -182,3 +191,102 @@ if (user.last_login) {
 
     $('#usersTableContainer').html(tableHtml);
 }
+
+
+
+function onMassEmailButtonClick(){
+    // collect the users that are checked and use window.users to get the user data and then append their email to the modal element 'recipients'
+    const selectedUsers = [];
+    $('#usersTable input[type="checkbox"]:checked').each(function() {
+        console.log($(this).data('id'));
+        // get the data-id
+        const userId = $(this).data('id');
+        const user = window.users.find(user => user.id === userId);
+        if (user) {
+            selectedUsers.push(user.email);
+        }
+    });
+   
+
+    // add selected user to recipients as options
+    const recipients = document.getElementById('recipients');
+    recipients.innerHTML = ''; // clear previous options
+    selectedUsers.forEach(email => {
+        const listItem = document.createElement('li');
+        listItem.textContent = email;
+        recipients.appendChild(listItem);
+    });
+    // show the modal
+    $("#massEmailModal").modal('show');
+
+ 
+
+}
+
+
+function onSelectAllButtonClick(){
+    console.log('Select all button clicked');
+    // select all checkboxes
+    $('#usersTable input[type="checkbox"]').each(function() {
+        $(this).prop('checked', true);
+    });
+}
+function onDeselectAllButtonClick(){
+    console.log('Deselect all button clicked');
+    // deselect all checkboxes
+    $('#usersTable input[type="checkbox"]').each(function() {
+        $(this).prop('checked', false);
+    });
+}
+
+
+
+function onSelectAllSubcontractorsButtonClick(){
+    onDeselectAllButtonClick();
+    console.log('Select all subcontractors button clicked');
+    // select all checkboxes of a user with user type 'subcontractor'
+    $('#usersTable input[type="checkbox"]').each(function() {
+        const userId = $(this).data('id');
+        const user = window.users.find(user => user.id === userId);
+        console.log(user);
+        if (user && user.title === 'subcontractor') {
+            console.log('User is a subcontractor');
+            $(this).prop('checked', true);
+        }
+    });
+
+}
+
+function onSelectAllAdminsButtonClick(){
+    onDeselectAllButtonClick();
+    console.log('Select all admins button clicked');
+    // select all checkboxes of a user with user type 'admin'
+    $('#usersTable input[type="checkbox"]').each(function() {
+        const userId = $(this).data('id');
+        const user = window.users.find(user => user.id === userId);
+        console.log(user);
+        if (user && user.title === 'Admin') {
+            console.log('User is an admin');
+            $(this).prop('checked', true);
+        }
+    });
+
+}
+
+function onSelectAllSupervisorsButtonClick(){
+    onDeselectAllButtonClick();
+    console.log('Select all supervisors button clicked');
+    // select all checkboxes of a user with user type 'supervisor'
+    $('#usersTable input[type="checkbox"]').each(function() {
+        const userId = $(this).data('id');
+        const user = window.users.find(user => user.id === userId);
+        console.log(user);
+        if (user && user.title === 'supervisor') {
+            console.log('User is a supervisor');
+            $(this).prop('checked', true);
+        }
+    });
+
+}
+
+
