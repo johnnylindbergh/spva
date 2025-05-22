@@ -683,6 +683,55 @@ function sendWelcomeEmail(user_id, callback) {
   });
 }
 
+function sendEmailWithLetterHead(to, subject, message, callback) {
+  // add the letter head to the message
+  const letterHead = `
+    <div style="text-align: center;">
+      <img src="${credentials.domain}/sunpainting_logo_blue.png" alt="Sun Painting Logo" style="width: 140px; margin: 20px;">
+      <p>${creds.companyAddress}</p>
+      <p>${creds.companyPhone}</p>
+    </div>
+  `;
+
+  // convert message to html
+  message = message.replace(/\n/g, "<br>");
+  message = message.replace(/ /g, "&nbsp;");
+  message = message.replace(/&nbsp;/g, " ");
+  message = message.replace(/<br>/g, "<br>");
+
+
+  // put the message in a div with a border
+  message = `
+    <div style="border: 1px solid black; padding: 20px; border-radius: 10px; margin: 20px; border-color:rgb(2, 146, 198);">
+      ${message}
+    </div>
+  `;
+
+  // append a footer
+  message += `
+    <div style="text-align: center; margin-top: 20px;">
+      <p>If you have any questions, please contact us at ${creds.companyEmail}</p>
+    </div>
+  `;
+
+  // send the email
+  const mailOptions = {
+    from: credentials.serverEmail,
+    to: to,
+    subject: subject,
+    html: letterHead + message,
+  };
+  transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err);
+      callback(err, null);
+    } else {
+      console.log("Email sent: " + info.response);
+      callback(null, info.response);
+    }
+  });
+}
+
 
 module.exports = {
   sendEmail,
@@ -696,5 +745,6 @@ module.exports = {
   sendSubcontractorFormEmail,
   sendSubcontractorFormNotificationEmail,
   sendSubcontractorAgreementNotificationEmail,
-  sendWelcomeEmail
+  sendWelcomeEmail,
+  sendEmailWithLetterHead
 };

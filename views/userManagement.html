@@ -206,7 +206,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="massEmailSubject" class="form-label">Subject</label>
-                        <input type="text" class="form-control" id="massSubject" name="subject" required>
+                        <input type="text" class="form-control" id="massEmailSubject" name="subject" required>
                     </div>
                     <div class="mb-3">
                         <label for="massEmailBody" class="form-label">Body</label>
@@ -224,7 +224,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-outline-primary">Send Email</button>
+                    <button type="submit" class="btn btn-outline-primary" onclick="sendMassEmail(event)">Send Email</button>
                 </div>
             </div>
         </form>

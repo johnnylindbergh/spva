@@ -325,6 +325,32 @@ module.exports = function (app) {
     });
   });
 
+  app.post("/userManagement/sendMassEmail", mid.isAdmin, (req, res) => {
+    console.log("sending mass email");
+    console.log(req.body);
+    
+    // send email to all users in req.body.recipients
+
+    console.log(req.body.recipients);
+
+    // subject is req.body.subject and message is req.body.message
+
+    for (let i = 0; i < req.body.recipients.length; i++) {
+      let recipient = req.body.recipients[i];
+      console.log("sending email to ", recipient);
+      emailer.sendEmailWithLetterHead(recipient, req.body.subject, req.body.body, function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("email sent to ", recipient);
+        }
+      });
+    }
+
+    res.status(200).send("Mass email sent");
+    
+  });
+
   
 
 

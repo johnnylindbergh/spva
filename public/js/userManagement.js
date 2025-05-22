@@ -223,6 +223,57 @@ function onMassEmailButtonClick(){
 
 }
 
+// the function that gets the subject and body of the email as well as the recipients and sends the email
+function sendMassEmail(event){
+    event.preventDefault();
+    const subject = document.getElementById('massEmailSubject').value;
+    const body = document.getElementById('massEmailBody').value;
+    const recipients = [];
+    // get the recipients from the modal element 'recipients'
+    const recipientList = document.getElementById('recipients');
+    const recipientItems = recipientList.getElementsByTagName('li');
+    for (let i = 0; i < recipientItems.length; i++) {
+        const email = recipientItems[i].textContent;
+        recipients.push(email);
+    }
+    console.log('Subject:', subject);
+    console.log('Body:', body);
+    console.log('Recipients:', recipients);
+
+    // send the email using fetch
+    fetch('/userManagement/sendMassEmail', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            subject: subject,
+            body: body,
+            recipients: recipients
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('Email sent successfully!');
+            $("#massEmailModal").modal('hide');
+            // clear the modal inputs
+            document.getElementById('emailSubject').value = '';
+            document.getElementById('emailBody').value = '';
+            const recipients = document.getElementById('recipients');
+            recipients.innerHTML = ''; // clear previous options
+        } else {
+            alert('Error sending email. Please try again.');
+        }
+    }
+    )
+    .catch(error => {
+        console.error('Error sending email:', error);
+        alert('Error sending email. Please try again.');
+    });
+}
+
+
+
 
 function onSelectAllButtonClick(){
     console.log('Select all button clicked');
