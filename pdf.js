@@ -221,15 +221,21 @@ const generateInvoicePdf = (data, callback) => {
         doc.fontSize(14).text(`Total Amount: $${data.totalAmount}`, { align: 'right', bold: true });
         doc.moveDown(2);
 
+
+      
+
         // Add footer
         doc.fontSize(10).text('Thank you for your business!', { align: 'center', italic: true });
+
+
+    
+
         doc.end();
     } catch (err) {
         console.error('Error generating PDF:', err);
         callback(err);
     }
 };
-
 
 
 function generateEstimatePDF(estimate, callback) {
@@ -244,141 +250,143 @@ function generateEstimatePDF(estimate, callback) {
             callback(null, pdfBuffer);
         });
 
-        doc.font("Times-Roman");
-        doc.fontSize(12);
-
-        // Add header
-        doc.moveDown(2);
-
-        // Add logo
+        // --- HEADER WITH LOGO ---
+        doc.font("Times-Roman").fontSize(12);
         const logoPath = path.join(__dirname, 'public/sunpainting_logo_blue.png');
         if (fs.existsSync(logoPath)) {
-            const imageX = (doc.page.width - 128) / 2; // Center the image horizontally
-            doc.image(logoPath, imageX, 0, { width: 128 });
-        } else {
-            console.error('Logo file not found:', logoPath);
+            const imageX = (doc.page.width - 128) / 2;
+            doc.image(logoPath, imageX, doc.y, { width: 128 });
+            doc.moveDown(2);
         }
 
-        doc.moveDown(2);
-
-        // Add company details if available
-      
-
+        // --- COMPANY DETAILS ---
         if (creds.companyAddress) {
             doc.fontSize(12).text(creds.companyAddress, { align: 'center' });
         }
-        doc.moveDown();
-
-        // Add estimate details
-            doc.fontSize(12).text(`   Date: ${new Date(estimate.takeoff.takeoff_created_at).toLocaleDateString() || 'N/A'}`);
-        if (estimate.takeoff.takeoff_start_date) {
-            doc.text(`   Start Date: ${new Date(estimate.takeoff.takeoff_start_date).toLocaleDateString() || 'N/A'}`);
-        }
-        doc.moveDown();
-        doc.text(`To: ${estimate.takeoff.customer_givenName || 'N/A'}`);
-        doc.text(`Company: ${estimate.takeoff.customer_CompanyName || 'N/A'}`);
-        doc.text(`Billing Address: ${estimate.takeoff.customer_billing_address || 'N/A'}`);
-        doc.text(`Phone: ${estimate.takeoff.customer_phone || 'N/A'}`);
-        doc.text(`Email: ${estimate.takeoff.customer_invoice_email_address || 'N/A'}`);
         doc.moveDown(2);
 
-        // sales person
-        if (estimate.takeoff.creator_name) {
-            doc.text(`Sales Person: ${estimate.takeoff.creator_name}`);
-        } 
-        if (estimate.takeoff.creator_email) {
-            doc.text(`Sales Person Email: ${estimate.takeoff.creator_email}`);
-        }
+        // --- ESTIMATE DETAILS ---
+        const details = [
+            [`Date:`, new Date(estimate.takeoff.takeoff_created_at).toLocaleDateString() || 'N/A'],
+            estimate.takeoff.takeoff_start_date ? [`Start Date:`, new Date(estimate.takeoff.takeoff_start_date).toLocaleDateString() || 'N/A'] : null,
+            [`To:`, estimate.takeoff.customer_givenName || 'N/A'],
+            [`Company:`, estimate.takeoff.customer_CompanyName || 'N/A'],
+            [`Billing Address:`, estimate.takeoff.customer_billing_address || 'N/A'],
+            [`Phone:`, estimate.takeoff.customer_phone || 'N/A'],
+            [`Email:`, estimate.takeoff.customer_invoice_email_address || 'N/A'],
+            estimate.takeoff.creator_name ? [`Sales Person:`, estimate.takeoff.creator_name] : null,
+            estimate.takeoff.creator_email ? [`Sales Person Email:`, estimate.takeoff.creator_email] : null,
+        ].filter(Boolean);
+
+        details.forEach(([label, value]) => {
+            doc.text(`${label} ${value}`);
+        });
         doc.moveDown(2);
 
-        // Add inclusions and exclusions in a table
-        doc.moveDown();
+        // --- INCLUSIONS & EXCLUSIONS TABLE ---
+        const startY = doc.y;
+        const descriptionX = 50;
+        const totalX = 450;
+        const sectionLabelOptions = { underline: true };
 
-        const tableTop = doc.y;
-        const descriptionWidth = 400;
-        const totalWidth = 100;
+        // Table header
+        doc.font("Times-Bold").fontSize(12)
+           .text('Description', descriptionX, doc.y)
+           .text('Total', totalX, startY);
+        doc.font("Times-Roman");
+        doc.moveTo(descriptionX, doc.y + 5).lineTo(totalX + 90, doc.y + 5).stroke();
+        doc.moveDown(1.2);
 
-        // Table headers
-        doc.fontSize(12).text('Description', 50, tableTop, { bold: true });
-        doc.text('Total', 50 + descriptionWidth, tableTop, { bold: true });
+        // Inclusions row
+        doc.font("Times-Bold").text('Inclusions', descriptionX, doc.y);
+        doc.font("Times-Roman").text(`$${numbersWithCommas(estimate.takeoff.takeoff_total) || '0.00'}`, totalX, doc.y, { align: 'right' });
+        doc.moveDown(0.7);
 
-        // Draw a line under the headers
-        doc.moveTo(50, tableTop + 15)
-            .lineTo(50 + descriptionWidth + totalWidth, tableTop + 15)
-            .stroke();
-
-        // Add inclusions
-        let rowTop = tableTop + 25;
+        // Inclusions text
         let inclusion = estimate.estimate.inclusions || 'N/A';
-        let inclusionTotal = numbersWithCommas(estimate.takeoff.takeoff_total) || '0.00';
-        inclusion = inclusion.replace(/<[^>]+>/g, ''); // Remove HTML tags
-        doc.fontSize(12).text('Inclusions', 50, rowTop);
-        doc.text(`$${inclusionTotal}`, 50 + descriptionWidth, rowTop);
-        rowTop += 20;
-        doc.text(inclusion, 50, rowTop, { width: descriptionWidth });
-        rowTop += 100;
+        inclusion = cleanHTML(inclusion);
+        doc.fontSize(11).text(inclusion, descriptionX + 15, doc.y, { width: totalX - descriptionX - 25 });
+        doc.moveDown(1.5);
 
-        // Draw a line between inclusions and exclusions
-        doc.moveTo(50, rowTop)
-            .lineTo(50 + descriptionWidth + totalWidth, rowTop)
-            .stroke();
-        rowTop += 10; // Move down for exclusions
-        // Add a label for exclusions
+        // Divider line
+        doc.moveTo(descriptionX, doc.y).lineTo(totalX + 90, doc.y).stroke();
+        doc.moveDown(0.7);
 
-        // Add exclusions
+        // Exclusions row
+        doc.font("Times-Bold").fontSize(12).text('Exclusions', descriptionX, doc.y);
+        doc.font("Times-Roman").text(`$${numbersWithCommas(estimate.estimate.exclusion_total) || '0.00'}`, totalX, doc.y, { align: 'right' });
+        doc.moveDown(0.7);
+
         let exclusion = estimate.estimate.exclusions || 'N/A';
-        let exclusionTotal = numbersWithCommas(estimate.estimate.exclusion_total) || '0.00';
-        exclusion = exclusion.replace(/<[^>]+>/g, ''); // Remove HTML tags
-        doc.fontSize(12).text('Exclusions', 50, rowTop);
-        doc.text(`$${exclusionTotal}`, 50 + descriptionWidth, rowTop);
-        rowTop += 15
-        doc.text(exclusion, 50, rowTop, { width: descriptionWidth });
-        rowTop += 40;
-
+        exclusion = cleanHTML(exclusion);
+        doc.fontSize(11).text(exclusion, descriptionX + 15, doc.y, { width: totalX - descriptionX - 25 });
         doc.moveDown(2);
 
-        // Add items table
-        doc.fontSize(14).text('Options', { underline: true });
-        doc.moveDown();
+        // --- OPTIONS TABLE ---
+        doc.font("Times-Bold").fontSize(14).text('Options', { underline: true });
+        doc.moveDown(1);
 
-        // Define table headers
-        const optionsTableTop = doc.y;
-        const itemWidth = 400;
-        const totalOptionWidth = 100;
+        // Option headers
+        doc.fontSize(12).text('Option', descriptionX, doc.y)
+                        .text('Total', totalX, doc.y, { align: 'right' });
+        doc.moveTo(descriptionX, doc.y + 5).lineTo(totalX + 90, doc.y + 5).stroke();
+        doc.moveDown(1.2);
 
-        doc.fontSize(12).text('Description', 50, optionsTableTop, { bold: true });
-        doc.text('Total', 50 + itemWidth, optionsTableTop, { bold: true });
-
-        // Draw a line under the headers
-        doc.moveTo(50, optionsTableTop + 15)
-            .lineTo(50 + itemWidth + totalOptionWidth, optionsTableTop + 15)
-            .stroke();
-
-        // Add table rows
-        let optionsRowTop = optionsTableTop + 25;
-        if (estimate.options.length > 0) {
+        // Options list
+        if (estimate.options && estimate.options.length > 0) {
             estimate.options.forEach((item) => {
                 const total = parseFloat(item.labor_cost) + parseFloat(item.material_cost);
                 let formattedTotal = numbersWithCommas(total.toFixed(2));
-                doc.fontSize(12).text(item.description || 'N/A', 50, optionsRowTop);
-                doc.text(`$${formattedTotal || '0.00'}`, 50 + itemWidth, optionsRowTop);
-                optionsRowTop += 20; // Move to the next row
+                doc.font("Times-Roman").fontSize(12)
+                   .text(item.description || 'N/A', descriptionX, doc.y)
+                   .text(`$${formattedTotal || '0.00'}`, totalX, doc.y, { align: 'right' });
+                doc.moveDown(1);
             });
         } else {
-            doc.fontSize(12).text('No items available.', 50, optionsRowTop);
+            doc.font("Times-Roman").fontSize(12).text('No items available.', descriptionX, doc.y);
+            doc.moveDown();
         }
 
-        // Add total amount
+        // --- TOTAL AMOUNT ---
         doc.moveDown(2);
-        doc.fontSize(14).text(`Total Amount: $${numbersWithCommas(estimate.takeoff.takeoff_total) || '0.00'}`, { align: 'right', bold: true });
-        doc.moveDown(2);
+        doc.font("Times-Bold").fontSize(14)
+           .text(`Total Amount: $${numbersWithCommas(estimate.takeoff.takeoff_total) || '0.00'}`,
+                 { align: 'right' });
+        doc.font("Times-Roman");
 
-        // Add footer
+    
+
+        // --- TERMS & CONDITIONS ---
+        if (estimate.takeoff.terms) {
+  
+            doc.moveDown();
+            doc.moveDown(1);
+            doc.font("Times-Roman").fontSize(12).text(
+                cleanHTML(estimate.takeoff.terms),
+                50, doc.y,
+                { width: doc.page.width - 100, align: 'left' }
+            );
+        }
+
+      
+      
+
         doc.end();
     } catch (err) {
         console.error('Error generating PDF:', err);
         callback(err);
     }
+}
+
+
+// Helper function to clean HTML content
+function cleanHTML(text) {
+    return text.replace(/<br\s*\/?>/gi, '\n')
+               .replace(/&nbsp;/g, ' ')
+               .replace(/<[^>]+>/g, '')
+               .replace(/&amp;/g, '&')
+               .replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>');
 }
 
 // function generateSubcontractorFormPDF(formData, callback) {

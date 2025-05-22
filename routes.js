@@ -1994,33 +1994,44 @@ module.exports = function (app) {
           return res.render("error.html", { link: '/', linkTitle: 'back', friendly: "Invalid estimate link. Please contact sales respresentative for new estimate." });
         }
 
-       
-        const estimateObject = {
-          takeoff: takeoff,
-          options: options,
-          estimate: estimate[0],
-        }
 
-        pdf.generateEstimatePDF(estimateObject, function (err, pdfBuffer) {
+        db.getSystemSettingByName("terms", function (err, terms) {
           if (err) {
             console.log(err);
-            return res.status(500).send("Error generating PDF");
+            return res.status(500).send("Error retrieving terms");
           }
-          if (!pdfBuffer || !Buffer.isBuffer(pdfBuffer)) {
-            console.error("PDF generation returned invalid data");
-            return res.status(500).send("Failed to generate valid PDF");
+
+          //console.log(terms[0].setting_value);
+          takeoff.terms = terms[0].setting_value;
+
+
+          const estimateObject = {
+            takeoff: takeoff,
+            options: options,
+            estimate: estimate[0],
           }
-          try {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'attachment; filename=estimate.pdf');
-            res.end(pdfBuffer, 'binary');
-          } catch (sendError) {
-            console.error("Error sending PDF:", sendError);
-            res.status(500).send("Error sending PDF");
-          }
-        });
-      }
-    );
+
+          pdf.generateEstimatePDF(estimateObject, function (err, pdfBuffer) {
+            if (err) {
+              console.log(err);
+              return res.status(500).send("Error generating PDF");
+            }
+            if (!pdfBuffer || !Buffer.isBuffer(pdfBuffer)) {
+              console.error("PDF generation returned invalid data");
+              return res.status(500).send("Failed to generate valid PDF");
+            }
+            try {
+              res.setHeader('Content-Type', 'application/pdf');
+              res.setHeader('Content-Disposition', 'attachment; filename=estimate.pdf');
+              res.end(pdfBuffer, 'binary');
+            } catch (sendError) {
+              console.error("Error sending PDF:", sendError);
+              res.status(500).send("Error sending PDF");
+            }
+          });
+        }
+        );
+      });
   });
 
   app.post('/changeStartDate', function (req, res) {
