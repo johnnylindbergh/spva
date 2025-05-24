@@ -150,7 +150,7 @@ module.exports = function (app) {
     console.log("subcontractor userId:", user.id);
     console.log("Looking for jobs assigned to userId:", user.id);
     db.query(
-      "SELECT jobs.*, subcontractor_jobs_assignment.allotted_bid as bid FROM jobs INNER JOIN subcontractor_jobs_assignment ON jobs.id = subcontractor_jobs_assignment.job_id WHERE subcontractor_jobs_assignment.user_id = ? AND jobs.isArchived = 0;",
+      "SELECT jobs.*, subcontractor_jobs_assignment.allotted_bid as bid FROM jobs INNER JOIN subcontractor_jobs_assignment ON jobs.id = subcontractor_jobs_assignment.job_id WHERE subcontractor_jobs_assignment.user_id = ? AND jobs.isArchived = 0 AND subcontractor_jobs_assignment.isArchived = 0;",
       [user.id],
       function (error, results) {
         if (error) {
