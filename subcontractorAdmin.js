@@ -281,7 +281,7 @@ module.exports = function (app) {
             FROM subcontractor_jobs_assignment 
             JOIN users ON subcontractor_jobs_assignment.user_id = users.id 
             JOIN jobs ON subcontractor_jobs_assignment.job_id = jobs.id
-            WHERE subcontractor_jobs_assignment.isArchived = 0
+            WHERE subcontractor_jobs_assignment.isArchived = 0 AND jobs.isArchived = 0
             ORDER BY users.id;`,
             function (error, results) {
                 if (error) {
