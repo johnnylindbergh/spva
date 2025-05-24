@@ -28,7 +28,7 @@ function getBidsData(form_id) {
           SELECT MIN(id) 
           FROM subcontractor_jobs_assignment 
           WHERE job_id = form_bid.job_id
-        )s
+        )
 WHERE form_bid.form_id = ?;
 `,
       [form_id],
