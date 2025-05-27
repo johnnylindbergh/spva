@@ -1257,8 +1257,6 @@ function loadTakeoffMaterials(id) {
               );
 
 
-              console.log("materejirj", material);
-
               if (paintOrderIndex === -1) {
                 paintOrder.push({
                   materialId: material.id,
