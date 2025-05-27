@@ -390,6 +390,9 @@ function add_subject(id) {
   // let scrollPos = $(window).scrollTop(); // Store current scroll position
   
   dropdown.toggle();
+  setTimeout(function () {
+    $(window).scrollTop(scrollPos);
+  }, 150);
   // get the coordinates of the button
   // $(window).scrollTop(scrollPos);
 

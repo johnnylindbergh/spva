@@ -352,6 +352,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const jobStartDate = document.getElementById('editJobStartDate').value;
         const jobEndDate = document.getElementById('editJobEndDate').value;
         const jobSupervisor = parseInt(document.getElementById('editJobSupervisor').value);
+
+        // get the job type from the radio buttons
+        const jobTypeBid = document.getElementById('editJobTypeBid').checked;
+        const jobTypeTM = document.getElementById('editJobTypeTM').checked;
+        let jobType = '';
+        if (jobTypeBid) {
+            jobType = 'bid';
+        } else if (jobTypeTM) {
+            jobType = 'TM';
+        }
         console.log("jobId:", jobId);
             console.log("jobName:", jobName);
             console.log("jobDescription:", jobDescription);
@@ -383,7 +393,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     job_location: jobLocation,
                     job_start_date: jobStartDate,
                     job_end_date: jobEndDate,
-                    supervisor_id: jobSupervisor
+                    supervisor_id: jobSupervisor,
+                    job_type: jobType
                 })
             });
             if (response.ok) {

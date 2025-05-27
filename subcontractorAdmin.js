@@ -61,15 +61,15 @@ module.exports = function (app) {
 
     app.put('/api/updateJob', mid.isSubcontractorAdmin, function (req, res) {
 
-        const { job_id, job_name, job_description, job_location, job_start_date, job_end_date,supervisor_id  } = req.body;
+        const { job_id, job_name, job_description, job_location, job_start_date, job_end_date, supervisor_id, job_type  } = req.body;
         console.log('req body', req.body);
-        if (!job_id || !job_name || !job_description || !job_location || !job_start_date || !job_end_date || !supervisor_id) {
+        if (!job_id || !job_name || !job_description || !job_location || !job_start_date || !job_end_date || !supervisor_id || !job_type) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
         db.query(
-            "UPDATE jobs SET job_name = ?, job_description = ?, job_location = ?, job_start_date = ?, job_end_date = ?, supervisor_id = ? WHERE id = ?",
-            [job_name, job_description, job_location, job_start_date, job_end_date, supervisor_id, job_id],
+            "UPDATE jobs SET job_name = ?, job_description = ?, job_location = ?, job_start_date = ?, job_end_date = ?, supervisor_id = ?, job_type = ? WHERE id = ?",
+            [job_name, job_description, job_location, job_start_date, job_end_date, supervisor_id, job_type, job_id],
             function (error, result) {
                 if (error) {
                     console.error('Error updating job:', error);

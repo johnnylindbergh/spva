@@ -429,6 +429,7 @@ CREATE TABLE subcontractor_jobs_assignment (
   agreement_id INT,
   isArchived TINYINT(1) DEFAULT 0,
   status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+  notes TEXT,
   allotted_bid DECIMAL(10,2),
   PRIMARY KEY (id),
   UNIQUE KEY (job_id, user_id), -- Prevent duplicate assignments
