@@ -1042,6 +1042,31 @@ module.exports = function (app) {
     });
   });
 
+  app.post("/change-equipment-cost", mid.isAdmin, function (req, res) {
+    console.log("changing equipment cost ", req.body);
+    db.takeoffGetStatus(req.body.takeoff_id, function (err, status) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving takeoff status");
+      } else {
+        if (status < 4) {
+          db.changeEquipmentCost(req.body.takeoff_id, req.body.equipment_cost, function (err) {
+            if (err) {
+              console.log(err);
+              res.status(500).send("Error updating equipment cost");
+            } else {
+              console.log("updated equipment cost");
+              res.end();
+            }
+          });
+        } else {
+          console.log("Takeoff is signed, cannot change equipment cost");
+          res.status(500).send("Takeoff is signed, cannot change equipment cost");
+        }
+      }
+    });
+  });
+
   app.post("/change-profit", mid.isAdmin, function (req, res) {
     console.log("changing profit ", req.body);
     db.takeoffGetStatus(req.body.takeoff_id, function (err, status) {

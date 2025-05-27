@@ -41,6 +41,7 @@ module.exports = {
     takeoffs.material_markup AS material_markup,
     takeoffs.touchups_cost AS touchups_cost,
     takeoffs.profit as profit,
+    takeoffs.equipment_cost AS equipment_cost,
     takeoffs.labor_markup AS labor_markup,
     takeoffs.supervisor_markup AS supervisor_markup,
     takeoffs.travel_cost AS travel_cost,

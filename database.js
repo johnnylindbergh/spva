@@ -1536,6 +1536,19 @@ module.exports = {
     );
   },
 
+  changeEquipmentCost: function (takeoff_id, equipment_cost, callback) {
+    console.log("change equipment cost: ", equipment_cost);
+    con.query(
+      "UPDATE takeoffs SET equipment_cost = ? WHERE id = ?;",
+      [equipment_cost, takeoff_id],
+      function (err) {
+        if (err) return callback(err);
+        callback(null);
+      }
+    );
+  },
+  
+
   changeProfit: function (takeoff_id, profit, callback) {
     console.log("change profit: ", profit);
     con.query(

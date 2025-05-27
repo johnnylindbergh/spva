@@ -13,6 +13,7 @@ let supervisor_markup = 0; // Supervisor markup as a percentage
 let travel_extra = 0;
 let touchups_cost = 0; // This should not affect gross profit
 let misc_material_cost = 0;
+let equipment_cost = 0; // Equipment cost, not part of COGS
 let tax = 0;
 let profit = 0;
 
@@ -104,7 +105,7 @@ let paintOrder = [];
 //   $.post("/toggle-material", { material_id: materialId })
 //     .done(function () {
 //       console.log("Material toggled successfully: " + materialId);
-//       debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id);
+//       loadTakeoffMaterials(takeoff_id);
 //     })
 //     .fail(function () {
 //       console.log("Failed to toggle material: " + materialId);
@@ -121,7 +122,7 @@ function separateLineItem(materialId, checkbox) {
   $.post("/separate-line-item", { material_id: materialId, takeoff_id: takeoff_id })
     .done(function () {
       console.log("Material separate line item toggled successfully: " + materialId);
-      debouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       console.log("Failed to toggle material separate line item: " + materialId);
@@ -390,9 +391,6 @@ function add_subject(id) {
   // let scrollPos = $(window).scrollTop(); // Store current scroll position
   
   dropdown.toggle();
-  setTimeout(function () {
-    $(window).scrollTop(scrollPos);
-  }, 150);
   // get the coordinates of the button
   // $(window).scrollTop(scrollPos);
 
@@ -437,7 +435,7 @@ function add_material(id) {
 //         console.log(
 //           "Material removed: " + material_id + " from subject: " + subject_id
 //         );
-//         debounceddebouncedLoadTakeoffMaterials(takeoff_id); // Only reload the takeoff materials table
+//         loadTakeoffMaterials(takeoff_id); // Only reload the takeoff materials table
 //       })
 //       .fail(function () {
 //         console.log("Failed to remove material from subject: " + material_id);
@@ -468,7 +466,7 @@ function removeMaterialSubject(sId, mId) {
   })
     .done(function () {
       console.log("Material removed: " + mId + " from subject: " + sId);
-      debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       console.log("Failed to remove material from subject: " + mId);
@@ -487,9 +485,9 @@ function add_material_subject() {
         console.log(
           "Material added to subject: " + material_id + " " + subject_id
         );
-        // wait 0.5 seconds and then call debounceddebouncedLoadTakeoffMaterials
+        // wait 0.5 seconds and then call loadTakeoffMaterials
         setTimeout(function () {
-          debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+          loadTakeoffMaterials(takeoff_id);
         }, 150);
       })
       .fail(function () {
@@ -571,7 +569,7 @@ function changeLaborRate() {
   $.post("/change-labor-rate", { takeoff_id: takeoff_id, labor_rate: labor_rate })
     .done(function () {
       console.log("Labor rate updated: " + labor_rate);
-      //debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      //loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       console.log("Failed to update labor rate: " + labor_rate);
@@ -601,7 +599,7 @@ function changeLaborMarkup(value) {
   $.post("/change-labor-markup", { takeoff_id: takeoff_id, labor_markup: (labor_markup.toFixed(2)) })
     .done(function () {
       console.log("Labor markup updated: " + labor_markup);
-      debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       console.log("Failed to update labor markup: " + labor_markup);
@@ -637,7 +635,7 @@ function changeMaterialMarkup(value) {
   $.post("/change-material-markup", { takeoff_id: takeoff_id, material_markup: material_markup.toFixed(2) })
     .done(function () {
       console.log("Material markup updated: " + material_markup);
-      debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       Swal.fire({
@@ -666,7 +664,7 @@ function updateSupervisorMarkup(value) {
   $.post("/change-supervisor-markup", { takeoff_id: takeoff_id, supervisor_markup: (supervisor_markup).toFixed(2) })
     .done(function () {
       console.log("Supervisor markup updated: " + supervisor_markup);
-      debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       Swal.fire({
@@ -704,7 +702,7 @@ function updateTravelExtra(value) {
   $.post("/change-travel-cost", { takeoff_id: takeoff_id, travel_extra: travel_extra })
     .done(function () {
       console.log("Travel extra markup updated: " + travel_extra);
-      debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       Swal.fire({
@@ -739,7 +737,7 @@ function updateTouchupsCost(value) {
   $.post("/change-touchups-cost", { takeoff_id: takeoff_id, touchups_cost: touchups_cost })
     .done(function () {
       console.log("Touchups cost updated: " + touchups_cost);
-      debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       Swal.fire({
@@ -763,7 +761,7 @@ function updateProfit(value) {
   $.post("/change-profit", { takeoff_id: takeoff_id, profit: profit })
     .done(function () {
       console.log("Profit updated: " + profit);
-      debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       Swal.fire({
@@ -810,7 +808,7 @@ function updateTax(value) {
   $.post("/change-tax", { takeoff_id: takeoff_id, tax: tax })
     .done(function () {
       console.log("Tax updated: " + tax);
-      debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       Swal.fire({
@@ -845,7 +843,41 @@ function updateMiscMaterialCost(value) {
   $.post("/change-misc-material-cost", { takeoff_id: takeoff_id, misc_material_cost: misc_material_cost })
     .done(function () {
       console.log("Misc material cost updated: " + misc_material_cost);
-      debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
+    })
+    .fail(function () {
+      Swal.fire({
+        title: 'Error',
+        text: 'Cannot modify takeoff',
+        icon: 'error',
+        showCancelButton: false,
+        confirmButtonText: 'OK'
+      }).then((result) => {
+        console.log('clicked');
+        // go back one page
+        //window.history.back();
+      });
+    });
+}
+
+function updateEquipmentCostHelper(value) {
+  equipment_cost = value;
+  $('#equipmentCostValue').val(equipment_cost);
+  debounceUpdateEquipmentCost(value);
+}
+
+const debounceUpdateEquipmentCost = debounce(function (value) {
+  updateEquipmentCost(value);
+}, 200);
+
+function updateEquipmentCost(value) {
+  equipment_cost = parseFloat(value);
+  console.log("Changing equipment cost to: " + equipment_cost);
+  $("#equipmentCost").val(parseFloat(value));
+  $.post("/change-equipment-cost", { takeoff_id: takeoff_id, equipment_cost: equipment_cost })
+    .done(function () {
+      console.log("Equipment cost updated: " + equipment_cost);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       Swal.fire({
@@ -1040,7 +1072,7 @@ function loadTakeoffMaterials(id) {
           updateMeasurement(rowId, newMeasurement);
           // Wait one sec and then reload the table to reflect changes
           setTimeout(function () {
-            debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+            loadTakeoffMaterials(takeoff_id);
           }, 200);
         });
 
@@ -1050,7 +1082,7 @@ function loadTakeoffMaterials(id) {
           updateMeasurementUnit(rowId, newMeasurementUnit);
           // Wait one sec and then reload the table to reflect changes
           setTimeout(function () {
-            debounceddebouncedLoadTakeoffMaterials(takeoff_id);
+            loadTakeoffMaterials(takeoff_id);
           }, 200);
         });
 
@@ -1239,7 +1271,7 @@ function loadTakeoffMaterials(id) {
 
           
           } else {
-            console.log("debounceddebouncedLoadTakeoffMaterials: No materials selected");
+            console.log("LoadTakeoffMaterials: No materials selected");
           }
 
           newRow.append(materialsCell);
@@ -1276,7 +1308,7 @@ function loadTakeoffMaterials(id) {
       let materialCost = (getMaterialTotal() + getMaterialMarkup()) * (1 + tax / 100);
 
       // Calculate final totals using the existing functions
-      let finalTotal = getRevenue() + touchups_cost + getMaterialTax(); // Revenue already includes markups, profit, and supervisor markup
+      let finalTotal = getRevenue() + touchups_cost + equipment_cost + getMaterialTax(); // Revenue already includes markups, profit, and supervisor markup
       let grossProfit = getGrossProfit();
       let grossProfitMargin = getGrossProfitMargin();
 
@@ -1381,8 +1413,6 @@ function loadTakeoffMaterials(id) {
     });
 }
 
-const debounceddebounceddebouncedLoadTakeoffMaterials = debounce(debounceddebounceddebouncedLoadTakeoffMaterials, 150);
-
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
@@ -1408,7 +1438,7 @@ function setMeasurement(rowId, newMeasurement) {
   $.post("/update-measurement", { id: rowId, measurement: newMeasurement })
     .done(function () {
       console.log("Measurement updated for subject: " + rowId);
-      debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       console.log("Failed to update measurement for subject: " + rowId);
@@ -1420,7 +1450,7 @@ function setMeasurement(rowId, newMeasurement) {
 //   $.post("/update-measurement", { id: rowId, measurement: newMeasurement })
 //     .done(function () {
 //       console.log("Measurement updated for subject: " + rowId);
-//       debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id);
+//       loadTakeoffMaterials(takeoff_id);
 //     })
 //     .fail(function () {
 //       console.log("Failed to update measurement for subject: " + rowId);
@@ -1437,7 +1467,7 @@ function updateMeasurementUnit(rowId, newUnit) {
       console.log(
         "Measurement unit updated successfully for subject: " + rowId
       );
-      debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id); // Reload the materials to reflect changes
+      loadTakeoffMaterials(takeoff_id); // Reload the materials to reflect changes
     })
     .fail(function () {
       console.log("Failed to update measurement unit for subject: " + rowId);
@@ -1466,7 +1496,7 @@ function laborPriceChange(id) {
   $.post("/change-labor-price", { subject: id, price: newPrice })
     .done(function () {
       console.log("Price updated for material: " + id);
-      debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       console.log("Failed to update price for material: " + id);
@@ -1478,7 +1508,7 @@ function updateMaterialCoverage(materialId, newCoverage) {
   $.post("/update-material-coverage", { material_id: materialId, coverage: newCoverage })
     .done(function () {
       console.log("Material coverage updated successfully for material: " + materialId);
-      debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id); // Reload the materials to reflect changes
+      loadTakeoffMaterials(takeoff_id); // Reload the materials to reflect changes
     })
     .fail(function () {
       console.log("Failed to update material coverage for material: " + materialId);
@@ -1516,9 +1546,9 @@ function priceChange(id) {
       console.log("Failed to update price for material: " + id);
     });
 
-  // wait 0.5 seconds and then call debounceddebounceddebouncedLoadTakeoffMaterials
+  // wait 0.5 seconds and then call loadTakeoffMaterials
   setTimeout(function () {
-    debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id);
+    loadTakeoffMaterials(takeoff_id);
   }, 200);
 }
 
@@ -1536,7 +1566,7 @@ function saveNotes(id) {
     .done(function () {
       console.log("Notes saved for material: " + currentNoteId);
       $("#notesModal").modal("hide");
-      debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id);
+      loadTakeoffMaterials(takeoff_id);
     })
     .fail(function () {
       console.log("Failed to save notes for material: " + currentNoteId);
@@ -1611,7 +1641,7 @@ function createSubject(event) {
   })
     .done(function () {
       alert("Subject created successfully!");
-      debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id); // Reload necessary data without redirecting
+      loadTakeoffMaterials(takeoff_id); // Reload necessary data without redirecting
     })
     .fail(function () {
       alert("Failed to create the subject. Please try again.");
@@ -1732,8 +1762,8 @@ let undoStack = [];
     $.post("/set-material-state", { material_id: materialId, state: value })
       .done(function() {
          console.log("Updated material " + materialId + " to " + value);
-         // then refresh UI or call debounceddebounceddebouncedLoadTakeoffMaterials
-          debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id);
+         // then refresh UI or call loadTakeoffMaterials
+          loadTakeoffMaterials(takeoff_id);
       })
       .fail(function() {
          console.log("Failed to update material " + materialId);
@@ -1767,9 +1797,9 @@ $(document).ready(function () {
   console.log("Takeoff ID: " + takeoff_id);
 
   setTimeout(function () {
-    debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id);
+    loadTakeoffMaterials(takeoff_id);
   }, 100);
-
+  
 
   // setTimeout(function () {
   //   updateLaborRate();
@@ -1793,6 +1823,6 @@ $(document).ready(function () {
 
 
   // setInterval(function () {
-  //   debounceddebounceddebouncedLoadTakeoffMaterials(takeoff_id);
+  //   loadTakeoffMaterials(takeoff_id);
   // }, 2000);
 });

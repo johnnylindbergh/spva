@@ -164,6 +164,13 @@
         <br>
 
         <div style="display: flex; align-items: center;">
+          <label for="equipmentCost" style="width: 150px; white-space: nowrap;">Equipment:</label>
+          <input type="range" id="equipmentCost" name="slider" min="0" max="5000" value="{{equipment_cost}}" oninput="updateEquipmentCostHelper(this.value)" style="width: 200px;">
+          <input type="number" id="equipmentCostValue" value="{{equipment_cost}}" oninput="updateEquipmentCostHelper(this.value)" style="width: 70px; margin-left: 8px;">$
+        </div>
+        <br>
+
+        <div style="display: flex; align-items: center;">
           <label for="profit" style="width: 150px; white-space: nowrap;">GB Profit:</label>
           <input type="range" id="profit" name="slider" min="0" max="100" value="{{profit}}" oninput="updateProfitHelper(this.value)" style="width: 200px;">
           <input type="number" id="profitValue" value="{{profit}}" oninput="updateProfitHelper(this.value)" style="width: 70px; margin-left: 8px;">%
