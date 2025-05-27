@@ -1,3 +1,4 @@
+
 // some global variables
 let subject_id = 0;
 let material_id = 0;
@@ -1255,11 +1256,17 @@ function loadTakeoffMaterials(id) {
                 (x) => x.materialId === material.id
               );
 
+
+              console.log("materejirj", material);
+
               if (paintOrderIndex === -1) {
                 paintOrder.push({
                   materialId: material.id,
                   materialName: material.name,
+                  materialCost: parseFloat(material.cost) + parseFloat(row.cost_delta),
+                  
                   numberOfGallons: Math.ceil(adjustedMeasurement / adjustedCoverage),
+
                 });
               } else {
                 paintOrder[paintOrderIndex].numberOfGallons += Math.ceil(
@@ -1588,6 +1595,8 @@ function renderPaintOrder(paintOrder) {
     let newRow = $("<tr></tr>");
     newRow.append("<td>" + row.materialName + "</td>");
     newRow.append("<td>" + row.numberOfGallons +" gal"+ "</td>");
+    newRow.append("<td>$" + (row.numberOfGallons * parseFloat(row.materialCost)).toFixed(2) + "</td>");
+
     paintOrderTable.append(newRow);
   });
 }
