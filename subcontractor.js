@@ -256,8 +256,6 @@ module.exports = function (app) {
                       ON form_items.id = form_item_days.form_item_id 
                   JOIN jobs 
                       ON form_items.job_id = jobs.id 
-                  JOIN subcontractor_jobs_assignment 
-                      ON subcontractor_jobs_assignment.job_id = form_items.job_id 
                   LEFT JOIN tickets
                       ON tickets.id = form_items.ticket_id
                    

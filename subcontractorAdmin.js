@@ -335,7 +335,7 @@ module.exports = function (app) {
 
 app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res) {
     const assignmentId = req.params.id;
-    db.query("UPDATE subcontractor_jobs_assignment SET isArchived = 1 WHERE id = ?;", [assignmentId], function (error, results) {
+    db.query("DELETE FROM subcontractor_jobs_assignment WHERE id = ?;", [assignmentId], function (error, results) {
         if (error) {
             console.error('Error archiving assignment:', error);
             return res.status(500).json({ error: 'Internal server error' });
