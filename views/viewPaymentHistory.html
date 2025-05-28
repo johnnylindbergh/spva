@@ -57,8 +57,29 @@
     </br>
 
 
+      <!-- videoContainer for embedded youtube video-->
+            <div id="optionsVideoContainer" class="mb-4" style="display: none; text-align: center;">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/3zDkMfjyfaU?si=gr1BKqtJu-aqCAmH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
         <!-- options table -->
-        <h3 class="mb-4">Options</h2>
+        <h3 class="mb-4">
+            Options
+            <i class="fa fa-info-circle" id="OptionsInfoButton" aria-hidden="true" title="Options details"></i>
+        </h3>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+            var optionsInfoBtn = document.getElementById('OptionsInfoButton');
+            if (optionsInfoBtn) {
+                optionsInfoBtn.addEventListener('click', function() {
+                var optionsVideoContainer = document.getElementById('optionsVideoContainer');
+                if (optionsVideoContainer) {
+                    optionsVideoContainer.style.display = 'block';
+                }
+                });
+            }
+            });
+        </script>
             <table id="optionsTable" class="table table-striped">
                 <thead class="thead-dark">
                     <tr>
@@ -75,7 +96,28 @@
 
         </br>
 
-        <h3 class="mb-4">Payment History</h2>
+           <!-- videoContainer for embedded youtube video-->
+            <div id="paymentHistoryVideoContainer" class="mb-4" style="display: none; text-align: center;">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/3zDkMfjyfaU?si=gr1BKqtJu-aqCAmH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+        <h3 class="mb-4">
+            Payment History
+            <i class="fa fa-info-circle" id="PaymentHistoryInfoButton" aria-hidden="true" title="Payment History details"></i>
+        </h3>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var paymentHistoryInfoBtn = document.getElementById('PaymentHistoryInfoButton');
+                if (paymentHistoryInfoBtn) {
+                    paymentHistoryInfoBtn.addEventListener('click', function() {
+                        var paymentHistoryVideoContainer = document.getElementById('paymentHistoryVideoContainer');
+                        if (paymentHistoryVideoContainer) {
+                            paymentHistoryVideoContainer.style.display = 'block';
+                        }
+                    });
+                }
+            });
+        </script>
             <table id="paymentHistoryTable" class="table table-striped">
                 <thead class="thead-dark">
                     <tr>
@@ -97,13 +139,40 @@
                 </form>
             </div>
 
+
+
+               <!-- videoContainer for embedded youtube video-->
+            <div id="sovHistoryVideoContainer" class="mb-4" style="display: none; text-align: center;">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/3zDkMfjyfaU?si=gr1BKqtJu-aqCAmH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+
             <!-- sov creator button -->
             <a href="/createSOV?takeoff_id={{takeoff_id}}" style="text-decoration: none;">
                 <button id="createSOVBtn" class="btn btn-outline-primary mb-3" style="">Create Schedule of Values</button>
             </a>
+
+
+                    
             <!-- a section of past sovs -->
             <div id="sovHistory">
-                <h3 class="mb-4">Schedule of Values History</h2>
+                <h3 class="mb-4">
+                    Schedule of Values History
+                    <i class="fa fa-info-circle" id="SOVHistoryInfoButton" aria-hidden="true" title="Schedule of Values History details"></i>
+                </h3>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var sovHistoryInfoBtn = document.getElementById('SOVHistoryInfoButton');
+                        if (sovHistoryInfoBtn) {
+                            sovHistoryInfoBtn.addEventListener('click', function() {
+                                var sovHistoryVideoContainer = document.getElementById('sovHistoryVideoContainer');
+                                if (sovHistoryVideoContainer) {
+                                    sovHistoryVideoContainer.style.display = 'block';
+                                }
+                            });
+                        }
+                    });
+                </script>
                     <table id="sovHistoryTable" class="table table-striped">
                         <thead class="thead-dark">
                             <tr>
@@ -119,9 +188,16 @@
                     </table>
             </div>
 
+
+            <!-- videoContainer for embedded youtube video-->
+            <div id="invoiceVideoContainer" class="mb-4" style="display: none; text-align: center;">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/3zDkMfjyfaU?si=gr1BKqtJu-aqCAmH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+               
+
             <!-- invoices section -->
             <div id="invoices">
-                <h3 class="mb-4">Invoices</h2>
+                <h3 class="mb-4">Invoices <i class="fa fa-info-circle" id="InvoiceInfoButton" aria-hidden="true" title="Invoice details"></i></h3>
                     <table id="invoiceTable" class="table table-striped">
                         <thead class="thead-dark">
                             <tr>
@@ -137,8 +213,31 @@
                     </table>
             </div>
 
+
+             <!-- videoContainer for embedded youtube video-->
+            <div id="changeOrderVideoContainer" class="mb-4" style="display: none; text-align: center;">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/3zDkMfjyfaU?si=gr1BKqtJu-aqCAmH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+            
             <div id="change-orders">
-                <h3 class="mb-4">Change Orders</h2>
+                <h3 class="mb-4">
+                    Change Orders
+                    <i class="fa fa-info-circle" id="ChangeOrderInfoButton" aria-hidden="true" title="Change Order details"></i>
+                </h3>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var changeOrderInfoBtn = document.getElementById('ChangeOrderInfoButton');
+                        if (changeOrderInfoBtn) {
+                            changeOrderInfoBtn.addEventListener('click', function() {
+                                var changeOrderVideoContainer = document.getElementById('changeOrderVideoContainer');
+                                if (changeOrderVideoContainer) {
+                                    changeOrderVideoContainer.style.display = 'block';
+                                }
+                            });
+                        }
+                    });
+                </script>
                     <table id="changeOrderTable" class="table table-striped">
                         <thead class="thead-dark">
                             <tr>
@@ -167,6 +266,20 @@
 </br>
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Show an alert or modal with invoice info when the info button is clicked
+        document.addEventListener('DOMContentLoaded', function() {
+            var infoBtn = document.getElementById('InvoiceInfoButton');
+            if (infoBtn) {
+                infoBtn.addEventListener('click', function() {
+                    // populate the video container
+                    var videoContainer = document.getElementById('invoiceVideoContainer');
+                    videoContainer.style.display = 'block';
+               
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

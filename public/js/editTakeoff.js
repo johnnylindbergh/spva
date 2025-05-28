@@ -1335,9 +1335,13 @@ function loadTakeoffMaterials(id) {
 
       // Update labor total (including markup)
       $("#laborTotal")
-        .text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)))
+        .html(
+          "Labor Cost: $" +
+            numberWithCommas(laborTotalAdjusted.toFixed(2)) +
+            ' <i class="fa fa-info-circle" style="cursor:pointer;color:#007bff;" title="Show labor details"></i>'
+        )
         .off("click")
-        .on("click", function() {
+        .on("click", function () {
           showLaborTotalDetails();
         });
 
@@ -1869,6 +1873,7 @@ function showLaborTotalDetails() {
         bidResult.innerHTML = `
           <p>Labor Cost - Bid: $${diff.toFixed(2)}</p>
           <p>Gross Profit (with bid): $${(getGrossProfit() + diff).toFixed(2)}</p>
+          <p>Gross Profit Margin: ${((getGrossProfit() + diff) / (getRevenue() + diff) * 100).toFixed(2)}%</p>
         `;
       });
     }

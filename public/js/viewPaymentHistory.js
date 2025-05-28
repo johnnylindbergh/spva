@@ -298,3 +298,11 @@ $(document).ready(function () {
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
+// lisner for InvoiceInfoButton 
+//  on click, show an embedded youtube video 
+document.getElementById('InvoiceInfoButton').addEventListener('click', function() {
+    const videoContainer = document.getElementById('videoContainer');
+    videoContainer.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/watch?si=2nBjVTSEArqtvWm2&v=3zDkMfjyfaU&feature=youtu.be" frameborder="0" allowfullscreen></iframe>';
+    videoContainer.style.display = 'block';
+});
