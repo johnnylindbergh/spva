@@ -332,10 +332,13 @@ function generateEstimatePDF(estimate, callback) {
         doc.moveTo(descriptionX, doc.y + 5).lineTo(totalX + 90, doc.y + 5).stroke();
         doc.moveDown(1.2);
 
+
+        let optionsTotal = 0;
         // Options list
         if (estimate.options && estimate.options.length > 0) {
             estimate.options.forEach((item) => {
                 const total = parseFloat(item.labor_cost) + parseFloat(item.material_cost);
+                optionsTotal += total;
                 let formattedTotal = numbersWithCommas(total.toFixed(2));
                 doc.font("Times-Roman").fontSize(12)
                    .text(item.description || 'N/A', descriptionX, doc.y)
@@ -347,10 +350,15 @@ function generateEstimatePDF(estimate, callback) {
             doc.moveDown();
         }
 
+
+        console.log('Options total:', optionsTotal);
+        console.log('Takeoff total:', estimate.takeoff.takeoff_total);
+        const finalTotal = (parseFloat(estimate.takeoff.takeoff_total) + parseFloat(optionsTotal)).toFixed(2);
+        console.log('Final total:', finalTotal);
         // --- TOTAL AMOUNT ---
         doc.moveDown(2);
         doc.font("Times-Bold").fontSize(14)
-           .text(`Total Amount: $${numbersWithCommas(estimate.takeoff.takeoff_total) || '0.00'}`,
+           .text(`Total Amount: $${numbersWithCommas(finalTotal) || '0.00'}`,
                  { align: 'right' });
         doc.font("Times-Roman");
 
