@@ -11,8 +11,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize the page
     function init() {
-        fetchData();
+        fetchData().then(() => {
+            makeDropdownsSearchable();
+        });
         setupEventListeners();
+        
     }
 
     // Fetch data from the server
@@ -56,6 +59,8 @@ document.addEventListener('DOMContentLoaded', function() {
             renderTicketJobSelect(jobsData);
             renderTicketSubcontractorSelect(subcontractorsData);
             renderSupervisorsSelect(supervisorsData);
+
+            makeDropdownsSearchable(); 
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -1069,6 +1074,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+
+    function makeDropdownsSearchable() {
+        $('.searchable').select2({
+            width: 'resolve',
+            placeholder: 'Select an option',
+            allowClear: true
+        });
+    }
     
 
     // Initialize the application

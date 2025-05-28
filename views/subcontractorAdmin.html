@@ -6,6 +6,17 @@
     <title>Subcontractor Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 
+
+        <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- select search -->
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
     <!-- sweet alert -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -15,8 +26,7 @@
     
     <link rel="stylesheet" href="./css/navbar.css">
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 
 </head>
@@ -108,7 +118,7 @@
             <!-- supervisor select -->
             <div class="col-md-6">
                 <label for="supervisorSelect" class="form-label">Select Supervisor:</label>
-                <select id="supervisorSelect" name="supervisorSelect" class="form-select" required>
+                <select id="supervisorSelect" name="supervisorSelect" class="form-select searchable" required>
                     <!-- Options will be dynamically populated -->
                 </select>
             </div>
@@ -176,13 +186,13 @@
             <form id="assignJobForm" class="row g-3">
                 <div class="col-md-6">
                     <label for="jobSelect" class="form-label">Select Job:</label>
-                    <select id="jobSelect" name="jobSelect" class="form-select" required>
+                    <select id="jobSelect" name="jobSelect" class="form-select searchable">
                         <!-- Options will be dynamically populated -->
                     </select>
                 </div>
                 <div class="col-md-6">
                     <label for="subcontractorSelect" class="form-label">Select Subcontractor:</label>
-                    <select id="subcontractorSelect" name="subcontractorSelect" class="form-select" required>
+                    <select id="subcontractorSelect" name="subcontractorSelect" class="form-select searchable" required>
                         <!-- Options will be dynamically populated -->
                     </select>
                 </div>
@@ -235,14 +245,14 @@
                
                 <div class="col-md-6">
                     <label for="jobSelectTicket" class="form-label">Select Job:</label>
-                    <select id="jobSelectTicket" name="jobSelectTicket" class="form-select" required>
+                    <select id="jobSelectTicket" name="jobSelectTicket" class="form-select searchable" required>
                         <!-- Options will be dynamically populated -->
                     </select>
                 </div>
 
                 <div class="col-md-6">
                     <label for="subcontractorSelectTicket" class="form-label">Select Subcontractor:</label>
-                    <select id="subcontractorSelectTicket" name="subcontractorSelectTicket" class="form-select" required>
+                    <select id="subcontractorSelectTicket" name="subcontractorSelectTicket" class="form-select searchable" required>
                         <!-- Options will be dynamically populated -->
                     </select>
                 </div>
@@ -290,14 +300,14 @@
                  <!-- job selection -->
                  <div class="col-md-6">
                     <label for="jobSelectAgreement" class="form-label">Select Job:</label>
-                    <select id="jobSelectAgreement" name="jobSelectAgreement" class="form-select" required>
+                    <select id="jobSelectAgreement" name="jobSelectAgreement" class="form-select searchable" required>
                         <!-- Options will be dynamically populated -->
                     </select>
                 </div>
 
                 <div class="col-md-6">
                     <label for="subcontractorSelectAgreement" class="form-label">Select Subcontractor:</label>
-                    <select id="subcontractorSelectAgreement" name="subcontractorSelectAgreement" class="form-select" required>
+                    <select id="subcontractorSelectAgreement" name="subcontractorSelectAgreement" class="form-select searchable" required>
                         <!-- Options will be dynamically populated -->
                     </select>
                 </div>
@@ -361,7 +371,7 @@
             <!-- subcontractor dropdown -->
             <div class="col-md-6">
                 <label for="subcontractorSelectExport" class="form-label">Select Subcontractor:</label>
-                <select id="subcontractorSelectExport" name="subcontractorSelectExport" class="form-select" required>
+                <select id="subcontractorSelectExport" name="subcontractorSelectExport" class="form-select searchable" required>
                     <!-- Options will be dynamically populated -->
                 </select>
             </div>
@@ -419,7 +429,7 @@
 
                         <div class="mb-3">
                             <label for="editJobSupervisor" class="form-label">Select Supervisor:</label>
-                            <select id="editJobSupervisor" name="editJobSupervisor" class="form-select" required>
+                            <select id="editJobSupervisor" name="editJobSupervisor" class="form-select searchable" required>
                                 <!-- Options will be dynamically populated -->
                             </select>
                         </div>
@@ -457,13 +467,13 @@
                         </div>
                         <div class="col-md-6">
                             <label for="editJobSelectTicket" class="form-label">Select Job:</label>
-                            <select id="editJobSelectTicket" name="editJobSelectTicket" class="form-select" required>
+                            <select id="editJobSelectTicket" name="editJobSelectTicket" class="form-select searchable" required>
                                 <!-- Options will be dynamically populated -->
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label for="editSubcontractorSelectTicket" class="form-label">Select Subcontractor:</label>
-                            <select id="editSubcontractorSelectTicket" name="editSubcontractorSelectTicket" class="form-select" required>
+                            <select id="editSubcontractorSelectTicket" name="editSubcontractorSelectTicket" class="form-select searchable" required>
                                 <!-- Options will be dynamically populated -->
                             </select>
                         </div>

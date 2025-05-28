@@ -87,65 +87,22 @@ $(document).ready(function () {
     // indicator.style.width = "100px";
      indicator.style.padding = "8px";
     indicator.style.textAlign = "center";
-    // indicator.style.height = "20px";
-    // indicator.style.borderRadius = "5px";
-    // indicator.style.borderColor = "rgb(0, 164, 65)";
-    // indicator.style.backgroundColor = "rgb(240, 250, 244)";
-    // indicator.style.position = "relative";
-    // indicator.style.transition = "background-color 0.3s ease";
-    // indicator.style.cursor = "pointer";
-    // indicator.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.2)";
-    // indicator.style.marginBottom = "5px";
-    // indicator.style.fontSize = "12px";
-    // indicator.style.color = "green";// dark green
+    indicator.style.alignItems = "center";
+    indicator.style.display = "flex";
+
+    indicator.paddingTop = "50px";
+    indicator.marginTop = "10px";
+
+    // push down the indicator to the bottom of the cell
+    indicator.style.height = "40px";
+
+    // nudge the indicator down
+    indicator.style.marginTop = "14px";
 
     return indicator;
-
-    
-    
-   
   }
 
-  // function getColor(dateCreated) {
-  //   const now = moment();
-  //   const created = moment(dateCreated);
-  //   const duration = moment.duration(now.diff(created));
-  //   const days = duration.asDays();
 
-  //   console.log("Days since creation:", days);
-
-  //   const maxDays = 30;
-  //   const percentage = Math.min(days / maxDays, 1); // Clamp percentage between 0 and 1
-
-  //   const gradientStops = [
-  //       { day: 0, color: { r: 76, g: 175, b: 80, a:0.75 } },  //rgba(76, 175, 79, 0.36) - vibrant green
-  //       { day: 10, color: { r: 173, g: 204, b: 78, a:0.75 } }, // Slightly yellow-green
-  //       { day: 20, color: { r: 255, g: 193, b: 7, a:0.75 } },  //rgba(255, 193, 7, 0.4) - bright yellow
-  //       { day: 30, color: { r: 255, g: 13, b: 13, a:0.75 } },  //rgba(255, 13, 13, 0.4) - red
-  //   ];
-  //   const startColor = gradientStops[0].color;
-  //   const endColor = gradientStops[gradientStops.length - 1].color;
-  //   let color = { r: 0, g: 0, b: 0, a: 0 };
-  //   if (percentage < 0.5) {
-  //       const start = gradientStops[0];
-  //       const end = gradientStops[1];
-  //       const ratio = percentage / 0.5;
-  //       color.r = Math.round(start.color.r + (end.color.r - start.color.r) * ratio);
-  //       color.g = Math.round(start.color.g + (end.color.g - start.color.g) * ratio);
-  //       color.b = Math.round(start.color.b + (end.color.b - start.color.b) * ratio);
-  //       color.a = Math.round(start.color.a + (end.color.a - start.color.a) * ratio);
-  //   } else {
-  //       const start = gradientStops[1];
-  //       const end = gradientStops[2];
-  //       const ratio = (percentage - 0.5) / 0.5;
-  //       color.r = Math.round(start.color.r + (end.color.r - start.color.r) * ratio);
-  //       color.g = Math.round(start.color.g + (end.color.g - start.color.g) * ratio);
-  //       color.b = Math.round(start.color.b + (end.color.b - start.color.b) * ratio);
-  //       color.a = Math.round(start.color.a + (end.color.a - start.color.a) * ratio);
-  //   }
-    
-  //   return `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
-  // }
    
 
   function viewPaymentHistory(id) {
