@@ -905,14 +905,17 @@ function loadTakeoffMaterials(id) {
   let scrollPos = $(window).scrollTop(); // Store current scroll position
   takeoff_id = id;
 
-  laborTotal = 0;
-  materialTotal = 0;
 
   console.log("Loading takeoff materials");
 
   $.post("/loadTakeoffMaterials", { takeoff_id: takeoff_id })
     .done(function (data) {
       console.log(data.takeoff);
+
+
+
+  laborTotal = 0;
+  materialTotal = 0;
 
       // set some global variables
       labor_rate = parseFloat(data.takeoff[0].labor_rate);
@@ -1331,7 +1334,12 @@ function loadTakeoffMaterials(id) {
       $("#sum").text("Total Cost: $" + numberWithCommas(finalTotal.toFixed(2)));
 
       // Update labor total (including markup)
-      $("#laborTotal").text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)));
+      $("#laborTotal")
+        .text("Labor Cost: $" + numberWithCommas(laborTotalAdjusted.toFixed(2)))
+        .off("click")
+        .on("click", function() {
+          showLaborTotalDetails();
+        });
 
       // Update material total (including markup)
       $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialCost.toFixed(2)));
@@ -1833,3 +1841,45 @@ $(document).ready(function () {
   //   loadTakeoffMaterials(takeoff_id);
   // }, 2000);
 });
+
+function showLaborTotalDetails() {
+  Swal.fire({
+    title: 'Labor Total Details',
+    html: `
+      <p>Labor Rate: $${labor_rate.toFixed(2)}</p>
+      <p>Labor Markup: ${labor_markup * 100}%</p>
+      <p>Touchups Cost: $${touchups_cost.toFixed(2)}</p>
+      <p>Travel Extra: $${travel_extra.toFixed(2)}</p>
+      <p>Raw Labor Cost: $${(laborTotal + touchups_cost + travel_extra).toFixed(2)}</p>
+      <hr>
+      <label for="bidInput">Bid Amount: </label>
+      <input type="number" id="bidInput" class="swal2-input" placeholder="Enter bid amount" min="0" step="any">
+      <div id="bidResult" style="margin-top:10px;"></div>
+    `,
+    icon: 'info',
+    confirmButtonText: 'OK',
+    showCancelButton: false,
+    didOpen: () => {
+      const bidInput = Swal.getPopup().querySelector('#bidInput');
+      const bidResult = Swal.getPopup().querySelector('#bidResult');
+      bidInput.addEventListener('input', function () {
+        const bid = parseFloat(bidInput.value) || 0;
+        const laborCost = laborTotal + touchups_cost + travel_extra;
+        const diff = laborCost - bid;
+        bidResult.innerHTML = `
+          <p>Labor Cost - Bid: $${diff.toFixed(2)}</p>
+          <p>Gross Profit (with bid): $${(getGrossProfit() + diff).toFixed(2)}</p>
+        `;
+      });
+    }
+  }).then((result) => {
+    // add the diff to gross profit
+    if (result.isConfirmed) {
+      const bidInput = Swal.getPopup().querySelector('#bidInput');
+      // Update gross profit with the difference
+      const newGrossProfit = getGrossProfit() + diff;
+      // Update the gross profit display
+      $("#grossProfit").text("Gross Profit: $" + numberWithCommas(newGrossProfit.toFixed(2)));
+    }
+  });
+}
