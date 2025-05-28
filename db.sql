@@ -250,7 +250,7 @@ CREATE TABLE change_orders (
   qb_number INT,
   co_number INT,
   hash VARCHAR(64),
-  -- 0 unapproved, 1 approved, 2 approved by creator, 
+  -- 0 unapproved, 1 approved
   status TINYINT(1) DEFAULT 0,
   require_client_approval TINYINT DEFAULT 0,
   -- client-agreement 0 not approved, 1 approved

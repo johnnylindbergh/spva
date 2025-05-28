@@ -3812,6 +3812,23 @@ app.post('/getTerms', function (req, res) {
     );
   });
 
+
+  app.post("/updateChangeOrderStatusInternal", mid.isAdmin, function (req, res) {
+
+    console.log("updating change order status internally");
+    console.log(req.body);
+
+    db.updateChangeOrderStatusInternal(req.body.change_order_id, req.body.status, function (err) {
+      if (err) {
+        console.log(err);
+        res.send("error updating change order status");
+      } else {
+        res.send("success");
+      }
+    }
+    );
+  });
+
   // open to public, should probably change to hash
   app.post("/updateChangeOrderStatus", function (req, res) {
     console.log("updating change order status");
@@ -3850,7 +3867,7 @@ app.post('/getTerms', function (req, res) {
 
 
 
-    db.updateChangeOrderStatus(req.body.change_order_id, parseInt(req.body.status), hash,  function (err) {
+    db.updateChangeOrderStatus(parseInt(req.body.change_order_id), parseInt(req.body.status), hash,  function (err) {
       if (err) {
         console.log(err);
         res.send("error updating change order status");

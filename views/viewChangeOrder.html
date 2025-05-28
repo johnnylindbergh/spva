@@ -21,6 +21,10 @@
 
     <script src="https://cdn.jsdelivr.net/gh/frankeno/xsalert@main/src/xsalert.js"></script>
 
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
 
     <script>
 function shareChangeOrderWithClient(){
@@ -108,7 +112,7 @@ function shareChangeOrderWithClient(){
           
                 <tr>
                     <td>Status</td>
-                    <td>{{status}}</td>
+                    <td>{{^status}} Not {{/status}} Approved  </td>
                 </tr>
                 <tr>
                     <td>Change Order Total</td>
@@ -147,9 +151,86 @@ function shareChangeOrderWithClient(){
         </table>
 
         <button class="btn btn-outline-primary mt-3" id="shareWithClient" onclick="shareChangeOrderWithClient()">Share with Client</button>
+        <button class="btn btn-outline-secondary mt-3" data-toggle="modal" data-target="#editChangeOrderModal">Change Status</button>
+
+        <!-- delete change order button -->
+        <button class="btn btn-outline-danger mt-3" id="deleteChangeOrderBtn">Delete Change Order</button>
+
+        <!-- download change order button -->
+        <button class="btn btn-outline-success mt-3" id="downloadChangeOrderBtn">Download Change Order</button>
+        
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+    <!-- modal edit changeOrder -->
+    <div class="modal fade" id="editChangeOrderModal" tabindex="-1" role="dialog" aria-labelledby="editChangeOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editChangeOrderModalLabel">Edit Change Order Approval Status</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body
+">
+                    <form id="editChangeOrderForm">
+                        
+                        <div class="form-group">
+                            <label for="changeOrderStatus">Status</label>
+                            <select class="form-control" id="changeOrderStatus" name="status">
+                                <option value="approved" {{#status}}selected {{/status}}>Approved</option>
+                                <option value="rejected"{{^status}}selected {{/status}}>Not Approved</option>
+                            </select>
+                        </div>
+                       
+                        <input type="hidden" id="changeOrderId" name="id" value="{{change_order.id}}">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveChangeOrderBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#saveChangeOrderBtn').click(function() {
+
+                // 0 for not approved, 1 for approved
+                var status = $('#changeOrderStatus').val();
+                
+                
+
+                status = (status === 'approved') ? 1 : 0;
+
+                console.log("change order status",status);
+                var formData = {
+                    change_order_id: parseInt($('#changeOrderId').val()),
+                    status: parseInt(status),
+                }
+
+                $.post('/updateChangeOrderStatusInternal', formData, function(response) {
+                    if (response = 'success') {
+                        $('#editChangeOrderModal').modal('hide');
+                        location.reload();
+                    } else {
+                        XSAlert({
+                            title: 'Error',
+                            message: 'Failed to update change order status: ' + response,
+                            icon: 'error',
+                        });
+                        
+                    }
+                });
+            });
+        });
+    </script>
+</div>
+
+
+
 </body>
 </html>

@@ -1733,11 +1733,28 @@ getChangeOrderItemsById: function (change_order_id, callback) {
         [status, change_order_id, hash],
         function (err) {
           if (err) return callback(err);
+          console.log("Change order status updated successfully");
           callback(null);
         }
       );
     },
 
+
+    updateChangeOrderStatusInternal: function (change_order_id, status, callback) {
+      // update the change order status
+      con.query(
+        "UPDATE change_orders SET status = ? WHERE id = ?;",
+        [status, change_order_id],
+        function (err) {
+          if (err) return callback(err);
+          console.log("Change order status updated successfully");
+          callback(null);
+        }
+      );
+    },
+
+    
+  // used to create a new change order
 
   // this function is used to create a new change order
   // request is an object:
