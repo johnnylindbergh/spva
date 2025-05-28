@@ -662,4 +662,36 @@ app.delete('/api/assignments/:id', mid.isSubcontractorAdmin, function (req, res)
         );
     }
     );
+
+    app.post('/api/supervisorReport', mid.isSubcontractorAdmin, function (req, res) {
+
+        const supervisorId = req.body.supervisorId;
+        console.log('Supervisor ID:', supervisorId);
+        if (!supervisorId) {
+            return res.status(400).json({ error: 'Supervisor ID is required' });
+        }
+        db.query(
+            `SELECT 
+                jobs.id AS job_id,
+                jobs.job_name,
+                COALESCE(SUM(form_bid.request), 0) AS total_requested_amount,
+                COALESCE(SUM(form_item_days.duration), 0) AS total_hours
+            FROM jobs
+            LEFT JOIN form_bid ON jobs.id = form_bid.job_id
+            LEFT JOIN form_items ON form_items.form_id = form_bid.form_id AND form_items.job_id = jobs.id
+            LEFT JOIN form_item_days ON form_item_days.form_item_id = form_items.id
+            WHERE jobs.supervisor_id = ? AND jobs.isArchived = 0
+            GROUP BY jobs.id;`,
+            [supervisorId],
+            function (error, results) {
+                if (error) {
+                    console.error('Error fetching supervisor report:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+
+                res.send(jsonToCSV(results));
+            }
+        );
+    }
+    );
 };

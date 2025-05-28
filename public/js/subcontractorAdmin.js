@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
             renderTicketJobSelect(jobsData);
             renderTicketSubcontractorSelect(subcontractorsData);
             renderSupervisorsSelect(supervisorsData);
+            renderSupervisorSelectReports(supervisorsData);
 
             makeDropdownsSearchable(); 
 
@@ -1075,6 +1076,58 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
+     function renderSupervisorSelectReports(supervisors) {
+        const supervisorSelectReports = document.getElementById('supervisorSelectReports');
+        supervisorSelectReports.innerHTML = '<option value="">Select Supervisor</option>';
+        supervisors.forEach(supervisor => {
+            const option = document.createElement('option');
+            option.value = supervisor.id;
+            option.textContent = `${supervisor.name}`;
+            supervisorSelectReports.appendChild(option);
+        });
+    }
+
+    document.getElementById('generateReportBtn').addEventListener('click', async function() {
+        const supervisorId = parseInt(document.getElementById('supervisorSelectReports').value);
+
+        if (!supervisorId) {
+            alert('Please fill in all fields.');
+            return;
+        }
+
+        const data = {
+            supervisorId: supervisorId
+        };
+
+        try {
+            const response = await fetch('/api/supervisorReport', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'report.csv';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } else {
+                alert('Failed to generate report.');
+            }
+        } catch (error) {
+            console.error('Error generating report:', error);
+        }
+    });
+
+
+
+
+   
+
+
     function makeDropdownsSearchable() {
         $('.searchable').select2({
             width: 'resolve',
@@ -1087,3 +1140,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize the application
     init();
 });
+
+
+

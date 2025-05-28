@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,23 +8,23 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 
 
-        <!-- jQuery -->
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- select search -->
 
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 
     <!-- sweet alert -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/defaults.css">
-    
+
     <link rel="stylesheet" href="./css/navbar.css">
 
 
@@ -37,19 +38,20 @@
         border-color: #3babc9;
     }
 </style>
+
 <body>
 
     <div class="navbar" style="text-align: center;">
-        <ul>   
-            <li> <a href = "/admin"> Admin</a></li>
-            <li> <a href = "/logout"> Logout</a></li>
+        <ul>
+            <li> <a href="/admin"> Admin</a></li>
+            <li> <a href="/logout"> Logout</a></li>
         </ul>
-       
+
         <h1 style="color:white; display: inline-block; margin: 0 auto;">Subcontractor Admin</h1>
     </div>
-</br>
-</br>
-</br>
+    </br>
+    </br>
+    </br>
 
     <!-- table of existing jobs -->
     <main class="container my-4">
@@ -58,20 +60,22 @@
             <div class="accordion" id="jobsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="jobsHeading"></h2>
-                        <button class="accordion-button collapsed no-hover" type="button" data-bs-toggle="collapse" data-bs-target="#jobsCollapse" aria-expanded="false" aria-controls="jobsCollapse">
-                            Show/Hide Existing Jobs Table
-                        </button>
-                        <style>
-                            .accordion-button.no-hover:hover, 
-                            .accordion-button.no-hover:focus {
-                                background-color: inherit;
-                                color: inherit;
-                                box-shadow: none;
-                                transition: none;
-                            }
-                        </style>
+                    <button class="accordion-button collapsed no-hover" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#jobsCollapse" aria-expanded="false" aria-controls="jobsCollapse">
+                        Show/Hide Existing Jobs Table
+                    </button>
+                    <style>
+                        .accordion-button.no-hover:hover,
+                        .accordion-button.no-hover:focus {
+                            background-color: inherit;
+                            color: inherit;
+                            box-shadow: none;
+                            transition: none;
+                        }
+                    </style>
                     </h2>
-                    <div id="jobsCollapse" class="accordion-collapse collapse" aria-labelledby="jobsHeading" data-bs-parent="#jobsAccordion">
+                    <div id="jobsCollapse" class="accordion-collapse collapse" aria-labelledby="jobsHeading"
+                        data-bs-parent="#jobsAccordion">
                         <div class="accordion-body p-0">
                             <table class="table table-responsive mb-0">
                                 <thead class="table-dark">
@@ -92,446 +96,492 @@
             </div>
         </section>
 
-    <main class="container my-4">
-        <section class="mb-5">
-            <h2 class="mb-3">Create Job</h2>
-            <form id="createJobForm" class="row g-3">
-            <div class="col-md-6">
-                <label for="jobName" class="form-label">Job Name:</label>
-                <input type="text" id="jobName" name="jobName" class="form-control" required>
-            </div>
-       
-            <div class="col-md-6">
-                <label for="jobDescription" class="form-label">Job Description:</label>
-                <textarea id="jobDescription" name="jobDescription" class="form-control" rows="3" required></textarea>
-            </div>
-            <div class="col-md-6">
-                <label for="jobLocation" class="form-label">Job Location:</label>
-                <input type="text" id="jobLocation" name="jobLocation" class="form-control" required>
-            </div>
-            <div class="col-md-6">
-                <label for="jobStartDate" class="form-label">Job Start Date:</label>
-                <input type="date" id="jobStartDate" name="jobStartDate" class="form-control" required>
-            </div>
-          
+        <main class="container my-4">
+            <section class="mb-5">
+                <h2 class="mb-3">Create Job</h2>
+                <form id="createJobForm" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="jobName" class="form-label">Job Name:</label>
+                        <input type="text" id="jobName" name="jobName" class="form-control" required>
+                    </div>
 
-            <!-- supervisor select -->
-            <div class="col-md-6">
-                <label for="supervisorSelect" class="form-label">Select Supervisor:</label>
-                <select id="supervisorSelect" name="supervisorSelect" class="form-select searchable" required>
-                    <!-- Options will be dynamically populated -->
-                </select>
-            </div>
+                    <div class="col-md-6">
+                        <label for="jobDescription" class="form-label">Job Description:</label>
+                        <textarea id="jobDescription" name="jobDescription" class="form-control" rows="3"
+                            required></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="jobLocation" class="form-label">Job Location:</label>
+                        <input type="text" id="jobLocation" name="jobLocation" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="jobStartDate" class="form-label">Job Start Date:</label>
+                        <input type="date" id="jobStartDate" name="jobStartDate" class="form-control" required>
+                    </div>
 
-              <div class="col-md-6">
-                <label for="jobEndDate" class="form-label">Job End Date:</label>
-                <input type="date" id="jobEndDate" name="jobEndDate" class="form-control" required>
-            </div>
 
-            
-            <!-- job type radio section. types ("Bid", "TM") -->
-            <div class="col-md-6">
-                <label class="form-label">Job Type:</label>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="jobType" id="jobTypeBid" value="Bid" checked>
-                    <label class="form-check-label" for="jobTypeBid">Bid</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="jobType" id="jobTypeTM" value="TM">
-                    <label class="form-check-label" for="jobTypeTM">TM</label>
-                </div>
-            </div>
-            <div class="col-12">
-                <button type="submit" class="btn btn-outline-primary">Create Job</button>
-            </div>
-            </form>
-        </section>
+                    <!-- supervisor select -->
+                    <div class="col-md-6">
+                        <label for="supervisorSelect" class="form-label">Select Supervisor:</label>
+                        <select id="supervisorSelect" name="supervisorSelect" class="form-select searchable" required>
+                            <!-- Options will be dynamically populated -->
+                        </select>
+                    </div>
 
-        <!-- existing assignments table -->
-        <section class="mb-5">
-            <h2 class="mb-3">Current Assignments</h2>
-            <div class="accordion" id="assignmentsAccordion">
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="assignmentsHeading">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#assignmentsCollapse" aria-expanded="false" aria-controls="assignmentsCollapse">
-                            Show/Hide Current Assignments Table
-                        </button>
-                    </h2>
-                    <div id="assignmentsCollapse" class="accordion-collapse collapse" aria-labelledby="assignmentsHeading" data-bs-parent="#assignmentsAccordion">
-                        <div class="accordion-body p-0">
-                            <table class="table table-striped mb-0">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>Subcontractor</th>
-                                        <th>Allotted Bid</th>
-                                        <th></th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="assignmentsTable">
-                                    <!-- Rows will be dynamically populated -->
-                                </tbody>
-                            </table>
+                    <div class="col-md-6">
+                        <label for="jobEndDate" class="form-label">Job End Date:</label>
+                        <input type="date" id="jobEndDate" name="jobEndDate" class="form-control" required>
+                    </div>
+
+
+                    <!-- job type radio section. types ("Bid", "TM") -->
+                    <div class="col-md-6">
+                        <label class="form-label">Job Type:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="jobType" id="jobTypeBid" value="Bid"
+                                checked>
+                            <label class="form-check-label" for="jobTypeBid">Bid</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="jobType" id="jobTypeTM" value="TM">
+                            <label class="form-check-label" for="jobTypeTM">TM</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-outline-primary">Create Job</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- existing assignments table -->
+            <section class="mb-5">
+                <h2 class="mb-3">Current Assignments</h2>
+                <div class="accordion" id="assignmentsAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="assignmentsHeading">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#assignmentsCollapse" aria-expanded="false"
+                                aria-controls="assignmentsCollapse">
+                                Show/Hide Current Assignments Table
+                            </button>
+                        </h2>
+                        <div id="assignmentsCollapse" class="accordion-collapse collapse"
+                            aria-labelledby="assignmentsHeading" data-bs-parent="#assignmentsAccordion">
+                            <div class="accordion-body p-0">
+                                <table class="table table-striped mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Subcontractor</th>
+                                            <th>Allotted Bid</th>
+                                            <th></th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="assignmentsTable">
+                                        <!-- Rows will be dynamically populated -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-        <section class="mb-5">
-            <h2 class="mb-3">Assign Job to Subcontractor</h2>
-        
-            <!-- subtext -->
-            <p class="text-muted">Select a job, subcontractor, and their allotted bid.</p>
-        </br>
-            <form id="assignJobForm" class="row g-3">
-                <div class="col-md-6">
-                    <label for="jobSelect" class="form-label">Select Job:</label>
-                    <select id="jobSelect" name="jobSelect" class="form-select searchable">
-                        <!-- Options will be dynamically populated -->
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label for="subcontractorSelect" class="form-label">Select Subcontractor:</label>
-                    <select id="subcontractorSelect" name="subcontractorSelect" class="form-select searchable" required>
-                        <!-- Options will be dynamically populated -->
-                    </select>
-                </div>
+                <section class="mb-5">
+                    <h2 class="mb-3">Assign Job to Subcontractor</h2>
 
-                <!-- allotted bid -->
-                <div class="col-md-6">
-                    <label for="allottedBid" class="form-label">Allotted Bid:</label>
-                    <input type="number" id="allottedBid" name="allottedBid" class="form-control" required>
-                </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-outline-primary">Assign Job</button>
-                </div>
-            </form>
-        </section>
+                    <!-- subtext -->
+                    <p class="text-muted">Select a job, subcontractor, and their allotted bid.</p>
+                    </br>
+                    <form id="assignJobForm" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="jobSelect" class="form-label">Select Job:</label>
+                            <select id="jobSelect" name="jobSelect" class="form-select searchable">
+                                <!-- Options will be dynamically populated -->
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="subcontractorSelect" class="form-label">Select Subcontractor:</label>
+                            <select id="subcontractorSelect" name="subcontractorSelect" class="form-select searchable"
+                                required>
+                                <!-- Options will be dynamically populated -->
+                            </select>
+                        </div>
 
-        <!--ticket section -->
-        <section class="mb-5">
-            <h2 class="mb-3">Tickets</h2>
-            <table class="table table-responsive collapse hide" id="ticketsTableContainer">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Ticket Number</th>
-                        <th>Ticket Description</th>
-                        <th>Subcontractor</th>
-                        <th>Job</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="ticketsTable">
-                    <!-- Rows will be dynamically populated -->
-                </tbody>
-            </table>
-        </section>
+                        <!-- allotted bid -->
+                        <div class="col-md-6">
+                            <label for="allottedBid" class="form-label">Allotted Bid:</label>
+                            <input type="number" id="allottedBid" name="allottedBid" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-outline-primary">Assign Job</button>
+                        </div>
+                    </form>
+                </section>
 
-        <!-- create ticket section -->
-        <section class="mb-5">
-            <h2 class="mb-3">Create Ticket</h2>
-            <form id="ticketForm" class="row g-3">
+                <!--ticket section -->
+                <section class="mb-5">
+                    <h2 class="mb-3">Tickets</h2>
+                    <table class="table table-responsive collapse hide" id="ticketsTableContainer">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Ticket Number</th>
+                                <th>Ticket Description</th>
+                                <th>Subcontractor</th>
+                                <th>Job</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticketsTable">
+                            <!-- Rows will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </section>
 
-                <div class="col-md-6">
-                    <label for="ticketName" class="form-label">Ticket Name:</label>
-                    <input type="text" id="ticketName" name="ticketName" class="form-control" required>
-                </div>
+                <!-- create ticket section -->
+                <section class="mb-5">
+                    <h2 class="mb-3">Create Ticket</h2>
+                    <form id="ticketForm" class="row g-3">
 
-                <div class="col-md-6">
-                    <label for="ticketNumber" class="form-label">Ticket Number:</label>
-                    <input type="text" id="ticketNumber" name="ticketNumber" class="form-control" required>
-                </div>
-               
-                <div class="col-md-6">
-                    <label for="jobSelectTicket" class="form-label">Select Job:</label>
-                    <select id="jobSelectTicket" name="jobSelectTicket" class="form-select searchable" required>
-                        <!-- Options will be dynamically populated -->
-                    </select>
-                </div>
+                        <div class="col-md-6">
+                            <label for="ticketName" class="form-label">Ticket Name:</label>
+                            <input type="text" id="ticketName" name="ticketName" class="form-control" required>
+                        </div>
 
-                <div class="col-md-6">
-                    <label for="subcontractorSelectTicket" class="form-label">Select Subcontractor:</label>
-                    <select id="subcontractorSelectTicket" name="subcontractorSelectTicket" class="form-select searchable" required>
-                        <!-- Options will be dynamically populated -->
-                    </select>
-                </div>
+                        <div class="col-md-6">
+                            <label for="ticketNumber" class="form-label">Ticket Number:</label>
+                            <input type="text" id="ticketNumber" name="ticketNumber" class="form-control" required>
+                        </div>
 
-                <div class="col-md-6">
-                    <label for="ticketDescription" class="form-label">Ticket Description:</label>
-                    <textarea id="ticketDescription" name="ticketDescription" class="form-control" rows="3" required></textarea>
-                </div>
+                        <div class="col-md-6">
+                            <label for="jobSelectTicket" class="form-label">Select Job:</label>
+                            <select id="jobSelectTicket" name="jobSelectTicket" class="form-select searchable" required>
+                                <!-- Options will be dynamically populated -->
+                            </select>
+                        </div>
 
-                <div class="col-12">
-                    <button type="submit" class="btn btn-outline-primary">Create Ticket</button>
-                </div>
-            </form>
-        </section>
+                        <div class="col-md-6">
+                            <label for="subcontractorSelectTicket" class="form-label">Select Subcontractor:</label>
+                            <select id="subcontractorSelectTicket" name="subcontractorSelectTicket"
+                                class="form-select searchable" required>
+                                <!-- Options will be dynamically populated -->
+                            </select>
+                        </div>
 
-       
+                        <div class="col-md-6">
+                            <label for="ticketDescription" class="form-label">Ticket Description:</label>
+                            <textarea id="ticketDescription" name="ticketDescription" class="form-control" rows="3"
+                                required></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-outline-primary">Create Ticket</button>
+                        </div>
+                    </form>
+                </section>
 
 
-        <!-- agreement section -->
 
-        <section class="mb-5">
-            <h2 class="mb-3">Agreements and Subcontractor Assignments</h2>
-            <table class="table table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Agreement ID</th>
-                        <th>Scope</th>
-                        <th>Subcontractor Name</th>
-                        <th>Created</th>
-                        <th>PDF</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="agreementsTable" style="overflow-y: auto; max-height: 400px;">
-                    <!-- Rows will be dynamically populated -->
-                </tbody>
-            </table>
-        </section>
 
-         <section class="mb-5">
-            <h2 class="mb-3">Create Subcontractor Agreement</h2>
-            <form id="createAgreementForm" class="row g-3">
+                <!-- agreement section -->
 
-                 <!-- job selection -->
-                 <div class="col-md-6">
-                    <label for="jobSelectAgreement" class="form-label">Select Job:</label>
-                    <select id="jobSelectAgreement" name="jobSelectAgreement" class="form-select searchable" required>
-                        <!-- Options will be dynamically populated -->
-                    </select>
-                </div>
+                <section class="mb-5">
+                    <h2 class="mb-3">Agreements and Subcontractor Assignments</h2>
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Agreement ID</th>
+                                <th>Scope</th>
+                                <th>Subcontractor Name</th>
+                                <th>Created</th>
+                                <th>PDF</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agreementsTable" style="overflow-y: auto; max-height: 400px;">
+                            <!-- Rows will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </section>
 
-                <div class="col-md-6">
-                    <label for="subcontractorSelectAgreement" class="form-label">Select Subcontractor:</label>
-                    <select id="subcontractorSelectAgreement" name="subcontractorSelectAgreement" class="form-select searchable" required>
-                        <!-- Options will be dynamically populated -->
-                    </select>
-                </div>
-               
+                <section class="mb-5">
+                    <h2 class="mb-3">Create Subcontractor Agreement</h2>
+                    <form id="createAgreementForm" class="row g-3">
 
-                <div class="col-md-6">
-                    <label for="agreementDetails" class="form-label">Agreement Details:</label>
-                    <textarea id="agreementDetails" name="agreementDetails" class="form-control" rows="3" required></textarea>
-                </div>
-                <!-- agreement pdf upload -->
-                <div class="col-md-6">
-                    <label for="agreementPdf" class="form-label">Upload Agreement PDF:</label>
-                    <input type="file" id="agreementPdf" name="agreementPdf" class="form-control" accept=".pdf" required>
-                </div>
-                
-                <div class="col-12">
-                    <button type="submit" class="btn btn-outline-primary">Create Agreement</button>
-                </div>
-            </form>
-        </section>
+                        <!-- job selection -->
+                        <div class="col-md-6">
+                            <label for="jobSelectAgreement" class="form-label">Select Job:</label>
+                            <select id="jobSelectAgreement" name="jobSelectAgreement" class="form-select searchable"
+                                required>
+                                <!-- Options will be dynamically populated -->
+                            </select>
+                        </div>
 
-        <section class="mb-5">
-            <h2 class="mb-3">View Subcontractor Forms</h2>
-            <table class="table table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Form ID</th>
-                        <th>Subcontractor Name</th>
-                        <th>Date Created</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody id="subcontractorFormsTable">
-                    <!-- Rows will be dynamically populated -->
-                </tbody>
-            </table>
-        </section>
+                        <div class="col-md-6">
+                            <label for="subcontractorSelectAgreement" class="form-label">Select Subcontractor:</label>
+                            <select id="subcontractorSelectAgreement" name="subcontractorSelectAgreement"
+                                class="form-select searchable" required>
+                                <!-- Options will be dynamically populated -->
+                            </select>
+                        </div>
 
-        <section>
-            <h2 class="mb-3">Approve/Disapprove Payments</h2>
-            <table class="table table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Job</th>
-                        <th>Subcontractor Name</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="paymentsTable">
-                    <!-- Rows will be dynamically populated -->
-                </tbody>
-            </table>
-        </section>
-    
 
-        <!-- section to export payments to CSV-->
-        <section class="mb-5">
-            <h2 class="mb-3">Export Payments to CSV</h2>
-            <!-- subcontractor dropdown -->
-            <div class="col-md-6">
-                <label for="subcontractorSelectExport" class="form-label">Select Subcontractor:</label>
-                <select id="subcontractorSelectExport" name="subcontractorSelectExport" class="form-select searchable" required>
-                    <!-- Options will be dynamically populated -->
-                </select>
-            </div>
-            <button id="exportPaymentsBtn" class="btn btn-outline-primary">Export Payments</button>
-        </section>
+                        <div class="col-md-6">
+                            <label for="agreementDetails" class="form-label">Agreement Details:</label>
+                            <textarea id="agreementDetails" name="agreementDetails" class="form-control" rows="3"
+                                required></textarea>
+                        </div>
+                        <!-- agreement pdf upload -->
+                        <div class="col-md-6">
+                            <label for="agreementPdf" class="form-label">Upload Agreement PDF:</label>
+                            <input type="file" id="agreementPdf" name="agreementPdf" class="form-control" accept=".pdf"
+                                required>
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-outline-primary">Create Agreement</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="mb-3">View Subcontractor Forms</h2>
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Form ID</th>
+                                <th>Subcontractor Name</th>
+                                <th>Date Created</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subcontractorFormsTable">
+                            <!-- Rows will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </section>
+
+                <section>
+                    <h2 class="mb-3">Approve/Disapprove Payments</h2>
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Job</th>
+                                <th>Subcontractor Name</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTable">
+                            <!-- Rows will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </section>
+
+
+                <!-- section to export payments to CSV-->
+                <section class="mb-5">
+                    <h2 class="mb-3">Export Payments to CSV</h2>
+                    <!-- subcontractor dropdown -->
+                    <div class="col-md-6">
+                        <label for="subcontractorSelectExport" class="form-label">Select Subcontractor:</label>
+                        <select id="subcontractorSelectExport" name="subcontractorSelectExport"
+                            class="form-select searchable" required>
+                            <!-- Options will be dynamically populated -->
+                        </select>
+                    </div>
+                    <button id="exportPaymentsBtn" class="btn btn-outline-primary">Export Payments</button>
+                </section>
+
+
+                <!-- section to generate supervisor report -->
+                 <!-- user selects a supervisor from dropdown and recieves a pdf download -->
+                <section class="mb-5">
+                    <h2 class="mb-3">Generate Supervisor Report</h2>
+                    <div class="col-md-6">
+                        <label for="supervisorSelectReports" class="form-label">Select Supervisor:</label>
+                        <select id="supervisorSelectReports" name="supervisorSelectReports"
+                            class="form-select searchable" required>
+                            <!-- Options will be dynamically populated -->
+                        </select>
+                    </div>
+                    <button id="generateReportBtn" class="btn btn-outline-primary">Generate Report</button>
+                </section>
 
         </main>
 
-    <!-- modal job edit form -->
-    <div class="modal fade" id="jobEditModal" tabindex="-1" aria-labelledby="jobEditModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="jobEditModalLabel">Edit Job</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editJobForm">
-                        <!-- hidden job id -->
-                        <div class="mb-3">
-                            <label for="editJobName" class="form-label">Job Name:</label>
-                            <input type="text" id="editJobName" name="editJobName" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editJobDescription" class="form-label">Job Description:</label>
-                            <textarea id="editJobDescription" name="editJobDescription" class="form-control" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editJobLocation" class="form-label">Job Location:</label>
-                            <input type="text" id="editJobLocation" name="editJobLocation" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editJobStartDate" class="form-label">Job Start Date:</label>
-                            <input type="date" id="editJobStartDate" name="editJobStartDate" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editJobEndDate" class="form-label">Job End Date:</label>
-                            <input type="date" id="editJobEndDate" name="editJobEndDate" class="form-control" required>
-                        </div>
-                        <!-- job type bid or TM -->
-                        <div class="mb-3">
-                            <label class="form-label">Job Type:</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="editJobType" id="editJobTypeBid" value="Bid" checked>
-                                <label class="form-check-label" for="editJobTypeBid">Bid</label>
+        <!-- modal job edit form -->
+        <div class="modal fade" id="jobEditModal" tabindex="-1" aria-labelledby="jobEditModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="jobEditModalLabel">Edit Job</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editJobForm">
+                            <!-- hidden job id -->
+                            <div class="mb-3">
+                                <label for="editJobName" class="form-label">Job Name:</label>
+                                <input type="text" id="editJobName" name="editJobName" class="form-control" required>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="editJobType" id="editJobTypeTM" value="TM">
-                                <label class="form-check-label" for="editJobTypeTM">TM</label>
+                            <div class="mb-3">
+                                <label for="editJobDescription" class="form-label">Job Description:</label>
+                                <textarea id="editJobDescription" name="editJobDescription" class="form-control"
+                                    rows="3" required></textarea>
                             </div>
-                        </div>
+                            <div class="mb-3">
+                                <label for="editJobLocation" class="form-label">Job Location:</label>
+                                <input type="text" id="editJobLocation" name="editJobLocation" class="form-control"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editJobStartDate" class="form-label">Job Start Date:</label>
+                                <input type="date" id="editJobStartDate" name="editJobStartDate" class="form-control"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editJobEndDate" class="form-label">Job End Date:</label>
+                                <input type="date" id="editJobEndDate" name="editJobEndDate" class="form-control"
+                                    required>
+                            </div>
+                            <!-- job type bid or TM -->
+                            <div class="mb-3">
+                                <label class="form-label">Job Type:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="editJobType" id="editJobTypeBid"
+                                        value="Bid" checked>
+                                    <label class="form-check-label" for="editJobTypeBid">Bid</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="editJobType" id="editJobTypeTM"
+                                        value="TM">
+                                    <label class="form-check-label" for="editJobTypeTM">TM</label>
+                                </div>
+                            </div>
 
 
-                        <!-- editJobSupervisor -->
+                            <!-- editJobSupervisor -->
 
-                        <div class="mb-3">
-                            <label for="editJobSupervisor" class="form-label">Select Supervisor:</label>
-                            <select id="editJobSupervisor" name="editJobSupervisor" class="form-select searchable" required>
-                                <!-- Options will be dynamically populated -->
-                            </select>
-                        </div>
+                            <div class="mb-3">
+                                <label for="editJobSupervisor" class="form-label">Select Supervisor:</label>
+                                <select id="editJobSupervisor" name="editJobSupervisor" class="form-select searchable"
+                                    required>
+                                    <!-- Options will be dynamically populated -->
+                                </select>
+                            </div>
 
-                        <input type="hidden" id="editJobId" name="editJobId">
-                    </form>
-                </div>
+                            <input type="hidden" id="editJobId" name="editJobId">
+                        </form>
+                    </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-outline-primary" id="saveChangesBtn">Save changes</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-outline-primary" id="saveChangesBtn">Save changes</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- edit ticket modal -->
-    <div class="modal fade" id="ticketViewModal" tabindex="-1" aria-labelledby="ticketEditModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ticketEditModalLabel">Edit Ticket</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editTicketForm" class="row g-3">
-                        <input type="hidden" id="editTicketId" name="editTicketId">
-                        <div class="col-md-6">
-                            <label for="editTicketName" class="form-label">Ticket Name:</label>
-                            <input type="text" id="editTicketName" name="editTicketName" class="form-control" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="editTicketNumber" class="form-label">Ticket Number:</label>
-                            <input type="text" id="editTicketNumber" name="editTicketNumber" class="form-control" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="editJobSelectTicket" class="form-label">Select Job:</label>
-                            <select id="editJobSelectTicket" name="editJobSelectTicket" class="form-select searchable" required>
-                                <!-- Options will be dynamically populated -->
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="editSubcontractorSelectTicket" class="form-label">Select Subcontractor:</label>
-                            <select id="editSubcontractorSelectTicket" name="editSubcontractorSelectTicket" class="form-select searchable" required>
-                                <!-- Options will be dynamically populated -->
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="editTicketDescription" class="form-label">Ticket Description:</label>
-                            <textarea id="editTicketDescription" name="editTicketDescription" class="form-control" rows="3" required></textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Status:</label>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="editTicketStatusSwitch" name="editTicketStatusSwitch">
-                                <label class="form-check-label" for="editTicketStatusSwitch" id="editTicketStatusLabel">Open</label>
+        <!-- edit ticket modal -->
+        <div class="modal fade" id="ticketViewModal" tabindex="-1" aria-labelledby="ticketEditModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ticketEditModalLabel">Edit Ticket</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editTicketForm" class="row g-3">
+                            <input type="hidden" id="editTicketId" name="editTicketId">
+                            <div class="col-md-6">
+                                <label for="editTicketName" class="form-label">Ticket Name:</label>
+                                <input type="text" id="editTicketName" name="editTicketName" class="form-control"
+                                    required>
                             </div>
-                            <!-- Hidden select to store status value for form submission -->
-                            <input type="hidden" id="editTicketStatus" name="editTicketStatus" value="Open">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-outline-primary" id="saveTicketChangesBtn">Save changes</button>
+                            <div class="col-md-6">
+                                <label for="editTicketNumber" class="form-label">Ticket Number:</label>
+                                <input type="text" id="editTicketNumber" name="editTicketNumber" class="form-control"
+                                    required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editJobSelectTicket" class="form-label">Select Job:</label>
+                                <select id="editJobSelectTicket" name="editJobSelectTicket"
+                                    class="form-select searchable" required>
+                                    <!-- Options will be dynamically populated -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editSubcontractorSelectTicket" class="form-label">Select
+                                    Subcontractor:</label>
+                                <select id="editSubcontractorSelectTicket" name="editSubcontractorSelectTicket"
+                                    class="form-select searchable" required>
+                                    <!-- Options will be dynamically populated -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editTicketDescription" class="form-label">Ticket Description:</label>
+                                <textarea id="editTicketDescription" name="editTicketDescription" class="form-control"
+                                    rows="3" required></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status:</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="editTicketStatusSwitch"
+                                        name="editTicketStatusSwitch">
+                                    <label class="form-check-label" for="editTicketStatusSwitch"
+                                        id="editTicketStatusLabel">Open</label>
+                                </div>
+                                <!-- Hidden select to store status value for form submission -->
+                                <input type="hidden" id="editTicketStatus" name="editTicketStatus" value="Open">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-outline-primary" id="saveTicketChangesBtn">Save
+                            changes</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script>
-        // Switch logic for ticket status (Open <-> Closed)
-        $(function() {
-            // Set initial label and value based on checkbox
-            $('#editTicketStatusSwitch').on('change', function() {
-                if (this.checked) {
-                    $('#editTicketStatusLabel').text('Open');
-                    $('#editTicketStatus').val('open');
-                } else {
-                    $('#editTicketStatusLabel').text('Closed');
-                    $('#editTicketStatus').val('closed');
-                }
+        <script>
+            // Switch logic for ticket status (Open <-> Closed)
+            $(function () {
+                // Set initial label and value based on checkbox
+                $('#editTicketStatusSwitch').on('change', function () {
+                    if (this.checked) {
+                        $('#editTicketStatusLabel').text('Open');
+                        $('#editTicketStatus').val('open');
+                    } else {
+                        $('#editTicketStatusLabel').text('Closed');
+                        $('#editTicketStatus').val('closed');
+                    }
+                });
+
+                // Optional: When opening modal, set switch and label based on current status
+                window.setEditTicketStatus = function (status) {
+                    if (status === 'Closed') {
+                        $('#editTicketStatusSwitch').prop('checked', false);
+                        $('#editTicketStatusLabel').text('Closed');
+                        $('#editTicketStatus').val('Closed');
+                    } else {
+                        $('#editTicketStatusSwitch').prop('checked', false);
+                        $('#editTicketStatusLabel').text('Open');
+                        $('#editTicketStatus').val('Open');
+                    }
+                };
             });
 
-            // Optional: When opening modal, set switch and label based on current status
-            window.setEditTicketStatus = function(status) {
-                if (status === 'Closed') {
-                    $('#editTicketStatusSwitch').prop('checked', false);
-                    $('#editTicketStatusLabel').text('Closed');
-                    $('#editTicketStatus').val('Closed');
-                } else {
-                    $('#editTicketStatusSwitch').prop('checked', false);
-                    $('#editTicketStatusLabel').text('Open');
-                    $('#editTicketStatus').val('Open');
-                }
-            };
-        });
 
-        
-    </script>
+        </script>
 
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/subcontractorAdmin.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="/js/subcontractorAdmin.js"></script>
 </body>
+
 </html>
