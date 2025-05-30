@@ -313,14 +313,6 @@ async function copyTakeoff(takeoff_id, callback) {
       return callback(err);
     }
 
-    // update the old takeoff hash
-    con.query("UPDATE takeoffs SET hash = ? WHERE id = ?;", [generateHash(), takeoff_id], function (err) {
-      if (err) {
-        console.log(err);
-        return callback(err);
-      }
-    });
-
     // copy the takeoff
     con.query(
       "INSERT INTO takeoffs (creator_id, name, hash, customer_id) VALUES (?, ?, ?, ?);",
@@ -345,8 +337,8 @@ async function copyTakeoff(takeoff_id, callback) {
 
           for (const material of applied_materials) {
             con.query(
-              "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
-              [newTakeoffId, material.name, material.measurement, material.measurement_unit, material.color, material.labor_cost, material.top_coat, material.primer],
+              "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer, material_id, coverage_delta, cost_delta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+              [newTakeoffId, material.name, material.measurement, material.measurement_unit, material.color, material.labor_cost, material.top_coat, material.primer, material.material_id, material.coverage_delta, material.cost_delta],
               function (err) {
                 if (err) {
                   console.log(err);

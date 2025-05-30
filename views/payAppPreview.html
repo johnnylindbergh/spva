@@ -51,6 +51,7 @@
 
 </head>
 <body>
+    <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
     <div class="container-fluid">
         <h2 class="text-center">Pay Application Preview</h2>
         <form method="post" action="/payAppPreview/save">
@@ -125,5 +126,75 @@
             }
         }
     </script>
+
+    <script>
+$(document).ready(function() {
+    // Listen for changes on all inputs in the table
+    $('.table input').on('input', function() {
+        var $row = $(this).closest('tr');
+        recalculateRow($row);
+    });
+
+    // Initial calculation for all rows
+    $('.table tbody tr').each(function() {
+        recalculateRow($(this));
+    });
+
+    function parseNum(val) {
+        var n = parseFloat(val.toString().replace(/[^0-9.\-]/g, ''));
+        return isNaN(n) ? 0 : n;
+    }
+
+    function recalculateRow($row) {
+        // Get values
+        var scheduledValue = parseNum($row.find('input[name*="[Scheduled Value]"]').val());
+        var prevCompleted = parseNum($row.find('input[name*="[Work Completed: From Previous Application]"]').val());
+        var thisPeriod = parseNum($row.find('input[name*="[Work Completed: This Period]"]').val());
+        var matStored = parseNum($row.find('input[name*="[Materials Presently Stored]"]').val());
+
+        // Total Completed and Stored To Date
+        var totalCompleted = prevCompleted + thisPeriod + matStored;
+        $row.find('input[name*="[Total Completed and Stored To Date]"]').val(totalCompleted.toFixed(2));
+
+        // % Complete
+        var percent = scheduledValue ? (totalCompleted / scheduledValue) * 100 : 0;
+        $row.find('input[name*="[%]"]').val(percent.toFixed(2));
+
+        // Balance To Finish
+        var balanceToFinish = scheduledValue - totalCompleted;
+        $row.find('input[name*="[Balance To Finish]"]').val(balanceToFinish.toFixed(2));
+
+        // Retainage calculations
+        var prevWorkRetainage = parseNum($row.find('input[name*="[From Previous Application: Work Retainage $]"]').val());
+        var workRetainagePercent = parseNum($row.find('input[name*="[Retained This Period: Work Retainage %]"]').val());
+        var matRetainagePercent = parseNum($row.find('input[name*="[Retained This Period: Materials Retainage %]"]').val());
+
+        // Retained This Period: Work Retainage $
+        var retainedWorkThisPeriod = (thisPeriod * workRetainagePercent / 100);
+        $row.find('input[name*="[Retained This Period: Work Retainage $]"]').val(retainedWorkThisPeriod.toFixed(2));
+
+        // Retained This Period: Materials Retainage $
+        var retainedMatThisPeriod = (matStored * matRetainagePercent / 100);
+        $row.find('input[name*="[Retained This Period: Materials Retainage $]"]').val(retainedMatThisPeriod.toFixed(2));
+
+        // Currently Retained: Work Retainage $
+        var releasedWork = parseNum($row.find('input[name*="[Released This Period: Work Retainage $]"]').val());
+        var currWorkRetained = prevWorkRetainage + retainedWorkThisPeriod - releasedWork;
+        $row.find('input[name*="[Currently Retained: Work Retainage $]"]').val(currWorkRetained.toFixed(2));
+
+        // Currently Retained: Materials Retainage $
+        var prevMatRetainage = parseNum($row.find('input[name*="[From Previous Application: Materials Retainage $]"]').val());
+        var releasedMat = parseNum($row.find('input[name*="[Released This Period: Materials Retainage $]"]').val());
+        var currMatRetained = prevMatRetainage + retainedMatThisPeriod - releasedMat;
+        $row.find('input[name*="[Currently Retained: Materials Retainage $]"]').val(currMatRetained.toFixed(2));
+
+        // Total $
+        var total = totalCompleted - currWorkRetained - currMatRetained;
+        $row.find('input[name*="[Total $]"]').val(total.toFixed(2));
+    }
+});
+</script>
+
+
 </body>
 </html>

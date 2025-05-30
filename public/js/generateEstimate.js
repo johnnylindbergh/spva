@@ -381,13 +381,13 @@ function handleContentChange() {
     const includes = proposalIncludesEditor ? proposalIncludesEditor.root.innerHTML : '';
     const exclusions = exclusionsEditor ? exclusionsEditor.root.innerHTML : '';
 
-    // format the content to be sent
-    // let formattedIncludes = includes.replace(/<[^>]*>/g, '').trim(); // Remove HTML tags and trim
-    // let formattedExclusions = exclusions.replace(/<[^>]*>/g, '').trim(); // Remove HTML tags and trim
+    //format the content to be sent
+    let formattedIncludes = includes.replace(/<[^>]*>/g, '').trim(); // Remove HTML tags and trim
+    let formattedExclusions = exclusions.replace(/<[^>]*>/g, '').trim(); // Remove HTML tags and trim
 
-    // clean the content, remove leading/trailing whitespace and non-breaking spaces
-    //  formattedIncludes = formattedIncludes.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
-    //  formattedIncludes = formattedExclusions.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
+   //clean the content, remove leading/trailing whitespace and non-breaking spaces
+     formattedIncludes = formattedIncludes.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
+     formattedIncludes = formattedExclusions.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
 
 
      // remove the leading/trailing <p><br></p>

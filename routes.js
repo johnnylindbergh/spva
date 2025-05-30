@@ -3277,6 +3277,14 @@ app.post('/uploadPayApp', mid.isAdmin, upload.single('pay_app_file'), (req, res)
     return res.status(400).send('No file uploaded or file type not allowed.');
   }
 
+  // get the takeoff_id from the form data
+  const takeoff_id = req.body.job_id;
+  if (!takeoff_id) {
+    console.log("takeoff_id is missing");
+    return res.status(400).send('Takeoff ID is required.');
+  }
+  console.log("takeoff_id:", takeoff_id);
+
   // read the file, convert to JSON and render a html page with it
   const filePath = req.file.path;
   const fileExtension = path.extname(req.file.originalname).toLowerCase();
@@ -3299,7 +3307,7 @@ app.post('/uploadPayApp', mid.isAdmin, upload.single('pay_app_file'), (req, res)
         return res.status(500).send('Error processing CSV file.');
       }
       console.log("Parsed CSV data:", data);
-      res.render("payAppPreview.html", { items: data });
+      res.render("payAppPreview.html", { takeoff_id: takeoff_id, items: data });
     });
   } else {
     return res.status(400).send('Unsupported file type.');
@@ -3308,7 +3316,8 @@ app.post('/uploadPayApp', mid.isAdmin, upload.single('pay_app_file'), (req, res)
 
 app.post('/payAppPreview/confirmUpload', mid.isAdmin, function (req, res) {
   console.log("confirming pay app upload");
-  const payAppData = req.body.payAppData; // this should be an array of objects
+  console.log(req.body);
+  const payAppData = req.body.items; // this should be an array of objects
   const takeoff_id = req.body.takeoff_id;
   console.log("takeoff_id:", takeoff_id);
   console.log("payAppData:", payAppData);
