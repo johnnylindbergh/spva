@@ -214,6 +214,12 @@
           }, 3000);
         });
     }
+
+    // on document ready, load existing content if available
+    $(document).ready(function() {
+      const existingContent = "{{settings.chatgpt_prompt}}"; // Assuming this is passed from the server
+      loadExistingContent(existingContent);
+    });
   </script>
 </body>
 </html>

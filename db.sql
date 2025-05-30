@@ -132,6 +132,8 @@ CREATE TABLE takeoffs (
   file_path_of_plans VARCHAR(255),
   estimate_id INT UNIQUE,
   status TINYINT(1) DEFAULT 0,
+  badgeCount INT DEFAULT 0,
+  badgeText VARCHAR(64) DEFAULT 'New',
   hash VARCHAR(64),
   signed_at TIMESTAMP,
   view_count INT DEFAULT 0,

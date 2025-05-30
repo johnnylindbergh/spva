@@ -3267,9 +3267,9 @@ module.exports = function (app) {
   }
 };
 
-  const upload = multer({ storage: storage, fileFilter: fileFilter });
+  const uploadPayApp = multer({ storage: storage, fileFilter: fileFilter });
 
-app.post('/uploadPayApp', mid.isAdmin, upload.single('pay_app_file'), (req, res) => {
+app.post('/uploadPayApp', mid.isAdmin, uploadPayApp.single('pay_app_file'), (req, res) => {
   console.log("uploadPayApp post accessed");
 
   if (!req.file) {

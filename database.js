@@ -315,107 +315,122 @@ async function copyTakeoff(takeoff_id, callback) {
 
     // copy the takeoff
     con.query(
-      "INSERT INTO takeoffs (creator_id, name, hash, customer_id) VALUES (?, ?, ?, ?);",
-      [takeoff[0].creator_id, takeoff[0].name + " copy", generateHash(), takeoff[0].customer_id],
+      `INSERT INTO takeoffs (
+      creator_id, name, hash, customer_id,
+      travel_cost, tax, labor_cost, labor_rate, material_cost, material_markup, labor_markup,
+      touchups_cost, supervisor_markup, profit, misc_materials_cost, equipment_cost
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+      [
+      takeoff[0].creator_id,
+      takeoff[0].name + " copy",
+      generateHash(),
+      takeoff[0].customer_id,
+      takeoff[0].travel_cost,
+      takeoff[0].tax,
+      takeoff[0].labor_cost,
+      takeoff[0].labor_rate,
+      takeoff[0].material_cost,
+      takeoff[0].material_markup,
+      takeoff[0].labor_markup,
+      takeoff[0].touchups_cost,
+      takeoff[0].supervisor_markup,
+      takeoff[0].profit,
+      takeoff[0].misc_materials_cost,
+      takeoff[0].equipment_cost
+      ],
       function (err, result) {
-        if (err) {
-          console.log(err);
-          return callback(err);
-        }
-        const newTakeoffId = result.insertId;
-        console.log("new takeoff id: ", newTakeoffId);
+      if (err) {
+        console.log(err);
+        return callback(err);
+      }
+      const newTakeoffId = result.insertId;
+      console.log("new takeoff id: ", newTakeoffId);
 
-        // copy the applied_materials
-        con.query("SELECT * FROM applied_materials WHERE takeoff_id = ?;", [takeoff_id], async function (err, applied_materials) {
+      // copy the applied_materials
+      con.query("SELECT * FROM applied_materials WHERE takeoff_id = ?;", [takeoff_id], async function (err, applied_materials) {
+        if (err) {
+        console.log(err);
+        return callback(err);
+        }
+
+        for (const material of applied_materials) {
+        con.query(
+          "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer, material_id, coverage_delta, cost_delta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+          [newTakeoffId, material.name, material.measurement, material.measurement_unit, material.color, material.labor_cost, material.top_coat, material.primer, material.material_id, material.coverage_delta, material.cost_delta],
+          function (err) {
           if (err) {
             console.log(err);
             return callback(err);
           }
+          }
+        );
+        }
 
+        // copy the estimates
+        con.query("SELECT * FROM estimates WHERE takeoff_id = ?;", [takeoff_id], function (err, estimates) {
+        if (err) {
+          console.log(err);
+          return callback(err);
+        }
 
-           
+        for (const estimate of estimates) {
+          con.query(
+          "INSERT INTO estimates (takeoff_id, signed_total, inclusions, exclusions) VALUES (?, ?, ?, ?);",
+          [newTakeoffId, estimate.signed_total, estimate.inclusions, estimate.exclusions],
+          function (err) {
+            if (err) {
+            console.log(err);
+            return callback(err);
+            }
+          }
+          );
+        }
 
-          for (const material of applied_materials) {
-            con.query(
-              "INSERT INTO applied_materials (takeoff_id, name, measurement, measurement_unit, color, labor_cost, top_coat, primer, material_id, coverage_delta, cost_delta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-              [newTakeoffId, material.name, material.measurement, material.measurement_unit, material.color, material.labor_cost, material.top_coat, material.primer, material.material_id, material.coverage_delta, material.cost_delta],
-              function (err) {
-                if (err) {
-                  console.log(err);
-                  return callback(err);
-                }
-              }
-            );
+        // copy the invoices
+        con.query("SELECT * FROM invoices WHERE takeoff_id = ?;", [takeoff_id], function (err, invoices) {
+          if (err) {
+          console.log(err);
+          return callback(err);
           }
 
-        
-              // copy the estimates
-              con.query("SELECT * FROM estimates WHERE takeoff_id = ?;", [takeoff_id], function (err, estimates) {
+          for (const invoice of invoices) {
+          con.query(
+            "INSERT INTO invoices (invoice_number, qb_number, invoice_name, hash, takeoff_id, total, invoice_payment_method, status, payment_confirmation_email_sent, due_date, view_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+            [invoice.invoice_number, invoice.qb_number, invoice.invoice_name, generateHash(), newTakeoffId, invoice.total, invoice.invoice_payment_method, invoice.status, invoice.payment_confirmation_email_sent, invoice.due_date, invoice.view_count],
+            function (err, result) {
+            if (err) {
+              console.log(err);
+              return callback(err);
+            }
+            const newInvoiceId = result.insertId;
+
+            // copy the invoice_items
+            con.query("SELECT * FROM invoice_items WHERE invoice_id = ?;", [invoice.id], function (err, invoice_items) {
+              if (err) {
+              console.log(err);
+              return callback(err);
+              }
+
+              for (const item of invoice_items) {
+              con.query(
+                "INSERT INTO invoice_items (invoice_id, description, quantity, cost) VALUES (?, ?, ?, ?);",
+                [newInvoiceId, item.description, item.quantity, item.cost],
+                function (err) {
                 if (err) {
                   console.log(err);
                   return callback(err);
                 }
-
-                for (const estimate of estimates) {
-                  con.query(
-                    "INSERT INTO estimates (takeoff_id, signed_total, inclusions, exclusions) VALUES (?, ?, ?, ?);",
-                    [newTakeoffId, estimate.signed_total, estimate.inclusions, estimate.exclusions],
-                    function (err) {
-                      if (err) {
-                        console.log(err);
-                        return callback(err);
-                      }
-                    }
-                  );
                 }
-
-                // copy the invoices
-                con.query("SELECT * FROM invoices WHERE takeoff_id = ?;", [takeoff_id], function (err, invoices) {
-                  if (err) {
-                    console.log(err);
-                    return callback(err);
-                  }
-
-
-                  for (const invoice of invoices) {
-                    con.query(
-                      "INSERT INTO invoices (invoice_number, qb_number, invoice_name, hash, takeoff_id, total, invoice_payment_method, status, payment_confirmation_email_sent, due_date, view_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-                      [invoice.invoice_number, invoice.qb_number, invoice.invoice_name, generateHash(), newTakeoffId, invoice.total, invoice.invoice_payment_method, invoice.status, invoice.payment_confirmation_email_sent, invoice.due_date, invoice.view_count],
-                      function (err, result) {
-                        if (err) {
-                          console.log(err);
-                          return callback(err);
-                        }
-                        const newInvoiceId = result.insertId;
-
-                        // copy the invoice_items
-                        con.query("SELECT * FROM invoice_items WHERE invoice_id = ?;", [invoice.id], function (err, invoice_items) {
-                          if (err) {
-                            console.log(err);
-                            return callback(err);
-                          }
-
-                          for (const item of invoice_items) {
-                            con.query(
-                              "INSERT INTO invoice_items (invoice_id, description, quantity, cost) VALUES (?, ?, ?, ?);",
-                              [newInvoiceId, item.description, item.quantity, item.cost],
-                              function (err) {
-                                if (err) {
-                                  console.log(err);
-                                  return callback(err);
-                                }
-                              }
-                            );
-                          }
-                        });
-                      }
-                    );
-                  }
-                });
-            
+              );
+              }
+            });
             }
           );
+          }
         });
+
+        });
+      });
       }
     );
   });

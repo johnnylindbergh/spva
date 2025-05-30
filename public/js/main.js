@@ -194,6 +194,13 @@ $(document).ready(function () {
   
         // Add the progress bar
         let status = createStatusIndicator(takeoff.status, takeoff.takeoff_created_at);
+
+        // add a message count badge to the status
+        if (takeoff.badgeCount > 0) {
+          let badge = $("<span>").addClass("badge bg-primary").text(takeoff.badgeCount);
+          status.append(badge);
+        }
+
         let tdProgress = $("<td>");
         if (takeoff.status === 4) {
           tdProgress.addClass("hoverable").attr(
