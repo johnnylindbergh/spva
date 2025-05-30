@@ -58,7 +58,7 @@ $(document).ready(function () {
       { code: 0, label: "Takeoff Created", color: "rgba(255, 235, 59, 0.36)" }, // vibrant yellow
       { code: 1, label: "Takeoff Uploaded", color: "rgba(255, 152, 0, 0.36)" }, // vibrant orange
       { code: 2, label: "Estimate Generated", color: "rgba(33, 150, 243, 0.36)" }, // light blue
-      { code: 3, label: "Estimate Published", color: "rgba(3, 169, 244, 0.36)" }, // vibrant blue
+      { code: 3, label: "Estimate Published", color: "rgba(224, 3, 244, 0.36)" }, // vibrant blue
       { code: 4, label: "Estimate Approved", color: "rgba(60, 198, 65, 0.36)" }, // vibrant green
       { code: 5, label: "Invoiced", color: "rgba(76, 175, 80, 0.36)" },
     ];
