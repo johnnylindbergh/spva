@@ -1,6 +1,7 @@
-
-
 const takeoff_data = [];
+
+// Rich text editor instances (declared globally)
+let proposalIncludesEditor, exclusionsEditor, optionDescriptionEditor;
 
 function updateTakeoffOwnerEmailAddress(){
     let email = $("#owner_email_address").val();
@@ -13,34 +14,33 @@ function updateTakeoffOwnerEmailAddress(){
       .fail(function() {
         console.log("Failed to update takeoff owner email address: " + email);
       });
-  }
+}
 
-  function updateTakeoffInvoiceEmailAddress(){
+function updateTakeoffInvoiceEmailAddress(){
     let email = $("#invoice_email_address").val();
     let takeoff_id = $("#takeoff_id").val();
-    console.log("Updating takeoff owner email address: " + email);
+    console.log("Updating takeoff invoice email address: " + email);
     $.post("/update-takeoff-invoice-email", { takeoff_id: takeoff_id, invoice_email_address: email })
       .done(function() {
         console.log("Takeoff invoice email address updated: " + email);
       })
       .fail(function() {
-        console.log("Failed to update takeoff invoive email address: " + email);
+        console.log("Failed to update takeoff invoice email address: " + email);
       });
-  }
+}
 
-    function updateTakeoffBillingAddress(){
-        let address = $("#owner_billing_address").val();
-        let takeoff_id = $("#takeoff_id").val();
-        console.log("Updating takeoff owner billing address: " + address);
-        $.post("/update-takeoff-owner-billing", { takeoff_id: takeoff_id, owner_billing_address: address })
-            .done(function() {
-            console.log("Takeoff owner billing address updated: " + address);
-            })
-            .fail(function() {
-            console.log("Failed to update takeoff owner billing address: " + address);
-            });
-    }
-
+function updateTakeoffBillingAddress(){
+    let address = $("#owner_billing_address").val();
+    let takeoff_id = $("#takeoff_id").val();
+    console.log("Updating takeoff owner billing address: " + address);
+    $.post("/update-takeoff-owner-billing", { takeoff_id: takeoff_id, owner_billing_address: address })
+        .done(function() {
+        console.log("Takeoff owner billing address updated: " + address);
+        })
+        .fail(function() {
+        console.log("Failed to update takeoff owner billing address: " + address);
+        });
+}
 
 // Function to convert markdown-like text to HTML
 function formatTextToHTML(text) {
@@ -61,52 +61,23 @@ function formatTextToHTML(text) {
 
 // Function to populate the "Proposal Includes" section
 function populateProposalIncludes(items) {
-    const includesList = $('#proposal-includes');
-    includesList.empty(); // Clear any existing content
-
-    // set the content of the includesList to the items
-    // items is a string 
-    includesList.html(formatTextToHTML(items));
-   // $('#includes-total').text(calculateTotal(items.length, 50)); // Example calculation
+    if (proposalIncludesEditor) {
+        const htmlContent = formatTextToHTML(items);
+        proposalIncludesEditor.root.innerHTML = htmlContent;
+        // Update hidden input
+        $('#proposal-includes-content').val(htmlContent);
+    }
 }
 
 // Function to populate the "Exclusions & Assumptions" section
 function populateExclusions(exclusions) {
-    const exclusionsList = $('#exclusions');
-    exclusionsList.empty(); // Clear any existing content
-
-    exclusionsList.html(formatTextToHTML(exclusions));
-
-
-   // $('#excludes-total').text("$0.00"); 
+    if (exclusionsEditor) {
+        const htmlContent = formatTextToHTML(exclusions);
+        exclusionsEditor.root.innerHTML = htmlContent;
+        // Update hidden input
+        $('#exclusions-content').val(htmlContent);
+    }
 }
-
-
-
-
-
-// function handleSignatureChange() {
-//     const signatureInput = $('#signature').val();
-//     const dateInput = $('input[type="date"]').val();
-
-//     console.log('Signature Updated:', signatureInput);
-    
-//     // Prepare the data to send to the server
-//     const data = {
-//         signature: signatureInput,
-//         date: dateInput
-//     };
-
-//     // Send the data to the server via a POST request using jQuery
-//     $.post('/update-signature', data)
-//         .done(function(response) {
-//             console.log('Success:', response);
-//         })
-//         .fail(function(error) {
-//             console.error('Error:', error);
-//         });
-// }
-
 
 function regenChatGPTResponse() {
     const takeoff_id = $('#takeoff_id').val();
@@ -114,17 +85,11 @@ function regenChatGPTResponse() {
 
     $.post('/regenChatGPTResponse', {takeoff_id: takeoff_id}, function(data) {
         console.log('ChatGPT response regenerated:', data);
-        if (data.status== 'success') {
-            // reload the page
-            // location.reload();
-            // set the content of the includesList to the items
-            const includesList = $('#proposal-includes');
-            includesList.empty(); // Clear any existing content
-            includesList.html(formatTextToHTML(data.inclusions));
-            // set the content of the exclusionsList to the items
-            const exclusionsList = $('#exclusions');
-            exclusionsList.empty(); // Clear any existing content
-            exclusionsList.html(formatTextToHTML(data.exclusions));
+        if (data.status == 'success') {
+            // Update the rich text editors with new content
+            populateProposalIncludes(data.inclusions);
+            populateExclusions(data.exclusions);
+            
             Swal.fire({
                 title: 'Success',
                 text: 'ChatGPT response has been successfully regenerated.',
@@ -137,10 +102,8 @@ function regenChatGPTResponse() {
                 icon: 'error',
             });
         }
-    }
-    );
+    });
 }
-
 
 function populateOptions(takeoff_id) {   
     $.post('/loadOptions', {takeoff_id: takeoff_id}, function(data) {
@@ -153,7 +116,9 @@ function populateOptions(takeoff_id) {
             const table = $('#options-table');
             table.empty(); // Clear the table before populating it with new data
             table.append('<tr><td>No options found.</td></tr>');
+            return;
         }
+        
         const table = $('#options-table');
         table.empty(); // Clear the table before populating it with new data
 
@@ -173,11 +138,10 @@ function populateOptions(takeoff_id) {
 
         let requiredTotal = 0;
         let optionalTotal = 0;
-        
 
         for (let i = 0; i < data.length; i++) {
             const newRow = $('<tr>').data('row_id', data[i].id); // Store row_id as data attribute
-            const descriptionCell = $('<td contenteditable="false" class="editable">').text(data[i].description);
+            const descriptionCell = $('<td contenteditable="false" class="editable">').html(data[i].description);
             const laborCostCell = $('<td contenteditable="false" class="editable">').text(numberWithCommas(data[i].labor_cost));
             const materialCostCell = $('<td contenteditable="false" class="editable">').text(numberWithCommas(data[i].material_cost));
 
@@ -191,8 +155,6 @@ function populateOptions(takeoff_id) {
                 optionalTotal += parseFloat(data[i].labor_cost) + parseFloat(data[i].material_cost);
             }
 
-
-
             deleteCell.on('click', function() {
                 deleteOption(data[i].id);
             });
@@ -202,16 +164,12 @@ function populateOptions(takeoff_id) {
             laborCostCell.addClass('amount-column'); // Add class to identify amount columns
             materialCostCell.addClass('amount-column'); // Add class to identify
 
-
-
             newRow.append(deleteCell);
-            // newRow.append(editCell);
             newRow.append(descriptionCell);
             newRow.append(laborCostCell);
             newRow.append(materialCostCell);
             newRow.append(requiredCell);
             table.append(newRow);
-
         }
 
         requiredTotal = parseFloat(requiredTotal);
@@ -223,25 +181,17 @@ function populateOptions(takeoff_id) {
         $('#requiredTotal').text("Required Total: $"+numberWithCommas(requiredTotal.toFixed(2)));
 
         let takeoffTotal = parseFloat($('#takeoffTotal').text().replace(/[^0-9.-]+/g,""));
-
         takeoffTotal += requiredTotal;
         $('#takeoffTotal').text("$"+numberWithCommas(takeoffTotal.toFixed(2)));
-
-
     });
-
- 
 }
 
-
-
-   
-
-		
 function postToAddOption(event) {
     event.preventDefault(); // Prevent the default form submission behavior
+    console.log("Adding option...");
     const takeoff_id = $('#takeoff_id').val();
-    const description = $('#description').val();
+    // Get description from rich text editor
+    let description = optionDescriptionEditor ? optionDescriptionEditor.root.innerHTML : $('#description').val();
     let laborCost = $('#laborCost').val();
     let materialCost = $('#materialCost').val();
     let isRequired = $('#isRequired').is(':checked') ? 1 : 0;
@@ -250,10 +200,19 @@ function postToAddOption(event) {
     laborCost = laborCost.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
     materialCost = materialCost.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
 
+    // clean the input from the rich text editor
+    description = description.replace(/<[^>]*>/g, ''); // Remove HTML tags
+    description = description.trim(); // Trim whitespace
+    description = description.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
+    
+    if (description === '') {
+        alert('Please enter a valid description.');
+        return;
+    }
+   
 
-
-    if (isNaN(parseFloat(laborCost)) || isNaN(parseFloat(laborCost))) {
-        alert('Please enter a valid number for Option Price.');
+    if (isNaN(parseFloat(laborCost)) || isNaN(parseFloat(materialCost))) {
+        alert('Please enter valid numbers for costs.');
         return;
     }
 
@@ -262,7 +221,7 @@ function postToAddOption(event) {
         description: description,
         material_cost: materialCost, // Consistent naming with backend
         labor_cost: laborCost,
-        isRequired:isRequired,
+        isRequired: isRequired,
         takeoff_id: takeoff_id,
     };
 
@@ -272,20 +231,22 @@ function postToAddOption(event) {
             console.log('Row added/updated successfully:', response);
             if (response.new_row_id) { // if the insert was successful,
                 // reload the page
-                 populateOptions(takeoff_id);  
-                 
-                 // empty the input fields
-                    $('#description').val('');
-                    $('#laborCost').val('');
-                    $('#materialCost').val('');
-                    $('#isRequired').prop('checked', false); // uncheck the checkbox
+                populateOptions(takeoff_id);  
                 
+                // empty the input fields
+                if (optionDescriptionEditor) {
+                    optionDescriptionEditor.setText('');
+                }
+                $('#laborCost').val('');
+                $('#materialCost').val('');
+                $('#isRequired').prop('checked', false); // uncheck the checkbox
             }
         })
         .fail(function(error) {
             console.error('Error adding/updating row:', error);
         });
 }
+
 function confirmSendAutoDeposit() {
     // Close the modal dialog
     $('#auto-initial-deposit-dialog').modal('hide');
@@ -299,6 +260,7 @@ function confirmSendAutoDeposit() {
     // When the confirmation button in the modal is clicked
     $('#confirm-email-send').off('click').on('click', function () {
         $('#email-confirmation-dialog').modal('hide'); // Close the confirmation dialog
+        const takeoff_id = $('#takeoff_id').val();
         $.post('/shareClient', { takeoff_id: takeoff_id, sendAutoDeposit: sendAutoDeposit }, function (data) {
             console.log("twas the email sent?", data);
             if (data == "email sent") {
@@ -309,7 +271,6 @@ function confirmSendAutoDeposit() {
         });
     });
 }
-
 
 function closeAutoInitialDepositDialog() {
     // Hide the modal dialog
@@ -329,7 +290,7 @@ function shareClient() {
         const sendAutoDeposit = $('#send-auto-deposit').is(':checked'); // Get the checkbox value
         console.log("Send Auto Deposit:", sendAutoDeposit);
 
-        // Close the modal dialog'
+        // Close the modal dialog
         $('#auto-initial-deposit-dialog').modal('hide');
     });
 }
@@ -373,7 +334,6 @@ function confirmEmailSend(){
     const sendAutoDeposit = $('#send-auto-deposit').is(':checked');
     console.log("Send Auto Deposit:", sendAutoDeposit);
 
-
     const takeoff_id = $('#takeoff_id').val();
 
     // post to the server
@@ -399,14 +359,40 @@ let isTranslating = false;
 
 function toggleTranslateMenu() {
     const translateElement = document.getElementById("google_translate_element");
-    translateElement.style.display = translateElement.style.display === "none" ? "block" : "none";
-    isTranslating = true; // Set the flag to true when translation starts
-    setTimeout(() => {
-        isTranslating = false; // Reset the flag after a delay (adjust the delay as needed)
-    }, 5000); // Adjust the delay as needed (delay needed so that the translation process has enough time to finish before updating the database with the translated content)
+    if (translateElement) {
+        translateElement.style.display = translateElement.style.display === "none" ? "block" : "none";
+        isTranslating = true; // Set the flag to true when translation starts
+        setTimeout(() => {
+            isTranslating = false; // Reset the flag after a delay
+        }, 5000);
+    }
 }
 
 let estimate_id;
+
+// Function to handle content changes in rich text editors
+function handleContentChange() {
+    if (isTranslating) {
+        console.log('Skipping update during translation');
+        return;
+    }
+
+    // Get content from rich text editors
+    const includes = proposalIncludesEditor ? proposalIncludesEditor.root.innerHTML : '';
+    const exclusions = exclusionsEditor ? exclusionsEditor.root.innerHTML : '';
+
+    // Send POST request with the new content
+    var takeoff_id = $('#takeoff_id').val();
+    console.log('Updating content for takeoff:', takeoff_id);
+    $.post('/update-content', { id: estimate_id, includes: includes, exclusions: exclusions})
+        .done(function(response) {
+            console.log('Content updated successfully:', response);
+        })
+        .fail(function(error) {
+            console.error('Error updating content:', error);
+        });
+}
+
 // Function to add onclick and oninput listeners to all editable elements
 function addEditableListeners() {
     // Add listeners to all elements with the class "editable"
@@ -421,32 +407,14 @@ function addEditableListeners() {
 
         // On input, send POST request to server when content changes
         element.on('focusout', function() {
-            if (isTranslating) {
-                console.log('Skipping update during translation');
-                return; // Skip the update if translation is happening
-            }
-
-            // determine if the element is in the includes or excludes section
-            const includes = $('#proposal-includes').html(); // weird naming convention
-            const exclusions = $('#exclusions').html();
-
-            // Send POST request with the new content
-            var takeoff_id = $('#takeoff_id').val(); // not super safe, but just for example
-            console.log('Updating content for takeoff:', takeoff_id);
-            $.post('/update-content', { id: estimate_id, includes: includes, exclusions: exclusions})
-                .done(function(response) {
-                    console.log('Content updated successfully:', response);
-                })
-                .fail(function(error) {
-                    console.error('Error updating content:', error);
-                });
+            handleContentChange();
         });
     });
 }
+
 numberWithCommas = (x) => {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-
 
 function toggleNumbers() {
     console.log('Toggling visibility of Amount columns...');
@@ -474,13 +442,6 @@ function toggleNumbers() {
     // also remove the amount header
     const amountHeader = $('#amount-header');
     amountHeader.toggle();
-    
-
-
-}
-function toggleTranslateMenu() {
-    const translateElement = document.getElementById("google_translate_element");
-    translateElement.style.display = translateElement.style.display === "none" ? "block" : "none";
 }
 
 function deleteOption(id){
@@ -500,7 +461,6 @@ function deleteOption(id){
     });
 }
 
-
 function makeAlFriendly(takeoff_id) {
     // make the inclusions total editable and restyle to be bigger
     const inclusionsTotal = $('#includes-total');
@@ -512,12 +472,11 @@ function makeAlFriendly(takeoff_id) {
     inclusionsTotal.css('background-color', '#ffffff');
 
     // add an onclick listener to the inclusions total that posts the includes_total to the server
-
     inclusionsTotal.on('focusout', function() {
         let newTotal = inclusionsTotal.text();
 
-        // srip the dollar sign and commas
-         newTotal = newTotal.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
+        // strip the dollar sign and commas
+        newTotal = newTotal.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
         console.log('New inclusions total:', newTotal);
         $.post('/updateTakeoffTotal', { takeoff_id: takeoff_id, total: newTotal, materialTotal: 0, laborTotal: 0 })
             .done(function(response) {
@@ -525,8 +484,7 @@ function makeAlFriendly(takeoff_id) {
 
                 // also change the takeoffTotal 
                 let takeoffTotal = $('#takeoffTotal');
-
-                takeoffTotal.text("$"+numberWithCommas(newTotal.toFixed(2)));
+                takeoffTotal.text("$"+numberWithCommas(parseFloat(newTotal).toFixed(2)));
             })
             .fail(function(error) {
                 console.error('Error updating inclusions total:', error);
@@ -534,44 +492,107 @@ function makeAlFriendly(takeoff_id) {
     });
 }
 
+// Initialize rich text editors
+function initializeRichTextEditors() {
+    // Initialize Proposal Includes Editor
+    proposalIncludesEditor = new Quill('#proposal-includes-editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link'],
+                ['clean']
+            ]
+        },
+        placeholder: 'Enter proposal inclusions...'
+    });
 
-   
+    // Initialize Exclusions Editor
+    exclusionsEditor = new Quill('#exclusions-editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link'],
+                ['clean']
+            ]
+        },
+        placeholder: 'Enter exclusions...'
+    });
+
+    // Initialize Option Description Editor
+    optionDescriptionEditor = new Quill('#option-description-editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['clean']
+            ]
+        },
+        placeholder: 'Enter option description...'
+    });
+
+    // Sync editor content with hidden inputs and handle changes
+    proposalIncludesEditor.on('text-change', function() {
+        document.getElementById('proposal-includes-content').value = proposalIncludesEditor.root.innerHTML;
+        // Debounce the content update to avoid too many server calls
+        clearTimeout(proposalIncludesEditor.updateTimeout);
+        proposalIncludesEditor.updateTimeout = setTimeout(handleContentChange, 1000);
+    });
+
+    exclusionsEditor.on('text-change', function() {
+        document.getElementById('exclusions-content').value = exclusionsEditor.root.innerHTML;
+        // Debounce the content update
+        clearTimeout(exclusionsEditor.updateTimeout);
+        exclusionsEditor.updateTimeout = setTimeout(handleContentChange, 1000);
+    });
+
+    optionDescriptionEditor.on('text-change', function() {
+        document.getElementById('description').value = optionDescriptionEditor.root.innerHTML;
+    });
+}
 
 // Example to dynamically populate content on page load
 $(document).ready(function() {
-    // Populate the "Proposal Includes" section with dynamic data
-    // post takeoff_id to getEstimateData to set includesItems and exclusionsItems
+    // Initialize rich text editors first
+    initializeRichTextEditors();
     
+    // Populate the "Proposal Includes" section with dynamic data
     var takeoff_id = parseInt($('#takeoff_id').val());
     var isAlTakeoff = false;
     var inclusions_presets;
-
     var isLocked = false;
     var takeoff_status;
 
     $.post('/getEstimateData', {takeoff_id: takeoff_id}, function(data) {
         console.log(data)
-        tax = data.takeoff[0].takeoff_tax; // consider that the tax percentage will be zero if the server returns zero.  
+        tax = data.takeoff[0].takeoff_tax;
         estimate_id = data.estimate[0].id;  
         isLocked = data.takeoff[0].isLocked;
         takeoff_status = data.takeoff[0].takeoff_status;
         console.log("isLocked", isLocked);
+        
+        // Populate rich text editors with data
         populateProposalIncludes(data.estimate[0].inclusions);
         populateExclusions(data.estimate[0].exclusions);
-         populateOptions(takeoff_id) || 0;
+        populateOptions(takeoff_id) || 0;
 
-         if (isLocked == 1 || takeoff_status >=3) {
-            // disable the inputs
-            $('#proposal-includes').attr('contenteditable', 'false');
-            $('#exclusions').attr('contenteditable', 'false');
-            $('#description').attr('disabled', true);
+        if (isLocked == 1 || takeoff_status >= 3) {
+            // Disable the rich text editors
+            if (proposalIncludesEditor) proposalIncludesEditor.disable();
+            if (exclusionsEditor) exclusionsEditor.disable();
+            if (optionDescriptionEditor) optionDescriptionEditor.disable();
+            
+            // Disable other inputs
             $('#laborCost').attr('disabled', true);
             $('#materialCost').attr('disabled', true);
             $('#isRequired').attr('disabled', true);
             $('.editable').css('pointer-events', 'none');
             $('.editable').css('background-color', '#f0f0f0');
-         }
-
+        }
 
         console.log(data.takeoff[0].takeoff_total);
         isAlTakeoff = parseInt(data.takeoff[0].isAlTakeoff) == 1;
@@ -588,13 +609,13 @@ $(document).ready(function() {
         let takeoffTotal = parseFloat(data.takeoff[0].takeoff_total);
         $('#takeoffTotal').text("$"+numberWithCommas(takeoffTotal.toFixed(2)));
 
-
         if (isAlTakeoff) {
             console.log("isAlTakeoff");
             makeAlFriendly(takeoff_id);
             const inclusionsDropdown = $('#inclusions-presets-dropdown');
             inclusionsDropdown.show();
             console.log("inclusions_presets", inclusions_presets);
+            
             // Add options to the dropdown
             inclusions_presets.forEach(preset => {
                 console.log(preset);
@@ -607,28 +628,26 @@ $(document).ready(function() {
                 const selectedKey = $(this).val();
                 console.log("selectedKey", selectedKey);
 
-                $('#proposal-includes').html(formatTextToHTML(selectedKey));
+                if (proposalIncludesEditor) {
+                    const htmlContent = formatTextToHTML(selectedKey);
+                    proposalIncludesEditor.root.innerHTML = htmlContent;
+                    $('#proposal-includes-content').val(htmlContent);
+                }
+                
                 // update the inclusions in the database
-                $.post('/update-content', { id: estimate_id, includes: selectedKey, excludes: $('#exclusions').html()})
+                const includes = proposalIncludesEditor ? proposalIncludesEditor.root.innerHTML : selectedKey;
+                const exclusions = exclusionsEditor ? exclusionsEditor.root.innerHTML : '';
+                
+                $.post('/update-content', { id: estimate_id, includes: includes, exclusions: exclusions})
                     .done(function(response) {
                         console.log('Content updated successfully:', response);
                     })
                     .fail(function(error) {
                         console.error('Error updating content:', error);
                     });
-
             });
         }
- 
     });
-
-
-
-
-    // if isAlTakeoff, then populate the inclusions_presets dropdown with the keys of the inclusions_presets object
-    // then when the user selects an option, populate the inclusions with the value of the selected key
-   
-
 
     $(document).keydown(function(event) {
         if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
@@ -637,10 +656,7 @@ $(document).ready(function() {
         }
     });
 
-
     // Add listeners to toggle number 
-
     $('.toggle-btn').click(toggleNumbers);
     addEditableListeners();
-
 });

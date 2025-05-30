@@ -1100,7 +1100,7 @@ function loadTakeoffMaterials(id) {
           row.id +
           ")'>"
         );
-        laborPrice.attr("style", "width: 50px;");
+        laborPrice.attr("style", "width: 80px;");
         let laborCell = $("<td></td>");
         // make the labor cell width smaller
         laborCell.attr("style", "width: 10px;");
@@ -1206,9 +1206,10 @@ function loadTakeoffMaterials(id) {
                   newCost.toFixed(2) +
                   "' step='any' min='0' onchange='priceChange(" +
                   material.id +
-                  ")'><br>"
+                  ")'>"
                 );
-                materialPrice.addClass("material-price-input");
+                // set width to 80px
+                materialPrice.attr("style", "width: 80px;");
                 materialPrice.append(
                   "<input type='hidden' id='raw_material_price_" +
                   material.id +
@@ -1284,14 +1285,32 @@ function loadTakeoffMaterials(id) {
 
           newRow.append(materialsCell);
 
+          // Center the button vertically and horizontally in the table cell
+          let addSubjectCell = $("<td></td>").css({
+            "text-align": "center",
+            "vertical-align": "middle"
+          });
+
           // "Add Material" button
-          let addSubject = $(
-            "<input type='button' onclick='add_subject(" + row.id + ")'>"
-          );
-          // add an id to the button so we can style it
-          addSubject.attr("id", "add_material_button_" + row.id);
-          addSubject.attr("value", "Add Material");
-          newRow.append(addSubject);
+          let addSubject = $("<input>", {
+            type: "button",
+            id: "add_material_button_" + row.id,
+            value: "Add Material",
+            click: function () { add_subject(row.id); }
+          }).css({
+            "margin": "0 auto",
+            "display": "block",
+            "padding": "5px 10px",
+            "background-color": "#007bff",
+            "color": "white",
+            "border": "none",
+            "border-radius": "5px",
+            "cursor": "pointer"
+          });
+
+          // Append the button to the cell, and the cell to the row
+          addSubjectCell.append(addSubject);
+          newRow.append(addSubjectCell);
 
           // Check for NaN in subsum before adding to sum
           if (isNaN(subsum) || !isFinite(subsum)) {
@@ -1348,6 +1367,7 @@ function loadTakeoffMaterials(id) {
       // Update material total (including markup)
       $("#materialTotal").text("Material Cost: $" + numberWithCommas(materialCost.toFixed(2)));
 
+     
 
 
 

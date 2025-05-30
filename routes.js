@@ -3802,10 +3802,19 @@ app.post('/getTerms', function (req, res) {
           console.log(err);
           res.redirect("/");
         } else {
-          console.log(change_order);
+          console.log("change order:", change_order);
 
           // save the hash in the session
           req.session.hash = hash;
+
+          // add commas to the change order total and the change order items total
+          change_order[0].change_order_total = numbersWithCommas(parseFloat(change_order[0].change_order_total).toFixed(2));
+          for (let i = 0; i < change_order_items.length; i++) {
+            change_order_items[i].total = numbersWithCommas((parseFloat(change_order_items[i].cost) * parseFloat(change_order_items[i].quantity)).toFixed(2));
+            change_order_items[i].number = i + 1;
+          }
+          console.log(change_order_items);
+
           res.render("viewChangeOrderClient.html", { change_order: change_order, change_order_items: change_order_items });
         }
       }
@@ -3872,7 +3881,13 @@ app.post('/getTerms', function (req, res) {
         console.log(err);
         res.send("error updating change order status");
       } else {
+        emailer.sendChangeOrderStatusEmail(req.body.change_order_id, req.body.status, function (err, response) {
+          if (err) {
+            console.log(err);
+            res.send("error sending email");
+          }
         res.send("success");
+        });
       }
     });
   }

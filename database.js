@@ -1630,10 +1630,11 @@ module.exports = {
 
   getChangeOrderById: function (change_order_id, callback) {
     con.query(
-      `SELECT change_orders.*, customers.primary_email_address AS owner_email 
+      `SELECT change_orders.*, customers.primary_email_address AS owner_email, users.name AS creator_name, users.email AS creator_email
        FROM change_orders 
        JOIN takeoffs ON change_orders.takeoff_id = takeoffs.id 
        JOIN customers ON takeoffs.customer_id = customers.id 
+       JOIN users ON takeoffs.creator_id = users.id
        WHERE change_orders.id = ?;`,
       [change_order_id],
       function (err, changeOrder) {

@@ -1,71 +1,132 @@
-
 /*
-  navbar.css: navbar-specific style
+  navbar.css: Navbar-specific styles
 */
 
-/* containing navbar div */
+/* Container for the navbar */
 .navbar {
   position: fixed;
   top: 0;
   width: 100%;
   font-size: 14px;
-  background-color:#ffa57e;
+  background-color: #ffa57e;
   z-index: 3;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
 }
 
-/* make all navbar content non-highlightable */
+/* Make all navbar content non-highlightable */
 .navbar * {
   user-select: none;
 }
 
-/* list containing all links */
+/* List containing all links */
 .navbar ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  display: flex;
 }
 
-/* navbar list elements */
+/* Navbar list items */
 .navbar li {
-  float:left;
+  float: none;
 }
 
-/* navbar link style */
+/* Navbar link styles */
 .navbar li a {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: white;
   text-align: center;
   padding: 16px 16px;
   text-decoration: none;
+  transition: background-color 0.3s ease;
 }
 
+/* Dropdown link styles */
 .navbar .dropdown {
   display: block;
   color: black;
-  text-align: center;
-  padding: 10 px 16px;
+  padding: 10px 16px;
   text-decoration: none;
 }
 
-/* highlight and change cursor when navbar links hovered */
+/* Hover effects for links */
 .navbar li a:hover {
-  background-color: #05666f;
+  background-color: #0798a5;
   cursor: pointer;
 }
 
-/* push text titles for each link away from their icons */
+/* Add left margin to icons inside links for spacing */
 .navbar li a i {
   margin-left: 3px;
 }
 
-/* container for page content on all pages with navbar */
+/* Container for page content to avoid being hidden behind navbar */
 .container {
   margin-top: 60px;
 }
-/* print style that hides the navbar */
+
+/* Print style: hide the navbar */
 @media print {
   .navbar {
     display: none;
+  }
+}
+
+/* Hamburger menu toggle button - hidden by default */
+.navbar .menu-toggle {
+  display: none;
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: white;
+  padding: 16px;
+  cursor: pointer;
+}
+
+/* Responsive styles for smaller screens */
+@media (max-width: 768px) {
+  /* Make navbar relative and allow for toggling menu */
+  .navbar {
+    position: relative;
+  }
+
+  /* Show hamburger button */
+  .navbar .menu-toggle {
+    display: block;
+    position: absolute;
+    right: 16px;
+    top: 16px;
+  }
+
+  /* Hide the menu list by default, show when active */
+  .navbar ul {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background-color: rgba(255, 165, 126, 0.66); /* A softer, semi-transparent background */
+    position: fixed;
+    top: 56px; /* Adjust as needed for the navbar height */
+    left: 0;
+    z-index: 4;
+    padding: 0;
+  }
+
+  /* Show menu when active */
+  .navbar ul.active {
+    display: flex;
+  }
+
+  /* Make list items full width for touch-friendly taps */
+  .navbar li {
+    width: 100%;
+  }
+
+  /* Remove float from list items for mobile responsiveness */
+  .navbar li {
+    float: none;
   }
 }

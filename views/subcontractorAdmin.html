@@ -37,13 +37,18 @@
         background-color: #57bbd6;
         border-color: #3babc9;
     }
+
+   
+  
 </style>
 
 <body>
 
     <div class="navbar" style="text-align: center;">
         <ul>
+            {{#auth.userIsAdmin}}
             <li> <a href="/admin"> Admin</a></li>
+            {{/auth.userIsAdmin}}
             <li> <a href="/logout"> Logout</a></li>
         </ul>
 
@@ -53,31 +58,28 @@
     </br>
     </br>
 
+    <!-- message container -->
+    <div class="container">
+        {{#auth.message}}
+            <h1>{{auth.message}}</h1>
+        {{/auth.message}}
+       
+    </div>
+
     <!-- table of existing jobs -->
     <main class="container my-4">
         <section class="mb-5">
             <h2 class="mb-3">Existing Jobs</h2>
             <div class="accordion" id="jobsAccordion">
                 <div class="accordion-item">
-                    <h2 class="accordion-header" id="jobsHeading"></h2>
-                    <button class="accordion-button collapsed no-hover" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#jobsCollapse" aria-expanded="false" aria-controls="jobsCollapse">
-                        Show/Hide Existing Jobs Table
-                    </button>
-                    <style>
-                        .accordion-button.no-hover:hover,
-                        .accordion-button.no-hover:focus {
-                            background-color: inherit;
-                            color: inherit;
-                            box-shadow: none;
-                            transition: none;
-                        }
-                    </style>
+                    <h2 class="accordion-header" id="jobsHeading">
+                        <button class="accordion-button collapsed no-hover" type="button" data-bs-toggle="collapse" data-bs-target="#jobsCollapse" aria-expanded="false" aria-controls="jobsCollapse">
+                            Show/Hide Existing Jobs Table
+                        </button>
                     </h2>
-                    <div id="jobsCollapse" class="accordion-collapse collapse" aria-labelledby="jobsHeading"
-                        data-bs-parent="#jobsAccordion">
+                    <div id="jobsCollapse" class="accordion-collapse collapse" aria-labelledby="jobsHeading" data-bs-parent="#jobsAccordion">
                         <div class="accordion-body p-0">
-                            <table class="table table-responsive mb-0">
+                            <table class="table table-striped mb-0">
                                 <thead class="table-dark">
                                     <tr>
                                         <th>Job Name</th>
@@ -95,6 +97,13 @@
                 </div>
             </div>
         </section>
+    <style>
+        .no-hover:hover, .no-hover:focus, .no-hover:active {
+            background-color: inherit !important;
+            color: inherit !important;
+            box-shadow: none !important;
+        }
+    </style>
 
         <main class="container my-4">
             <section class="mb-5">
@@ -159,14 +168,13 @@
                 <div class="accordion" id="assignmentsAccordion">
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="assignmentsHeading">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            <button class="accordion-button collapsed no-hover" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#assignmentsCollapse" aria-expanded="false"
                                 aria-controls="assignmentsCollapse">
                                 Show/Hide Current Assignments Table
                             </button>
                         </h2>
-                        <div id="assignmentsCollapse" class="accordion-collapse collapse"
-                            aria-labelledby="assignmentsHeading" data-bs-parent="#assignmentsAccordion">
+                        <div id="assignmentsCollapse" class="accordion-collapse collapse" aria-labelledby="assignmentsHeading" data-bs-parent="#assignmentsAccordion">
                             <div class="accordion-body p-0">
                                 <table class="table table-striped mb-0">
                                     <thead class="table-dark">
@@ -185,6 +193,9 @@
                         </div>
                     </div>
                 </div>
+
+            </br>
+            </br>
 
                 <section class="mb-5">
                     <h2 class="mb-3">Assign Job to Subcontractor</h2>
@@ -218,24 +229,37 @@
                     </form>
                 </section>
 
-                <!--ticket section -->
+                <!-- Tickets section styled like other sections -->
                 <section class="mb-5">
                     <h2 class="mb-3">Tickets</h2>
-                    <table class="table table-responsive collapse hide" id="ticketsTableContainer">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Ticket Number</th>
-                                <th>Ticket Description</th>
-                                <th>Subcontractor</th>
-                                <th>Job</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ticketsTable">
-                            <!-- Rows will be dynamically populated -->
-                        </tbody>
-                    </table>
+                    <div class="accordion" id="ticketsAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="ticketsHeading">
+                            <button class="accordion-button collapsed no-hover" type="button" data-bs-toggle="collapse" data-bs-target="#ticketsCollapse" aria-expanded="false" aria-controls="ticketsCollapse">
+                                Show/Hide Tickets Table
+                            </button>
+                        </h2>
+                        <div id="ticketsCollapse" class="accordion-collapse collapse" aria-labelledby="ticketsHeading" data-bs-parent="#ticketsAccordion">
+                            <div class="accordion-body p-0">
+                                <table class="table table-responsive mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Ticket Number</th>
+                                            <th>Ticket Description</th>
+                                            <th>Subcontractor</th>
+                                            <th>Job</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ticketsTable">
+                                        <!-- Rows will be dynamically populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
                 </section>
 
                 <!-- create ticket section -->

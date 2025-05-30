@@ -32,15 +32,9 @@
 
 <body>
   <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
-  <div class="navbar">
+  <div class="navbar" style="position: sticky; top: 0; z-index: 1000;">
     <ul>
       <li><a href="javascript:history.back()">Back</a></li>
-      <li><a href="https://youtu.be/3zDkMfjyfaU?si=2nBjVTSEArqtvWm2">{{defaults.sysName}}</a></li>
-      {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}}
-      <div style="float:right">
-        <li><a href="/auth/google">Log In</a></li>
-        <li><a href="/logout">Log Out</a></li>
-      </div>
     </ul>
   </div>
 
@@ -106,6 +100,7 @@
     <div class="float-right" style="text-align: right;">
       <h1 class="h4" id="sum"></h1>
       <h1 class="h5" id="materialTotal"></h1>
+      <h1 class="h5" id="rawMaterialCost"></h1>
 
       <h1 class="h5" id="laborTotal"></h1>
       <h1 class="h5" style="color:green;" id="laborAdjusted"></h1>
@@ -122,58 +117,58 @@
       <div style="margin-left: 20px;">
         {{#takeoff}}
         <div style="display: flex; align-items: center;">
-          <label for="laborRate" style="width: 150px; white-space: nowrap;">Labor Rate:</label>
+          <label for="laborRate" style="width: 400px; white-space: nowrap;">Labor Rate:</label>
           <input type="range" id="laborRate" name="slider" min="0" max="500" value="{{labor_rate}}" oninput="changeLaborRateHelper(this.value)" style="width: 200px;">
-          <input type="number" id="laborRateValue" value="{{labor_rate}}" oninput="changeLaborRateHelper(this.value)" style="width: 70px; margin-left: 8px; margin-left: 8px;">$/Hr
+          <input type="number" id="laborRateValue" value="{{labor_rate}}" oninput="changeLaborRateHelper(this.value)" style="width: 100px; margin-left: 8px; margin-left: 8px;">$/Hr
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
-          <label for="laborMarkup" style="width: 150px; white-space: nowrap;">Labor Markup:</label>
+          <label for="laborMarkup" style="width: 400px; white-space: nowrap;">Labor Markup:</label>
           <input type="range" id="laborMarkup" name="slider" min="0" max="100" value="{{labor_markup}}" oninput="changeLaborMarkupHelper(this.value)" style="width: 200px;">
-          <input type="number" id="laborMarkupValue" value="{{labor_markup}}" oninput="changeLaborMarkupHelper(this.value)" style="width: 70px; margin-left: 8px;">%
+          <input type="number" id="laborMarkupValue" value="{{labor_markup}}" oninput="changeLaborMarkupHelper(this.value)" style="width: 100px; margin-left: 8px;">%
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
-          <label for="materialMarkup" style="width: 150px; white-space: nowrap;">Material Markup:</label>
+          <label for="materialMarkup" style="width: 400px; white-space: nowrap;">Material Markup:</label>
           <input type="range" id="materialMarkup" name="slider" min="0" max="100" value="{{material_markup}}" oninput="updateMaterialMarkupHelper(this.value)" style="width: 200px;">
-          <input type="number" id="materialMarkupValue" value="{{material_markup}}" oninput="updateMaterialMarkupHelper(this.value)" style="width: 70px; margin-left: 8px;">%
+          <input type="number" id="materialMarkupValue" value="{{material_markup}}" oninput="updateMaterialMarkupHelper(this.value)" style="width: 100px; margin-left: 8px;">%
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
-          <label for="supervisionMarkup" style="width: 150px; white-space: nowrap;">Supervisor Markup:</label>
+          <label for="supervisionMarkup" style="width: 400px; white-space: nowrap;">Supervisor Markup:</label>
           <input type="range" id="supervisionMarkup" name="slider" min="0" max="100" value="{{supervisor_markup}}" oninput="updateSupervisorMarkupHelper(this.value)" style="width: 200px;">
-          <input type="number" id="supervisorMarkupValue" value="{{supervisor_markup}}" oninput="updateSupervisorMarkupHelper(this.value)" style="width: 70px; margin-left: 8px;">%
+          <input type="number" id="supervisorMarkupValue" value="{{supervisor_markup}}" oninput="updateSupervisorMarkupHelper(this.value)" style="width: 100px; margin-left: 8px;">%
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
-          <label for="touchupsCost" style="width: 150px; white-space: nowrap;">Touchups:</label>
+          <label for="touchupsCost" style="width: 400px; white-space: nowrap;">Touchups:</label>
           <input type="range" id="touchupsCost" name="slider" min="0" max="5000" value="{{touchups_cost}}" oninput="updateTouchupsCostHelper(this.value)" style="width: 200px;">
-          <input type="number" id="touchupsCostValue" value="{{touchups_cost}}" oninput="updateTouchupsCostHelper(this.value)" style="width: 70px; margin-left: 8px;">$
+          <input type="number" id="touchupsCostValue" value="{{touchups_cost}}" oninput="updateTouchupsCostHelper(this.value)" style="width: 100px; margin-left: 8px;">$
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
-          <label for="miscMaterialCost" style="width: 150px; white-space: nowrap;">Misc Materials:</label>
+          <label for="miscMaterialCost" style="width: 400px; white-space: nowrap;">Misc Materials:</label>
           <input type="range" id="miscMaterialCost" name="slider" min="0" max="5000" value="{{misc_materials_cost}}" oninput="updateMiscMaterialCostHelper(this.value)" style="width: 200px;">
-          <input type="number" id="miscMaterialCostValue" value="{{misc_materials_cost}}" oninput="updateMiscMaterialCostHelper(this.value)" style="width: 70px; margin-left: 8px;">$
+          <input type="number" id="miscMaterialCostValue" value="{{misc_materials_cost}}" oninput="updateMiscMaterialCostHelper(this.value)" style="width: 100px; margin-left: 8px;">$
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
-          <label for="equipmentCost" style="width: 150px; white-space: nowrap;">Equipment:</label>
+          <label for="equipmentCost" style="width: 400px; white-space: nowrap;">Equipment:</label>
           <input type="range" id="equipmentCost" name="slider" min="0" max="50000" value="{{equipment_cost}}" oninput="updateEquipmentCostHelper(this.value)" style="width: 200px;">
-          <input type="number" id="equipmentCostValue" value="{{equipment_cost}}" oninput="updateEquipmentCostHelper(this.value)" style="width: 70px; margin-left: 8px;">$
+          <input type="number" id="equipmentCostValue" value="{{equipment_cost}}" oninput="updateEquipmentCostHelper(this.value)" style="width: 100px; margin-left: 8px;">$
         </div>
         <br>
 
         <div style="display: flex; align-items: center;">
-          <label for="profit" style="width: 150px; white-space: nowrap;">GB Profit:</label>
+          <label for="profit" style="width: 400px; white-space: nowrap;">GB Profit:</label>
           <input type="range" id="profit" name="slider" min="0" max="100" value="{{profit}}" oninput="updateProfitHelper(this.value)" style="width: 200px;">
-          <input type="number" id="profitValue" value="{{profit}}" oninput="updateProfitHelper(this.value)" style="width: 70px; margin-left: 8px;">%
+          <input type="number" id="profitValue" value="{{profit}}" oninput="updateProfitHelper(this.value)" style="width: 100px; margin-left: 8px;">%
         </div>
         <br>
 
@@ -183,11 +178,11 @@
 
       <label for="slider">Travel Extra:</label>
       <input type="number" id="travelExtra" name="travelExtra" value="{{travel_cost}}"
-        onchange="updateTravelExtra(this.value)">
+        onchange="updateTravelExtra(this.value)" styple="width: 100px; margin-left: 8px;">
     </br>
     <div>
-      <label for="tax" style="width: 150px; white-space: nowrap;">Tax:</label>
-      <input type="number" id="tax" name="tax" min="0" max="100" value="{{tax}}" onchange="updateTaxHelper(this.value)" style="width: 70px; margin-left: 8px;">
+      <label for="tax" style="width: 400px; white-space: nowrap;">Tax:</label>
+      <input type="number" id="tax" name="tax" min="0" max="100" value="{{tax}}" onchange="updateTaxHelper(this.value)" style="width: 100px; margin-left: 8px;">
     </div>
     <br>
 
@@ -198,13 +193,7 @@
     </div>
 
 
-    <!-- i need help button -->
-      
-    <div class="help-button">
-      <a href="https://youtu.be/3zDkMfjyfaU?si=2nBjVTSEArqtvWm2" target="_blank">
-        <i class="fa fa-question-circle"></i> Need Help?
-      </a>
-    </div>
+   
     
   
 
@@ -232,6 +221,15 @@
     {{/takeoff}}
 
   </br>
+
+   <!-- i need help button -->
+      
+    <div class="help-button">
+      <a href="https://youtu.be/3zDkMfjyfaU?si=2nBjVTSEArqtvWm2" target="_blank">
+        <i class="fa fa-question-circle"></i> Need Help?
+      </a>
+    </div>
+
 
     <!-- as a get request, changed from material settings to settings -->
     <div style="display: flex; gap: 10px;">

@@ -53,6 +53,10 @@
                     // hide 
             
                     $('#changeOrderConfirmation').hide();
+                
+                    // update the status text
+                    const statusTextElement = document.getElementById('statusText');
+                    statusTextElement.textContent = status ? "Approved" : "Not Approved";                    
                 } else {
                     XSAlert({
                         title: 'Error',
@@ -176,10 +180,10 @@ function shareChangeOrderWithClient(){
                 <p class="card-text">{{description}}</p>
                 <h5 class="card-title
                 ">Change Order Total</h5>
-                <p class="card-text">{{change_order_total}}</p>
+                <p class="card-text">${{change_order_total}}</p>
                 <!-- status -->
                  <h5 class = "card-body">Status</h5>
-                    <p class = "card-body"> {{status}} </p>
+                    <p class = "card-body" id="statusText"> {{^status}} Not {{/status}} Approved </p>
                  
             </div>
         </div>
@@ -195,7 +199,6 @@ function shareChangeOrderWithClient(){
                     <th>Quantity</th>
                     <th>Cost</th>
                     <th>Total</th>
-                    <th>Created At</th>
                 </tr>
             </thead>
             <tbody>
@@ -204,9 +207,8 @@ function shareChangeOrderWithClient(){
                     <td>{{number}}</td>
                     <td>{{description}}</td>
                     <td>{{quantity}}</td>
-                    <td>{{cost}}</td>
-                    <td>{{total}}</td>
-                    <td>{{created_at}}</td>
+                    <td>${{cost}}</td>
+                    <td>${{total}}</td>
                 </tr>
                 {{/change_order_items}}
             </tbody>
@@ -218,19 +220,15 @@ function shareChangeOrderWithClient(){
         <div id="changeOrderConfirmation">
 
         
-        <div class="form-check">
-            <input class="form-check
-            -input" type="radio" name="share" id="shareYes" value="yes">
-            <label class="form-check
-            -label" for="shareYes">
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="share" id="shareYes" value="yes">
+            <label class="form-check-label" for="shareYes">
                 Yes
             </label>
         </div>
-        <div class="form-check">
-            <input class="form-check
-            -input" type="radio" name="share" id="shareNo" value="no">
-            <label class="form-check
-            -label" for="shareNo">
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="share" id="shareNo" value="no">
+            <label class="form-check-label" for="shareNo">
                 No
             </label>
         </div>

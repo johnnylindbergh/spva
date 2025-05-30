@@ -21,24 +21,67 @@
   </script>
 </head>
 <body>
-  <div class="navbar" style="display: flex; align-items: center;">
-    <ul style="margin: 0; padding: 0; display: flex; align-items: center; height: 100%;"> 
-      <li><a href="https://youtu.be/3zDkMfjyfaU?si=2nBjVTSEArqtvWm2">{{defaults.sysName}}</a></li>
-      {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}} 
-      <li><a href="https://shop.franksaulconstruction.com">Time Tracking</a></li>
-      <li><a href="/subcontractorAdmin">Subcontractor</a></li>
-      <li><a href="/userManagement">User Management</a></li>
-    </ul>
-    <ul style="margin: 0 0 0 auto; padding: 0; align-items: center; height: 100%;">
-      <li><a href="/auth/google">Log In</a></li>
-      <li><a href="/logout">Log Out</a></li>
-      <li style="display: flex; align-items: center; padding: 0 8px; height: 100%;">
-        <a href="/profile" >
-            <img src="{{auth.userImage}}" alt="Profile" style="border-radius: 50%; width: 36px; height: 36px; border: 2px solid #ccc; margin: -10px;">
-        </a>
-      </li>
-    </ul>
-  </div>
+  <!-- Expandable Navbar -->
+  <nav class="navbar-expandable" style="width: 100vw; left: 0; right: 0; top: 0; position: relative; background:rgba(255, 166, 131)">
+    <div class="navbar-header" style="display: flex; align-items: center; cursor: pointer; padding: 12px 24px; color: #fff;">
+      <span id="navbar-toggle" style="font-size: 2rem; margin-right: 12px; color: #fff;">&#9776; {{defaults.sysName}}</span>
+    </div>
+    <div id="navbar-content" style="display: none; flex-direction: row; justify-content: space-between; width: 100%; padding: 0 24px;">
+      <ul style="margin: 0; padding: 0; display: flex; flex-direction: row; align-items: center; list-style: none;">
+        <li style="margin-right: 16px;"><a href="https://youtu.be/3zDkMfjyfaU?si=2nBjVTSEArqtvWm2" style="color: #fff;">{{defaults.sysName}} Help</a></li>
+        {{#isAdmin}} <li style="margin-right: 16px;"><a href="/admin" style="color: #fff;">admin</a></li> {{/isAdmin}} 
+        <li style="margin-right: 16px;"><a href="https://shop.franksaulconstruction.com" style="color: #fff;">Time Tracking</a></li>
+        <li style="margin-right: 16px;"><a href="/subcontractorAdmin" style="color: #fff;">Subcontractor</a></li>
+        <li style="margin-right: 16px;"><a href="/userManagement" style="color: #fff;">User Management</a></li>
+        <li style="margin-right: 16px;"><a href="/auth/google" style="color: #fff;">Log In</a></li>
+        <li style="margin-right: 16px;"><a href="/logout" style="color: #fff;">Log Out</a></li>
+        <li style="display: flex; align-items: center; padding: 0 8px;">
+          <a href="/profile">
+            <img src="{{auth.userImage}}" alt="Profile" style="border-radius: 50%; width: 36px; height: 36px; border: 2px solid #fff;">
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <style>
+    @media (max-width: 900px) {
+      #navbar-content ul {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+      }
+      #navbar-content {
+        flex-direction: column !important;
+        padding: 0 12px !important;
+      }
+      .navbar-header {
+        padding: 12px 12px !important;
+      }
+    }
+    .navbar-expandable a {
+      color: #222;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .navbar-expandable a:hover {
+      color: #007bff;
+      text-decoration: underline;
+    }
+    .navbar-expandable ul {
+      list-style: none;
+    }
+    .navbar-expandable li {
+      display: flex;
+      align-items: center;
+    }
+  </style>
+  <script>
+    $(function() {
+      $('#navbar-toggle').on('click', function() {
+        $('#navbar-content').slideToggle(200);
+      });
+    });
+  </script>
 
   {{#auth}} 
   <div class="container">

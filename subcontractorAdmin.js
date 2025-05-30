@@ -15,6 +15,40 @@ const subcontractor = require("./subcontractor.js");
 
 
 
+
+function defaultSubcontractorAdminRender(req) {
+
+    console.log(req.user.local);
+  if (req.isAuthenticated() && req.user && req.user.local) {
+    // basic render object for fully authenticated user
+    return {
+      inDevMode: sys.DEV_MODE,
+      auth: {
+        isAuthenticated: true,
+        userIsAdmin: req.user.local.user_type === 1,
+        message: "Hello,   " + req.user.name.givenName + "!",
+        email: req.user.local.email,
+        userImage: req.user.local.profile_image_url,
+      },
+      defaults: {
+        sysName: sys.SYSTEM_NAME,
+        companyName: creds.companyName,
+        companyAddress: creds.companyAddress
+      },
+    };
+  } else {
+    // default welcome message for unauthenticated user
+    return {
+      inDevMode: sys.inDevMode,
+      auth: {
+        message: "Welcome! Please log in.",
+      },
+    };
+  }
+}
+
+
+
 function jsonToCSV(jsonData) {
     const csvRows = [];
     if (!Array.isArray(jsonData) || jsonData.length === 0) {
@@ -39,7 +73,9 @@ function jsonToCSV(jsonData) {
 module.exports = function (app) {
 
     app.get('/subcontractorAdmin', mid.isSubcontractorAdmin, function (req, res) {
-        res.render('subcontractorAdmin.html', { title: 'Subcontractor Admin' });
+        var render = defaultSubcontractorAdminRender(req);
+        console.log('subcontractorAdmin render', render);
+        res.render('subcontractorAdmin.html', render);
     });
 
     app.get('/api/jobs', mid.isSubcontractorAdmin, function (req, res) {

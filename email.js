@@ -276,6 +276,55 @@ async function sendInvoiceEmail(req, res, takeoff_id, invoice_id, callback) {
   }
 }
 
+
+async function sendChangeOrderStatusEmail(change_order_id, status, callback) {
+  db.getChangeOrderById(change_order_id, (err, change_order) => {
+    if (err) {
+      console.log(err);
+      callback("could not get change order by id", null);
+    } else {
+      console.log(change_order);
+      if (change_order.creator_email && change_order.name) {
+
+        let statusText = "";
+        // Set the status text with color based on the status
+        if (parseInt(status) === 1) {
+          statusText = '<span style="color:green;">APPROVED</span>';
+        } else {
+          statusText = '<span style="color:red;">REJECTED</span>';
+        }
+
+        const mailOptions = {
+          from: credentials.serverEmail,
+          to: change_order.creator_email,
+          subject: "Your Change Order Status Update from Sun Painting",
+          html: `
+            <h3>Hello, ${change_order.creator_name},</h3>
+            <h3>Your change order "${change_order.description}"status has been updated to ${statusText}.</h3>
+            <p>Please click the link below to view it:</p>
+            <a href="${credentials.domain}/viewChangeOrder?changeOrderId=${change_order?.id}">View Change Order</a></br>
+          `,
+        };
+
+        
+        const info = transporter.sendMail(mailOptions, (err, info) => {
+          if (err) {
+            console.log(err);
+            callback(err, null);
+          } else {
+            console.log("Email sent: " + info.response);
+            callback(null, info.response);
+          }
+        });
+      } else {
+        console.log("Some info is missing from this change order change_order.owner, change_order.owner_email, or change_order.hash");
+        callback("Some info is missing from this change order change_order.owner, change_order.owner_email, or change_order.hash", null);
+      }
+    }
+  }
+  );
+}
+
 async function sendPaymentConfirmationEmail(req, res, takeoff_id, invoice_id, callback) {
   db.getTakeoffById(takeoff_id, (err, takeoff) => {
     if (err || !takeoff) {
@@ -746,5 +795,6 @@ module.exports = {
   sendSubcontractorFormNotificationEmail,
   sendSubcontractorAgreementNotificationEmail,
   sendWelcomeEmail,
-  sendEmailWithLetterHead
+  sendEmailWithLetterHead,
+  sendChangeOrderStatusEmail
 };

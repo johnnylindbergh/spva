@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -6,14 +8,14 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-  <!-- sweet alert -->
+    <!-- sweet alert -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- stripe -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-  <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
 
     <!-- bootstrap modern-->
@@ -21,290 +23,473 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     
-    <!-- <script src="/js/checkout.js" defer></script> -->
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
+    
     <link rel="stylesheet" type="text/css" href="/css/reset.css">
-    <link rel="stylesheet" href="/css/estimateStyle.css">
     <link rel="stylesheet" href="/css/bottomNavbar.css">
-    <!-- <link rel="stylesheet" type="text/css" href="/css/defaults.css"> -->
+    <link rel="stylesheet" type="text/css" href="/css/defaults.css">
     <link rel="stylesheet" href="/css/navbar.css">
     <script src="/js/generateEstimate.js"></script>
 </head>
-<style>
 
+<style>
     #email-confirmation-dialog {
-        z-index: 1050; /* Bootstrap modals typically use 1050 */
+        z-index: 1050;
     }
 
-#auto-initial-deposit-dialog {
-  z-index: 1050; /* Bootstrap modals typically use 1050 */
-}
+    #auto-initial-deposit-dialog {
+        z-index: 1050;
+    }
 
-.modal-backdrop {
-  z-index: 1040; /* Bootstrap modals typically use 1040 */
-}
+    .modal-backdrop {
+        z-index: 1040;
+    }
 
-/* Add custom styles for the modal here */
+    .modal-content {
+        width: 100%;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 
-.modal-content {
-    width:100%;
-    background-color: #f8f9fa; /* Light background color */
-    border-radius: 0.5rem; /* Rounded corners */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-}
-.modal-header {
-    background-color: hsl(211, 100%, 50%); /* Bootstrap primary color */
-    color: white; /* White text */
-}
-.modal-title {
-    font-weight: bold; /* Bold title */
-}
+    .modal-header {
+        background-color: hsl(211, 100%, 50%);
+        color: white;
+    }
 
-.modal-body {
-    font-size: 1rem; /* Default font size */
-}
+    .modal-title {
+        font-weight: bold;
+    }
 
-.form-control {
-    width: 100%; /* Full width */
-}
+    .modal-body {
+        font-size: 1rem;
+    }
 
+    .form-control {
+        width: 100%;
+    }
 
+    /* Rich Text Editor Styles */
+    .rich-text-container {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        margin-bottom: 10px;
+    }
 
+    .ql-editor {
+        min-height: 100px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
 
+    .ql-toolbar {
+        border-bottom: 1px solid #ddd;
+    }
 
+    .ql-container {
+        border: none;
+    }
 
+    /* Compact toolbar for table cells */
+    .compact-editor .ql-toolbar {
+        padding: 5px;
+    }
 
-/* Add some padding to the body */
+    .compact-editor .ql-editor {
+        min-height: 80px;
+        font-size: 14px;
+    }
 
+    /* Table styling to accommodate editors */
+    #estimate-table td {
+        vertical-align: top;
+        padding: 10px;
+    }
 
+    .floating-navbar {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        border-radius: 2rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        padding: 0.5rem 1.5rem;
+        z-index: 1100;
+        transition: box-shadow 0.2s, padding 0.2s, width 0.2s;
+        min-width: 220px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
 
+    .floating-navbar .navbar-toggle-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        cursor: pointer;
+        color: #007bff;
+    }
+
+    .floating-navbar .navbar-content {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .floating-navbar.collapsed .navbar-content {
+        display: none;
+    }
+
+    .floating-navbar.collapsed {
+        padding: 0.5rem 1rem;
+        min-width: 48px;
+        width: auto;
+    }
+
+    @media (max-width: 600px) {
+        .floating-navbar {
+            left: 8px;
+            right: 8px;
+            transform: none;
+            min-width: unset;
+            width: calc(100% - 16px);
+            border-radius: 1rem;
+            padding: 0.5rem 0.5rem;
+        }
+    }
 </style>
 
 <body>
-        <div class="navbar">
-            <ul>
-                <li><a href="javascript:history.back()">Back</a></li>
-                <li><a href="https://youtu.be/3zDkMfjyfaU?si=2nBjVTSEArqtvWm2">{{defaults.sysName}}</a></li>
-                {{#isAdmin}} <li><a href="/admin">admin</a></li> {{/isAdmin}}
-                <div style="float:right">
-                    <li><a href="/auth/google">Log In</a></li>
-                    <li><a href="/logout">Log Out</a></li>
-                </div>
-            </ul>
-        </div>
-        <nav class="bottom-navbar">
-            <!-- <input type="button" value="send to my email: {{email}}" onclick="shareSelf()" class="img-button-client"> -->
+    <div class="navbar">
+        <ul>
+            <li><a href="javascript:history.back()">Back</a></li>
+        
+        </ul>
+    </div>
+    
+    <nav class="bottom-navbar floating-navbar collapsed" id="floatingNavbar">
+        <button class="navbar-toggle-btn" onclick="toggleFloatingNavbar()" aria-label="Toggle Navbar">
+            <i class="fa fa-bars"></i>
+        </button>
+        <div class="navbar-content">
             <input type="button" value="Share With Client" onclick="shareClient()" class="btn btn-outline-primary">
             <input type="button" value="Toggle Numbers" onclick="toggleNumbers()" class="btn btn-outline-primary">
             {{#takeoff}}
-            <button id="download-pdf" class="btn btn-outline-primary" onclick="window.location.href='/download-estimate-pdf/?hash={{takeoff_hash}}'" style="text-decoration: none;">Download PDF</button>
+            <button id="download-pdf" class="btn btn-outline-primary" onclick="window.location.href='/download-estimate-pdf/?hash={{takeoff_hash}}'">Download PDF</button>
             {{/takeoff}}
-            <!-- Add Google Translate Widget -->
-            <!-- <input type="button" value="Select Language" onclick="toggleTranslateMenu()" class="img-button-client"> -->
-        </nav>
-        <!-- Modal: Auto Send Initial Deposit Invoice -->
-        <div id="auto-initial-deposit-dialog" class="modal fade" tabindex="-1" aria-labelledby="autoInitialDepositLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="autoInitialDepositLabel">Auto Send Initial Deposit Invoice</h5>
-                        <button type="button" class="btn-close" onclick="closeAutoInitialDepositDialog()" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Would you like to send the initial deposit invoice automatically?</p>
-                    </br>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="send-auto-deposit">
-                            <label class="form-check-label" for="send-auto-deposit">Send Automatically</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button id="confirm-auto-deposit" class="btn btn-outline-primary" onclick="confirmSendAutoDeposit()">Confirm</button>
-                        <button type="button" class="btn btn-secondary" onclick="closeAutoInitialDepositDialog()">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
+    </nav>
 
-        <!-- modal email confirmation dialogue -->
-        <div id="email-confirmation-dialog" class="modal fade" tabindex="-1" aria-labelledby="emailConfirmationLabel" aria-hidden="true">
-            <div class="modal-dialog">
+    <script>
+        function toggleFloatingNavbar() {
+            const navbar = document.getElementById('floatingNavbar');
+            navbar.classList.toggle('collapsed');
+        }
+    </script>
+
+    <!-- Modal: Auto Send Initial Deposit Invoice -->
+    <div id="auto-initial-deposit-dialog" class="modal fade" tabindex="-1" aria-labelledby="autoInitialDepositLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                <h5 class="modal-title" id="emailConfirmationLabel">Email Confirmation</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="autoInitialDepositLabel">Auto Send Initial Deposit Invoice</h5>
+                    <button type="button" class="btn-close" onclick="closeAutoInitialDepositDialog()" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                <p>Are you sure you want to send this email?</p>
+                    <p>Would you like to send the initial deposit invoice automatically?</p>
+                    <br>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="send-auto-deposit">
+                        <label class="form-check-label" for="send-auto-deposit">Send Automatically</label>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                <button type="button" class="btn btn-outline-primary" onclick="confirmEmailSend()">Send</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button id="confirm-auto-deposit" class="btn btn-outline-primary" onclick="confirmSendAutoDeposit()">Confirm</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAutoInitialDepositDialog()">Cancel</button>
                 </div>
             </div>
-            </div>
-        </div>
-
-        <div class="container">
-   
-{{#takeoff}}
-
-<div class="mb-4">
-    <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
-    <div class="row mb-2">
-        <label for="takeoff_owner_name" class="col-sm-2 col-form-label">Owner:</label>
-        <div class="col-sm-10">
-            <input type="text" class="form-control w-100" id="takeoff_owner_name" onchange="updateTakeoffOwnerName()" value="{{customer_givenName}}">
         </div>
     </div>
-    <div class="row mb-2">
-        <label for="owner_billing_address" class="col-sm-2 col-form-label">Billing Address:</label>
-        <div class="col-sm-10">
-            <input type="text" class="form-control w-100" id="owner_billing_address" onchange="updateTakeoffBillingAddress()" value="{{customer_billing_address}}">
-        </div>
-    </div>
-    <div class="row mb-2">
-        <label for="owner_email_address" class="col-sm-2 col-form-label">Owner Email Address:</label>
-        <div class="col-sm-10">
-            <input type="text" class="form-control w-100" id="owner_email_address" onchange="updateTakeoffOwnerEmailAddress()" value="{{customer_primary_email_address}}">
-        </div>
-    </div>
-    <div class="row mb-2">
-        <label for="invoice_email_address" class="col-sm-2 col-form-label">Invoice Email Address:</label>
-        <div class="col-sm-10">
-            <input type="text" class="form-control w-100" id="invoice_email_address" onchange="updateTakeoffInvoiceEmailAddress()" value="{{customer_invoice_email_address}}">
-        </div>
-    </div>
-    <div class="text-muted small mt-2">
-        Last updated {{takeoff_updated_at}} by {{takeoff_last_updated_by}}
-    </div>
-</div>
-{{/takeoff}}
 
-            <!-- regen chatGPT response button -->
-            <input type="button" value="Regenerate ChatGPT Response" onclick="regenChatGPTResponse()"
-                class="btn btn-outline-primary">
-            </br>
-        </br>
-
-
-            <form action="/settings" method="POST">
-                <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
-                <input type="submit" class="btn btn-outline-primary" value="Settings">
-              </form>
-            </br>
-
-                <!-- dynamically populated dropdown -->
-                <select id="inclusions-presets-dropdown" class="form-control" style="display: none;"">
-                    <option value="">Select Inclusions</option>
-                </select>
-
-            <div class="subcontainer">
-                <table id="estimate-table">
-                    <tr>
-                        <th>Description</th>
-                        <th id = "amount-header">Amount</th>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true" class="editable" id="proposal-includes">
-                            <ul id="includes-list"></ul>
-                        </td>
-                        <td id="includes-total" class="amount-column">{{includes_total}}</td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true" class="editable" id="exclusions">
-                            <ul id="exclusions-list"></ul>
-                        </td>
-                        <td id="excludes-total" class="amount-column"></td>
-                    </tr>
-                </table>
-
-                </br>
-
-                <table id="options-table">
-
-                </table>
-            </br>
-                <div class="totals-container" style="text-align: right;">
-                    {{#takeoff}}
-                    <h1 id="takeoffTotal" class="display-4" style="margin: 0;">${{takeoff_total}}</h1> </br>
-                    <h2 id="laborTotal" class="h5" style="margin: 0; text-align: right;"> Labor Cost: ${{labor_total}}</h2>
-                    <h2 id="materialTotal" class="h5" style="margin: 0; text-align: right;"> Material Cost: ${{material_total}}</h2>
-                    <h2 id="requiredTotal" class="h5" style="margin: 0; text-align: right;"> Options Total (required): $0</h2>
-                    <h2 id="takeoffTax" class="h5" style="margin: 0; text-align: right;">%{{takeoff_tax}}</h2>
-                    {{/takeoff}}
+    <!-- Modal: Email confirmation dialogue -->
+    <div id="email-confirmation-dialog" class="modal fade" tabindex="-1" aria-labelledby="emailConfirmationLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="emailConfirmationLabel">Email Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to send this email?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" onclick="confirmEmailSend()">Send</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {{#takeoff}}
+        <div class="mb-4">
+            <input type="hidden" id="takeoff_id" value="{{takeoff_id}}">
+            <div class="row mb-2">
+                <label for="takeoff_owner_name" class="col-sm-2 col-form-label">Owner:</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control w-100" id="takeoff_owner_name" onchange="updateTakeoffOwnerName()" value="{{customer_givenName}}">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <label for="owner_billing_address" class="col-sm-2 col-form-label">Billing Address:</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control w-100" id="owner_billing_address" onchange="updateTakeoffBillingAddress()" value="{{customer_billing_address}}">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <label for="owner_email_address" class="col-sm-2 col-form-label">Owner Email Address:</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control w-100" id="owner_email_address" onchange="updateTakeoffOwnerEmailAddress()" value="{{customer_primary_email_address}}">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <label for="invoice_email_address" class="col-sm-2 col-form-label">Invoice Email Address:</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control w-100" id="invoice_email_address" onchange="updateTakeoffInvoiceEmailAddress()" value="{{customer_invoice_email_address}}">
+                </div>
+            </div>
+            <div class="text-muted small mt-2">
+                Last updated {{takeoff_updated_at}} by {{takeoff_last_updated_by}}
+            </div>
+        </div>
+        {{/takeoff}}
+
+        <!-- Regenerate ChatGPT response button -->
+        <input type="button" value="Regenerate ChatGPT Response" onclick="regenChatGPTResponse()" class="btn btn-outline-primary">
+        <br><br>
+
+        <form action="/settings" method="POST">
+            <input type="hidden" name="takeoff_id" value="{{takeoff_id}}">
+            <input type="submit" class="btn btn-outline-primary" value="Settings">
+        </form>
+        <br>
+
+        <!-- Dynamically populated dropdown -->
+        <select id="inclusions-presets-dropdown" class="form-control" style="display: none;">
+            <option value="">Select Inclusions</option>
+        </select>
+
+        <div class="subcontainer">
+            <table id="estimate-table">
+                <tr>
+                    <th>Description</th>
+                    <th id="amount-header">Amount</th>
+                </tr>
+                <tr>
+                    <td style="width: 70%;">
+                        <div class="rich-text-container compact-editor">
+                            <div id="proposal-includes-editor"></div>
+                        </div>
+                        <!-- Hidden input to store the content -->
+                        <input type="hidden" id="proposal-includes-content">
+                    </td>
+                    <td id="includes-total" class="amount-column">{{includes_total}}</td>
+                </tr>
+                <tr>
+                    <td style="width: 70%;">
+                        <div class="rich-text-container compact-editor">
+                            <div id="exclusions-editor"></div>
+                        </div>
+                        <!-- Hidden input to store the content -->
+                        <input type="hidden" id="exclusions-content">
+                    </td>
+                    <td id="excludes-total" class="amount-column"></td>
+                </tr>
+            </table>
+
+            <br>
+
+            <table id="options-table">
+            </table>
+
+            <br>
+
+            <div class="totals-container" style="text-align: right;">
+                {{#takeoff}}
+                <h1 id="takeoffTotal" class="display-4" style="margin: 0;">${{takeoff_total}}</h1>
+                <br>
+                <h2 id="laborTotal" class="h5" style="margin: 0; text-align: right;"> Labor Cost: ${{labor_total}}</h2>
+                <h2 id="materialTotal" class="h5" style="margin: 0; text-align: right;"> Material Cost: ${{material_total}}</h2>
+                <h2 id="requiredTotal" class="h5" style="margin: 0; text-align: right;"> Options Total (required): $0</h2>
+                <h2 id="takeoffTax" class="h5" style="margin: 0; text-align: right;">%{{takeoff_tax}}</h2>
+                {{/takeoff}}
+            </div>
+        </div>
+        
+        <!-- Horizontal break -->
+        <hr class="my-4">
+        <div class="options-container">
+            <div class="add-option">
+                <form id="addOptionForm" onsubmit="postToAddOption(event)" class="row g-3">
+                    <div class="col-12">
+                        <label for="description" class="form-label">Description:</label>
+                        <div class="rich-text-container">
+                            <div id="option-description-editor"></div>
+                        </div>
+                        <input type="hidden" id="description" name="description" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="laborCost" class="form-label">Labor Cost:</label>
+                        <input type="text" id="laborCost" name="laborCost" class="form-control" placeholder="Enter labor cost" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="materialCost" class="form-label">Material Cost:</label>
+                        <input type="text" id="materialCost" name="materialCost" class="form-control" placeholder="Enter material cost">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check">
+                            <input type="checkbox" id="isRequired" name="isRequired" class="form-check-input">
+                            <label for="isRequired" class="form-check-label">Is Required</label>
+                            <i class="fa fa-question-circle ms-2 text-muted" style="cursor: pointer;" onclick="showCheckboxInfo()" title="What does this mean?"></i>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success">Add Option</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <br><br><br><br><br><br>
+
+        <script>
+            function showCheckboxInfo() {
+                alert("Checking this box means the option is required and cannot be omitted by the customer. \n\n" +
+                    "Unchecking this box means the option is optional and can be omitted by the customer.");
+            }
+        </script>
+    </div>
+
+    <div id="checkout">
+        <!-- Checkout will insert the payment form here -->
+    </div>
+
+    <script>
+        // Rich text editor instances
+        let proposalIncludesEditor, exclusionsEditor, optionDescriptionEditor;
+
+        // Initialize rich text editors when document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Proposal Includes Editor
+            proposalIncludesEditor = new Quill('#proposal-includes-editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Enter proposal inclusions...'
+            });
+
+            // Initialize Exclusions Editor
+            exclusionsEditor = new Quill('#exclusions-editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Enter exclusions...'
+            });
+
+            // Initialize Option Description Editor
+            optionDescriptionEditor = new Quill('#option-description-editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Enter option description...'
+            });
+
+            // Sync editor content with hidden inputs
+            proposalIncludesEditor.on('text-change', function() {
+                document.getElementById('proposal-includes-content').value = proposalIncludesEditor.root.innerHTML;
+                // Call your existing update function if needed
+                // updateProposalIncludes();
+            });
+
+            exclusionsEditor.on('text-change', function() {
+                document.getElementById('exclusions-content').value = exclusionsEditor.root.innerHTML;
+                // Call your existing update function if needed
+                // updateExclusions();
+            });
+
+            optionDescriptionEditor.on('text-change', function() {
+                document.getElementById('description').value = optionDescriptionEditor.root.innerHTML;
+            });
+
+            // Load existing content if available
+            loadExistingContent();
+        });
+
+        // Function to load existing content into editors
+        function loadExistingContent() {
+            // You can populate these with existing data from your backend
+            // For example:
+            // proposalIncludesEditor.root.innerHTML = '{{proposal_includes_content}}';
+            // exclusionsEditor.root.innerHTML = '{{exclusions_content}}';
+        }
+
+        // Enhanced form submission to include rich text content
+        function postToAddOption(event) {
+            event.preventDefault();
             
-            <!-- Horizontal break -->
-            <hr class="my-4">
-            <div class="options-container">
-                <div class="add-option">
-                    <form id="addOptionForm" onsubmit="postToAddOption(event)" class="row g-3">
-                        <div class="col-md-3">
-                            <label for="description" class="form-label">Description:</label>
-                            <textarea id="description" name="description" class="form-control" placeholder="Enter description" required></textarea>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="laborCost" class="form-label">Labor Cost:</label>
-                            <input type="text" id="laborCost" name="laborCost" class="form-control" placeholder="Enter labor cost" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="materialCost" class="form-label">Material Cost:</label>
-                            <input type="text" id="materialCost" name="materialCost" class="form-control" placeholder="Enter material cost">
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <div class="form-check">
-                                <input type="checkbox" id="isRequired" name="isRequired" class="form-check-input">
-                                <label for="isRequired" class="form-check-label">Is Required</label>
-                                <i class="fa fa-question-circle ms-2 text-muted" style="cursor: pointer;" onclick="showCheckboxInfo()" title="What does this mean?"></i>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn btn-success">Add Option</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <script>
-                function showCheckboxInfo() {
-                    alert("Checking this box means the option is required and cannot be omitted by the customer. \n\n" +
-                        "Unchecking this box means the option is optional and can be omitted by the customer.");
-                }
-            </script>
+            // Ensure the description field has the latest content
+            document.getElementById('description').value = optionDescriptionEditor.root.innerHTML;
+            
+            // Your existing form submission logic here
+            const formData = new FormData(document.getElementById('addOptionForm'));
+            
+            // Clear the rich text editor after successful submission
+            // optionDescriptionEditor.setText('');
+            
+            // Continue with your existing postToAddOption logic...
+        }
 
+        // Function to get rich text content for saving
+        function getProposalIncludesContent() {
+            return proposalIncludesEditor.root.innerHTML;
+        }
 
+        function getExclusionsContent() {
+            return exclusionsEditor.root.innerHTML;
+        }
 
-            <!-- Signature section with IDs for signature input -->
-            <!-- <div class="signature">
-            <p><em>This budget estimate is not a contract until signed and returned to Sun Painting.</em></p> </br>
-            <p>
-                <strong>Authorized Signature:</strong> 
-                <input type="text" id="signature" onchange="handleSignatureChange()" placeholder="Sign here"> 
-                <strong>Date:</strong> 
-                <input type="date">
-            </p>
-        </div> -->
-        </div>
+        // Function to set content programmatically
+        function setProposalIncludesContent(htmlContent) {
+            proposalIncludesEditor.root.innerHTML = htmlContent;
+        }
 
-
-        <div id="checkout">
-            <!-- Checkout will insert the payment form here -->
-        </div>
-
-
-
-    </body>
-
-    </html>
-
-
-  
-    </div>
-    <br>
-    <!-- <script src="scripts.js"></script> -->
+        function setExclusionsContent(htmlContent) {
+            exclusionsEditor.root.innerHTML = htmlContent;
+        }
+    </script>
 </body>
-
 </html>
