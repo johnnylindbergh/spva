@@ -387,7 +387,10 @@ function handleContentChange() {
 
    //clean the content, remove leading/trailing whitespace and non-breaking spaces
      formattedIncludes = formattedIncludes.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
-     formattedIncludes = formattedExclusions.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
+     formattedIncludes = formattedIncludes.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
+
+    formattedExclusions = formattedExclusions.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
+    formattedExclusions = formattedExclusions.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
 
 
      // remove the leading/trailing <p><br></p>
