@@ -2085,6 +2085,62 @@ module.exports = function (app) {
       });
   });
 
+
+   // download shared pdf 
+  app.get("/download-estimate-pdf-admin", mid.isAdmin, function (req, res) {
+    const hash = req.query.hash;
+    console.log("downloading shared pdf ", hash);
+    if (!hash || hash.length != 32) {
+      return res.redirect("/");
+    }
+    db.getSharedEstimateAsAdmin(
+      hash,
+      function (err, estimate, takeoff, options) {
+        if (err || estimate.length == 0) {
+          console.log(err);
+          return res.render("error.html", { link: '/', linkTitle: 'back', friendly: "Invalid estimate link. Please contact sales respresentative for new estimate." });
+        }
+
+
+        db.getSystemSettingByName("terms", function (err, terms) {
+          if (err) {
+            console.log(err);
+            return res.status(500).send("Error retrieving terms");
+          }
+
+          //console.log(terms[0].setting_value);
+          takeoff.terms = terms[0].setting_value;
+
+
+          const estimateObject = {
+            takeoff: takeoff,
+            options: options,
+            estimate: estimate[0],
+          }
+
+          pdf.generateEstimatePDF(estimateObject, function (err, pdfBuffer) {
+            if (err) {
+              console.log(err);
+              return res.status(500).send("Error generating PDF");
+            }
+            if (!pdfBuffer || !Buffer.isBuffer(pdfBuffer)) {
+              console.error("PDF generation returned invalid data");
+              return res.status(500).send("Failed to generate valid PDF");
+            }
+            try {
+              res.setHeader('Content-Type', 'application/pdf');
+              res.setHeader('Content-Disposition', 'attachment; filename=estimate.pdf');
+              res.end(pdfBuffer, 'binary');
+            } catch (sendError) {
+              console.error("Error sending PDF:", sendError);
+              res.status(500).send("Error sending PDF");
+            }
+          });
+        }
+        );
+      });
+  });
+
   app.post('/changeStartDate', function (req, res) {
     console.log("changing start date ", req.body);
     db.changeStartDate(req.body.takeoff_id, req.body.startDate, function (err) {

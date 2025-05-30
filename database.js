@@ -2639,6 +2639,48 @@ getChangeOrderItemsById: function (change_order_id, callback) {
     );
   },
 
+// all the same but do not check status and do not update view count
+  getSharedEstimateAsAdmin: function (hash, callback) {
+    con.query(
+      queries.getCustomerTakeoffByHash,
+      [hash],
+      function (err, takeoffResults) {
+        if (err) return callback(err);
+        if (!takeoffResults || takeoffResults.length === 0) {
+          console.log("non-existent hash: ", hash);
+          return callback(
+            new Error("No takeoff found for the provided hash")
+          );
+        }
+
+        const takeoff = takeoffResults[0]; // assuming only one result
+
+        // Do not check the status here
+
+        //format the takeoff_start_date
+        takeoff.takeoff_start_date = moment(takeoff.takeoff_start_date).format("YYYY-MM-DD");
+
+        con.query(
+          "SELECT * FROM estimates WHERE id = ?;",
+          [takeoff.estimate_id],
+          function (err, estimateResults) {
+            if (err) return callback(err);
+
+            // Query the options table for the estimate_id
+            con.query(
+              "SELECT * FROM options WHERE takeoff_id = ?;",
+              [takeoff.takeoff_id],
+              function (err, optionsResults) {
+                if (err) return callback(err);
+                callback(null, estimateResults, takeoff, optionsResults);
+              }
+            );
+          }
+        );
+      }
+    );
+  },
+
   changeStartDate: function (takeoff_id, startDate, callback) {
 
     let start = moment(startDate).format("YYYY-MM-DD");
