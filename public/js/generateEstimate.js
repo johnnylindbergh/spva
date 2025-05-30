@@ -381,10 +381,24 @@ function handleContentChange() {
     const includes = proposalIncludesEditor ? proposalIncludesEditor.root.innerHTML : '';
     const exclusions = exclusionsEditor ? exclusionsEditor.root.innerHTML : '';
 
-    // Send POST request with the new content
+    // format the content to be sent
+    // let formattedIncludes = includes.replace(/<[^>]*>/g, '').trim(); // Remove HTML tags and trim
+    // let formattedExclusions = exclusions.replace(/<[^>]*>/g, '').trim(); // Remove HTML tags and trim
+
+    // clean the content, remove leading/trailing whitespace and non-breaking spaces
+    //  formattedIncludes = formattedIncludes.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
+    //  formattedIncludes = formattedExclusions.replace(/&nbsp;/g, ''); // Remove non-breaking spaces
+
+
+     // remove the leading/trailing <p><br></p>
+    // formattedIncludes = formattedIncludes.replace(/<p><br><\/p>/g, ''); // Remove empty paragraphs
+    // formattedExclusions = formattedExclusions.replace(/<p><br><\/p>/g, ''); // Remove empty paragraphs
+    // // Send POST request with the new content
+
+    // remove any leading/trailing whitespace
     var takeoff_id = $('#takeoff_id').val();
     console.log('Updating content for takeoff:', takeoff_id);
-    $.post('/update-content', { id: estimate_id, includes: includes, exclusions: exclusions})
+    $.post('/update-content', { id: estimate_id, includes: formattedIncludes, exclusions: formattedExclusions})
         .done(function(response) {
             console.log('Content updated successfully:', response);
         })
