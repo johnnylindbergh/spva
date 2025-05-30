@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pay Application Preview</title>
+
+    <!-- Jquery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+   <style>
+    .table thead th {
+        vertical-align: middle;
+        background: #f8f9fa;
+        font-size: 13px;
+        text-align: center;
+        white-space: nowrap;
+        min-width: 80px;
+    }
+    .table td, .table th {
+        font-size: 13px;
+        padding: 0.4rem 0.5rem;
+        text-align: right;
+        vertical-align: middle;
+        min-width: 80px;
+    }
+    .table td.desc, .table th.desc {
+        text-align: left;
+    }
+    input, select {
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 13px;
+        padding: 2px 4px;
+    }
+    .table-responsive {
+        font-size: 13px;
+    }
+    h2 {
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .btn + .btn {
+        margin-left: 0.5rem;
+    }
+</style>
+
+</head>
+<body>
+    <div class="container-fluid">
+        <h2 class="text-center">Pay Application Preview</h2>
+        <form method="post" action="/payAppPreview/save">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th>Item No</th>
+                            <th>Sub Job</th>
+                            <th>Cost Code</th>
+                            <th>Cost Type</th>
+                            <th class="desc">Description Of Work</th>
+                            <th>Scheduled Value</th>
+                            <th>Work Completed:<br>From Previous Application</th>
+                            <th>Work Completed:<br>This Period</th>
+                            <th>Materials Presently Stored</th>
+                            <th>Total Completed and Stored To Date</th>
+                            <th>%</th>
+                            <th>Balance To Finish</th>
+                            <th>From Previous Application:<br>Work Retainage $</th>
+                            <th>Retained This Period:<br>Work Retainage %</th>
+                            <th>Retained This Period:<br>Work Retainage $</th>
+                            <th>Retained This Period:<br>Materials Retainage %</th>
+                            <th>Retained This Period:<br>Materials Retainage $</th>
+                            <th>Released This Period:<br>Work Retainage $</th>
+                            <th>Released This Period:<br>Materials Retainage $</th>
+                            <th>Currently Retained:<br>Work Retainage $</th>
+                            <th>Currently Retained:<br>Materials Retainage $</th>
+                            <th>Total $</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#items}}
+                        <tr>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Item No]" value="{{Item No}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Sub Job]" value="{{Sub Job}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Cost Code]" value="{{Cost Code}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Cost Type]" value="{{Cost Type}}" /></td>
+                            <td class="desc"><input class="form-control form-control-sm" name="items[{{@index}}][Description Of Work]" value="{{Description Of Work}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Scheduled Value]" value="{{Scheduled Value}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Work Completed: From Previous Application]" value="{{Work Completed: From Previous Application}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Work Completed: This Period]" value="{{Work Completed: This Period}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Materials Presently Stored]" value="{{Materials Presently Stored}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Total Completed and Stored To Date]" value="{{Total Completed and Stored To Date}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][%]" value="{{%}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Balance To Finish]" value="{{Balance To Finish}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][From Previous Application: Work Retainage $]" value="{{From Previous Application: Work Retainage $}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Retained This Period: Work Retainage %]" value="{{Retained This Period: Work Retainage %}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Retained This Period: Work Retainage $]" value="{{Retained This Period: Work Retainage $}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Retained This Period: Materials Retainage %]" value="{{Retained This Period: Materials Retainage %}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Retained This Period: Materials Retainage $]" value="{{Retained This Period: Materials Retainage $}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Released This Period: Work Retainage $]" value="{{Released This Period: Work Retainage $}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Released This Period: Materials Retainage $]" value="{{Released This Period: Materials Retainage $}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Currently Retained: Work Retainage $]" value="{{Currently Retained: Work Retainage $}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Currently Retained: Materials Retainage $]" value="{{Currently Retained: Materials Retainage $}}" /></td>
+                            <td><input class="form-control form-control-sm" name="items[{{@index}}][Total $]" value="{{Total $}}" /></td>
+                        </tr>
+                        {{/items}}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-3 text-center">
+                <button type="button" class="btn btn-success" onclick="confirmUpload()">Confirm Upload</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        function confirmUpload() {
+            if (confirm('Are you sure you want to upload this pay application?')) {
+                document.querySelector('form').action = '/payAppPreview/confirmUpload';
+                document.querySelector('form').submit();
+            }
+        }
+    </script>
+</body>
+</html>

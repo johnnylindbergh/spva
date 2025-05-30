@@ -1620,6 +1620,7 @@ function renderPaintOrder(paintOrder) {
   let headerRow = $("<tr></tr>");
   headerRow.append("<th>Material</th>");
   headerRow.append("<th>Gallons</th>");
+  headerRow.append("<th>Price</th>");
   paintOrderTable.append(headerRow);
   paintOrder.forEach((row) => {
     let newRow = $("<tr></tr>");

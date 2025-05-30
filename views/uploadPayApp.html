@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Pay Application</title>
+
+    <!-- Jquery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        label { display: block; margin-bottom: 10px; }
+        input[type="file"] { margin-bottom: 20px; }
+        button { padding: 10px 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Upload Pay Application</h2>
+        <form action="/uploadPayApp" method="post" enctype="multipart/form-data">
+            <!-- job select -->
+            <label for="jobSelect">Select Job:</label>
+            <select id="jobSelect" name="job_id" required>
+                <!-- dyn -->
+            </select>
+            <label for="payAppFile">Select file to upload:</label>
+            <input type="file" id="pay_app_file" name="pay_app_file" required>
+            <button type="submit">Upload Pay Application</button>
+        </form>
+    </div>
+</body>
+
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: '/getAllTakeoffs',
+        method: 'GET',
+        success: function(data) {
+            var $jobSelect = $('#jobSelect');
+            $jobSelect.empty();
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(function(job) {
+                    var option = $('<option></option>')
+                        .val(job.id)
+                        .text(job.name || ('Job #' + job.id));
+                    $jobSelect.append(option);
+                });
+            } else {
+                $jobSelect.append('<option disabled>No jobs available</option>');
+            }
+        },
+        error: function() {
+            $('#jobSelect').append('<option disabled>Error loading jobs</option>');
+        }
+    });
+});
+</script>
+</html>

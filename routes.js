@@ -201,6 +201,54 @@ function readTakeoff(req, res, takeoff_id, filename, cb) {
     });
 }
 
+
+function parsePayAppCSV(filename, cb) {
+  console.log("parsing ", filename);
+  const results = [];
+  let headers = [];
+  fs.createReadStream(filename)
+    .pipe(parse({ delimiter: ",", trim: true }))
+    .on("data", function (row) {
+      if (headers.length === 0) {
+        headers = row;
+      } else {
+        // Map row to object using headers
+        const obj = {};
+        for (let i = 0; i < headers.length; i++) {
+          let val = row[i];
+          if (typeof val === "string") {
+            // Clean dollar amounts
+            if (val.match(/^\s*\$[\d,\.]+/)) {
+              val = val.replace(/[^0-9.-]+/g, "");
+              val = parseFloat(val);
+            }
+            // Clean percentages
+            else if (val.match(/^\s*[\d,\.]+\s*%/)) {
+              val = val.replace(/[^0-9.-]+/g, "");
+              val = parseFloat(val);
+            }
+            // Convert plain numbers
+            else if (!isNaN(val.replace(/,/g, "")) && val.trim() !== "") {
+              val = parseFloat(val.replace(/,/g, ""));
+            }
+          } else if (typeof val === "number") {
+            val = parseFloat(val);
+          }
+          obj[headers[i]] = val;
+        }
+        results.push(obj);
+      }
+    })
+    .on("end", function () {
+      cb(null, results);
+    })
+    .on("error", function (error) {
+      console.log(error.message);
+      cb(error);
+    });
+}
+  
+
 // number formatting 
 
 function numbersWithCommas(x) {
@@ -3180,6 +3228,94 @@ module.exports = function (app) {
     });
 
   });
+
+  app.get('/getAllTakeoffs', mid.isAdmin, function (req, res) {
+    console.log("getAllTakeoffs accessed");
+    db.getAllTakeoffs(function (err, takeoffs) {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving takeoffs");
+      } else {
+        console.log("takeoffs retrieved:", takeoffs);
+        // format the dates of the takeoffs
+        for (let i = 0; i < takeoffs.length; i++) {
+          takeoffs[i].created_at = moment(takeoffs[i].created_at).format('MMMM Do YYYY, h:mm:ss a');
+          takeoffs[i].updated_at = moment(takeoffs[i].updated_at).format('MMMM Do YYYY, h:mm:ss a');
+        }
+        res.json(takeoffs);
+      }
+    });
+  });
+
+  // function to show the upload pay app page
+  app.get('/uploadPayApp', mid.isAdmin, function (req, res) {
+    console.log("uploadPayApp accessed");
+    res.render("uploadPayApp.html");
+  }); 
+
+
+  const fileFilter = function (req, file, cb) {
+  const allowedMimeTypes = ['application/pdf', 'text/csv', 'application/vnd.ms-excel'];
+  const allowedExtensions = ['.pdf', '.csv'];
+
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  if (allowedMimeTypes.includes(file.mimetype) && allowedExtensions.includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only PDF and CSV files are allowed!'), false);
+  }
+};
+
+  const upload = multer({ storage: storage, fileFilter: fileFilter });
+
+app.post('/uploadPayApp', mid.isAdmin, upload.single('pay_app_file'), (req, res) => {
+  console.log("uploadPayApp post accessed");
+
+  if (!req.file) {
+    console.log("No file uploaded or invalid file type");
+    return res.status(400).send('No file uploaded or file type not allowed.');
+  }
+
+  // read the file, convert to JSON and render a html page with it
+  const filePath = req.file.path;
+  const fileExtension = path.extname(req.file.originalname).toLowerCase();
+  console.log("File uploaded:", req.file.originalname, "at", filePath);
+  if (fileExtension === '.pdf') {
+    // handle PDF file
+    pdf.parsePDF(filePath, function (err, data) {
+      if (err) {
+        console.error("Error parsing PDF:", err);
+        return res.status(500).send('Error processing PDF file.');
+      }
+      console.log("Parsed PDF data:", data);
+      res.render("payAppPreview.html", { payAppData: data });
+    });
+  } else if (fileExtension === '.csv') {
+    // handle CSV file
+    parsePayAppCSV(filePath, function (err, data) {
+      if (err) {
+        console.error("Error parsing CSV:", err);
+        return res.status(500).send('Error processing CSV file.');
+      }
+      console.log("Parsed CSV data:", data);
+      res.render("payAppPreview.html", { items: data });
+    });
+  } else {
+    return res.status(400).send('Unsupported file type.');
+  }
+});
+
+app.post('/payAppPreview/confirmUpload', mid.isAdmin, function (req, res) {
+  console.log("confirming pay app upload");
+  const payAppData = req.body.payAppData; // this should be an array of objects
+  const takeoff_id = req.body.takeoff_id;
+  console.log("takeoff_id:", takeoff_id);
+  console.log("payAppData:", payAppData);
+});
+
+
+
 
   app.get('/createSOV', mid.isAdmin, function (req, res) {
     console.log("creating schedule of values for ", req.query.takeoff_id);

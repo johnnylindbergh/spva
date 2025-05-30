@@ -99,7 +99,7 @@ input[type="reset"]:focus-visible {
 
 .container {
   padding: 21px;
-  width: 89%;
+  width: 100%;
   max-width: 1200px; /* Prevent over-stretching on wide screens */
 }
 

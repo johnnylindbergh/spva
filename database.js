@@ -692,6 +692,18 @@ module.exports = {
 },
 
 
+// simply returns all takeoffs in the database
+getAllTakeoffs: function (callback) {
+  con.query(
+    "SELECT * FROM takeoffs WHERE isArchived = 0 ORDER BY created_at DESC;",
+    function (err, takeoffs) {
+      if (err) return callback(err);
+      callback(null, takeoffs);
+    }
+  );
+},
+
+
   // loads results with is an array with the headers into the table subjects in the database
 
   loadTakeoffData: function (takeoff_id, results, headers, cb) {
